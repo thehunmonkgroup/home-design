@@ -1,0 +1,23 @@
+.coverage
+/dist/
+/build/
+
+# Private canonical home models
+/design/
+
+# Private design transactions
+/changes/
+
+# Generated assets for the currently active home
+/web/public/model/
+
+# Developer/account-specific Sites deployment binding
+/web/.openai/hosting.json
+
+web/node_modules/
+web/.next/
+web/.vinext/
+web/.wrangler/
+web/dist/
+web/.env*
+!web/.env.example

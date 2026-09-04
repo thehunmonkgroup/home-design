@@ -1,0 +1,778 @@
+{
+  "$schema": "../schema/home-model-0.1.schema.json",
+  "modelVersion": "0.1",
+  "revision": 0,
+  "project": {
+    "id": "project.reference-home",
+    "name": "Version 0.1 reference home",
+    "description": "A small fixture exercising the architectural core and its integrations.",
+    "site": {
+      "id": "site.reference",
+      "name": "Reference site"
+    },
+    "building": {
+      "id": "building.main",
+      "name": "Main house"
+    }
+  },
+  "units": {
+    "length": "mm",
+    "angle": "deg"
+  },
+  "coordinateSystem": {
+    "handedness": "right",
+    "upAxis": "Z",
+    "xDirection": "east",
+    "yDirection": "north",
+    "localOrigin": [
+      0,
+      0,
+      0
+    ],
+    "trueNorthDegrees": 0
+  },
+  "levels": {
+    "level.ground": {
+      "kind": "storey",
+      "name": "Ground floor",
+      "elevation": 0
+    },
+    "level.eave": {
+      "kind": "reference",
+      "name": "Roof eave",
+      "elevation": 2700
+    }
+  },
+  "anchors": {
+    "anchor.house.sw": {
+      "kind": "point2",
+      "name": "House southwest corner",
+      "level": "level.ground",
+      "position": [
+        0,
+        0
+      ]
+    },
+    "anchor.house.se": {
+      "kind": "point2",
+      "name": "House southeast corner",
+      "level": "level.ground",
+      "position": [
+        10000,
+        0
+      ]
+    },
+    "anchor.house.ne": {
+      "kind": "point2",
+      "name": "House northeast corner",
+      "level": "level.ground",
+      "position": [
+        10000,
+        8000
+      ]
+    },
+    "anchor.house.nw": {
+      "kind": "point2",
+      "name": "House northwest corner",
+      "level": "level.ground",
+      "position": [
+        0,
+        8000
+      ]
+    },
+    "anchor.deck.sw": {
+      "kind": "point2",
+      "name": "Deck southwest corner",
+      "level": "level.ground",
+      "position": [
+        3000,
+        -3000
+      ]
+    },
+    "anchor.deck.se": {
+      "kind": "point2",
+      "name": "Deck southeast corner",
+      "level": "level.ground",
+      "position": [
+        7000,
+        -3000
+      ]
+    },
+    "anchor.deck.ne": {
+      "kind": "point2",
+      "name": "Deck northeast corner",
+      "level": "level.ground",
+      "position": [
+        7000,
+        0
+      ]
+    },
+    "anchor.deck.nw": {
+      "kind": "point2",
+      "name": "Deck northwest corner",
+      "level": "level.ground",
+      "position": [
+        3000,
+        0
+      ]
+    },
+    "anchor.wall.north-axis": {
+      "kind": "axis2",
+      "name": "North wall axis",
+      "level": "level.ground",
+      "start": {
+        "anchor": "anchor.house.nw"
+      },
+      "end": {
+        "anchor": "anchor.house.ne"
+      }
+    }
+  },
+  "materials": {
+    "material.concrete": {
+      "name": "Concrete",
+      "category": "concrete",
+      "appearance": {
+        "color": "#A8A8A8",
+        "roughness": 0.9
+      }
+    },
+    "material.timber": {
+      "name": "Framing timber",
+      "category": "wood",
+      "appearance": {
+        "color": "#C69C6D",
+        "roughness": 0.8
+      }
+    },
+    "material.sheathing": {
+      "name": "Structural sheathing",
+      "category": "wood"
+    },
+    "material.gypsum": {
+      "name": "Gypsum board",
+      "category": "finish",
+      "appearance": {
+        "color": "#E8E5DF",
+        "roughness": 0.95
+      }
+    },
+    "material.siding": {
+      "name": "Wood siding",
+      "category": "finish",
+      "appearance": {
+        "color": "#8B6F47",
+        "roughness": 0.85
+      }
+    },
+    "material.roofing": {
+      "name": "Asphalt shingles",
+      "category": "roofing",
+      "appearance": {
+        "color": "#3F4448",
+        "roughness": 0.9
+      }
+    }
+  },
+  "types": {
+    "wallType.exterior.wood-185": {
+      "kind": "wallType",
+      "name": "185 mm wood-framed exterior wall",
+      "layers": [
+        {
+          "name": "Siding",
+          "material": "material.siding",
+          "thickness": 20,
+          "function": "finish"
+        },
+        {
+          "name": "Sheathing",
+          "material": "material.sheathing",
+          "thickness": 12,
+          "function": "substrate"
+        },
+        {
+          "name": "Framed structure",
+          "material": "material.timber",
+          "thickness": 140,
+          "function": "structure"
+        },
+        {
+          "name": "Interior gypsum",
+          "material": "material.gypsum",
+          "thickness": 13,
+          "function": "finish"
+        }
+      ],
+      "layerOrder": "exteriorToInterior",
+      "referencePlane": "center"
+    },
+    "slabType.concrete-200": {
+      "kind": "slabType",
+      "name": "200 mm concrete slab",
+      "layers": [
+        {
+          "name": "Concrete structure",
+          "material": "material.concrete",
+          "thickness": 200,
+          "function": "structure"
+        }
+      ],
+      "layerOrder": "topToBottom"
+    },
+    "slabType.deck-150": {
+      "kind": "slabType",
+      "name": "150 mm timber deck assembly",
+      "layers": [
+        {
+          "name": "Timber deck assembly",
+          "material": "material.timber",
+          "thickness": 150,
+          "function": "structure"
+        }
+      ],
+      "layerOrder": "topToBottom"
+    },
+    "roofType.shingle-250": {
+      "kind": "roofType",
+      "name": "Shingle roof assembly",
+      "layers": [
+        {
+          "name": "Asphalt shingles",
+          "material": "material.roofing",
+          "thickness": 10,
+          "function": "finish"
+        },
+        {
+          "name": "Sheathing",
+          "material": "material.sheathing",
+          "thickness": 20,
+          "function": "substrate"
+        },
+        {
+          "name": "Rafter and insulation zone",
+          "material": "material.timber",
+          "thickness": 220,
+          "function": "structure"
+        }
+      ],
+      "layerOrder": "topToBottom"
+    },
+    "doorType.entry-900x2100": {
+      "kind": "doorType",
+      "name": "Single entry door 900 x 2100",
+      "nominalWidth": 900,
+      "nominalHeight": 2100,
+      "operation": "singleSwing",
+      "frameDepth": 185,
+      "material": "material.timber"
+    },
+    "windowType.casement-1500x1200": {
+      "kind": "windowType",
+      "name": "Casement window 1500 x 1200",
+      "nominalWidth": 1500,
+      "nominalHeight": 1200,
+      "operation": "casement",
+      "frameDepth": 185,
+      "material": "material.timber"
+    },
+    "spaceType.living": {
+      "kind": "spaceType",
+      "name": "Living space",
+      "occupancy": "residential",
+      "conditioned": true
+    }
+  },
+  "elements": {
+    "slab.ground": {
+      "kind": "slab",
+      "name": "Ground floor slab",
+      "tags": [
+        "ground-floor",
+        "foundation"
+      ],
+      "storey": "level.ground",
+      "type": "slabType.concrete-200",
+      "role": "foundation",
+      "footprint": {
+        "outer": [
+          {
+            "anchor": "anchor.house.sw"
+          },
+          {
+            "anchor": "anchor.house.se"
+          },
+          {
+            "anchor": "anchor.house.ne"
+          },
+          {
+            "anchor": "anchor.house.nw"
+          }
+        ]
+      },
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": 0
+      },
+      "extrusionDirection": "down"
+    },
+    "wall.north": {
+      "kind": "wall",
+      "name": "North exterior wall",
+      "tags": [
+        "exterior",
+        "north"
+      ],
+      "storey": "level.ground",
+      "type": "wallType.exterior.wood-185",
+      "path": {
+        "kind": "axisAnchor",
+        "anchor": "anchor.wall.north-axis"
+      },
+      "locationLine": "center",
+      "base": {
+        "kind": "surface",
+        "element": "slab.ground",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "selector": "north-slope",
+        "offset": 0
+      }
+    },
+    "wall.east": {
+      "kind": "wall",
+      "name": "East exterior wall",
+      "tags": [
+        "exterior",
+        "east"
+      ],
+      "storey": "level.ground",
+      "type": "wallType.exterior.wood-185",
+      "path": {
+        "kind": "line",
+        "start": {
+          "anchor": "anchor.house.ne"
+        },
+        "end": {
+          "anchor": "anchor.house.se"
+        }
+      },
+      "locationLine": "center",
+      "base": {
+        "kind": "surface",
+        "element": "slab.ground",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "offset": 0
+      }
+    },
+    "wall.south": {
+      "kind": "wall",
+      "name": "South exterior wall facing the deck",
+      "tags": [
+        "exterior",
+        "south",
+        "deck-connection"
+      ],
+      "storey": "level.ground",
+      "type": "wallType.exterior.wood-185",
+      "path": {
+        "kind": "line",
+        "start": {
+          "anchor": "anchor.house.se"
+        },
+        "end": {
+          "anchor": "anchor.house.sw"
+        }
+      },
+      "locationLine": "center",
+      "base": {
+        "kind": "surface",
+        "element": "slab.ground",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "selector": "south-slope",
+        "offset": 0
+      }
+    },
+    "wall.west": {
+      "kind": "wall",
+      "name": "West exterior wall",
+      "tags": [
+        "exterior",
+        "west"
+      ],
+      "storey": "level.ground",
+      "type": "wallType.exterior.wood-185",
+      "path": {
+        "kind": "line",
+        "start": {
+          "anchor": "anchor.house.sw"
+        },
+        "end": {
+          "anchor": "anchor.house.nw"
+        }
+      },
+      "locationLine": "center",
+      "base": {
+        "kind": "surface",
+        "element": "slab.ground",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "offset": 0
+      }
+    },
+    "roof.main": {
+      "kind": "roof",
+      "name": "Main gable roof",
+      "tags": [
+        "main-roof",
+        "gable"
+      ],
+      "storey": "level.ground",
+      "type": "roofType.shingle-250",
+      "geometry": {
+        "kind": "parametric",
+        "form": "gable",
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.house.sw"
+            },
+            {
+              "anchor": "anchor.house.se"
+            },
+            {
+              "anchor": "anchor.house.ne"
+            },
+            {
+              "anchor": "anchor.house.nw"
+            }
+          ]
+        },
+        "eaveDatum": {
+          "kind": "level",
+          "level": "level.eave",
+          "offset": 0
+        },
+        "pitch": 30,
+        "ridgeDirection": [
+          1,
+          0
+        ],
+        "overhang": 600
+      }
+    },
+    "opening.window.north": {
+      "kind": "opening",
+      "name": "North living-room window rough opening",
+      "tags": [
+        "window-opening",
+        "north"
+      ],
+      "geometry": {
+        "kind": "rectangle",
+        "width": 1540,
+        "height": 1240,
+        "depth": 300
+      },
+      "placement": {
+        "station": 4000,
+        "stationReference": "center",
+        "verticalOffset": 900,
+        "verticalReference": "bottom",
+        "depthOffset": 0
+      }
+    },
+    "window.north": {
+      "kind": "window",
+      "name": "North living-room window",
+      "tags": [
+        "living-room",
+        "north"
+      ],
+      "type": "windowType.casement-1500x1200"
+    },
+    "opening.door.south": {
+      "kind": "opening",
+      "name": "South entry door rough opening",
+      "tags": [
+        "door-opening",
+        "south"
+      ],
+      "geometry": {
+        "kind": "rectangle",
+        "width": 940,
+        "height": 2140,
+        "depth": 300
+      },
+      "placement": {
+        "station": 5000,
+        "stationReference": "center",
+        "verticalOffset": 0,
+        "verticalReference": "bottom",
+        "depthOffset": 0
+      }
+    },
+    "door.south-entry": {
+      "kind": "door",
+      "name": "South entry door",
+      "tags": [
+        "entry",
+        "south"
+      ],
+      "type": "doorType.entry-900x2100",
+      "handing": "right",
+      "swingDirection": "inward"
+    },
+    "space.living": {
+      "kind": "space",
+      "name": "Living space",
+      "tags": [
+        "conditioned",
+        "living"
+      ],
+      "storey": "level.ground",
+      "type": "spaceType.living",
+      "geometry": {
+        "kind": "explicit",
+        "footprint": {
+          "outer": [
+            {
+              "point": [
+                92.5,
+                92.5
+              ]
+            },
+            {
+              "point": [
+                9907.5,
+                92.5
+              ]
+            },
+            {
+              "point": [
+                9907.5,
+                7907.5
+              ]
+            },
+            {
+              "point": [
+                92.5,
+                7907.5
+              ]
+            }
+          ]
+        }
+      },
+      "height": 2600
+    },
+    "slab.deck.south": {
+      "kind": "slab",
+      "name": "Attached south deck",
+      "tags": [
+        "exterior",
+        "deck",
+        "attached"
+      ],
+      "storey": "level.ground",
+      "type": "slabType.deck-150",
+      "role": "deck",
+      "footprint": {
+        "outer": [
+          {
+            "anchor": "anchor.deck.nw"
+          },
+          {
+            "anchor": "anchor.deck.ne"
+          },
+          {
+            "anchor": "anchor.deck.se"
+          },
+          {
+            "anchor": "anchor.deck.sw"
+          }
+        ]
+      },
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": -25
+      },
+      "extrusionDirection": "down"
+    },
+    "assembly.roof-system": {
+      "kind": "assembly",
+      "name": "Main roof system",
+      "tags": [
+        "roof",
+        "assembly"
+      ],
+      "assemblyType": "roofSystem"
+    }
+  },
+  "relationships": {
+    "rel.voids.north-window": {
+      "kind": "voids",
+      "name": "North wall is voided by its window opening",
+      "host": "wall.north",
+      "opening": "opening.window.north"
+    },
+    "rel.fills.north-window": {
+      "kind": "fills",
+      "opening": "opening.window.north",
+      "element": "window.north"
+    },
+    "rel.voids.south-door": {
+      "kind": "voids",
+      "host": "wall.south",
+      "opening": "opening.door.south"
+    },
+    "rel.fills.south-door": {
+      "kind": "fills",
+      "opening": "opening.door.south",
+      "element": "door.south-entry"
+    },
+    "rel.joins.north-east": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.north",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.east",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "rel.joins.east-south": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.east",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.south",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "rel.joins.south-west": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.south",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.west",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "rel.joins.west-north": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.west",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.north",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "rel.supports.slab-north-wall": {
+      "kind": "supports",
+      "support": "slab.ground",
+      "supported": "wall.north",
+      "interface": {
+        "primarySurface": "top",
+        "secondarySurface": "base"
+      }
+    },
+    "rel.attaches.deck-south-wall": {
+      "kind": "attaches",
+      "primary": "wall.south",
+      "attached": "slab.deck.south",
+      "connectionType": "ledger",
+      "interface": {
+        "primarySurface": "exterior",
+        "secondarySurface": "north-edge",
+        "startStation": 3000,
+        "endStation": 7000,
+        "elevation": -25
+      }
+    },
+    "rel.bounds.living-north": {
+      "kind": "bounds",
+      "space": "space.living",
+      "element": "wall.north",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "rel.bounds.living-east": {
+      "kind": "bounds",
+      "space": "space.living",
+      "element": "wall.east",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "rel.bounds.living-south": {
+      "kind": "bounds",
+      "space": "space.living",
+      "element": "wall.south",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "rel.bounds.living-west": {
+      "kind": "bounds",
+      "space": "space.living",
+      "element": "wall.west",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "rel.aggregates.roof": {
+      "kind": "aggregates",
+      "name": "Main roof system aggregates the generated roof",
+      "assembly": "assembly.roof-system",
+      "parts": [
+        "roof.main"
+      ]
+    }
+  },
+  "requirements": [
+    {
+      "id": "requirement.entry-clearance",
+      "statement": "Maintain clear access between the south entry door and the attached deck.",
+      "severity": "warning",
+      "appliesTo": [
+        "door.south-entry",
+        "slab.deck.south"
+      ]
+    }
+  ],
+  "metadata": {
+    "purpose": "schema validation and adapter conformance fixture"
+  }
+}

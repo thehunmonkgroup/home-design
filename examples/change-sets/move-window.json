@@ -1,0 +1,20 @@
+{
+  "$schema": "../../schema/change-set-0.1.schema.json",
+  "changeVersion": "0.1",
+  "id": "change.move-north-window",
+  "description": "Move the north window 500 mm east along its host wall.",
+  "baseRevision": 0,
+  "preconditions": [
+    {
+      "path": "/elements/opening.window.north/placement/station",
+      "equals": 4000
+    }
+  ],
+  "operations": [
+    {
+      "op": "moveOpening",
+      "openingId": "opening.window.north",
+      "station": 4500
+    }
+  ]
+}

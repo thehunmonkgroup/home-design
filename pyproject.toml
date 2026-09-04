@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "home-design"
+version = "0.1.0"
+description = "IFC-aligned home authoring, validation, and export engine"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "ifcopenshell>=0.8.3,<0.9",
+  "jsonschema>=4.23,<5",
+  "numpy>=2.1,<3",
+  "shapely>=2.0,<3",
+  "trimesh>=4.5,<5",
+]
+
+[project.optional-dependencies]
+dev = [
+  "basedpyright",
+  "black",
+  "flake8",
+  "PyYAML",
+  "pytest",
+  "pytest-cov",
+]
+
+[project.scripts]
+home-design = "home_design.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers -ra"
+testpaths = ["tests"]
+markers = [
+  "integration: exercises two or more project components",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["home_design"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 80

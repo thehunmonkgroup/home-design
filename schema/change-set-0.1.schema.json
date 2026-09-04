@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:home-design:schema:change-set:0.1",
+  "title": "Transactional home design change set",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["changeVersion", "id", "description", "baseRevision", "operations"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "changeVersion": {"const": "0.1"},
+    "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9._:-]*$"},
+    "description": {"type": "string", "minLength": 1},
+    "baseRevision": {"type": "integer", "minimum": 0},
+    "preconditions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "equals"],
+        "properties": {
+          "path": {"type": "string", "pattern": "^(|/.*)$"},
+          "equals": true
+        }
+      }
+    },
+    "operations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "path", "value"],
+            "properties": {
+              "op": {"const": "set"},
+              "path": {"type": "string", "pattern": "^/.+"},
+              "value": true
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "path"],
+            "properties": {
+              "op": {"const": "remove"},
+              "path": {"type": "string", "pattern": "^/.+"}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "anchorId", "position"],
+            "properties": {
+              "op": {"const": "moveAnchor"},
+              "anchorId": {"type": "string"},
+              "position": {
+                "type": "array",
+                "items": {"type": "number"},
+                "minItems": 2,
+                "maxItems": 3
+              }
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "openingId"],
+            "minProperties": 3,
+            "properties": {
+              "op": {"const": "moveOpening"},
+              "openingId": {"type": "string"},
+              "station": {"type": "number"},
+              "verticalOffset": {"type": "number"},
+              "depthOffset": {"type": "number"}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "registry", "objectId", "value"],
+            "properties": {
+              "op": {"const": "putObject"},
+              "registry": {"enum": ["levels", "anchors", "materials", "types", "elements", "relationships"]},
+              "objectId": {"type": "string"},
+              "value": {"type": "object"}
+            }
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["op", "registry", "objectId"],
+            "properties": {
+              "op": {"const": "removeObject"},
+              "registry": {"enum": ["levels", "anchors", "materials", "types", "elements", "relationships"]},
+              "objectId": {"type": "string"}
+            }
+          }
+        ]
+      }
+    }
+  }
+}

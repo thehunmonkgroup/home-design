@@ -1,0 +1,376 @@
+{
+  "format": "home-design-render-manifest-0.1",
+  "modelVersion": "0.1",
+  "sourceRevision": 0,
+  "project": {
+    "id": "project.reference-home",
+    "name": "Version 0.1 reference home"
+  },
+  "coordinateTransform": {
+    "source": "right-handed Z-up millimetres",
+    "target": "right-handed Y-up metres",
+    "mapping": [
+      "x/1000",
+      "z/1000",
+      "-y/1000"
+    ]
+  },
+  "elements": {
+    "slab.ground": {
+      "kind": "slab",
+      "name": "Ground floor slab",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_slab_ground_eaf3e9ea"
+      ],
+      "defaultVisible": true,
+      "data": {
+        "typeId": "slabType.concrete-200",
+        "role": "foundation",
+        "thickness": 200.0,
+        "topElevation": 0.0,
+        "bottomElevation": -200.0,
+        "footprint": {
+          "outer": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              10000.0,
+              0.0
+            ],
+            [
+              10000.0,
+              8000.0
+            ],
+            [
+              0.0,
+              8000.0
+            ]
+          ],
+          "holes": []
+        }
+      }
+    },
+    "wall.north": {
+      "kind": "wall",
+      "name": "North exterior wall",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_wall_north_2a9a3d00"
+      ],
+      "defaultVisible": true,
+      "data": {
+        "typeId": "wallType.exterior.wood-185",
+        "axis": [
+          [
+            0.0,
+            8000.0
+          ],
+          [
+            10000.0,
+            8000.0
+          ]
+        ],
+        "baseElevation": 0.0,
+        "topElevationRange": [
+          2829.903810567666,
+          2829.903810567666
+        ],
+        "thickness": 185.0,
+        "locationLine": "center"
+      }
+    },
+    "wall.east": {
+      "kind": "wall",
+      "name": "East exterior wall",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_wall_east_556c915a_part1",
+        "hd_wall_east_556c915a_part2"
+      ],
+      "defaultVisible": true,
+      "data": {
+        "typeId": "wallType.exterior.wood-185",
+        "axis": [
+          [
+            10000.0,
+            8000.0
+          ],
+          [
+            10000.0,
+            0.0
+          ]
+        ],
+        "baseElevation": 0.0,
+        "topElevationRange": [
+          2829.903810567666,
+          5139.304887326169
+        ],
+        "thickness": 185.0,
+        "locationLine": "center"
+      }
+    },
+    "wall.south": {
+      "kind": "wall",
+      "name": "South exterior wall facing the deck",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_wall_south_ca6b8ed1"
+      ],
+      "defaultVisible": true,
+      "data": {
+        "typeId": "wallType.exterior.wood-185",
+        "axis": [
+          [
+            10000.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "baseElevation": 0.0,
+        "topElevationRange": [
+          2829.903810567666,
+          2829.903810567666
+        ],
+        "thickness": 185.0,
+        "locationLine": "center"
+      }
+    },
+    "wall.west": {
+      "kind": "wall",
+      "name": "West exterior wall",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_wall_west_8fa730d7_part1",
+        "hd_wall_west_8fa730d7_part2"
+      ],
+      "defaultVisible": true,
+      "data": {
+        "typeId": "wallType.exterior.wood-185",
+        "axis": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            8000.0
+          ]
+        ],
+        "baseElevation": 0.0,
+        "topElevationRange": [
+          2829.903810567666,
+          5139.304887326169
+        ],
+        "thickness": 185.0,
+        "locationLine": "center"
+      }
+    },
+    "roof.main": {
+      "kind": "roof",
+      "name": "Main gable roof",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_roof_main_46845482_part1",
+        "hd_roof_main_46845482_part2"
+      ],
+      "defaultVisible": true,
+      "data": {
+        "typeId": "roofType.shingle-250",
+        "thickness": 250.0,
+        "faceIds": [
+          "roof.main.face-1",
+          "roof.main.face-2"
+        ],
+        "form": "gable"
+      }
+    },
+    "opening.window.north": {
+      "kind": "opening",
+      "name": "North living-room window rough opening",
+      "storeyId": "level.ground",
+      "nodes": [],
+      "defaultVisible": true,
+      "data": {
+        "hostId": "wall.north",
+        "origin": [
+          4000.0,
+          8000.0,
+          900.0
+        ],
+        "tangent": [
+          1.0,
+          0.0
+        ],
+        "width": 1540.0,
+        "height": 1240.0,
+        "depth": 300.0
+      }
+    },
+    "window.north": {
+      "kind": "window",
+      "name": "North living-room window",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_window_north_4176e612_part1",
+        "hd_window_north_4176e612_part2",
+        "hd_window_north_4176e612_part3",
+        "hd_window_north_4176e612_part4",
+        "hd_window_north_4176e612_part5"
+      ],
+      "defaultVisible": true,
+      "data": {
+        "typeId": "windowType.casement-1500x1200",
+        "openingId": "opening.window.north",
+        "roughOpeningClearance": [
+          40.0,
+          40.0
+        ],
+        "origin": [
+          4000.0,
+          8000.0,
+          920.0
+        ],
+        "tangent": [
+          1.0,
+          0.0
+        ]
+      }
+    },
+    "opening.door.south": {
+      "kind": "opening",
+      "name": "South entry door rough opening",
+      "storeyId": "level.ground",
+      "nodes": [],
+      "defaultVisible": true,
+      "data": {
+        "hostId": "wall.south",
+        "origin": [
+          5000.0,
+          0.0,
+          0.0
+        ],
+        "tangent": [
+          -1.0,
+          0.0
+        ],
+        "width": 940.0,
+        "height": 2140.0,
+        "depth": 300.0
+      }
+    },
+    "door.south-entry": {
+      "kind": "door",
+      "name": "South entry door",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_door_south-entry_a200a655"
+      ],
+      "defaultVisible": true,
+      "data": {
+        "typeId": "doorType.entry-900x2100",
+        "openingId": "opening.door.south",
+        "roughOpeningClearance": [
+          40.0,
+          40.0
+        ],
+        "origin": [
+          5000.0,
+          0.0,
+          20.0
+        ],
+        "tangent": [
+          -1.0,
+          0.0
+        ]
+      }
+    },
+    "space.living": {
+      "kind": "space",
+      "name": "Living space",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_space_living_69e75d15"
+      ],
+      "defaultVisible": false,
+      "data": {
+        "typeId": "spaceType.living",
+        "height": 2600.0,
+        "area": 76704225.0,
+        "footprint": {
+          "outer": [
+            [
+              92.5,
+              92.5
+            ],
+            [
+              9907.5,
+              92.5
+            ],
+            [
+              9907.5,
+              7907.5
+            ],
+            [
+              92.5,
+              7907.5
+            ]
+          ],
+          "holes": []
+        }
+      }
+    },
+    "slab.deck.south": {
+      "kind": "slab",
+      "name": "Attached south deck",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_slab_deck_south_638dc4a9"
+      ],
+      "defaultVisible": true,
+      "data": {
+        "typeId": "slabType.deck-150",
+        "role": "deck",
+        "thickness": 150.0,
+        "topElevation": -25.0,
+        "bottomElevation": -175.0,
+        "footprint": {
+          "outer": [
+            [
+              3000.0,
+              0.0
+            ],
+            [
+              7000.0,
+              0.0
+            ],
+            [
+              7000.0,
+              -3000.0
+            ],
+            [
+              3000.0,
+              -3000.0
+            ]
+          ],
+          "holes": []
+        }
+      }
+    },
+    "assembly.roof-system": {
+      "kind": "assembly",
+      "name": "Main roof system",
+      "storeyId": null,
+      "nodes": [],
+      "defaultVisible": true,
+      "data": {
+        "assemblyType": "roofSystem"
+      }
+    }
+  }
+}

@@ -1,0 +1,2184 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:home-design:schema:home-model:0.1",
+  "title": "AI-editable IFC-aligned home model",
+  "description": "Canonical parametric authoring graph for a home. Rendered meshes and CAD shapes are derived artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "modelVersion",
+    "revision",
+    "project",
+    "units",
+    "coordinateSystem",
+    "levels",
+    "anchors",
+    "materials",
+    "types",
+    "elements",
+    "relationships"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "modelVersion": {
+      "const": "0.1"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "project": {
+      "$ref": "#/$defs/Project"
+    },
+    "units": {
+      "$ref": "#/$defs/Units"
+    },
+    "coordinateSystem": {
+      "$ref": "#/$defs/CoordinateSystem"
+    },
+    "levels": {
+      "$ref": "#/$defs/LevelRegistry"
+    },
+    "anchors": {
+      "$ref": "#/$defs/AnchorRegistry"
+    },
+    "materials": {
+      "$ref": "#/$defs/MaterialRegistry"
+    },
+    "types": {
+      "$ref": "#/$defs/TypeRegistry"
+    },
+    "elements": {
+      "$ref": "#/$defs/ElementRegistry"
+    },
+    "relationships": {
+      "$ref": "#/$defs/RelationshipRegistry"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Requirement"
+      }
+    },
+    "metadata": {
+      "$ref": "#/$defs/Metadata"
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9._:-]*$",
+      "minLength": 2,
+      "maxLength": 160
+    },
+    "NonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Length": {
+      "type": "number",
+      "description": "Length in the project length unit, fixed to millimetres in model version 0.1."
+    },
+    "PositiveLength": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "Angle": {
+      "type": "number",
+      "description": "Angle in degrees."
+    },
+    "Vec2": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "Vec3": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "UnitVec2": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Vec2"
+        }
+      ],
+      "description": "A semantic validator must verify that this vector has unit length."
+    },
+    "UnitVec3": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Vec3"
+        }
+      ],
+      "description": "A semantic validator must verify that this vector has unit length."
+    },
+    "Project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "site",
+        "building"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "description": {
+          "type": "string"
+        },
+        "site": {
+          "$ref": "#/$defs/SpatialIdentity"
+        },
+        "building": {
+          "$ref": "#/$defs/SpatialIdentity"
+        },
+        "author": {
+          "type": "string"
+        }
+      }
+    },
+    "SpatialIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        }
+      }
+    },
+    "Units": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "length",
+        "angle"
+      ],
+      "properties": {
+        "length": {
+          "const": "mm"
+        },
+        "angle": {
+          "const": "deg"
+        }
+      }
+    },
+    "CoordinateSystem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "handedness",
+        "upAxis",
+        "xDirection",
+        "yDirection",
+        "localOrigin"
+      ],
+      "properties": {
+        "handedness": {
+          "const": "right"
+        },
+        "upAxis": {
+          "const": "Z"
+        },
+        "xDirection": {
+          "const": "east"
+        },
+        "yDirection": {
+          "const": "north"
+        },
+        "localOrigin": {
+          "$ref": "#/$defs/Vec3"
+        },
+        "trueNorthDegrees": {
+          "$ref": "#/$defs/Angle"
+        },
+        "georeference": {
+          "$ref": "#/$defs/Georeference"
+        }
+      }
+    },
+    "Georeference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "latitude",
+        "longitude"
+      ],
+      "properties": {
+        "latitude": {
+          "type": "number",
+          "minimum": -90,
+          "maximum": 90
+        },
+        "longitude": {
+          "type": "number",
+          "minimum": -180,
+          "maximum": 180
+        },
+        "elevationMm": {
+          "$ref": "#/$defs/Length"
+        },
+        "crs": {
+          "type": "string"
+        }
+      }
+    },
+    "LevelRegistry": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/Id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/Level"
+      }
+    },
+    "Level": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "name",
+        "elevation"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "storey",
+            "reference"
+          ]
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "elevation": {
+          "$ref": "#/$defs/Length"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "AnchorRegistry": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/Anchor"
+      }
+    },
+    "Anchor": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Point2Anchor"
+        },
+        {
+          "$ref": "#/$defs/Point3Anchor"
+        },
+        {
+          "$ref": "#/$defs/Axis2Anchor"
+        },
+        {
+          "$ref": "#/$defs/PlaneAnchor"
+        },
+        {
+          "$ref": "#/$defs/ElementStationAnchor"
+        }
+      ]
+    },
+    "AnchorBase": {
+      "type": "object",
+      "required": [
+        "kind",
+        "name"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "Point2Anchor": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/AnchorBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "level",
+            "position"
+          ],
+          "properties": {
+            "kind": {
+              "const": "point2"
+            },
+            "level": {
+              "$ref": "#/$defs/Id"
+            },
+            "position": {
+              "$ref": "#/$defs/Vec2"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Point3Anchor": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/AnchorBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "position"
+          ],
+          "properties": {
+            "kind": {
+              "const": "point3"
+            },
+            "position": {
+              "$ref": "#/$defs/Vec3"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Axis2Anchor": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/AnchorBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "level",
+            "start",
+            "end"
+          ],
+          "properties": {
+            "kind": {
+              "const": "axis2"
+            },
+            "level": {
+              "$ref": "#/$defs/Id"
+            },
+            "start": {
+              "$ref": "#/$defs/PointLocator2"
+            },
+            "end": {
+              "$ref": "#/$defs/PointLocator2"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PlaneAnchor": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/AnchorBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "origin",
+            "normal"
+          ],
+          "properties": {
+            "kind": {
+              "const": "plane"
+            },
+            "origin": {
+              "$ref": "#/$defs/Vec3"
+            },
+            "normal": {
+              "$ref": "#/$defs/UnitVec3"
+            },
+            "xDirection": {
+              "$ref": "#/$defs/UnitVec3"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "ElementStationAnchor": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/AnchorBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "element",
+            "station"
+          ],
+          "properties": {
+            "kind": {
+              "const": "elementStation"
+            },
+            "element": {
+              "$ref": "#/$defs/Id"
+            },
+            "station": {
+              "$ref": "#/$defs/Length"
+            },
+            "transverseOffset": {
+              "$ref": "#/$defs/Length",
+              "default": 0
+            },
+            "verticalOffset": {
+              "$ref": "#/$defs/Length",
+              "default": 0
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PointLocator2": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "anchor"
+          ],
+          "properties": {
+            "anchor": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "point"
+          ],
+          "properties": {
+            "point": {
+              "$ref": "#/$defs/Vec2"
+            }
+          }
+        }
+      ]
+    },
+    "Line2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "start",
+        "end"
+      ],
+      "properties": {
+        "kind": {
+          "const": "line"
+        },
+        "start": {
+          "$ref": "#/$defs/PointLocator2"
+        },
+        "end": {
+          "$ref": "#/$defs/PointLocator2"
+        }
+      }
+    },
+    "Polyline2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "points"
+      ],
+      "properties": {
+        "kind": {
+          "const": "polyline"
+        },
+        "points": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/PointLocator2"
+          }
+        },
+        "closed": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "Path2": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Line2"
+        },
+        {
+          "$ref": "#/$defs/Polyline2"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "anchor"
+          ],
+          "properties": {
+            "kind": {
+              "const": "axisAnchor"
+            },
+            "anchor": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ]
+    },
+    "Loop2": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "$ref": "#/$defs/PointLocator2"
+      }
+    },
+    "Profile2": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outer"
+      ],
+      "properties": {
+        "outer": {
+          "$ref": "#/$defs/Loop2"
+        },
+        "holes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Loop2"
+          }
+        }
+      }
+    },
+    "LocalLoop2": {
+      "type": "array",
+      "description": "Closed loop in an element-local 2D coordinate system; the closing point is implicit.",
+      "minItems": 3,
+      "items": {
+        "$ref": "#/$defs/Vec2"
+      }
+    },
+    "LocalProfile2": {
+      "type": "object",
+      "description": "Profile in an element-local 2D coordinate system.",
+      "additionalProperties": false,
+      "required": [
+        "outer"
+      ],
+      "properties": {
+        "outer": {
+          "$ref": "#/$defs/LocalLoop2"
+        },
+        "holes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LocalLoop2"
+          }
+        }
+      }
+    },
+    "Loop3": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "$ref": "#/$defs/Vec3"
+      }
+    },
+    "Profile3": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "outer"
+      ],
+      "properties": {
+        "outer": {
+          "$ref": "#/$defs/Loop3"
+        },
+        "holes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Loop3"
+          }
+        }
+      }
+    },
+    "MaterialRegistry": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/Material"
+      }
+    },
+    "Material": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "category": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "appearance": {
+          "$ref": "#/$defs/Appearance"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "Appearance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$"
+        },
+        "opacity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "roughness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "metalness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "Layer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "thickness",
+        "function"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "material": {
+          "$ref": "#/$defs/Id"
+        },
+        "thickness": {
+          "$ref": "#/$defs/PositiveLength"
+        },
+        "function": {
+          "enum": [
+            "structure",
+            "substrate",
+            "insulation",
+            "airGap",
+            "finish",
+            "membrane",
+            "other"
+          ]
+        }
+      }
+    },
+    "TypeRegistry": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/ComponentType"
+      }
+    },
+    "ComponentType": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/WallType"
+        },
+        {
+          "$ref": "#/$defs/SlabType"
+        },
+        {
+          "$ref": "#/$defs/RoofType"
+        },
+        {
+          "$ref": "#/$defs/DoorType"
+        },
+        {
+          "$ref": "#/$defs/WindowType"
+        },
+        {
+          "$ref": "#/$defs/SpaceType"
+        }
+      ]
+    },
+    "TypeBase": {
+      "type": "object",
+      "required": [
+        "kind",
+        "name"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "description": {
+          "type": "string"
+        },
+        "externalIds": {
+          "$ref": "#/$defs/ExternalIds"
+        }
+      }
+    },
+    "LayeredTypeProperties": {
+      "type": "object",
+      "required": [
+        "layers",
+        "layerOrder"
+      ],
+      "properties": {
+        "layers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Layer"
+          }
+        },
+        "layerOrder": {
+          "enum": [
+            "exteriorToInterior",
+            "topToBottom"
+          ]
+        }
+      }
+    },
+    "WallType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "$ref": "#/$defs/LayeredTypeProperties"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "wallType"
+            },
+            "layerOrder": {
+              "const": "exteriorToInterior"
+            },
+            "referencePlane": {
+              "enum": [
+                "center",
+                "coreCenter",
+                "exterior",
+                "interior"
+              ],
+              "default": "center"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "SlabType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "$ref": "#/$defs/LayeredTypeProperties"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "slabType"
+            },
+            "layerOrder": {
+              "const": "topToBottom"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RoofType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "$ref": "#/$defs/LayeredTypeProperties"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "roofType"
+            },
+            "layerOrder": {
+              "const": "topToBottom"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "DoorType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "nominalWidth",
+            "nominalHeight",
+            "operation"
+          ],
+          "properties": {
+            "kind": {
+              "const": "doorType"
+            },
+            "nominalWidth": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "nominalHeight": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "operation": {
+              "enum": [
+                "singleSwing",
+                "doubleSwing",
+                "doubleDoor",
+                "sliding",
+                "folding",
+                "revolving",
+                "fixedPanel",
+                "other"
+              ]
+            },
+            "frameDepth": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "material": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "WindowType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "nominalWidth",
+            "nominalHeight",
+            "operation"
+          ],
+          "properties": {
+            "kind": {
+              "const": "windowType"
+            },
+            "nominalWidth": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "nominalHeight": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "operation": {
+              "enum": [
+                "fixed",
+                "casement",
+                "awning",
+                "hopper",
+                "sliding",
+                "doubleHung",
+                "tiltTurn",
+                "other"
+              ]
+            },
+            "frameDepth": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "material": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "SpaceType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "spaceType"
+            },
+            "occupancy": {
+              "type": "string"
+            },
+            "conditioned": {
+              "type": "boolean"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "ElementRegistry": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/Element"
+      }
+    },
+    "Element": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Wall"
+        },
+        {
+          "$ref": "#/$defs/Slab"
+        },
+        {
+          "$ref": "#/$defs/Roof"
+        },
+        {
+          "$ref": "#/$defs/Opening"
+        },
+        {
+          "$ref": "#/$defs/Door"
+        },
+        {
+          "$ref": "#/$defs/Window"
+        },
+        {
+          "$ref": "#/$defs/Space"
+        },
+        {
+          "$ref": "#/$defs/Assembly"
+        }
+      ]
+    },
+    "ElementBase": {
+      "type": "object",
+      "required": [
+        "kind",
+        "name"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "description": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/NonEmptyString"
+          }
+        },
+        "externalIds": {
+          "$ref": "#/$defs/ExternalIds"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "StoreyElementProperties": {
+      "type": "object",
+      "required": [
+        "storey"
+      ],
+      "properties": {
+        "storey": {
+          "$ref": "#/$defs/Id"
+        }
+      }
+    },
+    "Wall": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "$ref": "#/$defs/StoreyElementProperties"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "path",
+            "locationLine",
+            "base",
+            "top"
+          ],
+          "properties": {
+            "kind": {
+              "const": "wall"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "path": {
+              "$ref": "#/$defs/Path2"
+            },
+            "locationLine": {
+              "enum": [
+                "center",
+                "coreCenter",
+                "exterior",
+                "interior"
+              ]
+            },
+            "base": {
+              "$ref": "#/$defs/BaseConstraint"
+            },
+            "top": {
+              "$ref": "#/$defs/TopConstraint"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "BaseConstraint": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LevelConstraint"
+        },
+        {
+          "$ref": "#/$defs/SurfaceConstraint"
+        }
+      ]
+    },
+    "TopConstraint": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "height"
+          ],
+          "properties": {
+            "kind": {
+              "const": "height"
+            },
+            "height": {
+              "$ref": "#/$defs/PositiveLength"
+            }
+          }
+        },
+        {
+          "$ref": "#/$defs/SurfaceConstraint"
+        }
+      ]
+    },
+    "LevelConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "level",
+        "offset"
+      ],
+      "properties": {
+        "kind": {
+          "const": "level"
+        },
+        "level": {
+          "$ref": "#/$defs/Id"
+        },
+        "offset": {
+          "$ref": "#/$defs/Length"
+        }
+      }
+    },
+    "SurfaceConstraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "element",
+        "surface",
+        "offset"
+      ],
+      "properties": {
+        "kind": {
+          "const": "surface"
+        },
+        "element": {
+          "$ref": "#/$defs/Id"
+        },
+        "surface": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "selector": {
+          "type": "string"
+        },
+        "offset": {
+          "$ref": "#/$defs/Length"
+        }
+      }
+    },
+    "Slab": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "$ref": "#/$defs/StoreyElementProperties"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "role",
+            "footprint",
+            "datum",
+            "extrusionDirection"
+          ],
+          "properties": {
+            "kind": {
+              "const": "slab"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "role": {
+              "enum": [
+                "floor",
+                "foundation",
+                "roofSlab",
+                "deck",
+                "landing",
+                "ceiling",
+                "other"
+              ]
+            },
+            "footprint": {
+              "$ref": "#/$defs/Profile2"
+            },
+            "datum": {
+              "$ref": "#/$defs/LevelConstraint"
+            },
+            "extrusionDirection": {
+              "enum": [
+                "up",
+                "down"
+              ]
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Roof": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "$ref": "#/$defs/StoreyElementProperties"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "geometry"
+          ],
+          "properties": {
+            "kind": {
+              "const": "roof"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "geometry": {
+              "$ref": "#/$defs/RoofGeometry"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RoofGeometry": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/ParametricRoof"
+        },
+        {
+          "$ref": "#/$defs/RoofFaceSet"
+        }
+      ]
+    },
+    "ParametricRoof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "form",
+        "footprint",
+        "eaveDatum",
+        "overhang"
+      ],
+      "properties": {
+        "kind": {
+          "const": "parametric"
+        },
+        "form": {
+          "enum": [
+            "flat",
+            "shed",
+            "gable",
+            "hip"
+          ]
+        },
+        "footprint": {
+          "$ref": "#/$defs/Profile2"
+        },
+        "eaveDatum": {
+          "$ref": "#/$defs/LevelConstraint"
+        },
+        "pitch": {
+          "$ref": "#/$defs/Angle"
+        },
+        "slopeDirection": {
+          "$ref": "#/$defs/UnitVec2"
+        },
+        "ridgeDirection": {
+          "$ref": "#/$defs/UnitVec2"
+        },
+        "overhang": {
+          "$ref": "#/$defs/Length"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "form": {
+                "enum": [
+                  "shed",
+                  "gable",
+                  "hip"
+                ]
+              }
+            },
+            "required": [
+              "form"
+            ]
+          },
+          "then": {
+            "properties": {
+              "pitch": true
+            },
+            "required": [
+              "pitch"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "form": {
+                "const": "shed"
+              }
+            },
+            "required": [
+              "form"
+            ]
+          },
+          "then": {
+            "properties": {
+              "slopeDirection": true
+            },
+            "required": [
+              "slopeDirection"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "form": {
+                "const": "gable"
+              }
+            },
+            "required": [
+              "form"
+            ]
+          },
+          "then": {
+            "properties": {
+              "ridgeDirection": true
+            },
+            "required": [
+              "ridgeDirection"
+            ]
+          }
+        }
+      ]
+    },
+    "RoofFaceSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "faces"
+      ],
+      "properties": {
+        "kind": {
+          "const": "faceSet"
+        },
+        "faces": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/RoofFace"
+          }
+        }
+      }
+    },
+    "RoofFace": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "boundary"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "boundary": {
+          "$ref": "#/$defs/Profile3"
+        }
+      }
+    },
+    "Opening": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "geometry",
+            "placement"
+          ],
+          "properties": {
+            "kind": {
+              "const": "opening"
+            },
+            "geometry": {
+              "$ref": "#/$defs/OpeningGeometry"
+            },
+            "placement": {
+              "$ref": "#/$defs/HostedPlacement"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "OpeningGeometry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "width",
+            "height",
+            "depth"
+          ],
+          "properties": {
+            "kind": {
+              "const": "rectangle"
+            },
+            "width": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "height": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "depth": {
+              "$ref": "#/$defs/PositiveLength"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "profile",
+            "depth"
+          ],
+          "properties": {
+            "kind": {
+              "const": "profile"
+            },
+            "profile": {
+              "$ref": "#/$defs/LocalProfile2"
+            },
+            "depth": {
+              "$ref": "#/$defs/PositiveLength"
+            }
+          }
+        }
+      ]
+    },
+    "HostedPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "station",
+        "stationReference",
+        "verticalOffset",
+        "verticalReference",
+        "depthOffset"
+      ],
+      "properties": {
+        "station": {
+          "$ref": "#/$defs/Length",
+          "description": "Distance along the host path from its start."
+        },
+        "stationReference": {
+          "enum": [
+            "start",
+            "center",
+            "end"
+          ],
+          "description": "Which horizontal point of the opening is located at station."
+        },
+        "verticalOffset": {
+          "$ref": "#/$defs/Length"
+        },
+        "verticalReference": {
+          "enum": [
+            "bottom",
+            "center",
+            "top"
+          ]
+        },
+        "depthOffset": {
+          "$ref": "#/$defs/Length"
+        }
+      }
+    },
+    "Door": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "kind": {
+              "const": "door"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "handing": {
+              "enum": [
+                "left",
+                "right",
+                "notApplicable"
+              ]
+            },
+            "swingDirection": {
+              "enum": [
+                "inward",
+                "outward",
+                "notApplicable"
+              ]
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Window": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "kind": {
+              "const": "window"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "operationOverride": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Space": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "$ref": "#/$defs/StoreyElementProperties"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "geometry",
+            "height"
+          ],
+          "properties": {
+            "kind": {
+              "const": "space"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "geometry": {
+              "$ref": "#/$defs/SpaceGeometry"
+            },
+            "height": {
+              "$ref": "#/$defs/PositiveLength"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "SpaceGeometry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "footprint"
+          ],
+          "properties": {
+            "kind": {
+              "const": "explicit"
+            },
+            "footprint": {
+              "$ref": "#/$defs/Profile2"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "seedPoint"
+          ],
+          "properties": {
+            "kind": {
+              "const": "derived"
+            },
+            "seedPoint": {
+              "$ref": "#/$defs/Vec2"
+            }
+          }
+        }
+      ]
+    },
+    "Assembly": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "assemblyType"
+          ],
+          "properties": {
+            "kind": {
+              "const": "assembly"
+            },
+            "assemblyType": {
+              "enum": [
+                "roofSystem",
+                "wallSystem",
+                "floorSystem",
+                "deckSystem",
+                "stairSystem",
+                "other"
+              ]
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RelationshipRegistry": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/Relationship"
+      }
+    },
+    "Relationship": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/VoidsRelationship"
+        },
+        {
+          "$ref": "#/$defs/FillsRelationship"
+        },
+        {
+          "$ref": "#/$defs/JoinsRelationship"
+        },
+        {
+          "$ref": "#/$defs/SupportsRelationship"
+        },
+        {
+          "$ref": "#/$defs/AttachesRelationship"
+        },
+        {
+          "$ref": "#/$defs/BoundsRelationship"
+        },
+        {
+          "$ref": "#/$defs/AggregatesRelationship"
+        }
+      ]
+    },
+    "RelationshipBase": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "externalIds": {
+          "$ref": "#/$defs/ExternalIds"
+        }
+      }
+    },
+    "VoidsRelationship": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/RelationshipBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "host",
+            "opening"
+          ],
+          "properties": {
+            "kind": {
+              "const": "voids"
+            },
+            "host": {
+              "$ref": "#/$defs/Id"
+            },
+            "opening": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "FillsRelationship": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/RelationshipBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "opening",
+            "element"
+          ],
+          "properties": {
+            "kind": {
+              "const": "fills"
+            },
+            "opening": {
+              "$ref": "#/$defs/Id"
+            },
+            "element": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "JoinsRelationship": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/RelationshipBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "a",
+            "b",
+            "joinType"
+          ],
+          "properties": {
+            "kind": {
+              "const": "joins"
+            },
+            "a": {
+              "$ref": "#/$defs/PathConnectionEnd"
+            },
+            "b": {
+              "$ref": "#/$defs/PathConnectionEnd"
+            },
+            "joinType": {
+              "enum": [
+                "miter",
+                "butt",
+                "tee",
+                "lap",
+                "other"
+              ]
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PathConnectionEnd": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "element",
+        "at"
+      ],
+      "properties": {
+        "element": {
+          "$ref": "#/$defs/Id"
+        },
+        "at": {
+          "enum": [
+            "start",
+            "end",
+            "path"
+          ]
+        },
+        "station": {
+          "$ref": "#/$defs/Length"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "at": {
+                "const": "path"
+              }
+            },
+            "required": [
+              "at"
+            ]
+          },
+          "then": {
+            "properties": {
+              "station": true
+            },
+            "required": [
+              "station"
+            ]
+          },
+          "else": {
+            "not": {
+              "required": [
+                "station"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "SupportsRelationship": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/RelationshipBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "support",
+            "supported"
+          ],
+          "properties": {
+            "kind": {
+              "const": "supports"
+            },
+            "support": {
+              "$ref": "#/$defs/Id"
+            },
+            "supported": {
+              "$ref": "#/$defs/Id"
+            },
+            "interface": {
+              "$ref": "#/$defs/ConnectionInterface"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "AttachesRelationship": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/RelationshipBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "primary",
+            "attached",
+            "connectionType"
+          ],
+          "properties": {
+            "kind": {
+              "const": "attaches"
+            },
+            "primary": {
+              "$ref": "#/$defs/Id"
+            },
+            "attached": {
+              "$ref": "#/$defs/Id"
+            },
+            "connectionType": {
+              "enum": [
+                "direct",
+                "ledger",
+                "anchored",
+                "flashed",
+                "bearing",
+                "other"
+              ]
+            },
+            "interface": {
+              "$ref": "#/$defs/ConnectionInterface"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "ConnectionInterface": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "primarySurface": {
+          "type": "string"
+        },
+        "secondarySurface": {
+          "type": "string"
+        },
+        "startStation": {
+          "$ref": "#/$defs/Length"
+        },
+        "endStation": {
+          "$ref": "#/$defs/Length"
+        },
+        "elevation": {
+          "$ref": "#/$defs/Length"
+        }
+      }
+    },
+    "BoundsRelationship": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/RelationshipBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "space",
+            "element",
+            "boundaryType",
+            "elementSide"
+          ],
+          "properties": {
+            "kind": {
+              "const": "bounds"
+            },
+            "space": {
+              "$ref": "#/$defs/Id"
+            },
+            "element": {
+              "$ref": "#/$defs/Id"
+            },
+            "boundaryType": {
+              "enum": [
+                "physical",
+                "virtual"
+              ]
+            },
+            "elementSide": {
+              "enum": [
+                "left",
+                "right",
+                "top",
+                "bottom",
+                "interior",
+                "exterior",
+                "unspecified"
+              ]
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "AggregatesRelationship": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/RelationshipBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "assembly",
+            "parts"
+          ],
+          "properties": {
+            "kind": {
+              "const": "aggregates"
+            },
+            "assembly": {
+              "$ref": "#/$defs/Id"
+            },
+            "parts": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/Id"
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "ExternalIds": {
+      "type": "object",
+      "propertyNames": {
+        "minLength": 1
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "Requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "severity"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "statement": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "severity": {
+          "enum": [
+            "info",
+            "warning",
+            "error"
+          ]
+        },
+        "appliesTo": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Id"
+          }
+        }
+      }
+    },
+    "Metadata": {
+      "type": "object",
+      "additionalProperties": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      }
+    }
+  }
+}
