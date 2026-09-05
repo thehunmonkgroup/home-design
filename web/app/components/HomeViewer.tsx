@@ -36,6 +36,8 @@ import { canonicalSectionPlane, configureDirectionalShadow, configureOrbitContro
 import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, type CatalogModel } from '../lib/catalog';
 import ViewOrientation from './ViewOrientation';
 import DesignRequirements from './DesignRequirements';
+import PanelControls from './PanelControls';
+import { readPanelVisibility, savePanelVisibility, type PanelVisibility, type ReviewPanel } from '../lib/panels';
 
 interface SceneHandle {
   controls: OrbitControls;
@@ -47,6 +49,12 @@ interface SceneHandle {
 }
 
 export default function HomeViewer() {
+  const [panels, setPanels] = useState(readPanelVisibility);
+  const togglePanel = (panel: ReviewPanel) => {
+    const visible = !panels[panel];
+    setPanels({ ...panels, [panel]: visible });
+    savePanelVisibility(panel, visible);
+  };
   const [models, setModels] = useState<CatalogModel[]>([]);
   const [selectedKey, setSelectedKey] = useState('');
   const [catalogMessage, setCatalogMessage] = useState('Reading the model catalog…');
@@ -75,15 +83,18 @@ export default function HomeViewer() {
     key={entry ? `${entry.key}/${entry.version}` : catalogMessage}
     entry={entry} models={models} onSwitch={setSelectedKey}
     catalogMessage={catalogMessage} catalogStatus={catalogStatus}
+    panels={panels} onTogglePanel={togglePanel}
   />;
 }
 
-function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus }: {
+function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, panels, onTogglePanel }: {
   entry?: CatalogModel;
   models: CatalogModel[];
   onSwitch: (key: string) => void;
   catalogMessage: string;
   catalogStatus: 'loading' | 'error';
+  panels: PanelVisibility;
+  onTogglePanel: (panel: ReviewPanel) => void;
 }) {
   const canvasHost = useRef<HTMLDivElement>(null);
   const sceneHandle = useRef<SceneHandle | null>(null);
@@ -96,8 +107,6 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus }:
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(entry ? 'loading' : catalogStatus);
   const [message, setMessage] = useState(entry ? 'Loading model…' : catalogMessage);
   const [loadAttempt, setLoadAttempt] = useState(0);
-  const [treeOpen, setTreeOpen] = useState(false);
-  const [inspectorOpen, setInspectorOpen] = useState(false);
   const [solarStudyId, setSolarStudyId] = useState('');
   const [sectionAxis, setSectionAxis] = useState<'none' | 'x' | 'y' | 'z'>('none');
   const [sectionOffset, setSectionOffset] = useState(0);
@@ -114,7 +123,6 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus }:
 
   const selectElement = useCallback((elementId: string | null) => {
     setSelectedId(elementId);
-    if (elementId) setInspectorOpen(true);
     const handle = sceneHandle.current;
     const currentManifest = manifestRef.current;
     if (!handle || !currentManifest) return;
@@ -328,7 +336,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus }:
   }, []);
 
   return (
-    <main className="review-shell">
+    <main className={`review-shell ${panels.components ? '' : 'components-hidden'} ${panels.details ? '' : 'details-hidden'}`}>
       <header className="review-header">
         <div className="brand-mark" aria-hidden="true"><span /><span /><span /></div>
         <div className="brand-copy">
@@ -348,10 +356,8 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus }:
         </div>
       </header>
 
-      <button className="mobile-panel-button tree-button" onClick={() => setTreeOpen((open) => !open)}>
-        Components
-      </button>
-      <aside className={`model-tree ${treeOpen ? 'panel-open' : ''}`} aria-label="Model components">
+      <PanelControls visibility={panels} onToggle={onTogglePanel} />
+      <aside id="components-panel" className="model-tree" hidden={!panels.components} aria-label="Model components">
         <div className="panel-heading">
           <div><p>Model index</p><h2>Components</h2></div>
           <span>{manifest ? Object.keys(manifest.elements).length : '—'}</span>
@@ -368,7 +374,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus }:
                   <div className={`component-row ${visible ? '' : 'component-hidden'}`} key={elementId}>
                     <button
                       className={`component-select ${selectedId === elementId ? 'selected' : ''}`}
-                      onClick={() => { selectElement(elementId); setTreeOpen(false); }}
+                      onClick={() => selectElement(elementId)}
                     >
                       <span className={`kind-swatch kind-${element.kind}`} />
                       <span><strong>{element.name}</strong><small>{elementId}</small></span>
@@ -434,13 +440,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus }:
         <ViewOrientation northRotation={northRotation} />
       </section>
 
-      <button
-        className="mobile-panel-button inspector-button"
-        onClick={() => setInspectorOpen((open) => !open)}
-      >
-        Details
-      </button>
-      <aside className={`inspector ${inspectorOpen ? 'panel-open' : ''}`} aria-label="Element details">
+      <aside id="details-panel" className="inspector" hidden={!panels.details} aria-label="Element details">
         <div className="panel-heading">
           <div><p>Selection</p><h2>{selected ? selected.kind : 'Nothing selected'}</h2></div>
           {selected && <span className={`large-swatch kind-${selected.kind}`} />}

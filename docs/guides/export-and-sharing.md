@@ -89,6 +89,10 @@ camera, presentation lighting and Cut set to Off. Selection and sun-study choice
 are cleared. If a home fails to load, retry it or choose another home. Reload the
 page to discover newly published models.
 
+Use the **Show/Hide Components** and **Show/Hide Details** buttons below the project
+title to toggle each panel. This browser remembers your choices for this site
+across reloads and model switches, when browser storage is available.
+
 The **Model north** compass rotates with the camera's orbit heading. It indicates
 canonical +Y north, not surveyed true north, and is a read-only orientation aid.
 Panning and zooming do not change its heading. Hover over **Orbit**, **Pan**, or
