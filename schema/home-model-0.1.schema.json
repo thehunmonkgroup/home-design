@@ -19,6 +19,8 @@
     "relationships"
   ],
   "properties": {
+    "solarStudies": {"type": "array", "items": {"$ref": "#/$defs/SolarStudy"}},
+    "drawings": {"type": "array", "items": {"$ref": "#/$defs/DrawingView"}},
     "$schema": {
       "type": "string"
     },
@@ -67,6 +69,1271 @@
     }
   },
   "$defs": {
+    "SolarStudy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "at": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T.*(Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "samplesPerSide": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      }
+    },
+    "DrawingView": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "kind",
+        "axis",
+        "position"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Id"
+        },
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "kind": {
+          "enum": [
+            "projection",
+            "section"
+          ]
+        },
+        "axis": {
+          "enum": [
+            "x",
+            "y",
+            "z"
+          ]
+        },
+        "position": {
+          "$ref": "#/$defs/Length"
+        },
+        "includeKinds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "start",
+              "end"
+            ],
+            "properties": {
+              "start": {
+                "$ref": "#/$defs/Vec3"
+              },
+              "end": {
+                "$ref": "#/$defs/Vec3"
+              },
+              "label": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "DrainsToRelationship": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/RelationshipBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "source",
+            "target"
+          ],
+          "properties": {
+            "kind": {
+              "const": "drainsTo"
+            },
+            "source": {
+              "$ref": "#/$defs/Id"
+            },
+            "target": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "ScalarProperties": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "boolean",
+          "null"
+        ]
+      }
+    },
+    "Performance": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "uFactorWm2K": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "rValueM2KW": {
+          "type": "number",
+          "minimum": 0
+        },
+        "shgc": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "airLeakageACH50": {
+          "type": "number",
+          "minimum": 0
+        },
+        "nfrcId": {
+          "type": "string"
+        },
+        "glazing": {
+          "enum": [
+            "doubleLowEArgon",
+            "double",
+            "triple",
+            "other"
+          ]
+        },
+        "frame": {
+          "enum": [
+            "vinyl",
+            "fiberglass",
+            "wood",
+            "metal",
+            "other"
+          ]
+        }
+      }
+    },
+    "RequirementCheck": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "property",
+        "operator",
+        "value"
+      ],
+      "properties": {
+        "property": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9.]*$"
+        },
+        "operator": {
+          "enum": [
+            "atMost",
+            "atLeast",
+            "equals"
+          ]
+        },
+        "value": {
+          "type": "number"
+        }
+      }
+    },
+    "Section": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "width",
+            "depth"
+          ],
+          "properties": {
+            "kind": {
+              "const": "rectangle"
+            },
+            "width": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "depth": {
+              "$ref": "#/$defs/PositiveLength"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "diameter"
+          ],
+          "properties": {
+            "kind": {
+              "const": "circle"
+            },
+            "diameter": {
+              "$ref": "#/$defs/PositiveLength"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "profile"
+          ],
+          "properties": {
+            "kind": {
+              "const": "profile"
+            },
+            "profile": {
+              "$ref": "#/$defs/LocalProfile2"
+            }
+          }
+        }
+      ]
+    },
+    "PointLocator3": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "point"
+          ],
+          "properties": {
+            "point": {
+              "$ref": "#/$defs/Vec3"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "anchor"
+          ],
+          "properties": {
+            "anchor": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "point",
+            "elevation"
+          ],
+          "properties": {
+            "point": {
+              "$ref": "#/$defs/Vec2"
+            },
+            "elevation": {
+              "$ref": "#/$defs/ElevationDatum"
+            }
+          }
+        }
+      ]
+    },
+    "Axis3": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "$ref": "#/$defs/PointLocator3"
+      }
+    },
+    "Path3": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "$ref": "#/$defs/PointLocator3"
+      }
+    },
+    "StationInterval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start",
+        "end"
+      ],
+      "properties": {
+        "start": {
+          "type": "number",
+          "minimum": 0
+        },
+        "end": {
+          "$ref": "#/$defs/PositiveLength"
+        }
+      }
+    },
+    "MemberType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "section",
+            "material"
+          ],
+          "properties": {
+            "kind": {
+              "const": "memberType"
+            },
+            "section": {
+              "$ref": "#/$defs/Section"
+            },
+            "material": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "FootingType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "depth",
+            "material"
+          ],
+          "properties": {
+            "kind": {
+              "const": "footingType"
+            },
+            "depth": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "material": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "StairType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "treadDepth",
+            "treadThickness",
+            "maxRiser",
+            "material",
+            "stringerType"
+          ],
+          "properties": {
+            "kind": {
+              "const": "stairType"
+            },
+            "treadDepth": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "treadThickness": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "maxRiser": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "minRiser": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "material": {
+              "$ref": "#/$defs/Id"
+            },
+            "stringerType": {
+              "$ref": "#/$defs/Id"
+            },
+            "nosing": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "RailingType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "height",
+            "postSpacing",
+            "postSection",
+            "railSection",
+            "material",
+            "infill"
+          ],
+          "properties": {
+            "kind": {
+              "const": "railingType"
+            },
+            "height": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "postSpacing": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "postSection": {
+              "$ref": "#/$defs/Section"
+            },
+            "railSection": {
+              "$ref": "#/$defs/Section"
+            },
+            "material": {
+              "$ref": "#/$defs/Id"
+            },
+            "infill": {
+              "enum": [
+                "balusters",
+                "none"
+              ]
+            },
+            "balusterSection": {
+              "$ref": "#/$defs/Section"
+            },
+            "maxInfillGap": {
+              "$ref": "#/$defs/PositiveLength"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PanelType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "height",
+            "frameWidth",
+            "frameDepth",
+            "material",
+            "infillMaterial"
+          ],
+          "properties": {
+            "kind": {
+              "const": "panelType"
+            },
+            "height": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "frameWidth": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "frameDepth": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "material": {
+              "$ref": "#/$defs/Id"
+            },
+            "infillMaterial": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "SweepType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "section",
+            "material"
+          ],
+          "properties": {
+            "kind": {
+              "const": "sweepType"
+            },
+            "section": {
+              "$ref": "#/$defs/Section"
+            },
+            "material": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "FollowPath": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "element"
+      ],
+      "properties": {
+        "element": {
+          "$ref": "#/$defs/Id"
+        },
+        "side": {
+          "enum": [
+            "left",
+            "right"
+          ]
+        },
+        "edgeIndex": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "offset": {
+          "$ref": "#/$defs/Length"
+        }
+      }
+    },
+    "Member": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "role",
+            "axis"
+          ],
+          "properties": {
+            "kind": {
+              "const": "member"
+            },
+            "storey": {
+              "$ref": "#/$defs/Id"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "role": {
+              "enum": [
+                "beam",
+                "column",
+                "joist",
+                "rafter",
+                "stud",
+                "decking",
+                "stringer",
+                "brace",
+                "other"
+              ]
+            },
+            "axis": {
+              "$ref": "#/$defs/Axis3"
+            },
+            "roll": {
+              "$ref": "#/$defs/Angle"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Framing": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "role",
+            "axis",
+            "distribution",
+            "spacing",
+            "count"
+          ],
+          "properties": {
+            "kind": {
+              "const": "framing"
+            },
+            "storey": {
+              "$ref": "#/$defs/Id"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "role": {
+              "enum": [
+                "joist",
+                "rafter",
+                "stud",
+                "decking",
+                "other"
+              ]
+            },
+            "axis": {
+              "$ref": "#/$defs/Axis3"
+            },
+            "distribution": {
+              "$ref": "#/$defs/UnitVec3"
+            },
+            "spacing": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000
+            },
+            "omit": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "roll": {
+              "$ref": "#/$defs/Angle"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Footing": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "shape",
+            "datum"
+          ],
+          "properties": {
+            "kind": {
+              "const": "footing"
+            },
+            "storey": {
+              "$ref": "#/$defs/Id"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "shape": {
+              "enum": [
+                "pad",
+                "strip",
+                "pier"
+              ]
+            },
+            "footprint": {
+              "$ref": "#/$defs/Profile2"
+            },
+            "center": {
+              "$ref": "#/$defs/Vec2"
+            },
+            "diameter": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "datum": {
+              "$ref": "#/$defs/ElevationDatum"
+            }
+          },
+          "oneOf": [
+            {
+              "required": [
+                "footprint"
+              ],
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "center"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "diameter"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "required": [
+                "center",
+                "diameter"
+              ],
+              "properties": {
+                "shape": {
+                  "const": "pier"
+                }
+              },
+              "not": {
+                "required": [
+                  "footprint"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Stair": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "origin",
+            "direction",
+            "bottom",
+            "top",
+            "clearWidth"
+          ],
+          "properties": {
+            "kind": {
+              "const": "stair"
+            },
+            "storey": {
+              "$ref": "#/$defs/Id"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "origin": {
+              "$ref": "#/$defs/Vec2"
+            },
+            "direction": {
+              "$ref": "#/$defs/UnitVec2"
+            },
+            "bottom": {
+              "$ref": "#/$defs/ElevationDatum"
+            },
+            "top": {
+              "$ref": "#/$defs/ElevationDatum"
+            },
+            "clearWidth": {
+              "$ref": "#/$defs/PositiveLength"
+            },
+            "riserCount": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 1000
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Railing": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "role"
+          ],
+          "properties": {
+            "kind": {
+              "const": "railing"
+            },
+            "storey": {
+              "$ref": "#/$defs/Id"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "role": {
+              "enum": [
+                "guard",
+                "handrail"
+              ]
+            },
+            "path": {
+              "$ref": "#/$defs/Path3"
+            },
+            "follow": {
+              "$ref": "#/$defs/FollowPath"
+            },
+            "openings": {
+              "type": "array",
+              "minItems": 0,
+              "items": {
+                "$ref": "#/$defs/StationInterval"
+              }
+            }
+          },
+          "oneOf": [
+            {
+              "required": [
+                "path"
+              ],
+              "not": {
+                "required": [
+                  "follow"
+                ]
+              }
+            },
+            {
+              "required": [
+                "follow"
+              ],
+              "not": {
+                "required": [
+                  "path"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Panel": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type"
+          ],
+          "properties": {
+            "top": {"$ref": "#/$defs/TopConstraint"},
+            "kind": {
+              "const": "panel"
+            },
+            "storey": {
+              "$ref": "#/$defs/Id"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "path": {
+              "$ref": "#/$defs/Path3"
+            },
+            "follow": {
+              "$ref": "#/$defs/FollowPath"
+            },
+            "openings": {
+              "type": "array",
+              "minItems": 0,
+              "items": {
+                "$ref": "#/$defs/StationInterval"
+              }
+            }
+          },
+          "oneOf": [
+            {
+              "required": [
+                "path"
+              ],
+              "not": {
+                "required": [
+                  "follow"
+                ]
+              }
+            },
+            {
+              "required": [
+                "follow"
+              ],
+              "not": {
+                "required": [
+                  "path"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Terrain": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "state",
+            "points"
+          ],
+          "properties": {
+            "kind": {
+              "const": "terrain"
+            },
+            "storey": {
+              "$ref": "#/$defs/Id"
+            },
+            "state": {
+              "enum": [
+                "existing",
+                "proposed"
+              ]
+            },
+            "points": {
+              "type": "array",
+              "minItems": 3,
+              "items": {
+                "$ref": "#/$defs/Vec3"
+              }
+            },
+            "triangles": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            "material": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Sweep": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "role",
+            "path"
+          ],
+          "properties": {
+            "kind": {
+              "const": "sweep"
+            },
+            "storey": {
+              "$ref": "#/$defs/Id"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "role": {
+              "enum": [
+                "gutter",
+                "downspout",
+                "drain",
+                "interceptor",
+                "flashing",
+                "fascia",
+                "soffit",
+                "trim",
+                "other"
+              ]
+            },
+            "path": {
+              "$ref": "#/$defs/Path3"
+            },
+            "minFall": {
+              "type": "number",
+              "minimum": 0
+            },
+            "outlet": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "name",
+                "stable"
+              ],
+              "properties": {
+                "name": {
+                  "$ref": "#/$defs/NonEmptyString"
+                },
+                "stable": {
+                  "type": "boolean"
+                },
+                "exclusionRadius": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Load": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "target",
+            "footprint",
+            "forceN",
+            "category"
+          ],
+          "properties": {
+            "kind": {
+              "const": "load"
+            },
+            "storey": {
+              "$ref": "#/$defs/Id"
+            },
+            "target": {
+              "$ref": "#/$defs/Id"
+            },
+            "footprint": {
+              "$ref": "#/$defs/Profile2"
+            },
+            "forceN": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "category": {
+              "enum": [
+                "dead",
+                "live",
+                "equipment",
+                "wind",
+                "snow",
+                "other"
+              ]
+            },
+            "foundationRequired": {
+              "type": "boolean"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "DetailType": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/TypeBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "category",
+            "instructions"
+          ],
+          "properties": {
+            "kind": {
+              "const": "detailType"
+            },
+            "category": {
+              "enum": [
+                "waterproofing",
+                "flashing",
+                "airSealing",
+                "connection",
+                "other"
+              ]
+            },
+            "instructions": {
+              "$ref": "#/$defs/NonEmptyString"
+            },
+            "reference": {
+              "type": "string"
+            },
+            "material": {
+              "$ref": "#/$defs/Id"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "Detail": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/$defs/ElementBase"
+        },
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "participants",
+            "location"
+          ],
+          "properties": {
+            "kind": {
+              "const": "detail"
+            },
+            "storey": {
+              "$ref": "#/$defs/Id"
+            },
+            "type": {
+              "$ref": "#/$defs/Id"
+            },
+            "participants": {
+              "type": "array",
+              "minItems": 2,
+              "uniqueItems": true,
+              "items": {
+                "$ref": "#/$defs/Id"
+              }
+            },
+            "location": {
+              "$ref": "#/$defs/PointLocator3"
+            }
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PointSurfaceDatum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "element",
+        "surface",
+        "point",
+        "offset"
+      ],
+      "properties": {
+        "kind": {
+          "const": "surface"
+        },
+        "element": {
+          "$ref": "#/$defs/Id"
+        },
+        "surface": {
+          "enum": [
+            "top",
+            "underside",
+            "bottom"
+          ]
+        },
+        "point": {
+          "$ref": "#/$defs/Vec2"
+        },
+        "selector": {
+          "type": "string"
+        },
+        "offset": {
+          "$ref": "#/$defs/Length"
+        }
+      }
+    },
+    "ElevationDatum": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/LevelConstraint"
+        },
+        {
+          "$ref": "#/$defs/PointSurfaceDatum"
+        }
+      ]
+    },
+    "Clearance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "lower",
+        "upper",
+        "minimum"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "lower": {
+          "$ref": "#/$defs/ElevationDatum"
+        },
+        "upper": {
+          "$ref": "#/$defs/ElevationDatum"
+        },
+        "minimum": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
     "Id": {
       "type": "string",
       "pattern": "^[A-Za-z][A-Za-z0-9._:-]*$",
@@ -729,6 +1996,19 @@
         "function"
       ],
       "properties": {
+        "components": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["material", "fraction"],
+            "properties": {
+              "material": {"$ref": "#/$defs/Id"},
+              "fraction": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}
+            }
+          }
+        },
         "name": {
           "$ref": "#/$defs/NonEmptyString"
         },
@@ -762,6 +2042,13 @@
     },
     "ComponentType": {
       "oneOf": [
+        {"$ref": "#/$defs/MemberType"},
+        {"$ref": "#/$defs/FootingType"},
+        {"$ref": "#/$defs/StairType"},
+        {"$ref": "#/$defs/RailingType"},
+        {"$ref": "#/$defs/PanelType"},
+        {"$ref": "#/$defs/SweepType"},
+        {"$ref": "#/$defs/DetailType"},
         {
           "$ref": "#/$defs/WallType"
         },
@@ -789,6 +2076,8 @@
         "name"
       ],
       "properties": {
+        "specifications": {"$ref": "#/$defs/ScalarProperties"},
+        "performance": {"$ref": "#/$defs/Performance"},
         "kind": {
           "type": "string"
         },
@@ -917,6 +2206,12 @@
             "operation"
           ],
           "properties": {
+            "infillMaterial": {"$ref": "#/$defs/Id"},
+            "infillFraction": {"type": "number", "exclusiveMinimum": 0, "maximum": 1},
+            "frameWidth": {"$ref": "#/$defs/PositiveLength"},
+            "panelCount": {"type": "integer", "minimum": 1, "maximum": 8},
+            "glazingFraction": {"type": "number", "minimum": 0, "maximum": 1},
+            "clearOpeningWidth": {"$ref": "#/$defs/PositiveLength"},
             "kind": {
               "const": "doorType"
             },
@@ -947,6 +2242,8 @@
           }
         }
       ],
+      "dependentRequired": {"infillMaterial": ["infillFraction"], "infillFraction": ["infillMaterial"]},
+      "not": {"required": ["infillMaterial", "glazingFraction"]},
       "unevaluatedProperties": false
     },
     "WindowType": {
@@ -1029,6 +2326,16 @@
     },
     "Element": {
       "oneOf": [
+        {"$ref": "#/$defs/Member"},
+        {"$ref": "#/$defs/Framing"},
+        {"$ref": "#/$defs/Footing"},
+        {"$ref": "#/$defs/Stair"},
+        {"$ref": "#/$defs/Railing"},
+        {"$ref": "#/$defs/Panel"},
+        {"$ref": "#/$defs/Terrain"},
+        {"$ref": "#/$defs/Sweep"},
+        {"$ref": "#/$defs/Load"},
+        {"$ref": "#/$defs/Detail"},
         {
           "$ref": "#/$defs/Wall"
         },
@@ -1062,6 +2369,13 @@
         "name"
       ],
       "properties": {
+        "specifications": {"$ref": "#/$defs/ScalarProperties"},
+        "performance": {"$ref": "#/$defs/Performance"},
+        "grade": {"$ref": "#/$defs/Id"},
+        "clearances": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/Clearance"}
+        },
         "kind": {
           "type": "string"
         },
@@ -1280,7 +2594,7 @@
               "$ref": "#/$defs/Profile2"
             },
             "datum": {
-              "$ref": "#/$defs/LevelConstraint"
+              "$ref": "#/$defs/ElevationDatum"
             },
             "extrusionDirection": {
               "enum": [
@@ -1359,7 +2673,21 @@
           "$ref": "#/$defs/Profile2"
         },
         "eaveDatum": {
-          "$ref": "#/$defs/LevelConstraint"
+          "$ref": "#/$defs/ElevationDatum"
+        },
+        "datumPoint": {
+          "$ref": "#/$defs/Vec2"
+        },
+        "datumReference": {
+          "enum": ["eave", "bearing"]
+        },
+        "datumSurface": {
+          "enum": ["top", "underside"]
+        },
+        "edgeOverhangs": {
+          "type": "array",
+          "minItems": 3,
+          "items": {"type": "number", "minimum": 0}
         },
         "pitch": {
           "$ref": "#/$defs/Angle"
@@ -1602,6 +2930,7 @@
             "type"
           ],
           "properties": {
+            "swingAngle": {"type": "number", "minimum": 0, "maximum": 180},
             "kind": {
               "const": "door"
             },
@@ -1764,6 +3093,7 @@
     },
     "Relationship": {
       "oneOf": [
+        {"$ref": "#/$defs/DrainsToRelationship"},
         {
           "$ref": "#/$defs/VoidsRelationship"
         },
@@ -1963,6 +3293,8 @@
             "supported"
           ],
           "properties": {
+            "bearingPoint": {"$ref": "#/$defs/Vec3"},
+            "capacityN": {"type": "number", "exclusiveMinimum": 0},
             "kind": {
               "const": "supports"
             },
@@ -2139,6 +3471,7 @@
         "severity"
       ],
       "properties": {
+        "check": {"$ref": "#/$defs/RequirementCheck"},
         "id": {
           "$ref": "#/$defs/Id"
         },

@@ -102,7 +102,19 @@ class ModelIndex:
         :returns: Canonically ordered cycles without duplicates.
         """
         graph: dict[str, set[str]] = defaultdict(set)
-        geometry_paths = ("/base", "/top", "/datum", "/path", "/footprint", "/geometry")
+        geometry_paths = (
+            "/base",
+            "/top",
+            "/bottom",
+            "/datum",
+            "/path",
+            "/footprint",
+            "/geometry",
+            "/axis",
+            "/follow",
+            "/target",
+            "/location",
+        )
         for reference in self.references:
             if reference.registry in {"elements", "anchors"} and any(
                 marker in reference.path for marker in geometry_paths
@@ -253,6 +265,18 @@ class ModelIndex:
             if isinstance(layers, list):
                 for index, layer in enumerate(layers):
                     if isinstance(layer, dict):
+                        components = layer.get("components", [])
+                        if isinstance(components, list):
+                            for component_index, component in enumerate(components):
+                                if isinstance(component, dict) and isinstance(
+                                    component.get("material"), str
+                                ):
+                                    yield Reference(
+                                        type_id,
+                                        str(component["material"]),
+                                        f"/types/{type_id}/layers/{index}/components/{component_index}/material",
+                                        "materials",
+                                    )
                         material_id = layer.get("material")
                         if not isinstance(material_id, str):
                             continue
@@ -265,6 +289,17 @@ class ModelIndex:
             yield from self._field_reference(
                 type_id, component_type, "material", "types", "materials"
             )
+            yield from self._field_reference(
+                type_id, component_type, "infillMaterial", "types", "materials"
+            )
+            yield from self._field_reference(
+                type_id,
+                component_type,
+                "stringerType",
+                "types",
+                "types",
+                ("memberType",),
+            )
 
     def _element_references(self) -> Iterable[Reference]:
         expected_type = {
@@ -274,6 +309,14 @@ class ModelIndex:
             "door": ("doorType",),
             "window": ("windowType",),
             "space": ("spaceType",),
+            "member": ("memberType",),
+            "framing": ("memberType",),
+            "footing": ("footingType",),
+            "stair": ("stairType",),
+            "railing": ("railingType",),
+            "panel": ("panelType",),
+            "sweep": ("sweepType",),
+            "detail": ("detailType",),
         }
         for element_id, element in self.registries["elements"].items():
             kind = element.get("kind")
@@ -292,14 +335,43 @@ class ModelIndex:
                 element_id,
                 element,
                 f"/elements/{element_id}",
-                skip_fields={"storey", "type"},
+                skip_fields={
+                    "storey",
+                    "type",
+                    "properties",
+                    "specifications",
+                    "performance",
+                },
             )
+            yield from self._field_reference(
+                element_id, element, "material", "elements", "materials"
+            )
+            yield from self._field_reference(
+                element_id, element, "grade", "elements", "elements", ("terrain",)
+            )
+            yield from self._field_reference(
+                element_id, element, "target", "elements", "elements"
+            )
+            participants = element.get("participants", [])
+            if isinstance(participants, list):
+                for index, target in enumerate(participants):
+                    if isinstance(target, str):
+                        yield Reference(
+                            element_id,
+                            target,
+                            f"/elements/{element_id}/participants/{index}",
+                            "elements",
+                        )
 
     def _relationship_references(self) -> Iterable[Reference]:
         roles: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
-            "voids": (("host", ("wall", "slab", "roof")), ("opening", ("opening",))),
+            "voids": (
+                ("host", ("wall", "panel", "slab", "roof")),
+                ("opening", ("opening",)),
+            ),
             "fills": (("opening", ("opening",)), ("element", ("door", "window"))),
             "supports": (("support", ()), ("supported", ())),
+            "drainsTo": (("source", ("sweep",)), ("target", ("sweep",))),
             "attaches": (("primary", ()), ("attached", ())),
             "bounds": (("space", ("space",)), ("element", ())),
             "aggregates": (("assembly", ("assembly",)),),

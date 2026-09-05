@@ -75,13 +75,13 @@ class DesignTransactionWorkflow:
             "--build-directory",
             type=Path,
             default=Path("build"),
-            help="Generated artifact directory",
+            help="Generated artifact root; each model uses its filename stem (default: %(default)s)",
         )
         parser.add_argument(
             "--web-assets",
             type=Path,
             default=Path("web/public/model"),
-            help="Viewer model asset directory",
+            help="Viewer collection to merge this model into (default: %(default)s)",
         )
         parser.add_argument(
             "--dry-run",

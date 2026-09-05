@@ -7,7 +7,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 
 from shapely import BufferJoinStyle
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import LineString, Polygon
 from shapely.geometry.polygon import orient
 from shapely.ops import split, triangulate
 
@@ -15,6 +15,7 @@ from home_design.constants import GEOMETRY_TOLERANCE_MM
 from home_design.errors import ResolutionError
 from home_design.json_types import JsonObject, JsonValue
 from home_design.resolved import Face, MeshData, Vec2, Vec3
+from home_design.roof_controls import RoofControls
 
 
 def number(value: JsonValue, label: str) -> float:
@@ -363,6 +364,7 @@ class RoofSurface:
     pitch_degrees: float
     direction: Vec2
     thickness: float
+    bearing_footprint: Polygon | None = None
 
     def top_height(self, x: float, y: float) -> float:
         """Return roof top elevation at a plan point.
@@ -373,7 +375,7 @@ class RoofSurface:
         """
         pitch = math.tan(math.radians(self.pitch_degrees))
         dx, dy = self.direction
-        projections = [point[0] * dx + point[1] * dy for point in self._outer_points()]
+        projections = [point[0] * dx + point[1] * dy for point in self.outer_points()]
         projection = x * dx + y * dy
         if self.form == "flat":
             return self.eave_z
@@ -386,7 +388,15 @@ class RoofSurface:
                 + (max(projections) - min(projections)) / 2 * pitch
                 - abs(projection - center) * pitch
             )
-        boundary_distance = self.footprint.boundary.distance(Point(x, y))
+        reference = (
+            self.bearing_footprint
+            if self.bearing_footprint is not None
+            else self.footprint
+        )
+        boundary_distance = min(
+            nx * x + ny * y + offset
+            for nx, ny, offset in RoofControls.hip_planes(reference)
+        )
         return self.eave_z + boundary_distance * pitch
 
     def underside_height(self, x: float, y: float) -> float:
@@ -394,17 +404,20 @@ class RoofSurface:
 
         :param x: Canonical X coordinate.
         :param y: Canonical Y coordinate.
-        :returns: Approximate underside elevation in millimetres.
+        :returns: Underside plane elevation at the same X/Y in millimetres.
         """
         cosine = (
             math.cos(math.radians(self.pitch_degrees)) if self.form != "flat" else 1.0
         )
-        return self.top_height(x, y) - self.thickness * cosine
+        return self.top_height(x, y) - self.thickness / cosine
 
-    def _outer_points(self) -> list[Vec2]:
-        return [
-            (float(x), float(y)) for x, y in list(self.footprint.exterior.coords)[:-1]
-        ]
+    def outer_points(self) -> list[Vec2]:
+        reference = (
+            self.bearing_footprint
+            if self.bearing_footprint is not None
+            else self.footprint
+        )
+        return [(float(x), float(y)) for x, y in list(reference.exterior.coords)[:-1]]
 
 
 def roof_face_boundaries(surface: RoofSurface) -> tuple[tuple[Vec3, ...], ...]:
@@ -438,7 +451,7 @@ def offset_footprint(polygon: Polygon, overhang: float) -> Polygon:
 
 def _gable_boundaries(surface: RoofSurface) -> tuple[tuple[Vec3, ...], ...]:
     dx, dy = surface.direction
-    points = list(surface.footprint.exterior.coords)[:-1]
+    points = surface.outer_points()
     projections = [x * dx + y * dy for x, y in points]
     center = (min(projections) + max(projections)) / 2
     cx, cy = surface.footprint.centroid.coords[0]
@@ -480,85 +493,26 @@ def _gable_boundaries(surface: RoofSurface) -> tuple[tuple[Vec3, ...], ...]:
 
 
 def _hip_boundaries(surface: RoofSurface) -> tuple[tuple[Vec3, ...], ...]:
-    rectangle = surface.footprint.minimum_rotated_rectangle
-    if not isinstance(rectangle, Polygon):
-        raise ResolutionError("Hip roof footprint must resolve to a polygon")
-    if abs(rectangle.area - surface.footprint.area) > max(
-        1.0, surface.footprint.area * 1e-6
-    ):
-        raise ResolutionError("Version 0.1 hip roofs require a rectangular footprint")
-    corners = [(float(x), float(y)) for x, y in list(rectangle.exterior.coords)[:-1]]
-    lengths = [
-        math.dist(corners[index], corners[(index + 1) % 4]) for index in range(4)
-    ]
-    long_index = max(range(4), key=lambda index: lengths[index])
-    start = corners[long_index]
-    end = corners[(long_index + 1) % 4]
-    long_direction = normalize2((end[0] - start[0], end[1] - start[1]), "hip long axis")
-    short_length = min(lengths)
-    center = rectangle.centroid.coords[0]
-    half_ridge = max(lengths) / 2 - short_length / 2
-    ridge_a = (
-        center[0] - long_direction[0] * half_ridge,
-        center[1] - long_direction[1] * half_ridge,
+    reference = (
+        surface.bearing_footprint
+        if surface.bearing_footprint is not None
+        else surface.footprint
     )
-    ridge_b = (
-        center[0] + long_direction[0] * half_ridge,
-        center[1] + long_direction[1] * half_ridge,
-    )
-    ridge_z = surface.eave_z + short_length / 2 * math.tan(
-        math.radians(surface.pitch_degrees)
-    )
-    ordered = _ordered_rectangle(corners, long_direction)
-    c0, c1, c2, c3 = ordered
-    boundaries = (
-        (
-            (c0[0], c0[1], surface.eave_z),
-            (c1[0], c1[1], surface.eave_z),
-            (*ridge_b, ridge_z),
-            (*ridge_a, ridge_z),
-        ),
-        (
-            (c1[0], c1[1], surface.eave_z),
-            (c2[0], c2[1], surface.eave_z),
-            (*ridge_b, ridge_z),
-        ),
-        (
-            (c2[0], c2[1], surface.eave_z),
-            (c3[0], c3[1], surface.eave_z),
-            (*ridge_a, ridge_z),
-            (*ridge_b, ridge_z),
-        ),
-        (
-            (c3[0], c3[1], surface.eave_z),
-            (c0[0], c0[1], surface.eave_z),
-            (*ridge_a, ridge_z),
-        ),
-    )
-    return tuple(tuple(face) for face in boundaries)
-
-
-def _ordered_rectangle(
-    corners: Sequence[Vec2], direction: Vec2
-) -> tuple[Vec2, Vec2, Vec2, Vec2]:
-    perpendicular = (-direction[1], direction[0])
-    projected = sorted(
-        corners,
-        key=lambda point: (
-            point[0] * perpendicular[0] + point[1] * perpendicular[1],
-            point[0] * direction[0] + point[1] * direction[1],
-        ),
-    )
-    low = sorted(
-        projected[:2],
-        key=lambda point: point[0] * direction[0] + point[1] * direction[1],
-    )
-    high = sorted(
-        projected[2:],
-        key=lambda point: point[0] * direction[0] + point[1] * direction[1],
-        reverse=True,
-    )
-    return low[0], low[1], high[0], high[1]
+    planes = RoofControls.hip_planes(reference)
+    boundaries: list[tuple[Vec3, ...]] = []
+    for plane in planes:
+        points = [
+            (float(x), float(y))
+            for x, y in list(surface.footprint.exterior.coords)[:-1]
+        ]
+        for other in planes:
+            difference = (plane[0] - other[0], plane[1] - other[1], plane[2] - other[2])
+            points = RoofControls.clip(points, difference)
+        if len(points) >= 3 and Polygon(points).area > 0.01:
+            boundaries.append(
+                tuple((x, y, surface.top_height(x, y)) for x, y in points)
+            )
+    return tuple(boundaries)
 
 
 def _polygon_normal(boundary: Sequence[Vec3]) -> Vec3:

@@ -128,7 +128,9 @@ def test_all_parametric_roof_forms_resolve(
     roof["geometry"] = geometry
     _set_wall_heights(reference_model)
     resolved = ModelResolver(reference_model).resolve().element("roof.main")
-    assert len(resolved.meshes) == expected_faces
+    face_ids = resolved.data["faceIds"]
+    assert isinstance(face_ids, list)
+    assert len(face_ids) == expected_faces
     assert all(mesh.vertices and mesh.faces for mesh in resolved.meshes)
 
 
@@ -152,7 +154,7 @@ def test_explicit_roof_face_set_resolves(reference_model: JsonObject) -> None:
     }
     _set_wall_heights(reference_model)
     resolved = ModelResolver(reference_model).resolve().element("roof.main")
-    assert len(resolved.meshes) == 1
+    assert resolved.data["faceIds"] == ["roof-face.test"]
     assert resolved.data["form"] == "faceSet"
 
 
@@ -193,7 +195,7 @@ def test_explicit_roof_faces_continue_to_drive_wall_tops(
     assert isinstance(elevations, list)
     numeric = [float(value) for value in elevations if isinstance(value, (int, float))]
     assert numeric[1] - numeric[0] > 2000
-    assert len(east.meshes) == 2
+    assert {mesh.role.split(":")[1] for mesh in east.meshes} == {"1", "2"}
 
 
 def test_profile_opening_and_polyline_wall_resolve(reference_model: JsonObject) -> None:
@@ -213,7 +215,9 @@ def test_profile_opening_and_polyline_wall_resolve(reference_model: JsonObject) 
         "depth": 300,
     }
     resolved = ModelResolver(reference_model).resolve()
-    assert len(resolved.element("wall.north").meshes) == 2
+    assert {
+        mesh.role.split(":")[1] for mesh in resolved.element("wall.north").meshes
+    } == {"1", "2"}
     assert resolved.element("opening.window.north").data["width"] == pytest.approx(1540)
 
 

@@ -7,6 +7,8 @@ from home_design.errors import ResolutionError
 from home_design.graph import ModelIndex
 from home_design.json_types import JsonObject
 from home_design.loader import ModelLoader
+from home_design.resolver import ModelResolver
+from home_design.coordination import CoordinationValidator
 from home_design.validation.semantic import SemanticValidator
 from home_design.validation.topology import TopologyValidator
 
@@ -43,6 +45,13 @@ class ModelValidator:
         ):
             try:
                 diagnostics.extend(TopologyValidator(model, index).diagnostics())
+                if not any(item.severity == "error" for item in diagnostics):
+                    resolver = ModelResolver(model)
+                    resolved = resolver.resolve()
+                    diagnostics.extend(self._clearances(resolver))
+                    diagnostics.extend(
+                        CoordinationValidator(model, resolved).diagnostics()
+                    )
             except ResolutionError as error:
                 diagnostics.append(
                     Diagnostic(
@@ -52,3 +61,33 @@ class ModelValidator:
                     )
                 )
         return ValidationReport(tuple(diagnostics))
+
+    @staticmethod
+    def _clearances(resolver: ModelResolver) -> list[Diagnostic]:
+        diagnostics: list[Diagnostic] = []
+        for element_id, element in resolver.elements.items():
+            clearances = element.get("clearances", [])
+            if not isinstance(clearances, list):
+                continue
+            for clearance in clearances:
+                if not isinstance(clearance, dict):
+                    continue
+                lower, upper = clearance.get("lower"), clearance.get("upper")
+                minimum = clearance.get("minimum")
+                if (
+                    not isinstance(lower, dict)
+                    or not isinstance(upper, dict)
+                    or not isinstance(minimum, (int, float))
+                ):
+                    continue
+                actual = resolver.elevation(upper) - resolver.elevation(lower)
+                if actual < minimum - 0.01:
+                    diagnostics.append(
+                        Diagnostic(
+                            "error",
+                            "clearance.insufficient",
+                            f"{clearance.get('name')}: {actual:g} mm available, {minimum:g} mm required",
+                            subject_id=element_id,
+                        )
+                    )
+        return diagnostics

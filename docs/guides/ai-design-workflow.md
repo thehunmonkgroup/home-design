@@ -38,7 +38,7 @@ The AI then creates a change file with the current `baseRevision` and value prec
   "changeVersion": "0.1",
   "id": "change.move-north-window",
   "description": "Move the north window 500 mm east.",
-  "baseRevision": 0,
+  "baseRevision": 1,
   "preconditions": [
     {
       "path": "/elements/opening.window.north/placement/station",
@@ -55,17 +55,18 @@ The AI then creates a change file with the current `baseRevision` and value prec
 }
 ```
 
-Before committing:
+For an AI change to an existing design, use the guarded transaction workflow.
+A dry run validates the proposed revision without writing files:
 
 ```bash
-home-design apply design/home.json changes/move-window.json --dry-run
+python skills/home-design/scripts/design_transaction.py design/home.json changes/move-window.json --dry-run
 ```
 
-A successful dry run reports the next revision while leaving source files unchanged. Apply and rebuild after it passes:
+A successful dry run reports the next revision. Apply it and generate the IFC,
+browser assets and reports:
 
 ```bash
-home-design apply design/home.json changes/move-window.json
-home-design build design/home.json --output build --web-assets web/public/model
+python skills/home-design/scripts/design_transaction.py design/home.json changes/move-window.json
 ```
 
 ## Available transaction operations
@@ -93,6 +94,12 @@ Errors are intentionally specific. Common examples include:
 - `join.disconnected`: endpoints declared as joined are spatially separated.
 - `fill.exceeds-opening`: the door or window type is larger than its rough opening.
 - `topology.invalid-profile`: a footprint intersects itself, has no area, or has invalid holes.
+- `geometry.resolution-failed`: an invalid stair rise, uncovered terrain query, incompatible miter, insufficient section, or other impossible resolved geometry.
+- `clearance.insufficient`: a named pair of sampled elevations has less headroom than specified.
+- `support.bearing-outside-element`: an explicit bearing point lies outside a participant's bounds.
+- `load.incomplete-support-path` / `load.outside-target`: a loaded footprint is unsupported or exceeds its target surface.
+- `drainage.disconnected` / `drainage.outlet-near-footing`: connected drainage endpoints disagree or an outlet violates an authored footing exclusion radius.
+- `requirement.unsatisfied`: an explicit numeric property check fails (severity comes from the requirement).
 
 Resolve these checks in the canonical source by revising the design transaction or its explicit constraints. Regenerate `build/`, `web/public/model/`, and IFC entities from the accepted revision.
 
@@ -105,3 +112,66 @@ After each accepted revision:
 3. Inspect integrated components: hosts, openings/fills, joins, supports, attachments, boundaries, and assemblies.
 4. Compare the requested invariant with the resolved measurements in the right panel.
 5. Import the new IFC into the intended CAD application before relying on downstream edits.
+
+## Coordinating hillside construction
+
+1. Establish survey coordinates, finished-floor datums and separate existing/proposed
+   terrain. Confirm which surface each foundation or stair endpoint follows.
+2. Author shell layers and roof bearing datums. Give the low-slope porch its own roof
+   type, attach its elevation to the main roof underside, and check outer-edge
+   headroom using explicit surface points. An attachment relationship also records
+   interface intent, but does not replace placement constraints.
+3. Compose decks and landings from slabs. Use stairs for each flight; connect top
+   and bottom elevations to the landings/grade and verify the run fits the site.
+   Follow stairs/slab edges with separate guards, handrails and screen panels.
+4. Add native members and repeated framing. Record actual beam/post/footing
+   supports and load footprints for concentrated loads and structural roof members.
+   Author engineer-supplied capacities; validation does not calculate them.
+5. Route drainage with profile sweeps and `drainsTo`. Specify fall, a stable outlet
+   and footing exclusion distances. Attach reusable waterproofing, flashing and
+   air-sealing details to their actual participants.
+6. Add type/element performance and requirements. Review typed SI energy values
+   before importing US product ratings. Mark conditioned envelope boundaries
+   explicitly; do not include outdoor decks in the thermal envelope by accident.
+7. Rebuild and review layer sections, opening operation/clear widths, schedules,
+   grade exposure and summer/winter solar results. Retain surveyed and engineered
+   decisions as canonical data or referenced details, not edits to IFC/GLB files.
+
+These steps can be separate focused transactions; a coordinated change must include
+every dependent object needed to keep the revision valid. See the
+[authoring guide](model-authoring.md) for field examples and limitations.
+
+## Survey import
+
+Use a UTF-8 CSV with numeric `x,y,z` headers in one declared source unit. Subtract
+the survey origin in that same unit before conversion to canonical millimetres:
+
+```bash
+home-design import-survey design/home.json survey.csv \
+  --id terrain.existing --state existing --units ft \
+  --origin 2500000 800000 0 --output changes/survey.json
+python skills/home-design/scripts/design_transaction.py design/home.json changes/survey.json --dry-run
+python skills/home-design/scripts/design_transaction.py design/home.json changes/survey.json
+```
+
+The importer writes a revision/precondition-checked change, never the model. It
+validates the proposed surface and coordinated design before returning. Existing
+terrain with the same ID can be replaced; non-terrain IDs are protected. Delaunay
+triangulation fills the points' convex hull; use authored triangles for breaklines,
+holes and concave survey boundaries. No CRS reprojection or survey datum conversion
+is performed. Queries outside actual triangles fail instead of extrapolating.
+
+## Solar review
+
+Provide `coordinateSystem.georeference` latitude/longitude and true north, then
+author `solarStudies` for persistent viewer choices or run a read-only snapshot:
+
+```bash
+home-design solar design/home.json --at 2026-12-21T12:30:00-05:00 \
+  --samples 5 --output winter-solar.json
+```
+
+The timestamp must include a timezone. Samples are an N-by-N grid per opening;
+increase sampling for narrow shadows. Below-horizon or back-facing openings receive
+no direct sun. Assess representative winter and summer times, then give the envelope
+export to the energy rater. Geometric sun exposure is not a certification result.

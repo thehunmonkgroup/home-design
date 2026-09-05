@@ -5,7 +5,7 @@ import { isRenderManifest, nodeElementIndex } from '../app/lib/model';
 
 describe('Python to TypeScript render contract', () => {
   it('loads the generated reference manifest with unique stable scene nodes', async () => {
-    const path = resolve(process.cwd(), 'tests/fixtures/reference-render-manifest.json');
+    const path = resolve(process.cwd(), 'tests/fixtures/single-story-gable-house-render-manifest.json');
     const manifest: unknown = JSON.parse(await readFile(path, 'utf8'));
     expect(isRenderManifest(manifest)).toBe(true);
     if (!isRenderManifest(manifest)) return;

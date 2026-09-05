@@ -11,9 +11,6 @@
 # Generated assets for the currently active home
 /web/public/model/
 
-# Developer/account-specific Sites deployment binding
-/web/.openai/hosting.json
-
 web/node_modules/
 web/.next/
 web/.vinext/

@@ -59,8 +59,10 @@ def test_validate_inspect_apply_build_workflow(
         == 0
     )
     built = json.loads(capsys.readouterr().out)
-    assert len(built["artifacts"]) == 6
-    assert (web_assets / "model.glb").is_file()
+    assert len(built["models"]) == 1
+    assert len(built["models"][0]["artifacts"]) == 9
+    catalog = json.loads((web_assets / "index.json").read_text())
+    assert (web_assets / catalog["models"][0]["baseUrl"] / "model.glb").is_file()
 
 
 @pytest.mark.integration

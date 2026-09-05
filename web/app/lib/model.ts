@@ -2,6 +2,16 @@ import type { Object3D } from 'three';
 
 export type ElementKind =
   | 'assembly'
+  | 'member'
+  | 'framing'
+  | 'footing'
+  | 'stair'
+  | 'railing'
+  | 'panel'
+  | 'terrain'
+  | 'sweep'
+  | 'load'
+  | 'detail'
   | 'door'
   | 'opening'
   | 'roof'
@@ -30,6 +40,50 @@ export interface RenderManifest {
     mapping: [string, string, string];
   };
   elements: Record<string, ManifestElement>;
+  requirements?: DesignRequirement[];
+  requirementResults?: RequirementResult[];
+  solarStudies?: SolarStudy[];
+  reports?: { schedules: string; envelope: string; drawings: string };
+}
+
+export interface DesignRequirement {
+  id: string;
+  statement: string;
+  severity: string;
+  appliesTo?: string[];
+  check?: { property: string; operator: 'atMost' | 'atLeast' | 'equals'; value: number };
+}
+
+export interface RequirementResult {
+  id: string;
+  status: 'satisfied' | 'violated' | 'notChecked';
+  checks: Array<{
+    elementId: string;
+    property: string;
+    operator: 'atMost' | 'atLeast' | 'equals';
+    expected: number;
+    actual: unknown;
+    status: 'satisfied' | 'violated';
+  }>;
+}
+
+export function requirementStatusLabel(result?: RequirementResult): string {
+  switch (result?.status) {
+    case 'satisfied': return 'Satisfied';
+    case 'violated': return 'Violated';
+    case 'notChecked': return 'Not automatically checked';
+    default: return 'Status unavailable';
+  }
+}
+
+export interface SolarStudy {
+  id: string;
+  name: string;
+  at: string;
+  altitudeDegrees: number;
+  azimuthDegrees: number;
+  sunDirection: [number, number, number];
+  openings: Array<{ elementId: string; facesSun: boolean; unshadedFraction: number; sampleCount: number }>;
 }
 
 export interface ElementGroup {
@@ -40,6 +94,16 @@ export interface ElementGroup {
 
 const KIND_LABELS: Record<ElementKind, string> = {
   assembly: 'Assemblies',
+  member: 'Structural members',
+  framing: 'Framing',
+  footing: 'Footings',
+  stair: 'Stairs',
+  railing: 'Guards & handrails',
+  panel: 'Screens & panels',
+  terrain: 'Terrain',
+  sweep: 'Drainage & trim',
+  load: 'Design loads',
+  detail: 'Interface details',
   door: 'Doors',
   opening: 'Openings',
   roof: 'Roofs',
@@ -58,6 +122,16 @@ const KIND_ORDER: ElementKind[] = [
   'space',
   'opening',
   'assembly',
+  'member',
+  'framing',
+  'footing',
+  'stair',
+  'railing',
+  'panel',
+  'terrain',
+  'sweep',
+  'load',
+  'detail',
 ];
 
 export function isRenderManifest(value: unknown): value is RenderManifest {
@@ -93,12 +167,35 @@ export function nodeElementIndex(manifest: RenderManifest): Map<string, string> 
   return index;
 }
 
+export function canToggleVisibility(element: ManifestElement): boolean {
+  return element.nodes.length > 0;
+}
+
 export function defaultHiddenElementIds(manifest: RenderManifest): Set<string> {
   return new Set(
     Object.entries(manifest.elements)
-      .filter(([, element]) => !element.defaultVisible)
+      .filter(([, element]) => canToggleVisibility(element) && !element.defaultVisible)
       .map(([elementId]) => elementId),
   );
+}
+
+export function withElementVisibility(
+  manifest: RenderManifest,
+  hiddenIds: ReadonlySet<string>,
+  elementIds: Iterable<string>,
+  visible: boolean,
+): Set<string> {
+  const next = new Set([...hiddenIds].filter((id) => {
+    const element = manifest.elements[id];
+    return element && canToggleVisibility(element);
+  }));
+  for (const id of elementIds) {
+    const element = manifest.elements[id];
+    if (!element || !canToggleVisibility(element)) continue;
+    if (visible) next.delete(id);
+    else next.add(id);
+  }
+  return next;
 }
 
 export function applyElementVisibility(
@@ -106,6 +203,7 @@ export function applyElementVisibility(
   element: ManifestElement,
   visible: boolean,
 ): void {
+  if (!canToggleVisibility(element)) return;
   for (const nodeName of element.nodes) {
     const object = root.getObjectByName(nodeName);
     if (object) object.visible = visible;
@@ -131,4 +229,14 @@ export function formatMetric(value: unknown, unit = 'mm'): string | null {
     return `${(value / 1000).toLocaleString(undefined, { maximumFractionDigits: 3 })} m`;
   }
   return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })} ${unit}`;
+}
+
+export function formatProperty(key: string, value: unknown): string | null {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+  if (/area$/i.test(key)) return formatMetric(value / 1e6, 'm²');
+  if (/volume$/i.test(key)) return formatMetric(value / 1e9, 'm³');
+  if (key === 'forceN' || key === 'capacityN') return formatMetric(value / 1000, 'kN');
+  if (/degrees$|angle$|^pitch$|^roll$/i.test(key)) return formatMetric(value, '°');
+  if (/length$|width$|height$|depth$|thickness$|elevation$|spacing$|^station$|^run$|^rise$/i.test(key)) return formatMetric(value);
+  return value.toLocaleString(undefined, { maximumFractionDigits: 3 });
 }

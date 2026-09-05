@@ -93,17 +93,28 @@ def test_transaction_commit_writes_revision_and_all_adapter_outputs(
         json.loads(output_model.read_text(encoding="utf-8"))["revision"]
         == source_revision + 1
     )
-    assert {path.name for path in build_directory.iterdir()} == {
+    model_directory = build_directory / output_model.stem
+    assert report["buildDirectory"] == str(model_directory)
+    assert Path(report["ifc"]).is_file()
+    assert {path.name for path in model_directory.iterdir()} == {
         "build-metadata.json",
         "diagnostics.json",
         "model.glb",
         "model.ifc",
         "render-manifest.json",
         "resolved-model.json",
+        "schedules.json",
+        "envelope.json",
+        "drawings.svg",
     }
-    assert {path.name for path in web_assets.iterdir()} == {
+    catalog = json.loads((web_assets / "index.json").read_text())
+    browser_directory = web_assets / catalog["models"][0]["baseUrl"]
+    assert {path.name for path in browser_directory.iterdir()} == {
         "model.glb",
         "render-manifest.json",
+        "schedules.json",
+        "envelope.json",
+        "drawings.svg",
     }
 
 

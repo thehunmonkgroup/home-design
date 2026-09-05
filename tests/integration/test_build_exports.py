@@ -21,6 +21,8 @@ def test_build_produces_complete_cross_adapter_contract(
     output = tmp_path / "build"
     web_assets = tmp_path / "web-assets"
     result = BuildService().build(model_file, output, web_assets)
+    catalog = json.loads((web_assets / "index.json").read_text())
+    web_assets = web_assets / catalog["models"][0]["baseUrl"]
     assert all(
         path.is_file()
         for path in (

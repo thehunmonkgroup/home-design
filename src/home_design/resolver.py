@@ -3,18 +3,24 @@
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from shapely.affinity import translate
 from shapely.geometry import LineString, MultiPoint, MultiPolygon, Point, Polygon
 from shapely.ops import polygonize
 
 from home_design.errors import ResolutionError
+from home_design.components import ConstructionResolver
+from home_design.terrain import TerrainSurface
+from home_design.layers import LayerAssembly
+from home_design.construction import Authoring, ConstructionGeometry
+from home_design.coordination import GradeReport
+from home_design.doors import DoorGeometry
+from home_design.solar import SolarAnalysis
+from home_design.screens import ScreenGeometry
 from home_design.geometry import (
     RoofSurface,
-    extrude_planar_face,
     extrude_polygon,
-    extrude_wall_profile,
     layer_thickness,
     normalize2,
     number,
@@ -30,6 +36,8 @@ from home_design.graph import ModelIndex
 from home_design.json_types import JsonObject, JsonValue
 from home_design.locators import LocatorResolver, point_at_station
 from home_design.resolved import MeshData, ResolvedElement, ResolvedModel, Vec2, Vec3
+from home_design.roof_controls import RoofControls
+from home_design.requirements import RequirementEvaluator
 
 
 @dataclass(frozen=True, slots=True)
@@ -61,6 +69,10 @@ class ModelResolver:
         self.types: dict[str, JsonObject] = self.index.registries["types"]
         self.roof_surfaces: dict[str, RoofSurface] = {}
         self.openings: dict[str, HostedOpening] = {}
+        self._active_roofs: set[str] = set()
+        self._resolved: dict[str, ResolvedElement] = {}
+        self._active_elements: set[str] = set()
+        self.construction: ConstructionResolver = ConstructionResolver(self)
 
     def resolve(self) -> ResolvedModel:
         """Resolve all architectural components and integrations.
@@ -70,21 +82,9 @@ class ModelResolver:
         """
         self._prepare_roofs()
         self._prepare_openings()
-        resolved: dict[str, ResolvedElement] = {}
-        for kind in (
-            "slab",
-            "roof",
-            "wall",
-            "opening",
-            "door",
-            "window",
-            "space",
-            "assembly",
-        ):
-            for element_id, element in self.elements.items():
-                if element.get("kind") == kind:
-                    resolved[element_id] = self._resolve_element(element_id, element)
-        return ResolvedModel(
+        for element_id in self.elements:
+            self.resolve_component(element_id)
+        result = ResolvedModel(
             model_version=str(self.model.get("modelVersion")),
             source_revision=int(number(self.model.get("revision", 0), "revision")),
             project=self._object("project"),
@@ -92,12 +92,82 @@ class ModelResolver:
             levels=self._object("levels"),
             materials=self._object("materials"),
             types=self._object("types"),
-            elements=tuple(resolved[element_id] for element_id in self.elements),
+            elements=tuple(self._resolved[element_id] for element_id in self.elements),
             relationships=self._object("relationships"),
+            requirements=tuple(Authoring.array(self.model.get("requirements", []))),
+            solar_studies=tuple(Authoring.array(self.model.get("solarStudies", []))),
+            drawings=tuple(Authoring.array(self.model.get("drawings", []))),
         )
+        if result.solar_studies:
+            solar = SolarAnalysis(result)
+            result = replace(
+                result,
+                solar_studies=tuple(
+                    solar.study(Authoring.object(study))
+                    for study in result.solar_studies
+                ),
+            )
+        return replace(
+            result, requirement_results=RequirementEvaluator(result).evaluate()
+        )
+
+    def resolve_component(self, element_id: str) -> ResolvedElement:
+        """Resolve dependencies once while preserving canonical element identity."""
+        if element_id in self._resolved:
+            return self._resolved[element_id]
+        if element_id in self._active_elements:
+            raise ResolutionError(f"Element placement dependency cycle at {element_id}")
+        self._active_elements.add(element_id)
+        try:
+            result = self._resolve_element(element_id, self.elements[element_id])
+            result = self._with_specifications(result, self.elements[element_id])
+            self._resolved[element_id] = result
+            return result
+        finally:
+            self._active_elements.remove(element_id)
+
+    def _with_specifications(
+        self, resolved: ResolvedElement, source: JsonObject
+    ) -> ResolvedElement:
+        data = dict(resolved.data)
+        component_type = self.types.get(str(source.get("type")), {})
+        for field in ("specifications", "performance", "properties"):
+            inherited = component_type.get(field, {})
+            authored = source.get(field, {})
+            merged: JsonObject = {
+                **(inherited if isinstance(inherited, dict) else {}),
+                **(authored if isinstance(authored, dict) else {}),
+            }
+            if merged:
+                data[field] = merged
+        for field in ("description", "tags", "externalIds"):
+            if field in source:
+                data[field] = source[field]
+        requirements = [
+            requirement
+            for requirement in Authoring.array(self.model.get("requirements", []))
+            if isinstance(requirement, dict)
+            and resolved.element_id in Authoring.array(requirement.get("appliesTo", []))
+        ]
+        if requirements:
+            data["requirements"] = list(requirements)
+        grade_id = source.get("grade")
+        if isinstance(grade_id, str):
+            data["grade"] = {
+                "terrainId": grade_id,
+                **GradeReport.evaluate(resolved, self.elements[grade_id]),
+            }
+        return replace(resolved, data=data)
 
     def _resolve_element(self, element_id: str, element: JsonObject) -> ResolvedElement:
         kind = str(element.get("kind"))
+        if kind == "panel" and (
+            "top" in element
+            or any(opening.host_id == element_id for opening in self.openings.values())
+        ):
+            return self._resolve_screen(element_id, element)
+        if kind in ConstructionResolver.KINDS:
+            return self.construction.resolve(element_id, element)
         if kind == "slab":
             return self._resolve_slab(element_id, element)
         if kind == "roof":
@@ -124,26 +194,25 @@ class ModelResolver:
         outer, holes = self.locators.profile2(element.get("footprint"))
         polygon = polygon_from_loops(outer, holes)
         datum = self._dict(element.get("datum"), "slab datum")
-        datum_z = self.locators.level_constraint(datum)
+        datum_z = self.elevation(datum)
         direction = str(element.get("extrusionDirection"))
         bottom_z, top_z = (
             (datum_z - thickness, datum_z)
             if direction == "down"
             else (datum_z, datum_z + thickness)
         )
-        mesh = extrude_polygon(
-            polygon, bottom_z, top_z, primary_material(component_type), "body"
-        )
+        meshes = LayerAssembly.slab(polygon, top_z, component_type)
         return ResolvedElement(
             element_id,
             "slab",
             str(element.get("name")),
             self._string(element.get("storey")),
-            (mesh,),
+            meshes,
             {
                 "typeId": element.get("type"),
                 "role": element.get("role"),
                 "thickness": thickness,
+                "layers": LayerAssembly.metadata(component_type),
                 "topElevation": top_z,
                 "bottomElevation": bottom_z,
                 "footprint": {
@@ -157,7 +226,6 @@ class ModelResolver:
         component_type = self._type_for(element)
         thickness = layer_thickness(component_type)
         geometry = self._dict(element.get("geometry"), "roof geometry")
-        material_id = primary_material(component_type)
         if geometry.get("kind") == "faceSet":
             faces_value = geometry.get("faces")
             if not isinstance(faces_value, list):
@@ -183,10 +251,9 @@ class ModelResolver:
                 f"{element_id}.face-{index + 1}" for index in range(len(boundaries))
             ]
         meshes = tuple(
-            extrude_planar_face(
-                boundary, thickness, material_id, f"roof-face:{face_id}"
-            )
+            mesh
             for boundary, face_id in zip(boundaries, face_ids)
+            for mesh in LayerAssembly.roof(boundary, component_type, face_id)
         )
         face_id_values: list[JsonValue] = []
         face_id_values.extend(face_ids)
@@ -200,6 +267,7 @@ class ModelResolver:
                 "typeId": element.get("type"),
                 "thickness": thickness,
                 "faceIds": face_id_values,
+                "layers": LayerAssembly.metadata(component_type),
                 "form": (
                     geometry.get("form")
                     if geometry.get("kind") == "parametric"
@@ -211,7 +279,6 @@ class ModelResolver:
     def _resolve_wall(self, element_id: str, element: JsonObject) -> ResolvedElement:
         component_type = self._type_for(element)
         thickness = layer_thickness(component_type)
-        material_id = primary_material(component_type)
         axis_points = self.locators.path2(element.get("path"))
         points = self._wall_resolution_points(element, axis_points)
         base_z = self._constraint_height(
@@ -227,6 +294,8 @@ class ModelResolver:
         ]
         meshes: list[MeshData] = []
         cumulative = 0.0
+        net_area = 0.0
+        gross_area = 0.0
         top_elevations: list[float] = []
         for segment_index, (start, end) in enumerate(zip(points, points[1:])):
             segment_length = math.dist(start, end)
@@ -234,6 +303,7 @@ class ModelResolver:
             top_start = self._wall_top(element, start, base_z)
             top_end = self._wall_top(element, end, base_z)
             top_elevations.extend((top_start, top_end))
+            gross_area += segment_length * ((top_start + top_end) / 2 - base_z)
             profile = Polygon(
                 [
                     (0.0, 0.0),
@@ -266,6 +336,10 @@ class ModelResolver:
                         ]
                     )
                 )
+                if not profile.buffer(0.01).covers(clipped):
+                    raise ResolutionError(
+                        f"Opening {opening.opening_id} extends outside the actual wall profile"
+                    )
                 profile = profile.difference(clipped)
             if isinstance(profile, Polygon):
                 polygons = [profile]
@@ -276,18 +350,18 @@ class ModelResolver:
                     f"Wall {element_id} subtraction produced invalid geometry"
                 )
             for part_index, polygon in enumerate(polygons):
-                mesh = extrude_wall_profile(
-                    polygon,
-                    start,
-                    tangent,
-                    center_offset,
-                    thickness,
-                    base_z,
-                    material_id,
-                )
+                net_area += polygon.area
                 role = f"body:{segment_index + 1}:{part_index + 1}"
-                meshes.append(
-                    MeshData(mesh.vertices, mesh.faces, mesh.material_id, role)
+                meshes.extend(
+                    LayerAssembly.wall(
+                        polygon,
+                        start,
+                        tangent,
+                        center_offset + thickness / 2,
+                        base_z,
+                        component_type,
+                        role,
+                    )
                 )
             cumulative += segment_length
         return ResolvedElement(
@@ -299,26 +373,146 @@ class ModelResolver:
             {
                 "typeId": element.get("type"),
                 "axis": [list(point) for point in axis_points],
+                "topProfile": [
+                    [point[0], point[1], self._wall_top(element, point, base_z)]
+                    for point in points
+                ],
                 "baseElevation": base_z,
                 "topElevationRange": [min(top_elevations), max(top_elevations)],
                 "thickness": thickness,
                 "locationLine": element.get("locationLine"),
+                "netArea": net_area,
+                "grossArea": gross_area,
+                "layers": LayerAssembly.metadata(component_type),
+            },
+        )
+
+    def _screen_path(self, element: JsonObject) -> list[Vec3]:
+        """Require a straight, horizontal baseline for profiled/host screen panels."""
+        points = self.construction.path(element)
+        if len(points) != 2 or abs(points[0][2] - points[1][2]) > 0.01:
+            raise ResolutionError(
+                "Roof-following and hosted screens require a two-point horizontal path"
+            )
+        if math.dist(points[0], points[1]) <= 0.01:
+            raise ResolutionError("Screen path must have positive length")
+        return points
+
+    def _resolve_screen(self, element_id: str, element: JsonObject) -> ResolvedElement:
+        """Resolve a framed roof-height screen and its real hosted opening cuts."""
+        points = self._screen_path(element)
+        start, end = points
+        base = start[2]
+        length = math.dist(start, end)
+        tangent = normalize2((end[0] - start[0], end[1] - start[1]), "screen tangent")
+        definition = self._type_for(element)
+        control: JsonObject = {
+            "top": element.get(
+                "top", {"kind": "height", "height": definition["height"]}
+            )
+        }
+        plan = self._wall_resolution_points(
+            control, ((start[0], start[1]), (end[0], end[1]))
+        )
+        tops = [
+            (math.dist(plan[0], point), self._wall_top(control, point, base) - base)
+            for point in plan
+        ]
+        for index, (a, b) in enumerate(zip(plan, plan[1:])):
+            for ratio in (0.25, 0.5, 0.75):
+                sample = (a[0] + (b[0] - a[0]) * ratio, a[1] + (b[1] - a[1]) * ratio)
+                expected = (
+                    tops[index][1] + (tops[index + 1][1] - tops[index][1]) * ratio
+                )
+                if abs(self._wall_top(control, sample, base) - base - expected) > 0.01:
+                    raise ResolutionError("Split the screen at roof face changes")
+        if min(height for _, height in tops) <= 0:
+            raise ResolutionError("Screen top must be above its base")
+        profile = Polygon([(0, 0), (length, 0), *reversed(tops)])
+        hosted = [
+            opening
+            for opening in self.openings.values()
+            if opening.host_id == element_id
+        ]
+        cutouts = [
+            translate(opening.profile, xoff=opening.start_station, yoff=opening.bottom)
+            for opening in hosted
+        ]
+        gaps = [
+            (
+                number(Authoring.object(value)["start"], "gap start"),
+                number(Authoring.object(value)["end"], "gap end"),
+            )
+            for value in Authoring.array(element.get("openings", []))
+        ]
+        ConstructionGeometry.interval_segments(length, gaps)
+        for low, high in gaps:
+            gap = profile.intersection(
+                Polygon(
+                    [
+                        (low, 0),
+                        (high, 0),
+                        (high, profile.bounds[3]),
+                        (low, profile.bounds[3]),
+                    ]
+                )
+            )
+            if not isinstance(gap, Polygon):
+                raise ResolutionError(
+                    "Screen access gap must cut one contiguous region"
+                )
+            cutouts.append(gap)
+        meshes = ScreenGeometry.resolve(
+            profile, cutouts, plan[0], tangent, base, definition
+        )
+        return ResolvedElement(
+            element_id,
+            "panel",
+            str(element.get("name")),
+            self._string(element.get("storey")),
+            meshes,
+            {
+                "path": [list(point) for point in points],
+                "height": max(height for _, height in tops),
+                "topProfile": [
+                    [point[0], point[1], base + top[1]]
+                    for point, top in zip(plan, tops)
+                ],
+                "length": length,
+                "openings": element.get("openings", []),
+                "hostedOpeningIds": [opening.opening_id for opening in hosted],
+                "isStructuralGuard": False,
+                "typeId": element.get("type"),
+                "role": None,
             },
         )
 
     def _resolve_opening(self, element_id: str, element: JsonObject) -> ResolvedElement:
         opening = self.openings[element_id]
         host = self.elements[opening.host_id]
-        host_path = self.locators.path2(host.get("path"))
+        panel_points = self._screen_path(host) if host.get("kind") == "panel" else None
+        host_path = (
+            tuple((point[0], point[1]) for point in panel_points)
+            if panel_points
+            else self.locators.path2(host.get("path"))
+        )
         center_station = opening.start_station + opening.width / 2
         point, tangent = point_at_station(host_path, center_station)
         host_type = self._type_for(host)
-        host_depth = layer_thickness(host_type)
+        host_depth = (
+            number(host_type.get("frameDepth"), "screen depth")
+            if panel_points
+            else layer_thickness(host_type)
+        )
         placement = self._dict(element.get("placement"), "opening placement")
         normal = (-tangent[1], tangent[0])
         depth_offset = number(placement.get("depthOffset"), "opening depth offset")
-        base_z = self._constraint_height(
-            self._dict(host.get("base"), "wall base"), point, "top"
+        base_z = (
+            panel_points[0][2]
+            if panel_points
+            else self._constraint_height(
+                self._dict(host.get("base"), "wall base"), point, "top"
+            )
         )
         origin = (
             point[0] + normal[0] * depth_offset,
@@ -373,21 +567,25 @@ class ModelResolver:
             origin[2] + max((opening_height - height) / 2, 0.0),
         )
         if element.get("kind") == "door":
-            meshes = (
-                oriented_box(
-                    adjusted_origin,
-                    tangent,
-                    width,
-                    min(depth, 60.0),
-                    height,
-                    material_id,
-                    "door-panel",
-                ),
+            meshes, operation_data = DoorGeometry.resolve(
+                component_type,
+                element,
+                adjusted_origin,
+                tangent,
+                width,
+                height,
+                depth,
+                material_id,
             )
         else:
             meshes = self._window_meshes(
                 adjusted_origin, tangent, width, height, depth, material_id
             )
+            operation_data = {
+                "operation": component_type.get("operation"),
+                "nominalWidth": width,
+                "nominalHeight": height,
+            }
         return ResolvedElement(
             element_id,
             str(element.get("kind")),
@@ -403,6 +601,7 @@ class ModelResolver:
                 ],
                 "origin": list(adjusted_origin),
                 "tangent": list(tangent),
+                **operation_data,
             },
         )
 
@@ -443,42 +642,83 @@ class ModelResolver:
 
     def _prepare_roofs(self) -> None:
         for element_id, element in self.elements.items():
-            if element.get("kind") != "roof":
-                continue
-            geometry = self._dict(element.get("geometry"), "roof geometry")
-            if geometry.get("kind") != "parametric":
-                continue
-            outer, holes = self.locators.profile2(geometry.get("footprint"))
-            polygon = polygon_from_loops(outer, holes)
-            polygon = offset_footprint(
-                polygon, number(geometry.get("overhang"), "roof overhang")
+            if element.get("kind") == "roof":
+                self._prepare_roof(element_id)
+
+    def _prepare_roof(self, element_id: str) -> None:
+        if element_id in self.roof_surfaces:
+            return
+        if element_id in self._active_roofs:
+            raise ResolutionError(f"Roof placement dependency cycle at {element_id}")
+        element = self.elements[element_id]
+        geometry = self._dict(element.get("geometry"), "roof geometry")
+        if geometry.get("kind") != "parametric":
+            return
+        self._active_roofs.add(element_id)
+        try:
+            self.roof_surfaces[element_id] = self._parametric_roof_surface(
+                element, geometry
             )
-            eave_z = self.locators.level_constraint(
-                self._dict(geometry.get("eaveDatum"), "roof eave datum")
+        finally:
+            self._active_roofs.remove(element_id)
+
+    def _parametric_roof_surface(
+        self, element: JsonObject, geometry: JsonObject
+    ) -> RoofSurface:
+        outer, holes = self.locators.profile2(geometry.get("footprint"))
+        bearing = polygon_from_loops(outer, holes)
+        edge_offsets = geometry.get("edgeOverhangs")
+        polygon = (
+            RoofControls.edge_footprint(
+                bearing, [number(value, "edge overhang") for value in edge_offsets]
             )
-            form = str(geometry.get("form"))
-            pitch = number(geometry.get("pitch", 0), "roof pitch")
-            if form == "shed":
-                direction = normalize2(
-                    vector2(geometry.get("slopeDirection"), "roof slope direction"),
-                    "roof slope direction",
-                )
-            elif form == "gable":
-                ridge = normalize2(
-                    vector2(geometry.get("ridgeDirection"), "roof ridge direction"),
-                    "roof ridge direction",
-                )
-                direction = (-ridge[1], ridge[0])
-            else:
-                direction = (1.0, 0.0)
-            self.roof_surfaces[element_id] = RoofSurface(
-                form,
-                polygon,
-                eave_z,
-                pitch,
-                direction,
-                layer_thickness(self._type_for(element)),
+            if isinstance(edge_offsets, list)
+            else offset_footprint(
+                bearing, number(geometry.get("overhang"), "roof overhang")
             )
+        )
+        datum = self._dict(geometry.get("eaveDatum"), "roof eave datum")
+        eave_z = self.elevation(datum)
+        form = str(geometry.get("form"))
+        pitch = number(geometry.get("pitch", 0), "roof pitch")
+        if form == "shed":
+            direction = normalize2(
+                vector2(geometry.get("slopeDirection"), "roof slope direction"),
+                "roof slope direction",
+            )
+        elif form == "gable":
+            ridge = normalize2(
+                vector2(geometry.get("ridgeDirection"), "roof ridge direction"),
+                "roof ridge direction",
+            )
+            direction = (-ridge[1], ridge[0])
+        else:
+            direction = (1.0, 0.0)
+        thickness = layer_thickness(self._type_for(element))
+        if geometry.get("datumSurface") == "underside":
+            eave_z += thickness / math.cos(math.radians(pitch))
+        surface = RoofSurface(
+            form,
+            polygon,
+            eave_z,
+            pitch,
+            direction,
+            thickness,
+            bearing if geometry.get("datumReference") == "bearing" else None,
+        )
+        if "datumPoint" in geometry:
+            point = vector2(geometry["datumPoint"], "roof datum point")
+            surface = replace(
+                surface, eave_z=surface.eave_z + eave_z - surface.top_height(*point)
+            )
+        return surface
+
+    def elevation(self, datum: JsonObject) -> float:
+        """Resolve a level or an explicitly sampled element surface datum."""
+        if datum.get("kind") == "level":
+            return self.locators.level_constraint(datum)
+        point = vector2(datum.get("point"), "surface datum point")
+        return self._constraint_height(datum, point, "top")
 
     def _prepare_openings(self) -> None:
         for opening_id, element in self.elements.items():
@@ -548,21 +788,45 @@ class ModelResolver:
         referenced = self.elements.get(element_id)
         if referenced is None:
             raise ResolutionError(f"Unknown constrained element {element_id}")
+        if surface not in {"top", "bottom", "underside"}:
+            raise ResolutionError(f"Unknown surface {surface} on {element_id}")
+        if referenced.get("kind") == "terrain":
+            if surface != "top":
+                raise ResolutionError("Terrain exposes only its top survey surface")
+            return TerrainSurface.from_element(referenced).height(point) + offset
+        if referenced.get("kind") in {"footing", "stair"}:
+            resolved = self.resolve_component(element_id)
+            return (
+                number(
+                    resolved.data.get(
+                        "topElevation" if surface == "top" else "bottomElevation"
+                    ),
+                    "component surface",
+                )
+                + offset
+            )
         if referenced.get("kind") == "slab":
             slab_type = self._type_for(referenced)
             thickness = layer_thickness(slab_type)
-            datum_z = self.locators.level_constraint(
-                self._dict(referenced.get("datum"), "slab datum")
-            )
+            outer, holes = self.locators.profile2(referenced.get("footprint"))
+            if "point" in constraint and not polygon_from_loops(outer, holes).buffer(
+                0.01
+            ).covers(Point(point)):
+                raise ResolutionError(f"No slab surface on {element_id} covers {point}")
+            datum_z = self.elevation(self._dict(referenced.get("datum"), "slab datum"))
             direction = referenced.get("extrusionDirection")
             top = datum_z if direction == "down" else datum_z + thickness
             bottom = datum_z - thickness if direction == "down" else datum_z
             return (top if surface == "top" else bottom) + offset
+        if referenced.get("kind") == "roof":
+            self._prepare_roof(element_id)
         roof = self.roof_surfaces.get(element_id)
         if roof is not None:
+            if not roof.footprint.buffer(0.01).covers(Point(point)):
+                raise ResolutionError(f"No roof surface on {element_id} covers {point}")
             height = (
                 roof.underside_height(*point)
-                if surface == "underside"
+                if surface in {"underside", "bottom"}
                 else roof.top_height(*point)
             )
             return height + offset
@@ -601,9 +865,7 @@ class ModelResolver:
         if roof.form != "gable":
             return points
         dx, dy = roof.direction
-        projections = [
-            x * dx + y * dy for x, y in list(roof.footprint.exterior.coords)[:-1]
-        ]
+        projections = [x * dx + y * dy for x, y in roof.outer_points()]
         ridge_projection = (min(projections) + max(projections)) / 2
         resolved: list[Vec2] = [points[0]]
         for start, end in zip(points, points[1:]):
@@ -693,14 +955,14 @@ class ModelResolver:
                 / normal[2]
             )
             heights.append(
-                top - thickness * abs(normal[2]) / magnitude
-                if surface == "underside"
+                top - thickness * magnitude / abs(normal[2])
+                if surface in {"underside", "bottom"}
                 else top
             )
         if not heights:
             label = f" selected by {selector}" if selector else ""
             raise ResolutionError(f"No explicit roof face{label} covers point {point}")
-        return min(heights) if surface == "underside" else max(heights)
+        return min(heights) if surface in {"underside", "bottom"} else max(heights)
 
     def _explicit_roof_faces(
         self, roof: JsonObject

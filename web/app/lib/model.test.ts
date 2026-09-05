@@ -2,12 +2,16 @@ import { describe, expect, it } from 'vitest';
 import { Group, Mesh } from 'three';
 import {
   applyElementVisibility,
+  canToggleVisibility,
   defaultHiddenElementIds,
   elementIdForObject,
   formatMetric,
+  formatProperty,
   groupElements,
   isRenderManifest,
   nodeElementIndex,
+  withElementVisibility,
+  type ElementKind,
   type RenderManifest,
 } from './model';
 
@@ -42,6 +46,75 @@ describe('render manifest helpers', () => {
     expect([...defaultHiddenElementIds(manifest)]).toEqual(['space.living']);
   });
 
+  it.each<ElementKind>(['wall', 'opening', 'load', 'detail', 'assembly', 'space'])(
+    'derives visibility capability from nodes rather than the %s kind or default visibility',
+    (kind) => {
+      for (const defaultVisible of [true, false]) {
+        const element = { ...manifest.elements['wall.north'], kind, defaultVisible };
+        expect(canToggleVisibility({ ...element, nodes: [] })).toBe(false);
+        expect(canToggleVisibility({ ...element, nodes: ['test.geometry'] })).toBe(true);
+      }
+    },
+  );
+
+  it('keeps geometry-free records inspectable without initial hidden state', () => {
+    const mixed: RenderManifest = {
+      ...manifest,
+      elements: {
+        ...manifest.elements,
+        'space.record': { ...manifest.elements['space.living'], nodes: [] },
+      },
+    };
+    expect([...defaultHiddenElementIds(mixed)]).toEqual(['space.living']);
+    expect(groupElements(mixed).flatMap((group) => group.elements.map(([id]) => id)))
+      .toContain('space.record');
+  });
+
+  it('updates single and bulk visibility only for geometry-bearing records', () => {
+    const mixed: RenderManifest = {
+      ...manifest,
+      elements: {
+        ...manifest.elements,
+        'space.record': { ...manifest.elements['space.living'], nodes: [] },
+      },
+    };
+    const initial = defaultHiddenElementIds(mixed);
+    const unchanged = withElementVisibility(mixed, initial, ['space.record', 'missing'], false);
+    expect(unchanged).toEqual(initial);
+    const hidden = withElementVisibility(mixed, initial, ['wall.north'], false);
+    expect([...hidden]).toEqual(['space.living', 'wall.north']);
+    expect([...initial]).toEqual(['space.living']);
+
+    const allIds = Object.keys(mixed.elements);
+    const allHidden = withElementVisibility(mixed, hidden, allIds, false);
+    expect(allHidden).toEqual(new Set(['roof.main', 'wall.north', 'space.living']));
+    expect(withElementVisibility(mixed, allHidden, allIds, true)).toEqual(new Set());
+    expect([...allHidden]).toHaveLength(3);
+  });
+
+  it('discards stale or geometry-free hidden IDs during visibility updates', () => {
+    const changed: RenderManifest = {
+      ...manifest,
+      elements: {
+        ...manifest.elements,
+        'wall.north': { ...manifest.elements['wall.north'], nodes: [] },
+      },
+    };
+    const hidden = new Set(['space.living', 'wall.north', 'missing']);
+    expect(withElementVisibility(changed, hidden, ['roof.main'], false))
+      .toEqual(new Set(['space.living', 'roof.main']));
+    expect(hidden.size).toBe(3);
+  });
+
+  it('leaves scene geometry untouched when toggling a nonvisual record', () => {
+    const root = new Group();
+    const mesh = new Mesh();
+    mesh.name = 'wall.north';
+    root.add(mesh);
+    applyElementVisibility(root, { ...manifest.elements['wall.north'], nodes: [] }, false);
+    expect(mesh.visible).toBe(true);
+  });
+
   it('applies component visibility to every generated scene node', () => {
     const root = new Group();
     const firstRoofFace = new Group();
@@ -72,5 +145,13 @@ describe('render manifest helpers', () => {
     expect(formatMetric(185)).toBe('185 mm');
     expect(formatMetric(2700)).toBe('2.7 m');
     expect(formatMetric('2700')).toBeNull();
+  });
+
+  it('distinguishes counts, forces, areas and lengths in construction metadata', () => {
+    expect(formatProperty('riserCount', 16)).toBe('16');
+    expect(formatProperty('forceN', 12000)).toBe('12 kN');
+    expect(formatProperty('netArea', 12500000)).toBe('12.5 m²');
+    expect(formatProperty('volume', 2000000000)).toBe('2 m³');
+    expect(formatProperty('clearWidth', 1220)).toBe('1.22 m');
   });
 });

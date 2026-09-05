@@ -12,7 +12,8 @@ from home_design.loader import ModelLoader
 from home_design.validation import ModelValidator
 
 ROOT = Path(__file__).resolve().parents[1]
-REFERENCE_MODEL = ROOT / "examples" / "reference-home-0.1.json"
+REFERENCE_MODEL = ROOT / "examples" / "single-story-gable-house.json"
+CONSTRUCTION_MODEL = ROOT / "examples" / "hillside-deck-house.json"
 
 
 @pytest.fixture
@@ -43,6 +44,12 @@ def reference_model() -> JsonObject:
     value = json.loads(REFERENCE_MODEL.read_text(encoding="utf-8"))
     assert isinstance(value, dict)
     return deepcopy(value)
+
+
+@pytest.fixture
+def construction_model(loader: ModelLoader) -> JsonObject:
+    """Load the complete metric construction-system example."""
+    return loader.load(CONSTRUCTION_MODEL)
 
 
 @pytest.fixture

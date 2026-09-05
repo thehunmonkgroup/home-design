@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from dataclasses import replace
 from collections.abc import Callable
 from pathlib import Path
 from typing import ClassVar
@@ -11,7 +12,6 @@ import ifcopenshell
 import ifcopenshell.api.aggregate
 import ifcopenshell.api.context
 import ifcopenshell.api.feature
-import ifcopenshell.api.geometry
 import ifcopenshell.api.material
 import ifcopenshell.api.project
 import ifcopenshell.api.pset
@@ -20,13 +20,13 @@ import ifcopenshell.api.spatial
 import ifcopenshell.api.type
 import ifcopenshell.api.unit
 from ifcopenshell.entity_instance import entity_instance
-from ifcopenshell.util.shape_builder import SequenceOfVectors
 
 from home_design.constants import GUID_NAMESPACE, IFC_SCHEMA
 from home_design.errors import ExportError
 from home_design.geometry import vector2
 from home_design.json_types import JsonObject
 from home_design.resolved import ResolvedElement, ResolvedModel
+from home_design.adapters.ifc_properties import IfcProperties
 
 
 class IfcExporter:
@@ -41,6 +41,16 @@ class IfcExporter:
         "window": "IfcWindow",
         "space": "IfcSpace",
         "assembly": "IfcElementAssembly",
+        "member": "IfcMember",
+        "framing": "IfcElementAssembly",
+        "footing": "IfcFooting",
+        "stair": "IfcStairFlight",
+        "railing": "IfcRailing",
+        "panel": "IfcPlate",
+        "terrain": "IfcGeographicElement",
+        "sweep": "IfcBuildingElementProxy",
+        "load": "IfcBuildingElementProxy",
+        "detail": "IfcBuildingElementProxy",
     }
     _TYPE_CLASSES: ClassVar[dict[str, str]] = {
         "wallType": "IfcWallType",
@@ -49,6 +59,13 @@ class IfcExporter:
         "doorType": "IfcDoorType",
         "windowType": "IfcWindowType",
         "spaceType": "IfcSpaceType",
+        "memberType": "IfcMemberType",
+        "footingType": "IfcFootingType",
+        "stairType": "IfcStairFlightType",
+        "railingType": "IfcRailingType",
+        "panelType": "IfcPlateType",
+        "sweepType": "IfcBuildingElementProxyType",
+        "detailType": "IfcBuildingElementProxyType",
     }
 
     def export(self, model: ResolvedModel, output_path: Path) -> None:
@@ -87,6 +104,17 @@ class IfcExporter:
             "IfcProject",
             str(model.project.get("id")),
             str(model.project.get("name")),
+        )
+        IfcProperties(self.stable_guid).pset(
+            ifc,
+            project,
+            str(model.project.get("id")),
+            "Pset_HomeDesignProject",
+            {
+                "requirements": list(model.requirements),
+                "relationships": model.relationships,
+                "coordinateSystem": model.coordinate_system,
+            },
         )
         ifcopenshell.api.unit.assign_unit(ifc)
         site_data = model.project.get("site")
@@ -178,6 +206,7 @@ class IfcExporter:
                 ),
             )
             materials[material_id] = material
+            IfcProperties.material_data(ifc, material, material_id, value)
         return materials
 
     def _create_types(
@@ -197,24 +226,12 @@ class IfcExporter:
                 ifc, ifc_class, type_id, str(value.get("name", type_id))
             )
             product.PredefinedType = "NOTDEFINED"
+            properties = IfcProperties(self.stable_guid)
+            properties.pset(ifc, product, type_id, "Pset_HomeDesignType", value)
             material_id = value.get("material")
-            if not isinstance(material_id, str):
-                layers = value.get("layers")
-                if isinstance(layers, list):
-                    structural = next(
-                        (
-                            layer
-                            for layer in layers
-                            if isinstance(layer, dict)
-                            and layer.get("function") == "structure"
-                        ),
-                        None,
-                    )
-                    if structural is not None and isinstance(
-                        structural.get("material"), str
-                    ):
-                        material_id = structural["material"]
-            if isinstance(material_id, str) and material_id in materials:
+            if isinstance(value.get("layers"), list):
+                properties.layers(ifc, product, type_id, value, materials)
+            elif isinstance(material_id, str) and material_id in materials:
                 relation = ifcopenshell.api.material.assign_material(
                     ifc,
                     products=[product],
@@ -224,6 +241,37 @@ class IfcExporter:
                 if isinstance(relation, entity_instance):
                     self._set_relation_guid(relation, f"rel.material.{type_id}")
             products[type_id] = product
+            if value.get("kind") == "memberType":
+                for role, entity_class in (
+                    ("beam", "IfcBeamType"),
+                    ("column", "IfcColumnType"),
+                ):
+                    variant = self._root(
+                        ifc,
+                        entity_class,
+                        f"{type_id}/ifc/{role}",
+                        str(value.get("name")),
+                    )
+                    variant.PredefinedType = "BEAM" if role == "beam" else "COLUMN"
+                    properties.pset(
+                        ifc,
+                        variant,
+                        f"{type_id}/ifc/{role}",
+                        "Pset_HomeDesignType",
+                        value,
+                    )
+                    if isinstance(material_id, str) and material_id in materials:
+                        relation = ifcopenshell.api.material.assign_material(
+                            ifc,
+                            products=[variant],
+                            type="IfcMaterial",
+                            material=materials[material_id],
+                        )
+                        if isinstance(relation, entity_instance):
+                            self._set_relation_guid(
+                                relation, f"rel.material.{type_id}/ifc/{role}"
+                            )
+                    products[f"{type_id}|{role}"] = variant
         return products
 
     def _create_products(
@@ -235,11 +283,24 @@ class IfcExporter:
         types: dict[str, entity_instance],
     ) -> dict[str, entity_instance]:
         products: dict[str, entity_instance] = {}
-        for element in model.elements:
+        for element in self._expanded_elements(model):
             ifc_class = self._ENTITY_CLASSES[element.kind]
+            if element.kind == "member":
+                ifc_class = {"beam": "IfcBeam", "column": "IfcColumn"}.get(
+                    str(element.data.get("role")), "IfcMember"
+                )
             product = self._root(ifc, ifc_class, element.element_id, element.name)
             self._set_predefined_type(product, element)
             body = self._body_representation(ifc, body_context, element)
+            if body is not None:
+                for item, mesh in zip(body.Items, element.meshes):
+                    material = model.materials.get(mesh.material_id or "", {})
+                    IfcProperties.style(
+                        ifc,
+                        item,
+                        material if isinstance(material, dict) else {},
+                        mesh.role in {"window-glass", "door-glass"},
+                    )
             axis = self._axis_representation(ifc, axis_context, element)
             representations = [
                 representation
@@ -275,6 +336,16 @@ class IfcExporter:
                 },
             )
             type_id = element.data.get("typeId")
+            IfcProperties(self.stable_guid).pset(
+                ifc, product, element.element_id, "Pset_HomeDesignData", element.data
+            )
+            if element.kind == "member" and element.data.get("role") in {
+                "beam",
+                "column",
+            }:
+                type_id = f"{type_id}|{element.data.get('role')}"
+            if element.kind == "framing":
+                type_id = None
             if isinstance(type_id, str) and type_id in types:
                 relation = ifcopenshell.api.type.assign_type(
                     ifc,
@@ -284,7 +355,50 @@ class IfcExporter:
                 )
                 self._set_relation_guid(relation, f"rel.type.{element.element_id}")
             products[element.element_id] = product
+        for element in model.elements:
+            if element.kind == "framing":
+                children = [
+                    product
+                    for key, product in products.items()
+                    if key.startswith(f"{element.element_id}/member/")
+                ]
+                if children:
+                    relation = ifcopenshell.api.aggregate.assign_object(
+                        ifc,
+                        products=children,
+                        relating_object=products[element.element_id],
+                    )
+                    self._set_relation_guid(
+                        relation, f"rel.framing.{element.element_id}"
+                    )
         return products
+
+    @staticmethod
+    def _expanded_elements(model: ResolvedModel) -> tuple[ResolvedElement, ...]:
+        """Export repeated members as typed children with stable source-derived IDs."""
+        elements: list[ResolvedElement] = []
+        for element in model.elements:
+            if element.kind != "framing":
+                elements.append(element)
+                continue
+            elements.append(replace(element, meshes=()))
+            for mesh in element.meshes:
+                index = mesh.role.split(":")[-1]
+                elements.append(
+                    ResolvedElement(
+                        f"{element.element_id}/member/{index}",
+                        "member",
+                        f"{element.name} {index}",
+                        None,
+                        (mesh,),
+                        {
+                            **element.data,
+                            "generatedFrom": element.element_id,
+                            "memberIndex": int(index),
+                        },
+                    )
+                )
+        return tuple(elements)
 
     @staticmethod
     def _body_representation(
@@ -294,16 +408,32 @@ class IfcExporter:
     ) -> entity_instance | None:
         if not element.meshes:
             return None
-        vertices: list[SequenceOfVectors] = [
-            [tuple(vertex) for vertex in mesh.vertices] for mesh in element.meshes
-        ]
-        faces = [[list(face) for face in mesh.faces] for mesh in element.meshes]
-        return ifcopenshell.api.geometry.add_mesh_representation(
-            ifc,
-            context=context,
-            vertices=vertices,
-            faces=faces,
-            unit_scale=1.0,
+        items = []
+        for mesh in element.meshes:
+            coordinates = ifc.create_entity(
+                "IfcCartesianPointList3D", CoordList=mesh.vertices
+            )
+            faces = [
+                ifc.create_entity(
+                    "IfcIndexedPolygonalFace",
+                    CoordIndex=tuple(index + 1 for index in face),
+                )
+                for face in mesh.faces
+            ]
+            items.append(
+                ifc.create_entity(
+                    "IfcPolygonalFaceSet",
+                    Coordinates=coordinates,
+                    Closed=element.kind != "terrain",
+                    Faces=faces,
+                )
+            )
+        return ifc.create_entity(
+            "IfcShapeRepresentation",
+            ContextOfItems=context,
+            RepresentationIdentifier="Body",
+            RepresentationType="Tessellation",
+            Items=items,
         )
 
     @staticmethod
@@ -389,6 +519,7 @@ class IfcExporter:
             "fills": self._fills,
             "joins": self._joins,
             "supports": self._connects,
+            "drainsTo": self._connects,
             "attaches": self._connects,
             "bounds": self._bounds,
             "aggregates": self._aggregates,
@@ -473,6 +604,8 @@ class IfcExporter:
             relating_id, related_id = str(value.get("support")), str(
                 value.get("supported")
             )
+        elif value.get("kind") == "drainsTo":
+            relating_id, related_id = str(value.get("source")), str(value.get("target"))
         else:
             relating_id, related_id = str(value.get("primary")), str(
                 value.get("attached")
@@ -551,10 +684,29 @@ class IfcExporter:
                 "roofSlab": "ROOF",
                 "landing": "LANDING",
             }.get(str(element.data.get("role")), "FLOOR")
-        elif element.kind == "assembly":
+        elif element.kind in {"assembly", "framing"}:
             product.AssemblyPlace = "SITE"
             product.PredefinedType = "USERDEFINED"
             product.ObjectType = str(element.data.get("assemblyType", "Assembly"))
+        elif element.kind == "footing":
+            product.PredefinedType = {
+                "pad": "PAD_FOOTING",
+                "strip": "STRIP_FOOTING",
+                "pier": "USERDEFINED",
+            }[str(element.data.get("shape"))]
+            product.ObjectType = str(element.data.get("shape"))
+        elif element.kind == "stair":
+            product.PredefinedType = "STRAIGHT"
+            product.NumberOfRisers = element.data.get("riserCount")
+            product.NumberOfTreads = element.data.get("treadCount")
+            product.RiserHeight = element.data.get("riserHeight")
+            product.TreadLength = element.data.get("treadDepth")
+        elif element.kind == "railing":
+            product.PredefinedType = (
+                "HANDRAIL" if element.data.get("role") == "handrail" else "GUARDRAIL"
+            )
+        elif element.kind == "terrain":
+            product.PredefinedType = "TERRAIN"
         elif hasattr(product, "PredefinedType"):
             product.PredefinedType = "NOTDEFINED"
 

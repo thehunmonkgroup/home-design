@@ -3,7 +3,7 @@
   "changeVersion": "0.1",
   "id": "change.move-north-window",
   "description": "Move the north window 500 mm east along its host wall.",
-  "baseRevision": 0,
+  "baseRevision": 1,
   "preconditions": [
     {
       "path": "/elements/opening.window.north/placement/station",

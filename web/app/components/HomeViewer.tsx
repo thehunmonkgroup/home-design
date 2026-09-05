@@ -19,23 +19,23 @@ import {
   Vector3,
   WebGLRenderer,
 } from 'three';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import {
   applyElementVisibility,
+  canToggleVisibility,
   defaultHiddenElementIds,
   elementIdForObject,
-  formatMetric,
+  formatProperty,
   groupElements,
-  isRenderManifest,
   nodeElementIndex,
+  withElementVisibility,
   type ManifestElement,
   type RenderManifest,
 } from '../lib/model';
-import { configureCameraDepth, configureDirectionalShadow } from '../lib/scene';
-
-const MODEL_URL = '/model/model.glb';
-const MANIFEST_URL = '/model/render-manifest.json';
+import { canonicalSectionPlane, configureDirectionalShadow, configureOrbitControls, disposeSceneResources, frameModel, modelNorthRotation } from '../lib/scene';
+import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, type CatalogModel } from '../lib/catalog';
+import ViewOrientation from './ViewOrientation';
+import DesignRequirements from './DesignRequirements';
 
 interface SceneHandle {
   controls: OrbitControls;
@@ -43,9 +43,48 @@ interface SceneHandle {
   model: Group;
   renderer: WebGLRenderer;
   scene: Scene;
+  sun: DirectionalLight;
 }
 
 export default function HomeViewer() {
+  const [models, setModels] = useState<CatalogModel[]>([]);
+  const [selectedKey, setSelectedKey] = useState('');
+  const [catalogMessage, setCatalogMessage] = useState('Reading the model catalog…');
+  const [catalogStatus, setCatalogStatus] = useState<'loading' | 'error'>('loading');
+
+  useEffect(() => {
+    const controller = new AbortController();
+    loadCatalog(controller.signal).then((catalog) => {
+      if (controller.signal.aborted) return;
+      setModels(catalog.models);
+      setSelectedKey(catalog.models[0]?.key ?? '');
+      if (!catalog.models.length) {
+        setCatalogStatus('error');
+        setCatalogMessage('No models are published. Build a model with --web-assets web/public/model.');
+      }
+    }).catch((error: unknown) => {
+      if (controller.signal.aborted) return;
+      setCatalogStatus('error');
+      setCatalogMessage(`${error instanceof Error ? error.message : 'Catalog unavailable'}. Build models with --web-assets web/public/model, then reload.`);
+    });
+    return () => controller.abort();
+  }, []);
+
+  const entry = models.find((model) => model.key === selectedKey);
+  return <ModelReview
+    key={entry ? `${entry.key}/${entry.version}` : catalogMessage}
+    entry={entry} models={models} onSwitch={setSelectedKey}
+    catalogMessage={catalogMessage} catalogStatus={catalogStatus}
+  />;
+}
+
+function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus }: {
+  entry?: CatalogModel;
+  models: CatalogModel[];
+  onSwitch: (key: string) => void;
+  catalogMessage: string;
+  catalogStatus: 'loading' | 'error';
+}) {
   const canvasHost = useRef<HTMLDivElement>(null);
   const sceneHandle = useRef<SceneHandle | null>(null);
   const highlight = useRef<Box3Helper | null>(null);
@@ -54,18 +93,24 @@ export default function HomeViewer() {
   const [manifest, setManifest] = useState<RenderManifest | null>(null);
   const [hiddenIds, setHiddenIds] = useState<ReadonlySet<string>>(new Set());
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [message, setMessage] = useState('Reading the resolved model…');
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(entry ? 'loading' : catalogStatus);
+  const [message, setMessage] = useState(entry ? 'Loading model…' : catalogMessage);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [treeOpen, setTreeOpen] = useState(false);
   const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [solarStudyId, setSolarStudyId] = useState('');
+  const [sectionAxis, setSectionAxis] = useState<'none' | 'x' | 'y' | 'z'>('none');
+  const [sectionOffset, setSectionOffset] = useState(0);
+  const [northRotation, setNorthRotation] = useState(0);
 
   const groups = useMemo(() => (manifest ? groupElements(manifest) : []), [manifest]);
   const selected = selectedId && manifest ? manifest.elements[selectedId] : null;
-  const spacesVisible = manifest
+  const spaceIds = useMemo(() => manifest
     ? Object.entries(manifest.elements)
-        .filter(([, element]) => element.kind === 'space')
-        .every(([elementId]) => !hiddenIds.has(elementId))
-    : false;
+        .filter(([, element]) => element.kind === 'space' && canToggleVisibility(element))
+        .map(([elementId]) => elementId)
+    : [], [manifest]);
+  const spacesVisible = spaceIds.length > 0 && spaceIds.every((id) => !hiddenIds.has(id));
 
   const selectElement = useCallback((elementId: string | null) => {
     setSelectedId(elementId);
@@ -73,10 +118,14 @@ export default function HomeViewer() {
     const handle = sceneHandle.current;
     const currentManifest = manifestRef.current;
     if (!handle || !currentManifest) return;
-    if (highlight.current) handle.scene.remove(highlight.current);
+    if (highlight.current) {
+      handle.scene.remove(highlight.current);
+      disposeSceneResources(highlight.current);
+    }
     highlight.current = null;
     if (!elementId) return;
     const element = currentManifest.elements[elementId];
+    if (!element) return;
     const objects = element.nodes
       .map((name) => handle.scene.getObjectByName(name))
       .filter((object): object is NonNullable<typeof object> => Boolean(object));
@@ -94,9 +143,27 @@ export default function HomeViewer() {
     if (handle) frameModel(handle.camera, handle.controls, handle.model);
   }, []);
 
+  const applySolarStudy = useCallback((studyId: string) => {
+    setSolarStudyId(studyId);
+    const handle = sceneHandle.current;
+    const study = manifestRef.current?.solarStudies?.find((entry) => entry.id === studyId);
+    if (!handle) return;
+    const direction = study ? new Vector3(study.sunDirection[0], study.sunDirection[2], -study.sunDirection[1]) : undefined;
+    handle.sun.intensity = study && study.altitudeDegrees <= 0 ? 0 : 3.2;
+    configureDirectionalShadow(handle.sun, new Box3().setFromObject(handle.model), direction);
+  }, []);
+
+  const applySection = useCallback((axis: 'none' | 'x' | 'y' | 'z', offset: number) => {
+    setSectionAxis(axis);
+    setSectionOffset(offset);
+    const handle = sceneHandle.current;
+    if (handle) handle.renderer.clippingPlanes = axis === 'none' ? [] : [canonicalSectionPlane(axis, offset)];
+  }, []);
+
   useEffect(() => {
     const host = canvasHost.current;
-    if (!host) return;
+    if (!host || !entry) return;
+    const controller = new AbortController();
     const scene = new Scene();
     scene.background = new Color('#d9ddd8');
     const camera = new PerspectiveCamera(42, 1, 0.02, 500);
@@ -108,10 +175,10 @@ export default function HomeViewer() {
     host.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.screenSpacePanning = true;
-    controls.maxPolarAngle = Math.PI * 0.495;
+    configureOrbitControls(controls);
+    const updateOrientation = () => setNorthRotation(modelNorthRotation(camera));
+    controls.addEventListener('change', updateOrientation);
+    updateOrientation();
 
     scene.add(new HemisphereLight('#f3f5ef', '#77766d', 2.1));
     const sun = new DirectionalLight('#fff3da', 3.2);
@@ -126,12 +193,12 @@ export default function HomeViewer() {
     const pointer = new Vector2();
     let model = new Group();
     scene.add(model);
-    sceneHandle.current = { camera, controls, model, renderer, scene };
+    sceneHandle.current = { camera, controls, model, renderer, scene, sun };
 
     const resize = () => {
       const width = host.clientWidth;
       const height = host.clientHeight;
-      camera.aspect = width / Math.max(height, 1);
+      camera.aspect = Math.max(width, 1) / Math.max(height, 1);
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
     };
@@ -147,18 +214,14 @@ export default function HomeViewer() {
     };
     animate();
 
-    Promise.all([
-      fetch(MANIFEST_URL).then(async (response) => {
-        if (!response.ok) throw new Error(`Manifest request failed (${response.status})`);
-        const value: unknown = await response.json();
-        if (!isRenderManifest(value)) throw new Error('The render manifest has an unsupported format');
-        return value;
-      }),
-      new GLTFLoader().loadAsync(MODEL_URL),
-    ])
-      .then(([loadedManifest, gltf]) => {
+    loadModelAssets(entry, controller.signal)
+      .then(({ manifest: loadedManifest, model: loadedModel }) => {
+        if (controller.signal.aborted) {
+          disposeSceneResources(loadedModel);
+          return;
+        }
         scene.remove(model);
-        model = gltf.scene;
+        model = loadedModel;
         model.name = 'resolved-home';
         model.traverse((object) => {
           if (object instanceof Mesh) {
@@ -168,7 +231,7 @@ export default function HomeViewer() {
         });
         scene.add(model);
         configureDirectionalShadow(sun, new Box3().setFromObject(model));
-        sceneHandle.current = { camera, controls, model, renderer, scene };
+        sceneHandle.current = { camera, controls, model, renderer, scene, sun };
         for (const [elementId, element] of Object.entries(loadedManifest.elements)) {
           applyElementVisibility(scene, element, element.defaultVisible);
           const object = scene.getObjectByName(element.nodes[0] ?? '');
@@ -184,6 +247,7 @@ export default function HomeViewer() {
         frameModel(camera, controls, model);
       })
       .catch((error: unknown) => {
+        if (controller.signal.aborted) return;
         setStatus('error');
         setMessage(error instanceof Error ? error.message : 'The model could not be loaded');
       });
@@ -209,16 +273,22 @@ export default function HomeViewer() {
     renderer.domElement.addEventListener('pointerup', onPointerUp);
 
     return () => {
+      controller.abort();
       cancelAnimationFrame(frame);
       observer.disconnect();
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
       controls.dispose();
+      controls.removeEventListener('change', updateOrientation);
+      disposeSceneResources(scene);
+      sun.shadow.dispose();
       renderer.dispose();
+      renderer.forceContextLoss();
       host.replaceChildren();
       sceneHandle.current = null;
       manifestRef.current = null;
+      highlight.current = null;
     };
-  }, [selectElement]);
+  }, [entry, loadAttempt, selectElement]);
 
   useEffect(() => {
     if (!manifest || !sceneHandle.current) return;
@@ -229,32 +299,27 @@ export default function HomeViewer() {
   }, [hiddenIds, manifest]);
 
   const setElementVisible = useCallback((elementId: string, visible: boolean) => {
+    const element = manifest?.elements[elementId];
+    if (!manifest || !element || !canToggleVisibility(element)) return;
     if (!visible && selectedId === elementId) selectElement(null);
     setHiddenIds((current) => {
-      const next = new Set(current);
-      if (visible) next.delete(elementId);
-      else next.add(elementId);
-      hiddenIdsRef.current = next;
-      return next;
-    });
-  }, [selectElement, selectedId]);
-
-  const setSpacesVisible = useCallback((visible: boolean) => {
-    if (!manifest) return;
-    if (!visible && selectedId && manifest.elements[selectedId]?.kind === 'space') {
-      selectElement(null);
-    }
-    setHiddenIds((current) => {
-      const next = new Set(current);
-      for (const [elementId, element] of Object.entries(manifest.elements)) {
-        if (element.kind !== 'space') continue;
-        if (visible) next.delete(elementId);
-        else next.add(elementId);
-      }
+      const next = withElementVisibility(manifest, current, [elementId], visible);
       hiddenIdsRef.current = next;
       return next;
     });
   }, [manifest, selectElement, selectedId]);
+
+  const setSpacesVisible = useCallback((visible: boolean) => {
+    if (!manifest) return;
+    if (!visible && selectedId && spaceIds.includes(selectedId)) {
+      selectElement(null);
+    }
+    setHiddenIds((current) => {
+      const next = withElementVisibility(manifest, current, spaceIds, visible);
+      hiddenIdsRef.current = next;
+      return next;
+    });
+  }, [manifest, selectElement, selectedId, spaceIds]);
 
   const showAll = useCallback(() => {
     const next = new Set<string>();
@@ -268,11 +333,17 @@ export default function HomeViewer() {
         <div className="brand-mark" aria-hidden="true"><span /><span /><span /></div>
         <div className="brand-copy">
           <p>IFC-aligned model</p>
-          <h1>{manifest?.project.name ?? 'Home Design Review'}</h1>
+          <h1>{manifest?.project.name ?? entry?.name ?? 'Home Design Review'}</h1>
         </div>
         <div className="header-status">
           <span className={`status-dot status-${status}`} />
-          <span>{message}</span>
+          <span className="model-status-message" role="status">{status === 'error' ? 'Model unavailable' : message}</span>
+          {models.length > 0 && <select
+            className="model-switcher" aria-label="Model" value={entry?.key ?? ''}
+            onChange={(event) => onSwitch(event.target.value)}
+          >
+            {models.map((model) => <option key={model.key} value={model.key}>{modelLabel(model, models)}</option>)}
+          </select>}
           {manifest && <span className="revision-badge">rev {manifest.sourceRevision}</span>}
         </div>
       </header>
@@ -286,11 +357,13 @@ export default function HomeViewer() {
           <span>{manifest ? Object.keys(manifest.elements).length : '—'}</span>
         </div>
         <nav className="tree-groups">
+          {manifest && <DesignRequirements manifest={manifest} />}
           {groups.map((group) => (
             <section key={group.kind}>
               <h3>{group.label}<span>{group.elements.length}</span></h3>
               {group.elements.map(([elementId, element]) => {
-                const visible = !hiddenIds.has(elementId);
+                const canToggle = canToggleVisibility(element);
+                const visible = !canToggle || !hiddenIds.has(elementId);
                 return (
                   <div className={`component-row ${visible ? '' : 'component-hidden'}`} key={elementId}>
                     <button
@@ -300,7 +373,7 @@ export default function HomeViewer() {
                       <span className={`kind-swatch kind-${element.kind}`} />
                       <span><strong>{element.name}</strong><small>{elementId}</small></span>
                     </button>
-                    <button
+                    {canToggle && <button
                       className="visibility-toggle"
                       type="button"
                       aria-label={`${visible ? 'Hide' : 'Show'} ${element.name}`}
@@ -309,7 +382,7 @@ export default function HomeViewer() {
                       onClick={() => setElementVisible(elementId, !visible)}
                     >
                       <VisibilityIcon visible={visible} />
-                    </button>
+                    </button>}
                   </div>
                 );
               })}
@@ -321,22 +394,44 @@ export default function HomeViewer() {
       <section className="viewport" aria-label="Interactive three-dimensional home model">
         <div ref={canvasHost} className="canvas-host" />
         {status === 'loading' && <div className="loading-card"><span /><p>Resolving the building view</p></div>}
-        {status === 'error' && <div className="error-card"><strong>Preview unavailable</strong><p>{message}</p></div>}
+        {status === 'error' && <div className="error-card" role="alert"><strong>Preview unavailable</strong><p>{message}</p>
+          {entry && <button onClick={() => { setStatus('loading'); setMessage('Loading model…'); setLoadAttempt((attempt) => attempt + 1); }}>Retry model</button>}
+        </div>}
         <div className="viewport-tools">
           <button onClick={resetView} title="Frame the complete model">Frame model</button>
-          <button onClick={showAll} disabled={hiddenIds.size === 0} title="Show every component">
+          <button onClick={showAll} disabled={hiddenIds.size === 0} title="Show every component with 3D geometry">
             Show all
           </button>
           <label>
             <input
               type="checkbox"
               checked={spacesVisible}
+              disabled={spaceIds.length === 0}
               onChange={(event) => setSpacesVisible(event.target.checked)}
             />
             <span>Show spaces</span>
           </label>
+          {!!manifest?.solarStudies?.length && (
+            <label>
+              <span>Sun study</span>
+              <select aria-label="Sun study" value={solarStudyId} onChange={(event) => applySolarStudy(event.target.value)}>
+                <option value="">Presentation light</option>
+                {manifest.solarStudies.map((study) => <option key={study.id} value={study.id}>{study.name}</option>)}
+              </select>
+            </label>
+          )}
+          {manifest?.reports && entry && <a href={modelAssetUrl(entry, manifest.reports.drawings)} target="_blank" rel="noreferrer">Drawings</a>}
+          {manifest?.reports && entry && <a href={modelAssetUrl(entry, manifest.reports.schedules)} download>Schedules</a>}
+          {manifest?.reports && entry && <a href={modelAssetUrl(entry, manifest.reports.envelope)} download>Envelope</a>}
+          <label>
+            <span>Cut</span>
+            <select aria-label="Section axis" value={sectionAxis} onChange={(event) => applySection(event.target.value as 'none' | 'x' | 'y' | 'z', sectionOffset)}>
+              <option value="none">Off</option><option value="x">X</option><option value="y">Y</option><option value="z">Z</option>
+            </select>
+          </label>
+          {sectionAxis !== 'none' && <label><span>mm</span><input aria-label="Section position in millimetres" type="number" step="100" value={sectionOffset} onChange={(event) => applySection(sectionAxis, Number(event.target.value))} /></label>}
         </div>
-        <div className="axis-key" aria-label="View orientation"><span>N</span><i /><small>Orbit · pan · zoom</small></div>
+        <ViewOrientation northRotation={northRotation} />
       </section>
 
       <button
@@ -351,7 +446,13 @@ export default function HomeViewer() {
           {selected && <span className={`large-swatch kind-${selected.kind}`} />}
         </div>
         {selected && selectedId ? (
-          <ElementDetails elementId={selectedId} element={selected} />
+          <>
+            <ElementDetails elementId={selectedId} element={selected} />
+            {manifest?.solarStudies?.filter((study) => study.id === solarStudyId).map((study) => {
+              const opening = study.openings.find((entry) => entry.elementId === selectedId);
+              return opening ? <p className="solar-result" key={study.id}>{study.name}: {Math.round(opening.unshadedFraction * 100)}% of sampled opening receives direct sun. {study.at}</p> : null;
+            })}
+          </>
         ) : (
           <div className="empty-selection">
             <div className="selection-glyph" aria-hidden="true" />
@@ -380,12 +481,13 @@ function VisibilityIcon({ visible }: { visible: boolean }) {
 
 function ElementDetails({ elementId, element }: { elementId: string; element: ManifestElement }) {
   const measurements = Object.entries(element.data)
-    .map(([key, value]) => [key, formatMetric(value)] as const)
+    .map(([key, value]) => [key, formatProperty(key, value)] as const)
     .filter((entry): entry is readonly [string, string] => Boolean(entry[1]));
   return (
     <div className="element-details">
       <h3>{element.name}</h3>
       <code>{elementId}</code>
+      {!canToggleVisibility(element) && <p>No independent 3D geometry. Properties remain available for inspection.</p>}
       <dl>
         <div><dt>Kind</dt><dd>{element.kind}</dd></div>
         <div><dt>Storey</dt><dd>{element.storeyId ?? 'Hosted / none'}</dd></div>
@@ -399,18 +501,6 @@ function ElementDetails({ elementId, element }: { elementId: string; element: Ma
       </details>
     </div>
   );
-}
-
-function frameModel(camera: PerspectiveCamera, controls: OrbitControls, model: Group) {
-  const box = new Box3().setFromObject(model);
-  if (box.isEmpty()) return;
-  const size = box.getSize(new Vector3());
-  const center = box.getCenter(new Vector3());
-  const radius = Math.max(size.x, size.y, size.z);
-  camera.position.set(center.x + radius * 1.15, center.y + radius * 0.85, center.z + radius * 1.25);
-  configureCameraDepth(camera, box);
-  controls.target.copy(center);
-  controls.update();
 }
 
 function humanize(value: string) {

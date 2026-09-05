@@ -71,6 +71,14 @@ class GltfExporter:
                 "mapping": ["x/1000", "z/1000", "-y/1000"],
             },
             "elements": element_entries,
+            "requirements": list(model.requirements),
+            "requirementResults": list(model.requirement_results),
+            "solarStudies": list(model.solar_studies),
+            "reports": {
+                "schedules": "schedules.json",
+                "envelope": "envelope.json",
+                "drawings": "drawings.svg",
+            },
         }
         try:
             glb_path.parent.mkdir(parents=True, exist_ok=True)
@@ -103,7 +111,7 @@ class GltfExporter:
             material = PBRMaterial(
                 name="Space", baseColorFactor=[90, 170, 210, 35], roughnessFactor=1.0
             )
-        elif mesh_data.role == "window-glass":
+        elif mesh_data.role in {"window-glass", "door-glass"}:
             material = PBRMaterial(
                 name="Glass",
                 baseColorFactor=[135, 205, 225, 90],

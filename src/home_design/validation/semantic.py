@@ -88,11 +88,11 @@ class SemanticValidator:
         for relationship_id, relationship in self.index.relationships("voids"):
             host_id = relationship.get("host")
             host = self.elements.get(host_id) if isinstance(host_id, str) else None
-            if host is not None and host.get("kind") != "wall":
+            if host is not None and host.get("kind") not in {"wall", "panel"}:
                 diagnostics.append(
                     self._error(
                         "relationship.unsupported-opening-host",
-                        "Hosted station placement in model 0.1 is exportable only on walls",
+                        "Hosted station placement requires a wall or screen panel",
                         relationship_id,
                     )
                 )

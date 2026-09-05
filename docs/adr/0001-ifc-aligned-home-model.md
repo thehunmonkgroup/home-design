@@ -6,7 +6,7 @@
 
 ## Context
 
-The only design interface is conversational: an AI translates English requests into changes, validates them, and regenerates a Three.js preview. The same source must later produce stable, editable building data for FreeCAD. A Three.js scene graph or triangle mesh cannot be authoritative because it loses design intent, exact curves, host relationships, reusable types, and BIM semantics. Raw IFC is unsuitable as the authoring format because it is verbose and indirect for routine AI edits.
+The design interface is conversational: an AI translates English requests into changes, validates them, and regenerates a Three.js preview. The same source produces IFC4 building data for CAD applications, including FreeCAD. A Three.js scene graph or triangle mesh cannot be authoritative because it loses design intent, exact curves, host relationships, reusable types, and BIM semantics. Raw IFC is unsuitable as the authoring format because it is verbose and indirect for routine AI edits.
 
 Existing work informs the decision:
 
@@ -39,23 +39,27 @@ Architectural elements retain parametric definitions:
 - Roofs use either a parametric footprint recipe or explicit planar faces.
 - Openings retain host-relative placement and a rectangle or profile.
 - Doors and windows fill openings and reference reusable types.
-- Spaces use an explicit footprint or a seed point for later boundary derivation.
+- Spaces use an explicit footprint or a seed point with wall-boundary relationships.
+- Construction components use typed sections, paths, surface datums, framing distributions and material layers.
+- Terrain, load footprints, interface details and requirements record site and coordination intent.
 
 Generated Three.js meshes, tessellations, Boolean results, bounding boxes, IFC entity numbers, and FreeCAD shapes are build artifacts and must not be written back as authoritative geometry.
 
-Relationships are explicit and typed. Version 0.1 includes `voids`, `fills`, `joins`, `supports`, `attaches`, `bounds`, and `aggregates`. Each relationship has semantic role names instead of ambiguous `source` and `target` fields. Mere geometric contact never implies a durable relationship.
+Relationships are explicit and typed: `voids`, `fills`, `joins`, `supports`, `attaches`, `drainsTo`, `bounds`, and `aggregates`. Participant fields identify their roles, such as `support`/`supported` or drainage `source`/`target`. Mere geometric contact never implies a durable relationship.
 
 Placement constraints and semantic relationships are distinct. For example, a wall may have a base constrained to a slab's top surface while a `supports` relationship records the load/assembly meaning. An opening's local placement is owned by the opening, while `voids` identifies its host and `fills` identifies its door or window.
 
-AI modifications should be applied as transactional domain changes with preconditions, even when implemented initially as JSON patches. A change is committed only after:
+AI modifications use revision-checked transactional changes with preconditions. Validation covers:
 
 1. JSON Schema validation.
 2. Reference, type, and dependency-cycle checks.
 3. Topology checks such as valid profiles, compatible hosts, and non-overlapping openings.
 4. Geometry generation checks.
-5. Exportability checks for elements affected by the change.
+5. Authored clearances, support paths, drainage connections and executable requirements.
 
-The Three.js and IFC/FreeCAD outputs are separate deterministic adapters over the same resolved model. IFC is the first CAD interchange target. A later FreeCAD Python adapter may create native `.FCStd` features where doing so preserves useful parametric behavior beyond IFC.
+The GLB and IFC outputs use separate adapters over the same resolved model. Builds
+verify both exports and generate schedules, envelope data and drawings. FreeCAD
+interoperability uses IFC4 import.
 
 ## IFC mapping intent
 
@@ -81,16 +85,17 @@ Benefits:
 - The AI edits concise, named parameters and relationships instead of triangles.
 - Shared anchors and host-relative placement make coordinated changes predictable.
 - Three.js preview geometry can be regenerated quickly and discarded safely.
-- IFC and FreeCAD adapters receive stable identity, exact dimensions, and explicit semantics.
-- JSON Schema versioning and deterministic migrations can evolve the model.
+- Export adapters receive stable identity, exact dimensions, and explicit semantics.
+- JSON Schema defines the authoring contract and validates model structure.
 
 Costs and limitations:
 
 - JSON Schema cannot verify cross-reference existence, polygon topology, dependency cycles, or geometric fit; a semantic validator is required.
 - The two geometry adapters require conformance tests so their results do not drift.
-- Some complex or organic components will need custom parametric recipes or, as a last resort, imported mesh representations.
-- Model version 0.1 intentionally covers the architectural core, not structural analysis, MEP routing, code compliance, fabrication details, or construction documentation.
+- Geometry authoring is limited to the recipes and profiles supported by the schema and resolver.
+- Architectural and construction-coordination features require separate professional structural analysis, MEP design, code review, fabrication detailing and permit-document production.
 
 ## Compatibility rule
 
-Readers must reject unsupported major model versions. Additive backward-compatible fields increment the minor version; breaking field or semantic changes require a migration and a new major version.
+Canonical models and change sets declare their format versions. The loader and
+transaction engine validate each document against its supported schema.

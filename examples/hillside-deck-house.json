@@ -1,0 +1,5779 @@
+{
+  "modelVersion": "0.1",
+  "revision": 5,
+  "solarStudies": [
+    {
+      "id": "study.summer",
+      "name": "Summer afternoon",
+      "at": "2026-06-21T13:30:00-04:00",
+      "samplesPerSide": 5
+    },
+    {
+      "id": "study.winter",
+      "name": "Winter midday",
+      "at": "2026-12-21T12:30:00-05:00",
+      "samplesPerSide": 5
+    }
+  ],
+  "project": {
+    "id": "project.construction",
+    "name": "Hillside Deck House",
+    "description": "A two-story hillside home with south-facing decks on both levels, a screened porch, an open spa deck, and a sheltered east entry. Illustrative shell, framing, foundations, and site geometry; not an engineered construction design.",
+    "site": {
+      "id": "site.example",
+      "name": "Illustrative hillside"
+    },
+    "building": {
+      "id": "building.example",
+      "name": "Construction systems"
+    }
+  },
+  "units": {
+    "length": "mm",
+    "angle": "deg"
+  },
+  "coordinateSystem": {
+    "handedness": "right",
+    "upAxis": "Z",
+    "xDirection": "east",
+    "yDirection": "north",
+    "localOrigin": [
+      0,
+      0,
+      0
+    ],
+    "georeference": {
+      "latitude": 35.6,
+      "longitude": -82.5
+    }
+  },
+  "levels": {
+    "level.lower": {
+      "kind": "storey",
+      "name": "Lower",
+      "elevation": 0
+    },
+    "level.upper": {
+      "kind": "storey",
+      "name": "Upper",
+      "elevation": 3000
+    }
+  },
+  "anchors": {},
+  "materials": {
+    "mat.wood": {
+      "name": "Timber",
+      "appearance": {
+        "color": "#b28b60"
+      }
+    },
+    "mat.composite": {
+      "name": "Composite",
+      "appearance": {
+        "color": "#82786c"
+      }
+    },
+    "mat.stucco": {
+      "name": "Stucco",
+      "appearance": {
+        "color": "#dfd6c4"
+      }
+    },
+    "mat.white": {
+      "name": "Drywall",
+      "appearance": {
+        "color": "#ffffff"
+      }
+    },
+    "mat.roof": {
+      "name": "Roofing",
+      "appearance": {
+        "color": "#454545"
+      }
+    },
+    "mat.concrete": {
+      "name": "Concrete",
+      "appearance": {
+        "color": "#aaa9a4"
+      }
+    },
+    "mat.black": {
+      "name": "Black aluminum",
+      "appearance": {
+        "color": "#24282a"
+      }
+    },
+    "mat.screen": {
+      "name": "Screen mesh",
+      "appearance": {
+        "color": "#465047",
+        "opacity": 0.18
+      }
+    },
+    "mat.earth": {
+      "name": "Earth",
+      "appearance": {
+        "color": "#806c50"
+      }
+    }
+  },
+  "types": {
+    "type.slider": {
+      "kind": "doorType",
+      "name": "Efficient glazed slider",
+      "nominalWidth": 1800,
+      "nominalHeight": 2100,
+      "operation": "sliding",
+      "frameDepth": 140,
+      "panelCount": 2,
+      "glazingFraction": 0.85,
+      "material": "mat.white",
+      "performance": {
+        "uFactorWm2K": 1.4,
+        "shgc": 0.4,
+        "nfrcId": "Example only"
+      }
+    },
+    "type.entry": {
+      "kind": "doorType",
+      "name": "Insulated primary entry door",
+      "nominalWidth": 1050,
+      "nominalHeight": 2050,
+      "operation": "singleSwing",
+      "frameDepth": 170,
+      "glazingFraction": 0,
+      "material": "mat.white",
+      "specifications": {
+        "installation": "Flashed sill pan and continuous air seal"
+      }
+    },
+    "type.window": {
+      "kind": "windowType",
+      "name": "Fixed view window",
+      "nominalWidth": 900,
+      "nominalHeight": 1500,
+      "operation": "fixed",
+      "frameDepth": 140,
+      "material": "mat.white",
+      "performance": {
+        "uFactorWm2K": 1.4,
+        "shgc": 0.4
+      }
+    },
+    "type.floor": {
+      "kind": "slabType",
+      "name": "Composite over framing zone",
+      "layerOrder": "topToBottom",
+      "layers": [
+        {
+          "name": "Deck surface",
+          "thickness": 25,
+          "function": "finish",
+          "material": "mat.composite"
+        }
+      ]
+    },
+    "type.wall": {
+      "kind": "wallType",
+      "name": "Framed wall",
+      "layerOrder": "exteriorToInterior",
+      "layers": [
+        {
+          "name": "Stucco",
+          "thickness": 20,
+          "function": "finish",
+          "material": "mat.stucco"
+        },
+        {
+          "name": "Frame",
+          "thickness": 140,
+          "function": "structure",
+          "material": "mat.wood"
+        },
+        {
+          "name": "Drywall",
+          "thickness": 16,
+          "function": "finish",
+          "material": "mat.white"
+        }
+      ]
+    },
+    "type.roof": {
+      "kind": "roofType",
+      "name": "Cathedral roof",
+      "layerOrder": "topToBottom",
+      "layers": [
+        {
+          "name": "Roofing",
+          "thickness": 10,
+          "function": "finish",
+          "material": "mat.roof"
+        },
+        {
+          "name": "Rafters",
+          "thickness": 300,
+          "function": "structure",
+          "material": "mat.wood"
+        },
+        {
+          "name": "Pine",
+          "thickness": 19,
+          "function": "finish",
+          "material": "mat.wood"
+        }
+      ]
+    },
+    "type.porch-roof": {
+      "kind": "roofType",
+      "name": "Illustrative porch roof",
+      "layerOrder": "topToBottom",
+      "layers": [
+        {
+          "name": "Roofing",
+          "thickness": 10,
+          "function": "finish",
+          "material": "mat.roof"
+        },
+        {
+          "name": "Porch rafters",
+          "thickness": 140,
+          "function": "structure",
+          "material": "mat.wood"
+        },
+        {
+          "name": "Pine ceiling",
+          "thickness": 19,
+          "function": "finish",
+          "material": "mat.wood"
+        }
+      ]
+    },
+    "type.member": {
+      "kind": "memberType",
+      "name": "Timber beam",
+      "section": {
+        "kind": "rectangle",
+        "width": 140,
+        "depth": 240
+      },
+      "material": "mat.wood"
+    },
+    "type.post": {
+      "kind": "memberType",
+      "name": "Timber post",
+      "section": {
+        "kind": "rectangle",
+        "width": 140,
+        "depth": 140
+      },
+      "material": "mat.wood"
+    },
+    "type.stringer": {
+      "kind": "memberType",
+      "name": "Stair stringer",
+      "section": {
+        "kind": "rectangle",
+        "width": 50,
+        "depth": 280
+      },
+      "material": "mat.wood"
+    },
+    "type.footing": {
+      "kind": "footingType",
+      "name": "Concrete pad",
+      "depth": 400,
+      "material": "mat.concrete"
+    },
+    "type.stair": {
+      "kind": "stairType",
+      "name": "Exterior stair",
+      "treadDepth": 280,
+      "treadThickness": 38,
+      "maxRiser": 180,
+      "material": "mat.composite",
+      "stringerType": "type.stringer",
+      "nosing": 20
+    },
+    "type.guard": {
+      "kind": "railingType",
+      "name": "Open metal guard",
+      "height": 1100,
+      "postSpacing": 1500,
+      "postSection": {
+        "kind": "rectangle",
+        "width": 40,
+        "depth": 40
+      },
+      "railSection": {
+        "kind": "rectangle",
+        "width": 40,
+        "depth": 40
+      },
+      "material": "mat.black",
+      "infill": "balusters",
+      "balusterSection": {
+        "kind": "rectangle",
+        "width": 16,
+        "depth": 16
+      },
+      "maxInfillGap": 100
+    },
+    "type.handrail": {
+      "kind": "railingType",
+      "name": "Graspable handrail",
+      "height": 900,
+      "postSpacing": 1500,
+      "postSection": {
+        "kind": "rectangle",
+        "width": 40,
+        "depth": 40
+      },
+      "railSection": {
+        "kind": "circle",
+        "diameter": 40
+      },
+      "material": "mat.black",
+      "infill": "none"
+    },
+    "type.screen": {
+      "kind": "panelType",
+      "name": "Framed screen",
+      "height": 2500,
+      "frameWidth": 45,
+      "frameDepth": 45,
+      "material": "mat.black",
+      "infillMaterial": "mat.screen"
+    },
+    "type.pipe": {
+      "kind": "sweepType",
+      "name": "Drain pipe",
+      "section": {
+        "kind": "profile",
+        "profile": {
+          "outer": [
+            [
+              -60,
+              -60
+            ],
+            [
+              60,
+              -60
+            ],
+            [
+              60,
+              60
+            ],
+            [
+              -60,
+              60
+            ]
+          ],
+          "holes": [
+            [
+              [
+                -50,
+                -50
+              ],
+              [
+                -50,
+                50
+              ],
+              [
+                50,
+                50
+              ],
+              [
+                50,
+                -50
+              ]
+            ]
+          ]
+        }
+      },
+      "material": "mat.black"
+    },
+    "type.detail": {
+      "kind": "detailType",
+      "name": "Ledger flashing",
+      "category": "flashing",
+      "instructions": "Lap the drainage plane over the head flashing; maintain the drainage gap and protect fastener penetrations."
+    },
+    "type.house-ground-floor": {
+      "kind": "slabType",
+      "name": "Lower — exposed concrete floor",
+      "layerOrder": "topToBottom",
+      "layers": [
+        {
+          "name": "Exposed concrete slab",
+          "thickness": 150,
+          "material": "mat.concrete",
+          "function": "structure"
+        }
+      ]
+    },
+    "type.house-upper-floor": {
+      "kind": "slabType",
+      "name": "Upper — indoor floor and lower ceiling",
+      "layerOrder": "topToBottom",
+      "layers": [
+        {
+          "name": "Timber floor finish",
+          "thickness": 20,
+          "material": "mat.wood",
+          "function": "finish"
+        },
+        {
+          "name": "Subfloor",
+          "thickness": 20,
+          "material": "mat.wood",
+          "function": "structure"
+        },
+        {
+          "name": "Floor framing zone",
+          "thickness": 244,
+          "material": "mat.wood",
+          "function": "structure"
+        },
+        {
+          "name": "Lower ceiling drywall",
+          "thickness": 16,
+          "material": "mat.white",
+          "function": "finish"
+        }
+      ]
+    },
+    "type.lower-wall": {
+      "kind": "wallType",
+      "name": "Lower — illustrative masonry shell",
+      "layerOrder": "exteriorToInterior",
+      "layers": [
+        {
+          "name": "Exterior render",
+          "thickness": 20,
+          "material": "mat.stucco",
+          "function": "finish"
+        },
+        {
+          "name": "Masonry core (schematic)",
+          "thickness": 190,
+          "material": "mat.concrete",
+          "function": "structure"
+        },
+        {
+          "name": "Interior lining",
+          "thickness": 16,
+          "material": "mat.white",
+          "function": "finish"
+        }
+      ],
+      "specifications": {
+        "note": "Illustrative enclosure only; retained-wall reinforcement, waterproofing and insulation require project-specific design."
+      }
+    },
+    "type.open-plan-space": {
+      "kind": "spaceType",
+      "name": "Open-plan reference interior",
+      "conditioned": true,
+      "occupancy": "Residential"
+    },
+    "type.deck-rim": {
+      "kind": "memberType",
+      "name": "Illustrative deck rim board",
+      "section": {
+        "kind": "rectangle",
+        "width": 50,
+        "depth": 240
+      },
+      "material": "mat.wood"
+    },
+    "type.guard-connection": {
+      "kind": "detailType",
+      "name": "Guard post framing attachment",
+      "category": "connection",
+      "instructions": "Connect guard posts to structural rim or edge joists with engineer-specified blocking, connectors and fasteners; do not rely on composite decking for anchorage. Coordinate corner connections and corrosion-compatible hardware with the guard manufacturer."
+    },
+    "type.screen-door": {
+      "kind": "doorType",
+      "name": "Black framed screen door",
+      "nominalWidth": 914.4,
+      "nominalHeight": 2032,
+      "operation": "singleSwing",
+      "frameWidth": 40,
+      "frameDepth": 45,
+      "material": "mat.black",
+      "infillMaterial": "mat.screen",
+      "infillFraction": 0.9,
+      "specifications": {
+        "thermalBoundary": false,
+        "closer": "Self-closing hinges with positive latch"
+      }
+    },
+    "type.screen-perimeter": {
+      "kind": "detailType",
+      "name": "Screen enclosure perimeter closure",
+      "category": "connection",
+      "instructions": "Seal screen frame joints continuously at the house, roof underside, deck and corners. Keep insect screening independent of the structural guard. Fit the screen door with perimeter seals, a sweep, self-closing hinges and a latch; verify manufacturer mounting and clearances."
+    }
+  },
+  "elements": {
+    "wall.east": {
+      "kind": "wall",
+      "name": "Upper — east gable wall",
+      "storey": "level.upper",
+      "type": "type.wall",
+      "path": {
+        "kind": "line",
+        "start": {
+          "point": [
+            10000,
+            6000
+          ]
+        },
+        "end": {
+          "point": [
+            10000,
+            0
+          ]
+        }
+      },
+      "locationLine": "exterior",
+      "base": {
+        "kind": "surface",
+        "element": "slab.house.upper",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "offset": 0
+      }
+    },
+    "opening.slider": {
+      "kind": "opening",
+      "name": "South slider rough opening",
+      "geometry": {
+        "kind": "rectangle",
+        "width": 1820,
+        "height": 2120,
+        "depth": 200
+      },
+      "placement": {
+        "station": 7000,
+        "stationReference": "center",
+        "verticalOffset": 0,
+        "verticalReference": "bottom",
+        "depthOffset": 0
+      }
+    },
+    "door.slider": {
+      "kind": "door",
+      "name": "Upper — south porch sliding door",
+      "type": "type.slider"
+    },
+    "opening.entry": {
+      "kind": "opening",
+      "name": "East entrance rough opening",
+      "geometry": {
+        "kind": "rectangle",
+        "width": 1070,
+        "height": 2070,
+        "depth": 200
+      },
+      "placement": {
+        "station": 3900,
+        "stationReference": "center",
+        "verticalOffset": 0,
+        "verticalReference": "bottom",
+        "depthOffset": 0
+      }
+    },
+    "door.entry": {
+      "kind": "door",
+      "name": "Upper — primary east entry",
+      "type": "type.entry",
+      "handing": "left",
+      "swingDirection": "inward",
+      "swingAngle": 0
+    },
+    "opening.view": {
+      "kind": "opening",
+      "name": "Open deck view rough opening",
+      "geometry": {
+        "kind": "rectangle",
+        "width": 920,
+        "height": 1520,
+        "depth": 200
+      },
+      "placement": {
+        "station": 2000,
+        "stationReference": "center",
+        "verticalOffset": 850,
+        "verticalReference": "bottom",
+        "depthOffset": 0
+      }
+    },
+    "window.view": {
+      "kind": "window",
+      "name": "Upper — uncovered south view window",
+      "type": "type.window"
+    },
+    "footing.step": {
+      "kind": "footing",
+      "name": "Uphill stepped foundation strip",
+      "type": "type.footing",
+      "shape": "strip",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              0,
+              5700
+            ]
+          },
+          {
+            "point": [
+              10000,
+              5700
+            ]
+          },
+          {
+            "point": [
+              10000,
+              6300
+            ]
+          },
+          {
+            "point": [
+              0,
+              6300
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          5000,
+          6000
+        ],
+        "offset": -1500
+      },
+      "grade": "terrain.proposed"
+    },
+    "terrain.proposed": {
+      "kind": "terrain",
+      "name": "Proposed hillside — excavated house and south deck bench",
+      "state": "proposed",
+      "points": [
+        [
+          -5000,
+          -10000,
+          -500
+        ],
+        [
+          0,
+          -10000,
+          -500
+        ],
+        [
+          9000,
+          -10000,
+          -500
+        ],
+        [
+          10000,
+          -10000,
+          -500
+        ],
+        [
+          11000,
+          -10000,
+          -500
+        ],
+        [
+          16000,
+          -10000,
+          -500
+        ],
+        [
+          -5000,
+          -3000,
+          200
+        ],
+        [
+          0,
+          -3000,
+          -150
+        ],
+        [
+          9000,
+          -3000,
+          -150
+        ],
+        [
+          10000,
+          -3000,
+          -150
+        ],
+        [
+          11000,
+          -3000,
+          200
+        ],
+        [
+          16000,
+          -3000,
+          200
+        ],
+        [
+          -5000,
+          0,
+          500
+        ],
+        [
+          0,
+          0,
+          -150
+        ],
+        [
+          9000,
+          0,
+          -150
+        ],
+        [
+          10000,
+          0,
+          -150
+        ],
+        [
+          11000,
+          0,
+          500
+        ],
+        [
+          16000,
+          0,
+          500
+        ],
+        [
+          -5000,
+          6000,
+          1100
+        ],
+        [
+          0,
+          6000,
+          1100
+        ],
+        [
+          9000,
+          6000,
+          1100
+        ],
+        [
+          10000,
+          6000,
+          1100
+        ],
+        [
+          11000,
+          6000,
+          1100
+        ],
+        [
+          16000,
+          6000,
+          1100
+        ],
+        [
+          -5000,
+          10000,
+          1500
+        ],
+        [
+          0,
+          10000,
+          1500
+        ],
+        [
+          9000,
+          10000,
+          1500
+        ],
+        [
+          10000,
+          10000,
+          1500
+        ],
+        [
+          11000,
+          10000,
+          1500
+        ],
+        [
+          16000,
+          10000,
+          1500
+        ]
+      ],
+      "material": "mat.earth",
+      "triangles": [
+        [
+          0,
+          1,
+          7
+        ],
+        [
+          0,
+          7,
+          6
+        ],
+        [
+          1,
+          2,
+          8
+        ],
+        [
+          1,
+          8,
+          7
+        ],
+        [
+          2,
+          3,
+          9
+        ],
+        [
+          2,
+          9,
+          8
+        ],
+        [
+          3,
+          4,
+          10
+        ],
+        [
+          3,
+          10,
+          9
+        ],
+        [
+          4,
+          5,
+          11
+        ],
+        [
+          4,
+          11,
+          10
+        ],
+        [
+          6,
+          7,
+          13
+        ],
+        [
+          6,
+          13,
+          12
+        ],
+        [
+          7,
+          8,
+          14
+        ],
+        [
+          7,
+          14,
+          13
+        ],
+        [
+          8,
+          9,
+          15
+        ],
+        [
+          8,
+          15,
+          14
+        ],
+        [
+          9,
+          10,
+          16
+        ],
+        [
+          9,
+          16,
+          15
+        ],
+        [
+          10,
+          11,
+          17
+        ],
+        [
+          10,
+          17,
+          16
+        ],
+        [
+          12,
+          13,
+          19
+        ],
+        [
+          12,
+          19,
+          18
+        ],
+        [
+          15,
+          16,
+          22
+        ],
+        [
+          15,
+          22,
+          21
+        ],
+        [
+          16,
+          17,
+          23
+        ],
+        [
+          16,
+          23,
+          22
+        ],
+        [
+          18,
+          19,
+          25
+        ],
+        [
+          18,
+          25,
+          24
+        ],
+        [
+          19,
+          20,
+          26
+        ],
+        [
+          19,
+          26,
+          25
+        ],
+        [
+          20,
+          21,
+          27
+        ],
+        [
+          20,
+          27,
+          26
+        ],
+        [
+          21,
+          22,
+          28
+        ],
+        [
+          21,
+          28,
+          27
+        ],
+        [
+          22,
+          23,
+          29
+        ],
+        [
+          22,
+          29,
+          28
+        ]
+      ]
+    },
+    "slab.lower": {
+      "kind": "slab",
+      "name": "Lower south deck",
+      "storey": "level.lower",
+      "type": "type.floor",
+      "role": "deck",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              609.6,
+              -3048
+            ]
+          },
+          {
+            "point": [
+              9390.4,
+              -3048
+            ]
+          },
+          {
+            "point": [
+              9390.4,
+              0
+            ]
+          },
+          {
+            "point": [
+              609.6,
+              0
+            ]
+          }
+        ],
+        "holes": [
+          [
+            {
+              "point": [
+                729.6,
+                -2928
+              ]
+            },
+            {
+              "point": [
+                889.6,
+                -2928
+              ]
+            },
+            {
+              "point": [
+                889.6,
+                -2768
+              ]
+            },
+            {
+              "point": [
+                729.6,
+                -2768
+              ]
+            }
+          ],
+          [
+            {
+              "point": [
+                3224.8,
+                -2928
+              ]
+            },
+            {
+              "point": [
+                3384.8,
+                -2928
+              ]
+            },
+            {
+              "point": [
+                3384.8,
+                -2768
+              ]
+            },
+            {
+              "point": [
+                3224.8,
+                -2768
+              ]
+            }
+          ],
+          [
+            {
+              "point": [
+                5720,
+                -2928
+              ]
+            },
+            {
+              "point": [
+                5880,
+                -2928
+              ]
+            },
+            {
+              "point": [
+                5880,
+                -2768
+              ]
+            },
+            {
+              "point": [
+                5720,
+                -2768
+              ]
+            }
+          ],
+          [
+            {
+              "point": [
+                729.6,
+                -280
+              ]
+            },
+            {
+              "point": [
+                889.6,
+                -280
+              ]
+            },
+            {
+              "point": [
+                889.6,
+                -120
+              ]
+            },
+            {
+              "point": [
+                729.6,
+                -120
+              ]
+            }
+          ],
+          [
+            {
+              "point": [
+                4420,
+                -280
+              ]
+            },
+            {
+              "point": [
+                4580,
+                -280
+              ]
+            },
+            {
+              "point": [
+                4580,
+                -120
+              ]
+            },
+            {
+              "point": [
+                4420,
+                -120
+              ]
+            }
+          ],
+          [
+            {
+              "point": [
+                5720,
+                -280
+              ]
+            },
+            {
+              "point": [
+                5880,
+                -280
+              ]
+            },
+            {
+              "point": [
+                5880,
+                -120
+              ]
+            },
+            {
+              "point": [
+                5720,
+                -120
+              ]
+            }
+          ],
+          [
+            {
+              "point": [
+                6120,
+                -2928
+              ]
+            },
+            {
+              "point": [
+                6280,
+                -2928
+              ]
+            },
+            {
+              "point": [
+                6280,
+                -2768
+              ]
+            },
+            {
+              "point": [
+                6120,
+                -2768
+              ]
+            }
+          ],
+          [
+            {
+              "point": [
+                9110.4,
+                -2928
+              ]
+            },
+            {
+              "point": [
+                9270.4,
+                -2928
+              ]
+            },
+            {
+              "point": [
+                9270.4,
+                -2768
+              ]
+            },
+            {
+              "point": [
+                9110.4,
+                -2768
+              ]
+            }
+          ],
+          [
+            {
+              "point": [
+                6120,
+                -280
+              ]
+            },
+            {
+              "point": [
+                6280,
+                -280
+              ]
+            },
+            {
+              "point": [
+                6280,
+                -120
+              ]
+            },
+            {
+              "point": [
+                6120,
+                -120
+              ]
+            }
+          ],
+          [
+            {
+              "point": [
+                9110.4,
+                -280
+              ]
+            },
+            {
+              "point": [
+                9270.4,
+                -280
+              ]
+            },
+            {
+              "point": [
+                9270.4,
+                -120
+              ]
+            },
+            {
+              "point": [
+                9110.4,
+                -120
+              ]
+            }
+          ],
+          [
+            {
+              "point": [
+                7420,
+                -1580
+              ]
+            },
+            {
+              "point": [
+                7580,
+                -1580
+              ]
+            },
+            {
+              "point": [
+                7580,
+                -1420
+              ]
+            },
+            {
+              "point": [
+                7420,
+                -1420
+              ]
+            }
+          ]
+        ]
+      },
+      "datum": {
+        "kind": "level",
+        "level": "level.lower",
+        "offset": 0
+      },
+      "extrusionDirection": "down"
+    },
+    "slab.upper": {
+      "kind": "slab",
+      "name": "Covered upper deck zone",
+      "storey": "level.upper",
+      "type": "type.floor",
+      "role": "deck",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              609.6,
+              -3048
+            ]
+          },
+          {
+            "point": [
+              6000,
+              -3048
+            ]
+          },
+          {
+            "point": [
+              6000,
+              0
+            ]
+          },
+          {
+            "point": [
+              609.6,
+              0
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "level",
+        "level": "level.upper",
+        "offset": 0
+      },
+      "extrusionDirection": "down"
+    },
+    "slab.spa": {
+      "kind": "slab",
+      "name": "Dedicated spa deck zone",
+      "storey": "level.upper",
+      "type": "type.floor",
+      "role": "deck",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              6000,
+              -3048
+            ]
+          },
+          {
+            "point": [
+              9390.4,
+              -3048
+            ]
+          },
+          {
+            "point": [
+              9390.4,
+              0
+            ]
+          },
+          {
+            "point": [
+              6000,
+              0
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "level",
+        "level": "level.upper",
+        "offset": 0
+      },
+      "extrusionDirection": "down"
+    },
+    "slab.entry": {
+      "kind": "slab",
+      "name": "East entry landing",
+      "storey": "level.upper",
+      "type": "type.floor",
+      "role": "landing",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              10000,
+              1200
+            ]
+          },
+          {
+            "point": [
+              12400,
+              1200
+            ]
+          },
+          {
+            "point": [
+              12400,
+              3000
+            ]
+          },
+          {
+            "point": [
+              10000,
+              3000
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "level",
+        "level": "level.upper",
+        "offset": 0
+      },
+      "extrusionDirection": "down"
+    },
+    "wall.south": {
+      "kind": "wall",
+      "name": "Upper — south wall",
+      "storey": "level.upper",
+      "type": "type.wall",
+      "path": {
+        "kind": "line",
+        "start": {
+          "point": [
+            10000,
+            0
+          ]
+        },
+        "end": {
+          "point": [
+            0,
+            0
+          ]
+        }
+      },
+      "locationLine": "exterior",
+      "base": {
+        "kind": "surface",
+        "element": "slab.house.upper",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "offset": 0
+      }
+    },
+    "roof.main": {
+      "kind": "roof",
+      "name": "Main roof",
+      "storey": "level.upper",
+      "type": "type.roof",
+      "geometry": {
+        "kind": "parametric",
+        "form": "gable",
+        "footprint": {
+          "outer": [
+            {
+              "point": [
+                0,
+                0
+              ]
+            },
+            {
+              "point": [
+                10000,
+                0
+              ]
+            },
+            {
+              "point": [
+                10000,
+                6000
+              ]
+            },
+            {
+              "point": [
+                0,
+                6000
+              ]
+            }
+          ]
+        },
+        "eaveDatum": {
+          "kind": "level",
+          "level": "level.upper",
+          "offset": 3200
+        },
+        "datumReference": "bearing",
+        "datumSurface": "underside",
+        "pitch": 33.690067525979785,
+        "ridgeDirection": [
+          1,
+          0
+        ],
+        "overhang": 300
+      }
+    },
+    "roof.porch": {
+      "kind": "roof",
+      "name": "Porch roof",
+      "storey": "level.upper",
+      "type": "type.porch-roof",
+      "clearances": [
+        {
+          "name": "Outer porch standing headroom",
+          "lower": {
+            "kind": "level",
+            "level": "level.upper",
+            "offset": 0
+          },
+          "upper": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -3048
+            ],
+            "offset": 0
+          },
+          "minimum": 2440
+        },
+        {
+          "name": "Porch outer beam headroom",
+          "lower": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              3000,
+              -2848
+            ],
+            "offset": 0
+          },
+          "upper": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -2918
+            ],
+            "offset": -240
+          },
+          "minimum": 2440
+        }
+      ],
+      "geometry": {
+        "kind": "parametric",
+        "form": "shed",
+        "footprint": {
+          "outer": [
+            {
+              "point": [
+                609.6,
+                -3048
+              ]
+            },
+            {
+              "point": [
+                6000,
+                -3048
+              ]
+            },
+            {
+              "point": [
+                6000,
+                0
+              ]
+            },
+            {
+              "point": [
+                609.6,
+                0
+              ]
+            }
+          ]
+        },
+        "eaveDatum": {
+          "kind": "surface",
+          "element": "roof.main",
+          "surface": "underside",
+          "point": [
+            3000,
+            0
+          ],
+          "offset": -100
+        },
+        "datumPoint": [
+          3000,
+          0
+        ],
+        "pitch": 4.763641690726177,
+        "slopeDirection": [
+          0,
+          1
+        ],
+        "overhang": 0
+      }
+    },
+    "footing.spa": {
+      "kind": "footing",
+      "name": "Dedicated spa footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              7000,
+              -2000
+            ]
+          },
+          {
+            "point": [
+              8000,
+              -2000
+            ]
+          },
+          {
+            "point": [
+              8000,
+              -1000
+            ]
+          },
+          {
+            "point": [
+              7000,
+              -1000
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          7500,
+          -1500
+        ],
+        "offset": -800
+      }
+    },
+    "post.spa": {
+      "kind": "member",
+      "name": "Spa support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            7500,
+            -1500
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.spa",
+            "surface": "top",
+            "point": [
+              7500,
+              -1500
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            7500,
+            -1500
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "beam.spa": {
+      "kind": "member",
+      "name": "Spa bay — dedicated central beam",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            6000,
+            -1500
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -360
+          }
+        },
+        {
+          "point": [
+            9390.4,
+            -1500
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -360
+          }
+        }
+      ]
+    },
+    "framing.porch": {
+      "kind": "framing",
+      "name": "Porch joist group",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "joist",
+      "axis": [
+        {
+          "point": [
+            679.6,
+            -2998
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -120
+          }
+        },
+        {
+          "point": [
+            679.6,
+            0
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -120
+          }
+        }
+      ],
+      "distribution": [
+        1,
+        0,
+        0
+      ],
+      "spacing": 375.0285714285714,
+      "count": 15
+    },
+    "stair.entry": {
+      "kind": "stair",
+      "name": "Main entry stair",
+      "storey": "level.upper",
+      "type": "type.stair",
+      "origin": [
+        11000,
+        -3000
+      ],
+      "direction": [
+        0,
+        1
+      ],
+      "bottom": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          11000,
+          -3000
+        ],
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "slab.entry",
+        "surface": "top",
+        "point": [
+          11000,
+          1200
+        ],
+        "offset": 0
+      },
+      "clearWidth": 1220
+    },
+    "guard.entry": {
+      "kind": "railing",
+      "name": "Entry stair guard",
+      "storey": "level.upper",
+      "type": "type.guard",
+      "role": "guard",
+      "follow": {
+        "element": "stair.entry",
+        "side": "left",
+        "offset": 30
+      }
+    },
+    "handrail.entry": {
+      "kind": "railing",
+      "name": "Entry graspable handrail",
+      "storey": "level.upper",
+      "type": "type.handrail",
+      "role": "handrail",
+      "follow": {
+        "element": "stair.entry",
+        "side": "left",
+        "offset": 0
+      }
+    },
+    "guard.porch": {
+      "kind": "railing",
+      "name": "Covered porch — south guard",
+      "storey": "level.upper",
+      "type": "type.guard",
+      "role": "guard",
+      "follow": {
+        "element": "slab.upper",
+        "edgeIndex": 0
+      }
+    },
+    "screen.porch": {
+      "kind": "panel",
+      "name": "Covered porch — south screen",
+      "storey": "level.upper",
+      "type": "type.screen",
+      "path": [
+        {
+          "point": [
+            659.6,
+            -2998
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              659.6,
+              -2998
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            5950,
+            -2998
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              5950,
+              -2998
+            ],
+            "offset": 0
+          }
+        }
+      ],
+      "top": {
+        "kind": "surface",
+        "element": "roof.porch",
+        "surface": "underside",
+        "offset": 0
+      },
+      "specifications": {
+        "thermalBoundary": false
+      }
+    },
+    "drain.foundation": {
+      "kind": "sweep",
+      "name": "Foundation drain to stable daylight",
+      "storey": "level.lower",
+      "type": "type.pipe",
+      "role": "drain",
+      "path": [
+        {
+          "point": [
+            -1000,
+            7000,
+            0
+          ]
+        },
+        {
+          "point": [
+            -1000,
+            -5000,
+            -300
+          ]
+        }
+      ],
+      "minFall": 0.01,
+      "outlet": {
+        "name": "Stable discharge swale",
+        "stable": true,
+        "exclusionRadius": 1000
+      }
+    },
+    "load.spa": {
+      "kind": "load",
+      "name": "Future spa allowance including separately specified occupants",
+      "target": "slab.spa",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              7050,
+              -2600
+            ]
+          },
+          {
+            "point": [
+              9150,
+              -2600
+            ]
+          },
+          {
+            "point": [
+              9150,
+              -500
+            ]
+          },
+          {
+            "point": [
+              7050,
+              -500
+            ]
+          }
+        ]
+      },
+      "forceN": 31000,
+      "category": "equipment",
+      "foundationRequired": true
+    },
+    "detail.ledger": {
+      "kind": "detail",
+      "name": "Porch connection water control",
+      "type": "type.detail",
+      "participants": [
+        "wall.south",
+        "slab.upper"
+      ],
+      "location": {
+        "point": [
+          3000,
+          0,
+          3000
+        ]
+      }
+    },
+    "slab.house.lower": {
+      "kind": "slab",
+      "name": "Lower — indoor concrete floor",
+      "storey": "level.lower",
+      "type": "type.house-ground-floor",
+      "role": "foundation",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              0,
+              0
+            ]
+          },
+          {
+            "point": [
+              10000,
+              0
+            ]
+          },
+          {
+            "point": [
+              10000,
+              6000
+            ]
+          },
+          {
+            "point": [
+              0,
+              6000
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "level",
+        "level": "level.lower",
+        "offset": 0
+      },
+      "extrusionDirection": "down"
+    },
+    "space.lower": {
+      "kind": "space",
+      "name": "Lower — open-plan interior",
+      "storey": "level.lower",
+      "type": "type.open-plan-space",
+      "geometry": {
+        "kind": "explicit",
+        "footprint": {
+          "outer": [
+            {
+              "point": [
+                226,
+                226
+              ]
+            },
+            {
+              "point": [
+                9774,
+                226
+              ]
+            },
+            {
+              "point": [
+                9774,
+                5774
+              ]
+            },
+            {
+              "point": [
+                226,
+                5774
+              ]
+            }
+          ]
+        }
+      },
+      "height": 2700
+    },
+    "slab.house.upper": {
+      "kind": "slab",
+      "name": "Upper — indoor floor / lower ceiling",
+      "storey": "level.upper",
+      "type": "type.house-upper-floor",
+      "role": "floor",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              0,
+              0
+            ]
+          },
+          {
+            "point": [
+              10000,
+              0
+            ]
+          },
+          {
+            "point": [
+              10000,
+              6000
+            ]
+          },
+          {
+            "point": [
+              0,
+              6000
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "level",
+        "level": "level.upper",
+        "offset": 0
+      },
+      "extrusionDirection": "down"
+    },
+    "space.upper": {
+      "kind": "space",
+      "name": "Upper — open-plan interior (eave-height volume)",
+      "storey": "level.upper",
+      "type": "type.open-plan-space",
+      "geometry": {
+        "kind": "explicit",
+        "footprint": {
+          "outer": [
+            {
+              "point": [
+                176,
+                176
+              ]
+            },
+            {
+              "point": [
+                9824,
+                176
+              ]
+            },
+            {
+              "point": [
+                9824,
+                5824
+              ]
+            },
+            {
+              "point": [
+                176,
+                5824
+              ]
+            }
+          ]
+        }
+      },
+      "height": 3200
+    },
+    "wall.lower.south": {
+      "kind": "wall",
+      "name": "Lower — south wall",
+      "storey": "level.lower",
+      "type": "type.lower-wall",
+      "path": {
+        "kind": "line",
+        "start": {
+          "point": [
+            10000,
+            0
+          ]
+        },
+        "end": {
+          "point": [
+            0,
+            0
+          ]
+        }
+      },
+      "locationLine": "exterior",
+      "base": {
+        "kind": "surface",
+        "element": "slab.house.lower",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "slab.house.upper",
+        "surface": "underside",
+        "offset": 0
+      },
+      "grade": "terrain.proposed"
+    },
+    "wall.lower.west": {
+      "kind": "wall",
+      "name": "Lower — west wall",
+      "storey": "level.lower",
+      "type": "type.lower-wall",
+      "path": {
+        "kind": "line",
+        "start": {
+          "point": [
+            0,
+            0
+          ]
+        },
+        "end": {
+          "point": [
+            0,
+            6000
+          ]
+        }
+      },
+      "locationLine": "exterior",
+      "base": {
+        "kind": "surface",
+        "element": "slab.house.lower",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "slab.house.upper",
+        "surface": "underside",
+        "offset": 0
+      },
+      "grade": "terrain.proposed"
+    },
+    "wall.lower.north": {
+      "kind": "wall",
+      "name": "Lower — north wall",
+      "storey": "level.lower",
+      "type": "type.lower-wall",
+      "path": {
+        "kind": "line",
+        "start": {
+          "point": [
+            0,
+            6000
+          ]
+        },
+        "end": {
+          "point": [
+            10000,
+            6000
+          ]
+        }
+      },
+      "locationLine": "exterior",
+      "base": {
+        "kind": "surface",
+        "element": "footing.step",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "slab.house.upper",
+        "surface": "underside",
+        "offset": 0
+      },
+      "grade": "terrain.proposed"
+    },
+    "wall.lower.east": {
+      "kind": "wall",
+      "name": "Lower — east wall",
+      "storey": "level.lower",
+      "type": "type.lower-wall",
+      "path": {
+        "kind": "line",
+        "start": {
+          "point": [
+            10000,
+            6000
+          ]
+        },
+        "end": {
+          "point": [
+            10000,
+            0
+          ]
+        }
+      },
+      "locationLine": "exterior",
+      "base": {
+        "kind": "surface",
+        "element": "slab.house.lower",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "slab.house.upper",
+        "surface": "underside",
+        "offset": 0
+      },
+      "grade": "terrain.proposed"
+    },
+    "wall.upper.west": {
+      "kind": "wall",
+      "name": "Upper — west gable wall",
+      "storey": "level.upper",
+      "type": "type.wall",
+      "path": {
+        "kind": "line",
+        "start": {
+          "point": [
+            0,
+            0
+          ]
+        },
+        "end": {
+          "point": [
+            0,
+            6000
+          ]
+        }
+      },
+      "locationLine": "exterior",
+      "base": {
+        "kind": "surface",
+        "element": "slab.house.upper",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "offset": 0
+      }
+    },
+    "wall.upper.north": {
+      "kind": "wall",
+      "name": "Upper — north wall",
+      "storey": "level.upper",
+      "type": "type.wall",
+      "path": {
+        "kind": "line",
+        "start": {
+          "point": [
+            0,
+            6000
+          ]
+        },
+        "end": {
+          "point": [
+            10000,
+            6000
+          ]
+        }
+      },
+      "locationLine": "exterior",
+      "base": {
+        "kind": "surface",
+        "element": "slab.house.upper",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "offset": 0
+      }
+    },
+    "opening.lower.slider": {
+      "kind": "opening",
+      "name": "Lower — south slider rough opening",
+      "geometry": {
+        "kind": "rectangle",
+        "width": 1820,
+        "height": 2120,
+        "depth": 250
+      },
+      "placement": {
+        "station": 7000,
+        "stationReference": "center",
+        "verticalOffset": 0,
+        "verticalReference": "bottom",
+        "depthOffset": 0
+      }
+    },
+    "door.lower.slider": {
+      "kind": "door",
+      "name": "Lower — south deck sliding door",
+      "type": "type.slider"
+    },
+    "opening.lower.view": {
+      "kind": "opening",
+      "name": "Lower — south view rough opening",
+      "geometry": {
+        "kind": "rectangle",
+        "width": 920,
+        "height": 1520,
+        "depth": 250
+      },
+      "placement": {
+        "station": 2000,
+        "stationReference": "center",
+        "verticalOffset": 850,
+        "verticalReference": "bottom",
+        "depthOffset": 0
+      }
+    },
+    "window.lower.view": {
+      "kind": "window",
+      "name": "Lower — south view window",
+      "type": "type.window"
+    },
+    "framing.spa": {
+      "kind": "framing",
+      "name": "Spa bay joist group",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "joist",
+      "axis": [
+        {
+          "point": [
+            6070,
+            -2998
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -120
+          }
+        },
+        {
+          "point": [
+            6070,
+            0
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -120
+          }
+        }
+      ],
+      "distribution": [
+        1,
+        0,
+        0
+      ],
+      "spacing": 361.1555555555555,
+      "count": 10
+    },
+    "beam.porch.south": {
+      "kind": "member",
+      "name": "Covered deck — south support beam",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            609.6,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -360
+          }
+        },
+        {
+          "point": [
+            6000,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -360
+          }
+        }
+      ]
+    },
+    "footing.porch.south.0": {
+      "kind": "footing",
+      "name": "Covered deck south 1 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              509.6,
+              -3148
+            ]
+          },
+          {
+            "point": [
+              1109.6,
+              -3148
+            ]
+          },
+          {
+            "point": [
+              1109.6,
+              -2548
+            ]
+          },
+          {
+            "point": [
+              509.6,
+              -2548
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          809.6,
+          -2848
+        ],
+        "offset": -500
+      }
+    },
+    "post.porch.south.0": {
+      "kind": "member",
+      "name": "Covered deck south 1 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            809.6,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.porch.south.0",
+            "surface": "top",
+            "point": [
+              809.6,
+              -2848
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            809.6,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "footing.porch.south.1": {
+      "kind": "footing",
+      "name": "Covered deck south 2 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              3004.8,
+              -3148
+            ]
+          },
+          {
+            "point": [
+              3604.8,
+              -3148
+            ]
+          },
+          {
+            "point": [
+              3604.8,
+              -2548
+            ]
+          },
+          {
+            "point": [
+              3004.8,
+              -2548
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          3304.8,
+          -2848
+        ],
+        "offset": -500
+      }
+    },
+    "post.porch.south.1": {
+      "kind": "member",
+      "name": "Covered deck south 2 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            3304.8,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.porch.south.1",
+            "surface": "top",
+            "point": [
+              3304.8,
+              -2848
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            3304.8,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "footing.porch.south.2": {
+      "kind": "footing",
+      "name": "Covered deck south 3 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              5500,
+              -3148
+            ]
+          },
+          {
+            "point": [
+              6100,
+              -3148
+            ]
+          },
+          {
+            "point": [
+              6100,
+              -2548
+            ]
+          },
+          {
+            "point": [
+              5500,
+              -2548
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          5800,
+          -2848
+        ],
+        "offset": -500
+      }
+    },
+    "post.porch.south.2": {
+      "kind": "member",
+      "name": "Covered deck south 3 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            5800,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.porch.south.2",
+            "surface": "top",
+            "point": [
+              5800,
+              -2848
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            5800,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "beam.porch.north": {
+      "kind": "member",
+      "name": "Covered deck — north support beam",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            609.6,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -360
+          }
+        },
+        {
+          "point": [
+            6000,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -360
+          }
+        }
+      ]
+    },
+    "footing.porch.north.0": {
+      "kind": "footing",
+      "name": "Covered deck north 1 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              509.6,
+              -500
+            ]
+          },
+          {
+            "point": [
+              1109.6,
+              -500
+            ]
+          },
+          {
+            "point": [
+              1109.6,
+              100
+            ]
+          },
+          {
+            "point": [
+              509.6,
+              100
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          809.6,
+          -200
+        ],
+        "offset": -500
+      }
+    },
+    "post.porch.north.0": {
+      "kind": "member",
+      "name": "Covered deck north 1 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            809.6,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.porch.north.0",
+            "surface": "top",
+            "point": [
+              809.6,
+              -200
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            809.6,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "footing.porch.north.1": {
+      "kind": "footing",
+      "name": "Covered deck north 2 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              4200,
+              -500
+            ]
+          },
+          {
+            "point": [
+              4800,
+              -500
+            ]
+          },
+          {
+            "point": [
+              4800,
+              100
+            ]
+          },
+          {
+            "point": [
+              4200,
+              100
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          4500,
+          -200
+        ],
+        "offset": -500
+      }
+    },
+    "post.porch.north.1": {
+      "kind": "member",
+      "name": "Covered deck north 2 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            4500,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.porch.north.1",
+            "surface": "top",
+            "point": [
+              4500,
+              -200
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            4500,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "footing.porch.north.2": {
+      "kind": "footing",
+      "name": "Covered deck north 3 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              5500,
+              -500
+            ]
+          },
+          {
+            "point": [
+              6100,
+              -500
+            ]
+          },
+          {
+            "point": [
+              6100,
+              100
+            ]
+          },
+          {
+            "point": [
+              5500,
+              100
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          5800,
+          -200
+        ],
+        "offset": -500
+      }
+    },
+    "post.porch.north.2": {
+      "kind": "member",
+      "name": "Covered deck north 3 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            5800,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.porch.north.2",
+            "surface": "top",
+            "point": [
+              5800,
+              -200
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            5800,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "beam.spa.south": {
+      "kind": "member",
+      "name": "Spa bay — south support beam",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            6000,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -360
+          }
+        },
+        {
+          "point": [
+            9390.4,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -360
+          }
+        }
+      ]
+    },
+    "footing.spa.south.0": {
+      "kind": "footing",
+      "name": "Spa bay south 1 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              5900,
+              -3148
+            ]
+          },
+          {
+            "point": [
+              6500,
+              -3148
+            ]
+          },
+          {
+            "point": [
+              6500,
+              -2548
+            ]
+          },
+          {
+            "point": [
+              5900,
+              -2548
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          6200,
+          -2848
+        ],
+        "offset": -500
+      }
+    },
+    "post.spa.south.0": {
+      "kind": "member",
+      "name": "Spa bay south 1 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            6200,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.spa.south.0",
+            "surface": "top",
+            "point": [
+              6200,
+              -2848
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            6200,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "footing.spa.south.1": {
+      "kind": "footing",
+      "name": "Spa bay south 2 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              8890.4,
+              -3148
+            ]
+          },
+          {
+            "point": [
+              9490.4,
+              -3148
+            ]
+          },
+          {
+            "point": [
+              9490.4,
+              -2548
+            ]
+          },
+          {
+            "point": [
+              8890.4,
+              -2548
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          9190.4,
+          -2848
+        ],
+        "offset": -500
+      }
+    },
+    "post.spa.south.1": {
+      "kind": "member",
+      "name": "Spa bay south 2 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            9190.4,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.spa.south.1",
+            "surface": "top",
+            "point": [
+              9190.4,
+              -2848
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            9190.4,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "beam.spa.north": {
+      "kind": "member",
+      "name": "Spa bay — north support beam",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            6000,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -360
+          }
+        },
+        {
+          "point": [
+            9390.4,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -360
+          }
+        }
+      ]
+    },
+    "footing.spa.north.0": {
+      "kind": "footing",
+      "name": "Spa bay north 1 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              5900,
+              -500
+            ]
+          },
+          {
+            "point": [
+              6500,
+              -500
+            ]
+          },
+          {
+            "point": [
+              6500,
+              100
+            ]
+          },
+          {
+            "point": [
+              5900,
+              100
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          6200,
+          -200
+        ],
+        "offset": -500
+      }
+    },
+    "post.spa.north.0": {
+      "kind": "member",
+      "name": "Spa bay north 1 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            6200,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.spa.north.0",
+            "surface": "top",
+            "point": [
+              6200,
+              -200
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            6200,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "footing.spa.north.1": {
+      "kind": "footing",
+      "name": "Spa bay north 2 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              8890.4,
+              -500
+            ]
+          },
+          {
+            "point": [
+              9490.4,
+              -500
+            ]
+          },
+          {
+            "point": [
+              9490.4,
+              100
+            ]
+          },
+          {
+            "point": [
+              8890.4,
+              100
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          9190.4,
+          -200
+        ],
+        "offset": -500
+      }
+    },
+    "post.spa.north.1": {
+      "kind": "member",
+      "name": "Spa bay north 2 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            9190.4,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.spa.north.1",
+            "surface": "top",
+            "point": [
+              9190.4,
+              -200
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            9190.4,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "beam.roof.porch.south": {
+      "kind": "member",
+      "name": "Porch roof — south bearing beam",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            682.1,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -2918
+            ],
+            "offset": -120
+          }
+        },
+        {
+          "point": [
+            5927.5,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -2918
+            ],
+            "offset": -120
+          }
+        }
+      ]
+    },
+    "post.roof.porch.south.0": {
+      "kind": "member",
+      "name": "Porch roof south 1 post",
+      "storey": "level.upper",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            809.6,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            809.6,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -2918
+            ],
+            "offset": -240
+          }
+        }
+      ]
+    },
+    "post.roof.porch.south.1": {
+      "kind": "member",
+      "name": "Porch roof south 2 post",
+      "storey": "level.upper",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            3304.8,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            3304.8,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -2918
+            ],
+            "offset": -240
+          }
+        }
+      ]
+    },
+    "post.roof.porch.south.2": {
+      "kind": "member",
+      "name": "Porch roof south 3 post",
+      "storey": "level.upper",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            5800,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            5800,
+            -2848
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -2918
+            ],
+            "offset": -240
+          }
+        }
+      ]
+    },
+    "beam.roof.porch.north": {
+      "kind": "member",
+      "name": "Porch roof — north bearing beam",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            682.1,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -270
+            ],
+            "offset": -120
+          }
+        },
+        {
+          "point": [
+            5927.5,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -270
+            ],
+            "offset": -120
+          }
+        }
+      ]
+    },
+    "post.roof.porch.north.0": {
+      "kind": "member",
+      "name": "Porch roof north 1 post",
+      "storey": "level.upper",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            809.6,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            809.6,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -270
+            ],
+            "offset": -240
+          }
+        }
+      ]
+    },
+    "post.roof.porch.north.1": {
+      "kind": "member",
+      "name": "Porch roof north 2 post",
+      "storey": "level.upper",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            4500,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            4500,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -270
+            ],
+            "offset": -240
+          }
+        }
+      ]
+    },
+    "post.roof.porch.north.2": {
+      "kind": "member",
+      "name": "Porch roof north 3 post",
+      "storey": "level.upper",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            5800,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              3000,
+              -1500
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            5800,
+            -200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.porch",
+            "surface": "underside",
+            "point": [
+              3000,
+              -270
+            ],
+            "offset": -240
+          }
+        }
+      ]
+    },
+    "framing.entry": {
+      "kind": "framing",
+      "name": "East landing joist group",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "joist",
+      "axis": [
+        {
+          "point": [
+            10000,
+            1270
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "bottom",
+            "point": [
+              11000,
+              2100
+            ],
+            "offset": -120
+          }
+        },
+        {
+          "point": [
+            12400,
+            1270
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "bottom",
+            "point": [
+              11000,
+              2100
+            ],
+            "offset": -120
+          }
+        }
+      ],
+      "distribution": [
+        0,
+        1,
+        0
+      ],
+      "count": 6,
+      "spacing": 332
+    },
+    "beam.entry.west": {
+      "kind": "member",
+      "name": "East landing — west support beam",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            10200,
+            1200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "bottom",
+            "point": [
+              11000,
+              2100
+            ],
+            "offset": -360
+          }
+        },
+        {
+          "point": [
+            10200,
+            3000
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "bottom",
+            "point": [
+              11000,
+              2100
+            ],
+            "offset": -360
+          }
+        }
+      ]
+    },
+    "footing.entry.west.0": {
+      "kind": "footing",
+      "name": "East landing west 1 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              9900,
+              1100
+            ]
+          },
+          {
+            "point": [
+              10500,
+              1100
+            ]
+          },
+          {
+            "point": [
+              10500,
+              1700
+            ]
+          },
+          {
+            "point": [
+              9900,
+              1700
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          10200,
+          1400
+        ],
+        "offset": -500
+      }
+    },
+    "post.entry.west.0": {
+      "kind": "member",
+      "name": "East landing west 1 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            10200,
+            1400
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.entry.west.0",
+            "surface": "top",
+            "point": [
+              10200,
+              1400
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            10200,
+            1400
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "bottom",
+            "point": [
+              11000,
+              2100
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "footing.entry.west.1": {
+      "kind": "footing",
+      "name": "East landing west 2 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              9900,
+              2500
+            ]
+          },
+          {
+            "point": [
+              10500,
+              2500
+            ]
+          },
+          {
+            "point": [
+              10500,
+              3100
+            ]
+          },
+          {
+            "point": [
+              9900,
+              3100
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          10200,
+          2800
+        ],
+        "offset": -500
+      }
+    },
+    "post.entry.west.1": {
+      "kind": "member",
+      "name": "East landing west 2 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            10200,
+            2800
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.entry.west.1",
+            "surface": "top",
+            "point": [
+              10200,
+              2800
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            10200,
+            2800
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "bottom",
+            "point": [
+              11000,
+              2100
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "beam.entry.east": {
+      "kind": "member",
+      "name": "East landing — east support beam",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            12200,
+            1200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "bottom",
+            "point": [
+              11000,
+              2100
+            ],
+            "offset": -360
+          }
+        },
+        {
+          "point": [
+            12200,
+            3000
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "bottom",
+            "point": [
+              11000,
+              2100
+            ],
+            "offset": -360
+          }
+        }
+      ]
+    },
+    "footing.entry.east.0": {
+      "kind": "footing",
+      "name": "East landing east 1 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              11900,
+              1100
+            ]
+          },
+          {
+            "point": [
+              12500,
+              1100
+            ]
+          },
+          {
+            "point": [
+              12500,
+              1700
+            ]
+          },
+          {
+            "point": [
+              11900,
+              1700
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          12200,
+          1400
+        ],
+        "offset": -500
+      }
+    },
+    "post.entry.east.0": {
+      "kind": "member",
+      "name": "East landing east 1 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            12200,
+            1400
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.entry.east.0",
+            "surface": "top",
+            "point": [
+              12200,
+              1400
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            12200,
+            1400
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "bottom",
+            "point": [
+              11000,
+              2100
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "footing.entry.east.1": {
+      "kind": "footing",
+      "name": "East landing east 2 footing",
+      "storey": "level.lower",
+      "type": "type.footing",
+      "shape": "pad",
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              11900,
+              2500
+            ]
+          },
+          {
+            "point": [
+              12500,
+              2500
+            ]
+          },
+          {
+            "point": [
+              12500,
+              3100
+            ]
+          },
+          {
+            "point": [
+              11900,
+              3100
+            ]
+          }
+        ]
+      },
+      "datum": {
+        "kind": "surface",
+        "element": "terrain.proposed",
+        "surface": "top",
+        "point": [
+          12200,
+          2800
+        ],
+        "offset": -500
+      }
+    },
+    "post.entry.east.1": {
+      "kind": "member",
+      "name": "East landing east 2 ground support post",
+      "storey": "level.lower",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            12200,
+            2800
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "footing.entry.east.1",
+            "surface": "top",
+            "point": [
+              12200,
+              2800
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            12200,
+            2800
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "bottom",
+            "point": [
+              11000,
+              2100
+            ],
+            "offset": -480
+          }
+        }
+      ]
+    },
+    "roof.entry": {
+      "kind": "roof",
+      "name": "East entry — rain canopy",
+      "storey": "level.upper",
+      "type": "type.porch-roof",
+      "specifications": {
+        "thermalBoundary": false
+      },
+      "geometry": {
+        "kind": "parametric",
+        "form": "shed",
+        "footprint": {
+          "outer": [
+            {
+              "point": [
+                10000,
+                1050
+              ]
+            },
+            {
+              "point": [
+                12550,
+                1050
+              ]
+            },
+            {
+              "point": [
+                12550,
+                3150
+              ]
+            },
+            {
+              "point": [
+                10000,
+                3150
+              ]
+            }
+          ]
+        },
+        "eaveDatum": {
+          "kind": "level",
+          "level": "level.upper",
+          "offset": 2800
+        },
+        "datumReference": "bearing",
+        "datumSurface": "underside",
+        "datumPoint": [
+          12550,
+          2100
+        ],
+        "pitch": 4.763641690726177,
+        "slopeDirection": [
+          -1,
+          0
+        ],
+        "overhang": 0
+      },
+      "clearances": [
+        {
+          "name": "Entry canopy beam headroom",
+          "lower": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "top",
+            "point": [
+              12200,
+              2100
+            ],
+            "offset": 0
+          },
+          "upper": {
+            "kind": "surface",
+            "element": "roof.entry",
+            "surface": "underside",
+            "point": [
+              12270,
+              2100
+            ],
+            "offset": -240
+          },
+          "minimum": 2440
+        },
+        {
+          "name": "Entry door head clearance",
+          "lower": {
+            "kind": "level",
+            "level": "level.upper",
+            "offset": 2070
+          },
+          "upper": {
+            "kind": "surface",
+            "element": "roof.entry",
+            "surface": "underside",
+            "point": [
+              10000,
+              2100
+            ],
+            "offset": 0
+          },
+          "minimum": 100
+        }
+      ]
+    },
+    "beam.roof.entry.west": {
+      "kind": "member",
+      "name": "Entry canopy — wall ledger",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            10070,
+            1200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.entry",
+            "surface": "underside",
+            "point": [
+              10140,
+              2100
+            ],
+            "offset": -120
+          }
+        },
+        {
+          "point": [
+            10070,
+            3000
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.entry",
+            "surface": "underside",
+            "point": [
+              10140,
+              2100
+            ],
+            "offset": -120
+          }
+        }
+      ]
+    },
+    "beam.roof.entry.east": {
+      "kind": "member",
+      "name": "Entry canopy — outer beam",
+      "storey": "level.upper",
+      "type": "type.member",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            12200,
+            1200
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.entry",
+            "surface": "underside",
+            "point": [
+              12270,
+              2100
+            ],
+            "offset": -120
+          }
+        },
+        {
+          "point": [
+            12200,
+            3000
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.entry",
+            "surface": "underside",
+            "point": [
+              12270,
+              2100
+            ],
+            "offset": -120
+          }
+        }
+      ]
+    },
+    "post.roof.entry.0": {
+      "kind": "member",
+      "name": "Entry canopy outer post 1",
+      "storey": "level.upper",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            12200,
+            1400
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "top",
+            "point": [
+              12200,
+              1400
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            12200,
+            1400
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.entry",
+            "surface": "underside",
+            "point": [
+              12270,
+              2100
+            ],
+            "offset": -240
+          }
+        }
+      ]
+    },
+    "post.roof.entry.1": {
+      "kind": "member",
+      "name": "Entry canopy outer post 2",
+      "storey": "level.upper",
+      "type": "type.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            12200,
+            2800
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.entry",
+            "surface": "top",
+            "point": [
+              12200,
+              2800
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            12200,
+            2800
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "roof.entry",
+            "surface": "underside",
+            "point": [
+              12270,
+              2100
+            ],
+            "offset": -240
+          }
+        }
+      ]
+    },
+    "detail.entry.canopy": {
+      "kind": "detail",
+      "name": "Entry canopy wall flashing",
+      "type": "type.detail",
+      "participants": [
+        "wall.east",
+        "roof.entry"
+      ],
+      "location": {
+        "point": [
+          10000,
+          2100,
+          6000
+        ]
+      }
+    },
+    "guard.spa.south": {
+      "kind": "railing",
+      "name": "Open deck — south guard",
+      "storey": "level.upper",
+      "type": "type.guard",
+      "role": "guard",
+      "follow": {
+        "element": "slab.spa",
+        "edgeIndex": 0
+      }
+    },
+    "detail.guard.spa.south": {
+      "kind": "detail",
+      "name": "Open deck — south guard anchorage",
+      "type": "type.guard-connection",
+      "participants": [
+        "guard.spa.south",
+        "rim.spa.south",
+        "slab.spa"
+      ],
+      "location": {
+        "point": [
+          7695.2,
+          -3048
+        ],
+        "elevation": {
+          "kind": "surface",
+          "element": "slab.spa",
+          "surface": "top",
+          "point": [
+            7695.2,
+            -3048
+          ],
+          "offset": 0
+        }
+      }
+    },
+    "guard.spa.east": {
+      "kind": "railing",
+      "name": "Open deck — east guard",
+      "storey": "level.upper",
+      "type": "type.guard",
+      "role": "guard",
+      "follow": {
+        "element": "slab.spa",
+        "edgeIndex": 1
+      }
+    },
+    "detail.guard.spa.east": {
+      "kind": "detail",
+      "name": "Open deck — east guard anchorage",
+      "type": "type.guard-connection",
+      "participants": [
+        "guard.spa.east",
+        "framing.spa",
+        "slab.spa"
+      ],
+      "location": {
+        "point": [
+          9390.4,
+          -1524
+        ],
+        "elevation": {
+          "kind": "surface",
+          "element": "slab.spa",
+          "surface": "top",
+          "point": [
+            9390.4,
+            -1524
+          ],
+          "offset": 0
+        }
+      }
+    },
+    "guard.porch.west": {
+      "kind": "railing",
+      "name": "Covered porch — west guard",
+      "storey": "level.upper",
+      "type": "type.guard",
+      "role": "guard",
+      "follow": {
+        "element": "slab.upper",
+        "edgeIndex": 3
+      }
+    },
+    "detail.guard.porch.west": {
+      "kind": "detail",
+      "name": "Covered porch — west guard anchorage",
+      "type": "type.guard-connection",
+      "participants": [
+        "guard.porch.west",
+        "framing.porch",
+        "slab.upper"
+      ],
+      "location": {
+        "point": [
+          609.6,
+          -1524
+        ],
+        "elevation": {
+          "kind": "surface",
+          "element": "slab.upper",
+          "surface": "top",
+          "point": [
+            609.6,
+            -1524
+          ],
+          "offset": 0
+        }
+      }
+    },
+    "detail.guard.porch": {
+      "kind": "detail",
+      "name": "Covered porch — south guard anchorage",
+      "type": "type.guard-connection",
+      "participants": [
+        "guard.porch",
+        "rim.porch.south",
+        "slab.upper"
+      ],
+      "location": {
+        "point": [
+          3304.8,
+          -3048
+        ],
+        "elevation": {
+          "kind": "surface",
+          "element": "slab.upper",
+          "surface": "top",
+          "point": [
+            3304.8,
+            -3048
+          ],
+          "offset": 0
+        }
+      }
+    },
+    "rim.porch.south": {
+      "kind": "member",
+      "name": "Covered porch — south rim board",
+      "storey": "level.upper",
+      "type": "type.deck-rim",
+      "role": "joist",
+      "axis": [
+        {
+          "point": [
+            609.6,
+            -3023
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3304.8,
+              -1500
+            ],
+            "offset": -120
+          }
+        },
+        {
+          "point": [
+            6000,
+            -3023
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "bottom",
+            "point": [
+              3304.8,
+              -1500
+            ],
+            "offset": -120
+          }
+        }
+      ]
+    },
+    "rim.spa.south": {
+      "kind": "member",
+      "name": "Open deck — south rim board",
+      "storey": "level.upper",
+      "type": "type.deck-rim",
+      "role": "joist",
+      "axis": [
+        {
+          "point": [
+            6000,
+            -3023
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.spa",
+            "surface": "bottom",
+            "point": [
+              7695.2,
+              -1500
+            ],
+            "offset": -120
+          }
+        },
+        {
+          "point": [
+            9390.4,
+            -3023
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.spa",
+            "surface": "bottom",
+            "point": [
+              7695.2,
+              -1500
+            ],
+            "offset": -120
+          }
+        }
+      ]
+    },
+    "screen.porch.west": {
+      "kind": "panel",
+      "name": "Covered porch — west screen",
+      "storey": "level.upper",
+      "type": "type.screen",
+      "path": [
+        {
+          "point": [
+            659.6,
+            -2998
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              659.6,
+              -2998
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            659.6,
+            0
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              659.6,
+              0
+            ],
+            "offset": 0
+          }
+        }
+      ],
+      "top": {
+        "kind": "surface",
+        "element": "roof.porch",
+        "surface": "underside",
+        "offset": 0
+      },
+      "specifications": {
+        "thermalBoundary": false
+      }
+    },
+    "screen.porch.east": {
+      "kind": "panel",
+      "name": "Covered porch — east screen with door",
+      "storey": "level.upper",
+      "type": "type.screen",
+      "path": [
+        {
+          "point": [
+            5950,
+            0
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              5950,
+              0
+            ],
+            "offset": 0
+          }
+        },
+        {
+          "point": [
+            5950,
+            -2998
+          ],
+          "elevation": {
+            "kind": "surface",
+            "element": "slab.upper",
+            "surface": "top",
+            "point": [
+              5950,
+              -2998
+            ],
+            "offset": 0
+          }
+        }
+      ],
+      "top": {
+        "kind": "surface",
+        "element": "roof.porch",
+        "surface": "underside",
+        "offset": 0
+      },
+      "specifications": {
+        "thermalBoundary": false
+      }
+    },
+    "opening.porch.screen-door": {
+      "kind": "opening",
+      "name": "Porch east screen-door opening",
+      "geometry": {
+        "kind": "rectangle",
+        "width": 914.4,
+        "height": 2032,
+        "depth": 45
+      },
+      "placement": {
+        "station": 1500,
+        "stationReference": "center",
+        "verticalOffset": 0,
+        "verticalReference": "bottom",
+        "depthOffset": 0
+      }
+    },
+    "door.porch.screen": {
+      "kind": "door",
+      "name": "Porch — screen door to open deck",
+      "type": "type.screen-door",
+      "handing": "left",
+      "swingDirection": "outward",
+      "swingAngle": 0
+    },
+    "detail.porch.enclosure": {
+      "kind": "detail",
+      "name": "Porch screen perimeter and door seals",
+      "type": "type.screen-perimeter",
+      "participants": [
+        "screen.porch",
+        "screen.porch.west",
+        "screen.porch.east",
+        "door.porch.screen",
+        "wall.south",
+        "roof.porch",
+        "slab.upper"
+      ],
+      "location": {
+        "point": [
+          5950,
+          -1500
+        ],
+        "elevation": {
+          "kind": "surface",
+          "element": "slab.upper",
+          "surface": "top",
+          "point": [
+            5950,
+            -1500
+          ],
+          "offset": 0
+        }
+      }
+    }
+  },
+  "requirements": [
+    {
+      "id": "requirement.engineer",
+      "statement": "Illustrative geometry only; obtain site-specific structural design before construction.",
+      "severity": "info"
+    },
+    {
+      "id": "requirement.entry-width",
+      "statement": "Preserve the illustrative entry stair clear width.",
+      "severity": "error",
+      "appliesTo": [
+        "stair.entry"
+      ],
+      "check": {
+        "property": "clearWidth",
+        "operator": "atLeast",
+        "value": 1220
+      }
+    }
+  ],
+  "relationships": {
+    "void.slider": {
+      "kind": "voids",
+      "host": "wall.south",
+      "opening": "opening.slider"
+    },
+    "fill.slider": {
+      "kind": "fills",
+      "opening": "opening.slider",
+      "element": "door.slider"
+    },
+    "void.entry": {
+      "kind": "voids",
+      "host": "wall.east",
+      "opening": "opening.entry"
+    },
+    "fill.entry": {
+      "kind": "fills",
+      "opening": "opening.entry",
+      "element": "door.entry"
+    },
+    "void.view": {
+      "kind": "voids",
+      "host": "wall.south",
+      "opening": "opening.view"
+    },
+    "fill.view": {
+      "kind": "fills",
+      "opening": "opening.view",
+      "element": "window.view"
+    },
+    "support.footing": {
+      "kind": "supports",
+      "support": "footing.spa",
+      "supported": "post.spa"
+    },
+    "support.post": {
+      "kind": "supports",
+      "support": "post.spa",
+      "supported": "beam.spa"
+    },
+    "support.beam": {
+      "kind": "supports",
+      "support": "beam.spa",
+      "supported": "framing.spa",
+      "bearingPoint": [
+        6070,
+        -1500,
+        2735
+      ]
+    },
+    "bounds.lower.south": {
+      "kind": "bounds",
+      "space": "space.lower",
+      "element": "wall.lower.south",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "support.house.lower.south": {
+      "kind": "supports",
+      "support": "slab.house.lower",
+      "supported": "wall.lower.south"
+    },
+    "support.house.lower.south.above": {
+      "kind": "supports",
+      "support": "wall.lower.south",
+      "supported": "slab.house.upper"
+    },
+    "bounds.lower.west": {
+      "kind": "bounds",
+      "space": "space.lower",
+      "element": "wall.lower.west",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "support.house.lower.west": {
+      "kind": "supports",
+      "support": "slab.house.lower",
+      "supported": "wall.lower.west"
+    },
+    "support.house.lower.west.above": {
+      "kind": "supports",
+      "support": "wall.lower.west",
+      "supported": "slab.house.upper"
+    },
+    "bounds.lower.north": {
+      "kind": "bounds",
+      "space": "space.lower",
+      "element": "wall.lower.north",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "support.house.lower.north": {
+      "kind": "supports",
+      "support": "footing.step",
+      "supported": "wall.lower.north"
+    },
+    "support.house.lower.north.above": {
+      "kind": "supports",
+      "support": "wall.lower.north",
+      "supported": "slab.house.upper"
+    },
+    "bounds.lower.east": {
+      "kind": "bounds",
+      "space": "space.lower",
+      "element": "wall.lower.east",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "support.house.lower.east": {
+      "kind": "supports",
+      "support": "slab.house.lower",
+      "supported": "wall.lower.east"
+    },
+    "support.house.lower.east.above": {
+      "kind": "supports",
+      "support": "wall.lower.east",
+      "supported": "slab.house.upper"
+    },
+    "join.house.lower.0": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.lower.south",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.lower.west",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "join.house.lower.1": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.lower.west",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.lower.north",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "join.house.lower.2": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.lower.north",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.lower.east",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "join.house.lower.3": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.lower.east",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.lower.south",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "bounds.upper.south": {
+      "kind": "bounds",
+      "space": "space.upper",
+      "element": "wall.south",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "support.house.upper.south": {
+      "kind": "supports",
+      "support": "slab.house.upper",
+      "supported": "wall.south"
+    },
+    "support.house.upper.south.above": {
+      "kind": "supports",
+      "support": "wall.south",
+      "supported": "roof.main"
+    },
+    "bounds.upper.west": {
+      "kind": "bounds",
+      "space": "space.upper",
+      "element": "wall.upper.west",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "support.house.upper.west": {
+      "kind": "supports",
+      "support": "slab.house.upper",
+      "supported": "wall.upper.west"
+    },
+    "support.house.upper.west.above": {
+      "kind": "supports",
+      "support": "wall.upper.west",
+      "supported": "roof.main"
+    },
+    "bounds.upper.north": {
+      "kind": "bounds",
+      "space": "space.upper",
+      "element": "wall.upper.north",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "support.house.upper.north": {
+      "kind": "supports",
+      "support": "slab.house.upper",
+      "supported": "wall.upper.north"
+    },
+    "support.house.upper.north.above": {
+      "kind": "supports",
+      "support": "wall.upper.north",
+      "supported": "roof.main"
+    },
+    "bounds.upper.east": {
+      "kind": "bounds",
+      "space": "space.upper",
+      "element": "wall.east",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "support.house.upper.east": {
+      "kind": "supports",
+      "support": "slab.house.upper",
+      "supported": "wall.east"
+    },
+    "support.house.upper.east.above": {
+      "kind": "supports",
+      "support": "wall.east",
+      "supported": "roof.main"
+    },
+    "join.house.upper.0": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.south",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.upper.west",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "join.house.upper.1": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.upper.west",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.upper.north",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "join.house.upper.2": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.upper.north",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.east",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "join.house.upper.3": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.east",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.south",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "void.lower.slider": {
+      "kind": "voids",
+      "host": "wall.lower.south",
+      "opening": "opening.lower.slider"
+    },
+    "fill.lower.slider": {
+      "kind": "fills",
+      "opening": "opening.lower.slider",
+      "element": "door.lower.slider"
+    },
+    "void.lower.view": {
+      "kind": "voids",
+      "host": "wall.lower.south",
+      "opening": "opening.lower.view"
+    },
+    "fill.lower.view": {
+      "kind": "fills",
+      "opening": "opening.lower.view",
+      "element": "window.lower.view"
+    },
+    "support.porch.joists": {
+      "kind": "supports",
+      "support": "framing.porch",
+      "supported": "slab.upper",
+      "bearingPoint": [
+        679.6,
+        -1500,
+        2975
+      ]
+    },
+    "support.spa.joists": {
+      "kind": "supports",
+      "support": "framing.spa",
+      "supported": "slab.spa",
+      "bearingPoint": [
+        6070,
+        -1500,
+        2975
+      ]
+    },
+    "support.porch.south.joists": {
+      "kind": "supports",
+      "support": "beam.porch.south",
+      "supported": "framing.porch",
+      "bearingPoint": [
+        679.6,
+        -2848,
+        2735
+      ]
+    },
+    "support.porch.south.0.footing": {
+      "kind": "supports",
+      "support": "footing.porch.south.0",
+      "supported": "post.porch.south.0"
+    },
+    "support.porch.south.0.post": {
+      "kind": "supports",
+      "support": "post.porch.south.0",
+      "supported": "beam.porch.south"
+    },
+    "support.porch.south.1.footing": {
+      "kind": "supports",
+      "support": "footing.porch.south.1",
+      "supported": "post.porch.south.1"
+    },
+    "support.porch.south.1.post": {
+      "kind": "supports",
+      "support": "post.porch.south.1",
+      "supported": "beam.porch.south"
+    },
+    "support.porch.south.2.footing": {
+      "kind": "supports",
+      "support": "footing.porch.south.2",
+      "supported": "post.porch.south.2"
+    },
+    "support.porch.south.2.post": {
+      "kind": "supports",
+      "support": "post.porch.south.2",
+      "supported": "beam.porch.south"
+    },
+    "support.porch.north.joists": {
+      "kind": "supports",
+      "support": "beam.porch.north",
+      "supported": "framing.porch",
+      "bearingPoint": [
+        679.6,
+        -200,
+        2735
+      ]
+    },
+    "support.porch.north.0.footing": {
+      "kind": "supports",
+      "support": "footing.porch.north.0",
+      "supported": "post.porch.north.0"
+    },
+    "support.porch.north.0.post": {
+      "kind": "supports",
+      "support": "post.porch.north.0",
+      "supported": "beam.porch.north"
+    },
+    "support.porch.north.1.footing": {
+      "kind": "supports",
+      "support": "footing.porch.north.1",
+      "supported": "post.porch.north.1"
+    },
+    "support.porch.north.1.post": {
+      "kind": "supports",
+      "support": "post.porch.north.1",
+      "supported": "beam.porch.north"
+    },
+    "support.porch.north.2.footing": {
+      "kind": "supports",
+      "support": "footing.porch.north.2",
+      "supported": "post.porch.north.2"
+    },
+    "support.porch.north.2.post": {
+      "kind": "supports",
+      "support": "post.porch.north.2",
+      "supported": "beam.porch.north"
+    },
+    "support.spa.south.joists": {
+      "kind": "supports",
+      "support": "beam.spa.south",
+      "supported": "framing.spa",
+      "bearingPoint": [
+        6070,
+        -2848,
+        2735
+      ]
+    },
+    "support.spa.south.0.footing": {
+      "kind": "supports",
+      "support": "footing.spa.south.0",
+      "supported": "post.spa.south.0"
+    },
+    "support.spa.south.0.post": {
+      "kind": "supports",
+      "support": "post.spa.south.0",
+      "supported": "beam.spa.south"
+    },
+    "support.spa.south.1.footing": {
+      "kind": "supports",
+      "support": "footing.spa.south.1",
+      "supported": "post.spa.south.1"
+    },
+    "support.spa.south.1.post": {
+      "kind": "supports",
+      "support": "post.spa.south.1",
+      "supported": "beam.spa.south"
+    },
+    "support.spa.north.joists": {
+      "kind": "supports",
+      "support": "beam.spa.north",
+      "supported": "framing.spa",
+      "bearingPoint": [
+        6070,
+        -200,
+        2735
+      ]
+    },
+    "support.spa.north.0.footing": {
+      "kind": "supports",
+      "support": "footing.spa.north.0",
+      "supported": "post.spa.north.0"
+    },
+    "support.spa.north.0.post": {
+      "kind": "supports",
+      "support": "post.spa.north.0",
+      "supported": "beam.spa.north"
+    },
+    "support.spa.north.1.footing": {
+      "kind": "supports",
+      "support": "footing.spa.north.1",
+      "supported": "post.spa.north.1"
+    },
+    "support.spa.north.1.post": {
+      "kind": "supports",
+      "support": "post.spa.north.1",
+      "supported": "beam.spa.north"
+    },
+    "support.roof.porch.south": {
+      "kind": "supports",
+      "support": "beam.roof.porch.south",
+      "supported": "roof.porch"
+    },
+    "support.roof.porch.south.0.base": {
+      "kind": "supports",
+      "support": "slab.upper",
+      "supported": "post.roof.porch.south.0"
+    },
+    "support.roof.porch.south.0.head": {
+      "kind": "supports",
+      "support": "post.roof.porch.south.0",
+      "supported": "beam.roof.porch.south"
+    },
+    "support.roof.porch.south.1.base": {
+      "kind": "supports",
+      "support": "slab.upper",
+      "supported": "post.roof.porch.south.1"
+    },
+    "support.roof.porch.south.1.head": {
+      "kind": "supports",
+      "support": "post.roof.porch.south.1",
+      "supported": "beam.roof.porch.south"
+    },
+    "support.roof.porch.south.2.base": {
+      "kind": "supports",
+      "support": "slab.upper",
+      "supported": "post.roof.porch.south.2"
+    },
+    "support.roof.porch.south.2.head": {
+      "kind": "supports",
+      "support": "post.roof.porch.south.2",
+      "supported": "beam.roof.porch.south"
+    },
+    "support.roof.porch.north": {
+      "kind": "supports",
+      "support": "beam.roof.porch.north",
+      "supported": "roof.porch"
+    },
+    "support.roof.porch.north.0.base": {
+      "kind": "supports",
+      "support": "slab.upper",
+      "supported": "post.roof.porch.north.0"
+    },
+    "support.roof.porch.north.0.head": {
+      "kind": "supports",
+      "support": "post.roof.porch.north.0",
+      "supported": "beam.roof.porch.north"
+    },
+    "support.roof.porch.north.1.base": {
+      "kind": "supports",
+      "support": "slab.upper",
+      "supported": "post.roof.porch.north.1"
+    },
+    "support.roof.porch.north.1.head": {
+      "kind": "supports",
+      "support": "post.roof.porch.north.1",
+      "supported": "beam.roof.porch.north"
+    },
+    "support.roof.porch.north.2.base": {
+      "kind": "supports",
+      "support": "slab.upper",
+      "supported": "post.roof.porch.north.2"
+    },
+    "support.roof.porch.north.2.head": {
+      "kind": "supports",
+      "support": "post.roof.porch.north.2",
+      "supported": "beam.roof.porch.north"
+    },
+    "attach.deck.upper": {
+      "kind": "attaches",
+      "primary": "wall.south",
+      "attached": "slab.upper",
+      "connectionType": "flashed"
+    },
+    "attach.deck.lower": {
+      "kind": "attaches",
+      "primary": "wall.lower.south",
+      "attached": "slab.lower",
+      "connectionType": "flashed"
+    },
+    "attach.roof.porch": {
+      "kind": "attaches",
+      "primary": "wall.south",
+      "attached": "roof.porch",
+      "connectionType": "flashed"
+    },
+    "support.entry.joists": {
+      "kind": "supports",
+      "support": "framing.entry",
+      "supported": "slab.entry",
+      "bearingPoint": [
+        11000,
+        1270,
+        2975
+      ]
+    },
+    "support.entry.west.joists": {
+      "kind": "supports",
+      "support": "beam.entry.west",
+      "supported": "framing.entry",
+      "bearingPoint": [
+        10200,
+        1270,
+        2735
+      ]
+    },
+    "support.entry.west.0.footing": {
+      "kind": "supports",
+      "support": "footing.entry.west.0",
+      "supported": "post.entry.west.0"
+    },
+    "support.entry.west.0.post": {
+      "kind": "supports",
+      "support": "post.entry.west.0",
+      "supported": "beam.entry.west"
+    },
+    "support.entry.west.1.footing": {
+      "kind": "supports",
+      "support": "footing.entry.west.1",
+      "supported": "post.entry.west.1"
+    },
+    "support.entry.west.1.post": {
+      "kind": "supports",
+      "support": "post.entry.west.1",
+      "supported": "beam.entry.west"
+    },
+    "support.entry.east.joists": {
+      "kind": "supports",
+      "support": "beam.entry.east",
+      "supported": "framing.entry",
+      "bearingPoint": [
+        12200,
+        1270,
+        2735
+      ]
+    },
+    "support.entry.east.0.footing": {
+      "kind": "supports",
+      "support": "footing.entry.east.0",
+      "supported": "post.entry.east.0"
+    },
+    "support.entry.east.0.post": {
+      "kind": "supports",
+      "support": "post.entry.east.0",
+      "supported": "beam.entry.east"
+    },
+    "support.entry.east.1.footing": {
+      "kind": "supports",
+      "support": "footing.entry.east.1",
+      "supported": "post.entry.east.1"
+    },
+    "support.entry.east.1.post": {
+      "kind": "supports",
+      "support": "post.entry.east.1",
+      "supported": "beam.entry.east"
+    },
+    "attach.entry": {
+      "kind": "attaches",
+      "primary": "wall.east",
+      "attached": "slab.entry",
+      "connectionType": "flashed"
+    },
+    "support.roof.entry.west": {
+      "kind": "supports",
+      "support": "beam.roof.entry.west",
+      "supported": "roof.entry"
+    },
+    "support.entry.canopy.ledger": {
+      "kind": "supports",
+      "support": "wall.east",
+      "supported": "beam.roof.entry.west"
+    },
+    "attach.entry.canopy.ledger": {
+      "kind": "attaches",
+      "primary": "wall.east",
+      "attached": "beam.roof.entry.west",
+      "connectionType": "ledger"
+    },
+    "support.roof.entry.east": {
+      "kind": "supports",
+      "support": "beam.roof.entry.east",
+      "supported": "roof.entry"
+    },
+    "support.entry.canopy.0.base": {
+      "kind": "supports",
+      "support": "slab.entry",
+      "supported": "post.roof.entry.0"
+    },
+    "support.entry.canopy.0.head": {
+      "kind": "supports",
+      "support": "post.roof.entry.0",
+      "supported": "beam.roof.entry.east"
+    },
+    "support.entry.canopy.1.base": {
+      "kind": "supports",
+      "support": "slab.entry",
+      "supported": "post.roof.entry.1"
+    },
+    "support.entry.canopy.1.head": {
+      "kind": "supports",
+      "support": "post.roof.entry.1",
+      "supported": "beam.roof.entry.east"
+    },
+    "attach.entry.canopy": {
+      "kind": "attaches",
+      "primary": "wall.east",
+      "attached": "roof.entry",
+      "connectionType": "flashed"
+    },
+    "attach.guard.spa.south": {
+      "kind": "attaches",
+      "primary": "rim.spa.south",
+      "attached": "guard.spa.south",
+      "connectionType": "anchored"
+    },
+    "support.guard.spa.south": {
+      "kind": "supports",
+      "support": "rim.spa.south",
+      "supported": "guard.spa.south"
+    },
+    "attach.guard.spa.east": {
+      "kind": "attaches",
+      "primary": "framing.spa",
+      "attached": "guard.spa.east",
+      "connectionType": "anchored"
+    },
+    "support.guard.spa.east": {
+      "kind": "supports",
+      "support": "framing.spa",
+      "supported": "guard.spa.east"
+    },
+    "attach.guard.porch.west": {
+      "kind": "attaches",
+      "primary": "framing.porch",
+      "attached": "guard.porch.west",
+      "connectionType": "anchored"
+    },
+    "support.guard.porch.west": {
+      "kind": "supports",
+      "support": "framing.porch",
+      "supported": "guard.porch.west"
+    },
+    "attach.guard.porch": {
+      "kind": "attaches",
+      "primary": "rim.porch.south",
+      "attached": "guard.porch",
+      "connectionType": "anchored"
+    },
+    "support.guard.porch": {
+      "kind": "supports",
+      "support": "rim.porch.south",
+      "supported": "guard.porch"
+    },
+    "attach.rim.porch.south": {
+      "kind": "attaches",
+      "primary": "framing.porch",
+      "attached": "rim.porch.south",
+      "connectionType": "anchored"
+    },
+    "support.rim.porch.south": {
+      "kind": "supports",
+      "support": "framing.porch",
+      "supported": "rim.porch.south",
+      "bearingPoint": [
+        679.6,
+        -2998,
+        2855
+      ]
+    },
+    "attach.rim.spa.south": {
+      "kind": "attaches",
+      "primary": "framing.spa",
+      "attached": "rim.spa.south",
+      "connectionType": "anchored"
+    },
+    "support.rim.spa.south": {
+      "kind": "supports",
+      "support": "framing.spa",
+      "supported": "rim.spa.south",
+      "bearingPoint": [
+        6070,
+        -2998,
+        2855
+      ]
+    },
+    "attach.screen.porch.base": {
+      "kind": "attaches",
+      "primary": "slab.upper",
+      "attached": "screen.porch",
+      "connectionType": "anchored"
+    },
+    "attach.screen.porch.head": {
+      "kind": "attaches",
+      "primary": "roof.porch",
+      "attached": "screen.porch",
+      "connectionType": "direct"
+    },
+    "attach.screen.porch.west.base": {
+      "kind": "attaches",
+      "primary": "slab.upper",
+      "attached": "screen.porch.west",
+      "connectionType": "anchored"
+    },
+    "attach.screen.porch.west.head": {
+      "kind": "attaches",
+      "primary": "roof.porch",
+      "attached": "screen.porch.west",
+      "connectionType": "direct"
+    },
+    "attach.screen.porch.east.base": {
+      "kind": "attaches",
+      "primary": "slab.upper",
+      "attached": "screen.porch.east",
+      "connectionType": "anchored"
+    },
+    "attach.screen.porch.east.head": {
+      "kind": "attaches",
+      "primary": "roof.porch",
+      "attached": "screen.porch.east",
+      "connectionType": "direct"
+    },
+    "void.porch.screen-door": {
+      "kind": "voids",
+      "host": "screen.porch.east",
+      "opening": "opening.porch.screen-door"
+    },
+    "fill.porch.screen-door": {
+      "kind": "fills",
+      "opening": "opening.porch.screen-door",
+      "element": "door.porch.screen"
+    }
+  }
+}
