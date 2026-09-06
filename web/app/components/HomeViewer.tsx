@@ -26,7 +26,9 @@ import {
   defaultHiddenElementIds,
   elementIdForObject,
   formatProperty,
+  filterElementGroups,
   groupElements,
+  isolateElements,
   nodeElementIndex,
   withElementVisibility,
   type ManifestElement,
@@ -37,6 +39,7 @@ import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, type CatalogMo
 import ViewOrientation from './ViewOrientation';
 import DesignRequirements from './DesignRequirements';
 import PanelControls from './PanelControls';
+import QuickStart from './QuickStart';
 import { readPanelVisibility, savePanelVisibility, type PanelVisibility, type ReviewPanel } from '../lib/panels';
 
 interface SceneHandle {
@@ -111,8 +114,14 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const [sectionAxis, setSectionAxis] = useState<'none' | 'x' | 'y' | 'z'>('none');
   const [sectionOffset, setSectionOffset] = useState(0);
   const [northRotation, setNorthRotation] = useState(0);
+  const [componentQuery, setComponentQuery] = useState('');
+  const [isolateOnClick, setIsolateOnClick] = useState(false);
+  const [tourPanel, setTourPanel] = useState<ReviewPanel | 'none' | null>(null);
+  const displayedPanels = tourPanel ? { components: tourPanel === 'components', details: tourPanel === 'details' } : panels;
 
   const groups = useMemo(() => (manifest ? groupElements(manifest) : []), [manifest]);
+  const filteredGroups = useMemo(() => filterElementGroups(groups, componentQuery), [groups, componentQuery]);
+  const matchCount = filteredGroups.reduce((count, group) => count + group.elements.length, 0);
   const selected = selectedId && manifest ? manifest.elements[selectedId] : null;
   const spaceIds = useMemo(() => manifest
     ? Object.entries(manifest.elements)
@@ -306,16 +315,16 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     }
   }, [hiddenIds, manifest]);
 
-  const setElementVisible = useCallback((elementId: string, visible: boolean) => {
-    const element = manifest?.elements[elementId];
-    if (!manifest || !element || !canToggleVisibility(element)) return;
-    if (!visible && selectedId === elementId) selectElement(null);
-    setHiddenIds((current) => {
-      const next = withElementVisibility(manifest, current, [elementId], visible);
-      hiddenIdsRef.current = next;
-      return next;
-    });
-  }, [manifest, selectElement, selectedId]);
+  const clickVisibility = (elementIds: string[]) => {
+    if (!manifest) return;
+    const visible = elementIds.every((id) => !hiddenIdsRef.current.has(id));
+    const next = isolateOnClick
+      ? isolateElements(manifest, elementIds)
+      : withElementVisibility(manifest, hiddenIdsRef.current, elementIds, !visible);
+    if (selectedId && next.has(selectedId)) selectElement(null);
+    hiddenIdsRef.current = next;
+    setHiddenIds(next);
+  };
 
   const setSpacesVisible = useCallback((visible: boolean) => {
     if (!manifest) return;
@@ -336,7 +345,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   }, []);
 
   return (
-    <main className={`review-shell ${panels.components ? '' : 'components-hidden'} ${panels.details ? '' : 'details-hidden'}`}>
+    <main className={`review-shell ${displayedPanels.components ? '' : 'components-hidden'} ${displayedPanels.details ? '' : 'details-hidden'}`}>
       <header className="review-header">
         <div className="brand-mark" aria-hidden="true"><span /><span /><span /></div>
         <div className="brand-copy">
@@ -354,19 +363,45 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           </select>}
           {manifest && <span className="revision-badge">rev {manifest.sourceRevision}</span>}
         </div>
+        <QuickStart ready={status === 'ready'} onPanelFocus={setTourPanel} />
       </header>
 
-      <PanelControls visibility={panels} onToggle={onTogglePanel} />
-      <aside id="components-panel" className="model-tree" hidden={!panels.components} aria-label="Model components">
+      <PanelControls visibility={displayedPanels} onToggle={onTogglePanel} />
+      <aside id="components-panel" className="model-tree" hidden={!displayedPanels.components} aria-label="Model components">
         <div className="panel-heading">
           <div><p>Model index</p><h2>Components</h2></div>
           <span>{manifest ? Object.keys(manifest.elements).length : '—'}</span>
         </div>
+        <div className="component-filter" id="component-filter">
+          <label htmlFor="component-search">Filter by name or ID</label>
+          <div className="component-search-field">
+            <input id="component-search" type="search" value={componentQuery}
+              placeholder="Find components…" onChange={(event) => setComponentQuery(event.target.value)} />
+            {componentQuery && <button type="button" aria-label="Clear component filter" onClick={() => setComponentQuery('')}>×</button>}
+          </div>
+          <span role="status">{componentQuery.trim() ? `${matchCount} matching components` : `${matchCount} components`}</span>
+        </div>
         <nav className="tree-groups">
           {manifest && <DesignRequirements manifest={manifest} />}
-          {groups.map((group) => (
-            <section key={group.kind}>
-              <h3>{group.label}<span>{group.elements.length}</span></h3>
+          {manifest && filteredGroups.length === 0 && <p className="no-components">No matching components.</p>}
+          {filteredGroups.map((group) => {
+            const fullGroup = groups.find((entry) => entry.kind === group.kind)!;
+            const groupIds = fullGroup.elements.filter(([, element]) => canToggleVisibility(element)).map(([id]) => id);
+            const visibleCount = groupIds.filter((id) => !hiddenIds.has(id)).length;
+            const groupVisible = visibleCount > 0;
+            const mixed = groupVisible && visibleCount < groupIds.length;
+            const groupAction = isolateOnClick ? 'Isolate' : visibleCount === groupIds.length ? 'Hide' : 'Show';
+            return <section key={group.kind}>
+              <div className="component-group-heading">
+                <h3>{group.label}<span>{group.elements.length}</span></h3>
+                {groupIds.length > 0 && <button type="button" className="visibility-toggle"
+                  aria-label={`${groupAction} ${group.label} group`}
+                  aria-pressed={mixed ? 'mixed' : !groupVisible}
+                  title={`${groupAction} entire ${group.label} group${mixed ? ' (partially hidden)' : ''}`}
+                  onClick={() => clickVisibility(groupIds)}>
+                  <VisibilityIcon visible={groupVisible} mixed={mixed} />
+                </button>}
+              </div>
               {group.elements.map(([elementId, element]) => {
                 const canToggle = canToggleVisibility(element);
                 const visible = !canToggle || !hiddenIds.has(elementId);
@@ -382,18 +417,18 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
                     {canToggle && <button
                       className="visibility-toggle"
                       type="button"
-                      aria-label={`${visible ? 'Hide' : 'Show'} ${element.name}`}
+                      aria-label={`${isolateOnClick ? 'Isolate' : visible ? 'Hide' : 'Show'} ${element.name}`}
                       aria-pressed={!visible}
-                      title={`${visible ? 'Hide' : 'Show'} ${element.name}`}
-                      onClick={() => setElementVisible(elementId, !visible)}
+                      title={`${isolateOnClick ? 'Isolate' : visible ? 'Hide' : 'Show'} ${element.name}`}
+                      onClick={() => clickVisibility([elementId])}
                     >
                       <VisibilityIcon visible={visible} />
                     </button>}
                   </div>
                 );
               })}
-            </section>
-          ))}
+            </section>;
+          })}
         </nav>
       </aside>
 
@@ -408,6 +443,10 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           <button onClick={showAll} disabled={hiddenIds.size === 0} title="Show every component with 3D geometry">
             Show all
           </button>
+          <label title="Eye clicks show only the chosen component or group. Turning this off keeps current visibility.">
+            <input type="checkbox" checked={isolateOnClick} onChange={(event) => setIsolateOnClick(event.target.checked)} />
+            <span>Isolate on eye click</span>
+          </label>
           <label>
             <input
               type="checkbox"
@@ -440,7 +479,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
         <ViewOrientation northRotation={northRotation} />
       </section>
 
-      <aside id="details-panel" className="inspector" hidden={!panels.details} aria-label="Element details">
+      <aside id="details-panel" className="inspector" hidden={!displayedPanels.details} aria-label="Element details">
         <div className="panel-heading">
           <div><p>Selection</p><h2>{selected ? selected.kind : 'Nothing selected'}</h2></div>
           {selected && <span className={`large-swatch kind-${selected.kind}`} />}
@@ -469,12 +508,13 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   );
 }
 
-function VisibilityIcon({ visible }: { visible: boolean }) {
+function VisibilityIcon({ visible, mixed = false }: { visible: boolean; mixed?: boolean }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
       <circle cx="12" cy="12" r="2.5" />
       {!visible && <path className="visibility-slash" d="m4 4 16 16" />}
+      {mixed && <path className="visibility-slash" d="M3 21h18" />}
     </svg>
   );
 }

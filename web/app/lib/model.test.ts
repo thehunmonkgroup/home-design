@@ -7,7 +7,9 @@ import {
   elementIdForObject,
   formatMetric,
   formatProperty,
+  filterElementGroups,
   groupElements,
+  isolateElements,
   isRenderManifest,
   nodeElementIndex,
   withElementVisibility,
@@ -44,6 +46,33 @@ describe('render manifest helpers', () => {
 
   it('derives initial hidden state from manifest defaults', () => {
     expect([...defaultHiddenElementIds(manifest)]).toEqual(['space.living']);
+  });
+
+  it('filters names and IDs without case sensitivity and retains only matching sections', () => {
+    const groups = groupElements(manifest);
+    expect(filterElementGroups(groups, '  MAIN ROOF  ').map((group) => group.kind)).toEqual(['roof']);
+    expect(filterElementGroups(groups, 'WALL.NORTH')[0].elements[0][0]).toBe('wall.north');
+    expect(filterElementGroups(groups, 'north')[0].label).toBe('Walls');
+    expect(filterElementGroups(groups, 'no-such-component')).toEqual([]);
+    expect(filterElementGroups(groups, '   ')).toBe(groups);
+    expect(groups).toHaveLength(3);
+  });
+
+  it('isolates a group and lets later individual visibility edits keep the remaining isolation', () => {
+    const isolated = isolateElements(manifest, ['wall.north', 'roof.main']);
+    expect(isolated).toEqual(new Set(['space.living']));
+    const edited = withElementVisibility(manifest, isolated, ['wall.north'], false);
+    expect(edited).toEqual(new Set(['space.living', 'wall.north']));
+    expect(withElementVisibility(manifest, edited, ['wall.north'], true)).toEqual(isolated);
+    expect(isolateElements(manifest, ['space.living'])).toEqual(new Set(['wall.north', 'roof.main']));
+  });
+
+  it('does not hide property-only entries during isolation', () => {
+    const mixed = { ...manifest, elements: {
+      ...manifest.elements,
+      'space.record': { ...manifest.elements['space.living'], nodes: [] },
+    } };
+    expect(isolateElements(mixed, ['roof.main'])).toEqual(new Set(['wall.north', 'space.living']));
   });
 
   it.each<ElementKind>(['wall', 'opening', 'load', 'detail', 'assembly', 'space'])(

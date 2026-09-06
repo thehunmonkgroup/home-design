@@ -113,6 +113,9 @@ After each accepted revision:
 4. Compare the requested invariant with the resolved measurements in the right panel.
 5. Import the new IFC into the intended CAD application before relying on downstream edits.
 
+The [Browser viewer guide](viewer-guide.md) explains navigation, component
+filtering, visibility, isolation, requirement results and section controls.
+
 ## Coordinating hillside construction
 
 1. Establish survey coordinates, finished-floor datums and separate existing/proposed
@@ -174,4 +177,15 @@ home-design solar design/home.json --at 2026-12-21T12:30:00-05:00 \
 The timestamp must include a timezone. Samples are an N-by-N grid per opening;
 increase sampling for narrow shadows. Below-horizon or back-facing openings receive
 no direct sun. Assess representative winter and summer times, then give the envelope
-export to the energy rater. Geometric sun exposure is not a certification result.
+export to the energy rater. Use the viewer's
+[sun-study controls](viewer-guide.md#inspect-sections-and-sun-studies) to review
+built results and the [envelope handoff guide](export-and-sharing.md#envelope-and-solar-handoff)
+to prepare the analyst's export.
+
+Solar positioning follows the
+[NOAA approximate equations](https://gml.noaa.gov/grad/solcalc/solareqns.PDF).
+Studies trace a regular grid of direct-sun rays per opening against opaque model
+geometry, including decks and porch roofs. They omit atmospheric refraction,
+diffuse sky light, heat transfer, unmodeled trees and seasonal foliage. Transparent
+materials are not simulated optically. These snapshots inform shading decisions;
+annual savings, energy-code compliance and certification require separate analysis.

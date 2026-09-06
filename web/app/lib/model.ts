@@ -167,6 +167,23 @@ export function nodeElementIndex(manifest: RenderManifest): Map<string, string> 
   return index;
 }
 
+export function filterElementGroups(groups: ElementGroup[], query: string): ElementGroup[] {
+  const term = query.trim().toLocaleLowerCase();
+  if (!term) return groups;
+  return groups.map((group) => ({
+    ...group,
+    elements: group.elements.filter(([id, element]) =>
+      id.toLocaleLowerCase().includes(term) || element.name.toLocaleLowerCase().includes(term)),
+  })).filter((group) => group.elements.length > 0);
+}
+
+export function isolateElements(manifest: RenderManifest, elementIds: Iterable<string>): Set<string> {
+  const visibleIds = new Set(elementIds);
+  return new Set(Object.entries(manifest.elements)
+    .filter(([id, element]) => canToggleVisibility(element) && !visibleIds.has(id))
+    .map(([id]) => id));
+}
+
 export function canToggleVisibility(element: ManifestElement): boolean {
   return element.nodes.length > 0;
 }

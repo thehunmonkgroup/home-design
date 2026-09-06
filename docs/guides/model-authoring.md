@@ -196,6 +196,20 @@ Examples:
 
 Every durable connection uses an explicit relationship; geometric contact supplies supporting spatial evidence.
 
+## Drawing views and dimensions
+
+The optional root `drawings` array stores reproducible views for the exported
+SVG sheet. Each entry specifies `id`, `name`, `kind: "projection" | "section"`,
+`axis: "x" | "y" | "z"`, and a canonical millimetre `position` for the cut/view
+plane. Optional `includeKinds` filters the view. Use explicit views to isolate
+crowded construction details.
+
+`dimensions` contains canonical 3D `start`/`end` points and an optional `label`.
+Dimensions measure their projected distance in the selected view, so put dimension
+endpoints in the measurement plane. Rebuild after changing views or dimensions.
+See [Drawings and schedules](export-and-sharing.md#drawings-and-schedules) for
+default views, exported sheet contents and output limitations.
+
 ## Current boundaries
 
 The engine supports architectural/construction coordination, site geometry, drainage routing, geometric solar studies, schedules and dimensioned view/section exports. Structural analysis, reinforcement design, hydraulic simulation, annual energy modeling/certification, jurisdictional code approval, shop/fabrication detailing and native FreeCAD features remain external. Enter consultant-specified values in canonical fields and preserve their references. SVG drawings are coordination drawings, not a completed permit set.

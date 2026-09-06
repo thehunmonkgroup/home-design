@@ -47,12 +47,35 @@ python -m http.server 8000 --bind 127.0.0.1 --directory build/website
 Open `http://localhost:8000/`. Check the model selector, revisions, components,
 and downloads. Stop the server with Ctrl+C. Use HTTP rather than opening
 `index.html` directly, because the viewer fetches model files.
+See the [Browser viewer guide](viewer-guide.md) for review controls.
 
 Upload the **contents of `build/website/`** to any static host, or ZIP those
 contents if the host accepts archives. `index.html` belongs at the upload root.
 The viewer also works under a subdirectory such as `/homes/`; use its trailing
 slash or `/homes/index.html` URL. Publish the complete folder together on every
 update so the catalog and assets stay in sync.
+
+## Preview from a source checkout
+
+To preview a production build of the local `web/` project, first publish its model
+collection from the repository root:
+
+```bash
+home-design build design/home.json --web-assets web/public/model
+```
+
+Then run these commands from the `web` directory after installing its dependencies:
+
+```bash
+npm run build
+npm run start
+```
+
+The build copies model assets from `web/public/model/` into `web/dist/`, which the
+production preview serves. Rebuild both the models and viewer whenever the design
+changes. This preview includes the local published collection, including models
+retained by the default merge behavior. For a self-contained website with exactly
+the selected homes, use `home-design website-export` as described above.
 
 ## Optional: free Cloudflare Pages hosting
 

@@ -42,15 +42,17 @@ npm run dev
 
 Open the local URL printed by the web command. Choose a home in the top-bar model selector.
 Select a component in the left index or directly in the model; its resolved measurements appear in the inspector.
+See the [Browser viewer guide](docs/guides/viewer-guide.md) for navigation, filtering,
+visibility, isolation, requirements and sun-study controls.
 The two-storey construction example is
 [Hillside Deck House](examples/hillside-deck-house.json).
 It demonstrates coordinated terrain, foundations, framing, stairs, screen/guard
 separation, a dependent porch roof, drainage, product specifications, and solar
 studies. Its dimensions and specifications are illustrative and require
 project-specific engineering before construction.
-The example has a complete two-storey shell with separate indoor floors and four
-independently hideable walls per storey. Use the eye buttons beside **Lower — … wall**
-and **Upper — … wall** for cutaway views; the canonical walls remain intact.
+The viewer guide includes a
+[cutaway walkthrough](docs/guides/viewer-guide.md#cutaway-views-of-hillside-deck-house)
+for its two-storey shell.
 
 ## The conversational workflow
 
@@ -133,6 +135,7 @@ The canonical home JSON and intentional change-set JSON form the authoring histo
 
 - [AI design workflow](docs/guides/ai-design-workflow.md)
 - [Model authoring guide](docs/guides/model-authoring.md)
+- [Browser viewer guide](docs/guides/viewer-guide.md)
 - [IFC export and website sharing](docs/guides/export-and-sharing.md)
 - [Website export and deployment](docs/guides/website-deployment.md)
 - [Architecture and developer guide](docs/architecture.md)

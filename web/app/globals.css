@@ -72,12 +72,25 @@ button { color: inherit; }
 .revision-badge { margin-left: 8px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 4px; background: white; color: var(--ink); font-family: ui-monospace, monospace; }
 
 .model-tree, .inspector { min-height: 0; background: var(--panel); z-index: 5; }
-.model-tree { border-right: 1px solid var(--line); }
+.model-tree { display: flex; flex-direction: column; border-right: 1px solid var(--line); }
+.model-tree .panel-heading { flex-shrink: 0; }
 .inspector { border-left: 1px solid var(--line); }
 .panel-heading { display: flex; align-items: center; justify-content: space-between; height: 78px; padding: 0 18px; border-bottom: 1px solid var(--line); }
 .panel-heading h2 { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: 18px; font-weight: 500; text-transform: capitalize; }
 .panel-heading > span { display: grid; place-items: center; min-width: 28px; height: 28px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); font-size: 11px; }
-.tree-groups { height: calc(100% - 78px); overflow: auto; padding: 14px 10px 40px; }
+.tree-groups { flex: 1; min-height: 0; overflow: auto; padding: 14px 10px 40px; }
+.component-filter { padding: 12px 18px; border-bottom: 1px solid var(--line); }
+.component-filter label { display: block; margin-bottom: 6px; font-size: 11px; color: var(--muted); }
+.component-search-field { display: flex; border: 1px solid var(--line); border-radius: 4px; background: white; }
+.component-search-field:focus-within { outline: 2px solid var(--green); }
+.component-search-field input { width: 100%; min-width: 0; padding: 8px; border: 0; background: transparent; outline: none; font-size: 12px; }
+.component-search-field input::-webkit-search-cancel-button { display: none; }
+.component-search-field button { padding: 0 9px; border: 0; background: transparent; cursor: pointer; }
+.component-filter > span { display: block; margin-top: 6px; font-size: 10px; color: var(--muted); }
+.no-components { padding: 0 8px; color: var(--muted); font-size: 12px; }
+.component-group-heading { display: grid; grid-template-columns: minmax(0, 1fr) 34px; align-items: center; margin-bottom: 7px; }
+.tree-groups .component-group-heading h3 { margin-bottom: 0; }
+.component-group-heading .visibility-toggle { min-height: 28px; }
 .tree-groups section { margin-bottom: 18px; }
 .tree-groups h3 { display: flex; align-items: center; justify-content: space-between; margin: 0 8px 7px; color: var(--muted); font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
 .tree-groups h3 span { font-family: ui-monospace, monospace; }
@@ -186,3 +199,20 @@ button { color: inherit; }
 .requirement-satisfied { color: #31634c; }
 .requirement-violated { color: #a03830; }
 .requirement-measurement { margin-top: 6px; }
+
+.quick-start-button { flex-shrink: 0; width: 30px; height: 30px; padding: 0; border: 1px solid var(--line); border-radius: 50%; background: white; color: var(--green); font-weight: bold; cursor: pointer; }
+.quick-start-button:disabled { opacity: .45; cursor: default; }
+.quick-start-dialog { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0; background: transparent; color: var(--ink); }
+.quick-start-dialog::backdrop { background: rgb(22 35 30 / 35%); }
+.tour-spotlight { position: fixed; border: 3px solid #f6bc65; border-radius: 6px; pointer-events: none; box-shadow: 0 0 0 2px rgb(255 255 255 / 80%); }
+.tour-card { position: fixed; width: min(360px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; padding: 20px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); box-shadow: 0 12px 45px rgb(22 35 30 / 25%); }
+.tour-progress { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 11px; }
+.tour-card h2 { margin: 18px 0 10px; font: 500 22px Georgia, serif; }
+.tour-card h2:focus { outline: none; }
+.tour-card p { margin: 0 0 20px; font-size: 13px; line-height: 1.6; }
+.tour-card button { padding: 7px 10px; border: 1px solid var(--line); border-radius: 4px; background: white; cursor: pointer; font-size: 12px; }
+.tour-progress button { border: 0; padding-right: 0; background: transparent; text-decoration: underline; }
+.tour-actions { display: flex; justify-content: space-between; gap: 12px; }
+.tour-actions .tour-next { background: var(--green); color: white; border-color: var(--green); }
+.tour-card button:disabled { opacity: .4; cursor: default; }
+.tour-card button:focus-visible, .quick-start-button:focus-visible, .visibility-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
