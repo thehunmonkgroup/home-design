@@ -14,6 +14,7 @@ from shapely.ops import unary_union
 
 from home_design.construction import Authoring, ConstructionGeometry
 from home_design.errors import ResolutionError
+from home_design.layers import LayerAssembly
 from home_design.geometry import (
     extrude_polygon,
     number,
@@ -26,6 +27,8 @@ from home_design.placement import LocalFrame, tuple3
 from home_design.resolved import MeshData, ResolvedElement, Vec2, Vec3
 from home_design.solids import SolidOperations
 from home_design.member_geometry import MemberGeometry
+from home_design.boundaries import BoundaryIdentity
+from home_design.topology import NamedSpan, PartIdentity
 
 
 class PlanarFraming:
@@ -41,12 +44,16 @@ class PlanarFraming:
         self.host: ResolvedElement = host
         self.types: dict[str, JsonObject] = types
         self.definition: JsonObject = types[Authoring.text(source["type"])]
-        self.layer: int = int(number(source["layer"], "framing layer"))
+        self.layer: int = LayerAssembly.index(
+            host.data["layers"], source["layer"], f"Host {host.element_id}"
+        )
         self.depth: float
         offset: float
         offset, self.depth = self._layer_depth()
         self.frame: LocalFrame
         self.profile: Polygon
+        self.boundaries: tuple[NamedSpan, ...] = ()
+        self.identities: dict[str, str] = {}
         self.frame, self.profile = self._plane(offset)
         selected = [
             mesh for mesh in host.meshes if mesh.role.endswith(f"layer:{self.layer}")
@@ -225,6 +232,16 @@ class PlanarFraming:
                 vector3(value, "roof boundary")
                 for value in Authoring.array(selected[0]["boundary"])
             ]
+            names = BoundaryIdentity.profile(
+                {
+                    "outer": selected[0]["boundary"],
+                    **(
+                        {"boundaryIds": selected[0]["boundaryIds"]}
+                        if "boundaryIds" in selected[0]
+                        else {}
+                    ),
+                }
+            )
             normal = polygon_normal(boundary)
             if normal[2] < 0:
                 normal = (-normal[0], -normal[1], -normal[2])
@@ -232,6 +249,7 @@ class PlanarFraming:
             if "face" in self.source:
                 raise ResolutionError("Only roof framing accepts a face ID")
             footprint = Authoring.object(self.host.data["footprint"])
+            names = BoundaryIdentity.profile(footprint)
             elevation = number(self.host.data["topElevation"], "slab top")
             boundary = [
                 (point[0], point[1], elevation)
@@ -262,10 +280,13 @@ class PlanarFraming:
             )
         )
         across = ConstructionGeometry.cross(normal, along)
+        origin_index = BoundaryIdentity.select(
+            names[0], self.source.get("originBoundary", 0)
+        )
         origin = (
-            boundary[0][0] - normal[0] * offset,
-            boundary[0][1] - normal[1] * offset,
-            boundary[0][2] - normal[2] * offset,
+            boundary[origin_index][0] - normal[0] * offset,
+            boundary[origin_index][1] - normal[1] * offset,
+            boundary[origin_index][2] - normal[2] * offset,
         )
         frame = LocalFrame(origin, along, across, normal)
 
@@ -280,10 +301,14 @@ class PlanarFraming:
                 delta[i] * across[i] for i in range(3)
             )
 
-        return frame, Polygon(
-            [local(point) for point in boundary],
-            [[local(point) for point in loop] for loop in holes],
+        loops = [[local(point) for point in loop] for loop in [boundary, *holes]]
+        self.boundaries = tuple(
+            NamedSpan(identity, loop[index], loop[(index + 1) % len(loop)])
+            for loop, identities in zip(loops, names)
+            for index, identity in enumerate(identities)
         )
+        outer = loops[0][origin_index:] + loops[0][:origin_index]
+        return frame, Polygon(outer, loops[1:])
 
     def _section(self, type_id: str) -> tuple[float, float]:
         """Read a rectangular section in transverse-width and surface-normal depth."""
@@ -312,9 +337,24 @@ class PlanarFraming:
         return []
 
     def _add(
-        self, key: str, role: str, type_id: str, region: Polygon, direction: Vec2
+        self,
+        key: str,
+        role: str,
+        type_id: str,
+        region: Polygon,
+        direction: Vec2,
+        identity: str,
     ) -> None:
         """Fit one member's actual profile to the host and retain its stock reference."""
+        semantic_key = identity
+        if "originBoundary" in self.source:
+            aliases = Authoring.object(self.source.get("memberIds", {}))
+            key = Authoring.text(aliases.get(identity, identity))
+        if semantic_key in self.identities.values():
+            raise ResolutionError(
+                f"Ambiguous generated member identity {semantic_key}",
+                code="member.ambiguous-identity",
+            )
         if key in self.records:
             raise ResolutionError(f"Duplicate generated member key {key}")
         width, depth = self._section(type_id)
@@ -343,6 +383,8 @@ class PlanarFraming:
         self.meshes[key] = mesh
         self.regions[key] = profile
         self.records[key] = self._record(key, role, type_id, profile, direction, mesh)
+        self.records[key]["identityKey"] = semantic_key
+        self.identities[key] = semantic_key
 
     def _record(
         self,
@@ -390,6 +432,7 @@ class PlanarFraming:
         for ring_index, ring in enumerate((oriented.exterior, *oriented.interiors)):
             points = list(ring.coords)
             for index, (a, b) in enumerate(zip(points, points[1:])):
+                edge = PartIdentity.edge((a[0], a[1]), (b[0], b[1]), self.boundaries)
                 length = math.dist(a, b)
                 direction = ((b[0] - a[0]) / length, (b[1] - a[1]) / length)
                 extended = LineString(
@@ -413,6 +456,7 @@ class PlanarFraming:
                         type_id,
                         polygon,
                         direction,
+                        f"rim/{edge}/{PartIdentity.fragment(polygon, direction, tuple(span for span in self.boundaries if span.identity != edge))}",
                     )
 
     def _grid(self) -> None:
@@ -446,6 +490,7 @@ class PlanarFraming:
                     type_id,
                     polygon,
                     (1, 0),
+                    f"grid/{index}/{PartIdentity.fragment(polygon, (1, 0), self.boundaries)}",
                 )
 
     def _blocking(self) -> None:
@@ -469,8 +514,24 @@ class PlanarFraming:
                     raise ResolutionError(
                         f"Blocking row {key} intersects a perimeter joint"
                     )
+                boundaries = list(self.boundaries)
+                for member_key, member in self.regions.items():
+                    if member_key.startswith("blocking/"):
+                        continue
+                    points = list(member.exterior.coords)
+                    boundaries.extend(
+                        NamedSpan(
+                            self.identities[member_key], (a[0], a[1]), (b[0], b[1])
+                        )
+                        for a, b in zip(points, points[1:])
+                    )
                 self._add(
-                    f"blocking/{key}/{index}", "blocking", type_id, polygon, (0, 1)
+                    f"blocking/{key}/{index}",
+                    "blocking",
+                    type_id,
+                    polygon,
+                    (0, 1),
+                    f"blocking/{key}/{PartIdentity.fragment(polygon, (0, 1), tuple(boundaries))}",
                 )
 
     def _overrides(self) -> None:
@@ -529,6 +590,9 @@ class PlanarFraming:
                     "roofSystem" if self.host.kind == "roof" else "floorSystem"
                 ),
                 "memberCount": len(self.meshes),
+                "memberIdentities": {
+                    identity: key for key, identity in self.identities.items()
+                },
                 "members": [self.records[key] for key in sorted(self.records)],
                 "occupies": {
                     "regions": [{"host": self.host.element_id, "layer": self.layer}]

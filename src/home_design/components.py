@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from home_design.capabilities import ComponentRegistry
+from home_design.boundaries import BoundaryIdentity
+
 import math
 from typing import Protocol
 
@@ -47,20 +50,7 @@ class ResolutionContext(Protocol):
 class ConstructionResolver:
     """Generate construction geometry from reusable types and dependencies."""
 
-    KINDS: frozenset[str] = frozenset(
-        {
-            "member",
-            "framing",
-            "footing",
-            "stair",
-            "railing",
-            "panel",
-            "terrain",
-            "sweep",
-            "load",
-            "detail",
-        }
-    )
+    KINDS: frozenset[str] = ComponentRegistry.resolver_kinds("construction", "panel")
 
     def __init__(self, context: ResolutionContext) -> None:
         """Share canonical references and surface-query services."""
@@ -80,9 +70,11 @@ class ConstructionResolver:
                 .origin
             )
         if "anchor" in locator:
-            return self.context.locators.point3_anchor(
+            point = self.context.locators.point3_anchor(
                 Authoring.text(locator["anchor"])
             )
+            offset = vector3(locator.get("offset", [0, 0, 0]), "anchor point offset")
+            return point[0] + offset[0], point[1] + offset[1], point[2] + offset[2]
         if "elevation" in locator:
             x, y = vector2(locator.get("point"), "plan point")
             return x, y, self.context.elevation(Authoring.object(locator["elevation"]))
@@ -196,6 +188,7 @@ class ConstructionResolver:
             "section": section,
             "spacing": spacing,
             "memberIndices": [index for index in range(count) if index not in omit],
+            "distribution": list(distribution),
         }
 
     def footing(self, element: JsonObject) -> tuple[tuple[MeshData, ...], JsonObject]:
@@ -229,6 +222,7 @@ class ConstructionResolver:
                 {
                     "layers": [
                         {
+                            "id": "layer.legacy.0",
                             "name": "Foundation body",
                             "thickness": depth,
                             "material": material,
@@ -241,7 +235,16 @@ class ConstructionResolver:
                 else {}
             ),
             "footprint": {
-                "outer": [list(point) for point in list(polygon.exterior.coords)[:-1]]
+                "outer": [list(point) for point in list(polygon.exterior.coords)[:-1]],
+                **(
+                    {
+                        "boundaryIds": BoundaryIdentity.metadata(
+                            Authoring.object(element["footprint"])
+                        )
+                    }
+                    if "footprint" in element
+                    else {}
+                ),
             },
         }
 
@@ -382,11 +385,10 @@ class ConstructionResolver:
                 vector2(point, "deck edge")
                 for point in Authoring.array(footprint.get("outer"))
             ]
-            index = int(number(follow.get("edgeIndex", 0), "deck edge index"))
-            if index >= len(loop):
-                raise ResolutionError(
-                    "Followed edge index is outside the slab perimeter"
-                )
+            index = BoundaryIdentity.select(
+                BoundaryIdentity.profile(footprint)[0],
+                follow.get("edge", follow.get("edgeIndex", 0)),
+            )
             start, end = loop[index], loop[(index + 1) % len(loop)]
             dx, dy = normalize2((end[0] - start[0], end[1] - start[1]), "deck edge")
             z = number(dependency.data.get("topElevation"), "deck top")

@@ -12,6 +12,8 @@ from shapely.ops import unary_union
 
 from home_design.construction import Authoring, ConstructionGeometry
 from home_design.errors import ResolutionError
+from home_design.layers import LayerAssembly
+from home_design.boundaries import BoundaryIdentity
 from home_design.geometry import extrude_wall_profile, number, vector2, vector3
 from home_design.json_types import JsonObject, JsonValue
 from home_design.resolved import MeshData, ResolvedElement, Vec2, Vec3
@@ -65,10 +67,23 @@ class WallFraming:
         self.types: dict[str, JsonObject] = types
         self.definition: JsonObject = types[Authoring.text(source["type"])]
         self.boards: list[FramingBoard] = []
+        self.top_identities: list[str] = []
+        self.identities: dict[str, str] = {}
         path = [
             vector2(value, "wall axis") for value in Authoring.array(host.data["axis"])
         ]
-        segment = int(number(source.get("segment", 0), "wall segment"))
+        segment = BoundaryIdentity.select(
+            tuple(
+                Authoring.text(value)
+                for value in Authoring.array(
+                    host.data.get(
+                        "segmentIds",
+                        [f"segment.legacy.{index}" for index in range(len(path) - 1)],
+                    )
+                )
+            ),
+            source.get("segment", 0),
+        )
         if not 0 <= segment < len(path) - 1:
             raise ResolutionError("Wall framing segment is outside its host path")
         if len(path) > 2 and "segment" not in source:
@@ -115,9 +130,16 @@ class WallFraming:
         result: list[Vec2] = []
         station = 0.0
         previous = points[0]
-        for point in points:
+        names = Authoring.array(
+            self.host.data.get(
+                "topProfileIds", [f"legacy.{index}" for index in range(len(points) - 1)]
+            )
+        )
+        for index, point in enumerate(points):
             station += math.dist((previous[0], previous[1]), (point[0], point[1]))
             if offset - self.TOLERANCE <= station <= offset + length + self.TOLERANCE:
+                if result:
+                    self.top_identities.append(Authoring.text(names[index - 1]))
                 result.append(
                     (max(0.0, min(length, station - offset)), point[2] - self.base)
                 )
@@ -149,7 +171,11 @@ class WallFraming:
             Authoring.object(value)
             for value in Authoring.array(self.host.data["layers"])
         ]
-        index = int(number(self.source["layer"], "framing layer"))
+        index = LayerAssembly.index(
+            self.host.data["layers"],
+            self.source["layer"],
+            f"Host {self.host.element_id}",
+        )
         if (
             not 0 <= index < len(layers)
             or layers[index].get("representation") != "explicit"
@@ -477,6 +503,37 @@ class WallFraming:
                 board.depth_offset,
             )
 
+    def _identify(self) -> None:
+        """Retain legacy exports through explicit aliases while replacing positional top keys."""
+        segment_ids = Authoring.array(
+            self.host.data.get("segmentIds", [f"segment.legacy.{self.segment}"])
+        )
+        segment = Authoring.text(segment_ids[self.segment])
+        aliases = Authoring.object(self.source.get("memberIds", {}))
+        named = isinstance(self.source.get("segment"), str)
+        result: list[FramingBoard] = []
+        for board in self.boards:
+            key = board.key
+            if key.startswith("top/"):
+                _, course, index = key.split("/")
+                key = f"top/{course}/{self.top_identities[int(index)]}"
+            identity = f"segment/{segment}/{key}"
+            if identity in self.identities:
+                raise ResolutionError(
+                    f"Ambiguous top-profile member identity {identity}",
+                    code="member.ambiguous-identity",
+                )
+            emitted = (
+                Authoring.text(aliases.get(identity, identity)) if named else board.key
+            )
+            if emitted in self.identities.values():
+                raise ResolutionError(
+                    f"Repeated member alias {emitted}", code="member.duplicate-id"
+                )
+            self.identities[identity] = emitted
+            result.append(replace(board, key=emitted))
+        self.boards = result
+
     def resolve(self, element_id: str) -> ResolvedElement:
         """Generate all boards, physical geometry and inspectable construction records."""
         overrides = Authoring.object(self.source.get("openingOverrides", {}))
@@ -491,6 +548,7 @@ class WallFraming:
         self._ends(clear)
         self._field(clear)
         self._blocking()
+        self._identify()
         self._overrides()
         meshes: list[MeshData] = []
         members: list[JsonValue] = []
@@ -530,6 +588,7 @@ class WallFraming:
                 "segment": self.segment,
                 "assemblyType": "wallSystem",
                 "memberCount": len(meshes),
+                "memberIdentities": dict(self.identities),
                 "members": members,
                 "occupies": {
                     "regions": [
@@ -579,6 +638,11 @@ class WallFraming:
         ]
         return {
             "key": board.key,
+            "identityKey": next(
+                identity
+                for identity, key in self.identities.items()
+                if key == board.key
+            ),
             "typeId": board.type_id,
             "role": board.role,
             "section": self.types[board.type_id]["section"],

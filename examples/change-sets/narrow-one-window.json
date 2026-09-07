@@ -1,0 +1,22 @@
+{
+  "changeVersion": "0.1",
+  "id": "change.narrow-one-window",
+  "description": "Give the north window its own 1400 mm wide type while preserving the original reusable type and opening.",
+  "baseRevision": 1,
+  "preconditions": [
+    {"path": "/elements/window.north/type", "equals": "windowType.casement-1500x1200"},
+    {"path": "/types/windowType.casement-1500x1200", "equals": {
+      "kind": "windowType", "name": "Casement window 1500 x 1200",
+      "nominalWidth": 1500, "nominalHeight": 1200, "operation": "casement",
+      "frameDepth": 185, "material": "material.timber"
+    }}
+  ],
+  "operations": [
+    {"op": "putObject", "registry": "types", "objectId": "windowType.north-1400x1200", "value": {
+      "kind": "windowType", "name": "North casement window 1400 x 1200",
+      "nominalWidth": 1400, "nominalHeight": 1200, "operation": "casement",
+      "frameDepth": 185, "material": "material.timber"
+    }},
+    {"op": "set", "path": "/elements/window.north/type", "value": "windowType.north-1400x1200"}
+  ]
+}

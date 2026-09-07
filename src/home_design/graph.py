@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
+from typing import Literal
+from home_design.capabilities import ComponentRegistry, ReferenceRole as ReferenceRole
 
 from home_design.diagnostics import Diagnostic
-from home_design.json_types import JsonObject, JsonValue
+from home_design.json_types import JsonObject, JsonPointer, JsonValue
 
 
 @dataclass(frozen=True, slots=True)
@@ -19,6 +21,46 @@ class Reference:
     path: str
     registry: str
     expected_kinds: tuple[str, ...] = ()
+    role: ReferenceRole = "reference"
+    storage: Literal["value", "key"] = "value"
+
+    @property
+    def owner_registry(self) -> str:
+        """Return the registry containing the authored reference."""
+        return self.path.split("/")[1]
+
+    @property
+    def geometry_dependency(self) -> bool:
+        """Distinguish placement dependencies from cyclic semantic networks."""
+        return self.role == "placement" and self.registry in {"elements", "anchors"}
+
+    def to_dict(self, model: JsonObject | None = None) -> JsonObject:
+        """Serialize a typed edge with its exact source path."""
+        result: JsonObject = {
+            "ownerId": self.owner_id,
+            "ownerRegistry": self.owner_registry,
+            "targetId": self.target_id,
+            "targetRegistry": self.registry,
+            "path": self.path,
+            "role": self.role,
+            "geometryDependency": self.geometry_dependency,
+            "expectedKinds": list(self.expected_kinds),
+            "storage": self.storage,
+        }
+        if model is not None:
+            try:
+                parent = JsonPointer.get(model, self.path.rsplit("/", 1)[0])
+            except (KeyError, IndexError, ValueError, TypeError):
+                parent = None
+            if isinstance(parent, dict):
+                scope = {
+                    key: parent[key]
+                    for key in ("part", "port", "layer", "face")
+                    if key in parent
+                }
+                if scope:
+                    result["scope"] = scope
+        return result
 
 
 class ModelIndex:
@@ -41,7 +83,15 @@ class ModelIndex:
                 "relationships",
             )
         }
-        self.references: tuple[Reference, ...] = tuple(self._collect_references())
+        self.references: tuple[Reference, ...] = tuple(
+            replace(reference, role=self._reference_role(reference))
+            for reference in self._collect_references()
+        )
+        self.incoming: dict[str, list[Reference]] = defaultdict(list)
+        self.outgoing: dict[str, list[Reference]] = defaultdict(list)
+        for reference in self.references:
+            self.incoming[reference.target_id].append(reference)
+            self.outgoing[reference.owner_id].append(reference)
         self.relationships_by_kind: dict[str, list[tuple[str, JsonObject]]] = (
             defaultdict(list)
         )
@@ -102,29 +152,8 @@ class ModelIndex:
         :returns: Canonically ordered cycles without duplicates.
         """
         graph: dict[str, set[str]] = defaultdict(set)
-        geometry_fields = {
-            "base",
-            "top",
-            "bottom",
-            "datum",
-            "path",
-            "footprint",
-            "geometry",
-            "geometrySource",
-            "axis",
-            "follow",
-            "target",
-            "location",
-            "host",
-            "placement",
-            "nodes",
-            "port",
-        }
         for reference in self.references:
-            if reference.registry in {"elements", "anchors"} and (
-                reference.path.startswith("/anchors/")
-                or set(reference.path.split("/")[3:]) & geometry_fields
-            ):
+            if reference.geometry_dependency:
                 graph[reference.owner_id].add(reference.target_id)
         cycles: set[tuple[str, ...]] = set()
         active: list[str] = []
@@ -159,6 +188,14 @@ class ModelIndex:
         :returns: Relationship ID/object pairs.
         """
         return tuple(self.relationships_by_kind.get(kind, ()))
+
+    @staticmethod
+    def _reference_role(reference: Reference) -> ReferenceRole:
+        """Classify authored references through the shared capability contract."""
+        tokens = reference.path.split("/")[1:]
+        return ComponentRegistry.reference_role(
+            tokens[0], tokens[2] if len(tokens) > 2 else "", reference.registry
+        )
 
     def host_for_opening(self, opening_id: str) -> str | None:
         """Return an opening's declared host.
@@ -320,36 +357,6 @@ class ModelIndex:
             )
 
     def _element_references(self) -> Iterable[Reference]:
-        expected_type = {
-            "serviceDevice": ("serviceDeviceType",),
-            "serviceRoute": ("serviceRouteType",),
-            "serviceFitting": ("serviceFittingType",),
-            "serviceInsulation": ("serviceInsulationType",),
-            "planarFraming": ("planarFramingType",),
-            "wallFraming": ("wallFramingType",),
-            "wall": ("wallType",),
-            "slab": ("slabType",),
-            "roof": ("roofType",),
-            "door": ("doorType",),
-            "window": ("windowType",),
-            "space": ("spaceType",),
-            "member": ("memberType",),
-            "curvedMember": ("memberType",),
-            "hardware": ("hardwareType",),
-            "masonryPart": ("masonryPartType",),
-            "accessory": ("accessoryType",),
-            "envelopePart": ("envelopePartType",),
-            "reinforcingBar": ("reinforcingBarType",),
-            "reinforcingMesh": ("reinforcingMeshType",),
-            "fastenerGroup": ("fastenerType",),
-            "framing": ("memberType",),
-            "footing": ("footingType",),
-            "stair": ("stairType",),
-            "railing": ("railingType",),
-            "panel": ("panelType",),
-            "sweep": ("sweepType",),
-            "detail": ("detailType",),
-        }
         for element_id, element in self.registries["elements"].items():
             kind = element.get("kind")
             if kind == "serviceCircuit":
@@ -365,59 +372,17 @@ class ModelIndex:
                 yield from self._field_reference(
                     element_id, element, "owner", "elements", "elements"
                 )
-            if kind == "planarFraming":
+            capability = ComponentRegistry.components.get(str(kind))
+            if capability is not None and capability.host_targets:
                 yield from self._field_reference(
                     element_id,
                     element,
                     "host",
                     "elements",
                     "elements",
-                    ("slab", "roof"),
-                )
-            if kind == "serviceInsulation":
-                yield from self._field_reference(
-                    element_id,
-                    element,
-                    "host",
-                    "elements",
-                    "elements",
-                    ("serviceRoute", "serviceFitting"),
-                )
-            if kind == "wallFraming":
-                yield from self._field_reference(
-                    element_id, element, "host", "elements", "elements", ("wall",)
+                    capability.host_targets,
                 )
             if kind == "penetration":
-                yield from self._field_reference(
-                    element_id,
-                    element,
-                    "host",
-                    "elements",
-                    "elements",
-                    (
-                        "wall",
-                        "slab",
-                        "roof",
-                        "footing",
-                        "member",
-                        "framing",
-                        "wallFraming",
-                        "planarFraming",
-                        "memberAssembly",
-                        "curvedMember",
-                        "hardware",
-                        "masonryPart",
-                        "accessory",
-                        "envelopePart",
-                        "serviceDevice",
-                        "serviceRoute",
-                        "serviceFitting",
-                        "serviceInsulation",
-                        "reinforcingBar",
-                        "reinforcingMesh",
-                        "panel",
-                    ),
-                )
                 yield from self._field_reference(
                     element_id,
                     element,
@@ -434,7 +399,7 @@ class ModelIndex:
                 "type",
                 "elements",
                 "types",
-                expected_type.get(str(kind), ()),
+                ComponentRegistry.expected_types(str(kind)),
             )
             yield from self._value_references(
                 element_id,
@@ -538,11 +503,28 @@ class ModelIndex:
             return
         if not isinstance(value, dict):
             return
-        skip_fields = skip_fields or set()
+        skip_fields = (skip_fields or set()) | {
+            "properties",
+            "specifications",
+            "performance",
+            "externalIds",
+            "memberIds",
+            "recipeInstance",
+        }
         for field, child in value.items():
             if field in skip_fields:
                 continue
             child_path = f"{path}/{field}"
+            if field == "openingOverrides" and isinstance(child, dict):
+                for identity in child:
+                    yield Reference(
+                        owner_id,
+                        identity,
+                        f"{child_path}/{identity}",
+                        "elements",
+                        ("opening",),
+                        storage="key",
+                    )
             if field == "anchor" and isinstance(child, str):
                 yield Reference(owner_id, child, child_path, "anchors")
             elif field in {"memberType", "headerType", "sillType"} and isinstance(
@@ -561,34 +543,7 @@ class ModelIndex:
                         "serviceInsulation",
                     )
                 if path.endswith("/host"):
-                    expected = {
-                        "component": (
-                            "hardware",
-                            "fastenerGroup",
-                            "masonryPart",
-                            "reinforcingMesh",
-                            "accessory",
-                            "envelopePart",
-                            "serviceDevice",
-                            "serviceRoute",
-                            "serviceFitting",
-                            "serviceInsulation",
-                            "curvedMember",
-                            "memberAssembly",
-                            "clearanceZone",
-                            "barrierCheck",
-                        ),
-                        "wall": ("wall",),
-                        "route": ("serviceRoute", "serviceFitting"),
-                        "surface": ("slab", "roof", "footing"),
-                        "member": (
-                            "member",
-                            "wallFraming",
-                            "planarFraming",
-                            "memberAssembly",
-                            "curvedMember",
-                        ),
-                    }.get(str(value.get("kind")), ())
+                    expected = ComponentRegistry.hosts(str(value.get("kind")))
                 yield Reference(owner_id, child, child_path, "elements", expected)
             elif (
                 field == "host"
@@ -600,7 +555,7 @@ class ModelIndex:
                     child,
                     child_path,
                     "elements",
-                    ("wall", "slab", "roof", "footing"),
+                    tuple(sorted(ComponentRegistry.kinds("cavity_host"))),
                 )
             else:
                 yield from self._value_references(owner_id, child, child_path)

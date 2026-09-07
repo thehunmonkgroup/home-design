@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:home-design:schema:assembly-recipe:0.1",
+  "title": "Reusable canonical assembly recipe",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recipeVersion",
+    "id",
+    "name",
+    "modelVersion",
+    "assembly",
+    "objects"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "recipeVersion": {
+      "const": "0.1"
+    },
+    "modelVersion": {
+      "const": "0.2"
+    },
+    "id": {
+      "$ref": "#/$defs/Id"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "assembly": {
+      "$ref": "#/$defs/Id"
+    },
+    "parameters": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/Parameter"
+      }
+    },
+    "bindings": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Id"
+      },
+      "additionalProperties": {
+        "$ref": "#/$defs/Binding"
+      }
+    },
+    "connectionPoints": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Id"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "element",
+          "description"
+        ],
+        "properties": {
+          "element": {
+            "$ref": "#/$defs/Id"
+          },
+          "port": {
+            "$ref": "#/$defs/Id"
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "overridePaths": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/$defs/Pointer"
+      }
+    },
+    "objects": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "elements"
+      ],
+      "properties": {
+        "levels": {
+          "$ref": "#/$defs/Registry"
+        },
+        "anchors": {
+          "$ref": "#/$defs/Registry"
+        },
+        "materials": {
+          "$ref": "#/$defs/Registry"
+        },
+        "types": {
+          "$ref": "#/$defs/Registry"
+        },
+        "elements": {
+          "$ref": "#/$defs/Registry"
+        },
+        "relationships": {
+          "$ref": "#/$defs/Registry"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Id": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9._:-]*$",
+      "minLength": 2,
+      "maxLength": 160
+    },
+    "Pointer": {
+      "type": "string",
+      "pattern": "^/(levels|anchors|materials|types|elements|relationships)/[^/]+/"
+    },
+    "Registry": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/Id"
+      },
+      "additionalProperties": {
+        "type": "object"
+      }
+    },
+    "Parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "valueType",
+        "description",
+        "targets"
+      ],
+      "properties": {
+        "valueType": {
+          "enum": [
+            "length",
+            "angle",
+            "number",
+            "integer",
+            "boolean",
+            "string",
+            "point2",
+            "point3"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "default": {},
+        "minimum": {
+          "type": "number"
+        },
+        "maximum": {
+          "type": "number"
+        },
+        "targets": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/Target"
+          }
+        }
+      }
+    },
+    "Binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "registry",
+        "description"
+      ],
+      "properties": {
+        "registry": {
+          "enum": [
+            "levels",
+            "anchors",
+            "materials",
+            "types",
+            "elements"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Target": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Pointer"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path"
+          ],
+          "properties": {
+            "path": {
+              "$ref": "#/$defs/Pointer"
+            },
+            "scale": {
+              "type": "number"
+            },
+            "offset": {
+              "type": "number"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

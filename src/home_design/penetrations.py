@@ -7,6 +7,7 @@ from dataclasses import replace
 from home_design.components import ConstructionResolver
 from home_design.construction import Authoring, ConstructionGeometry
 from home_design.errors import ResolutionError
+from home_design.layers import LayerAssembly
 from home_design.geometry import extrude_polygon, number, polygon_normal, vector3
 from home_design.json_types import JsonObject, JsonValue
 from home_design.resolved import MeshData, ResolvedElement, Vec3
@@ -235,15 +236,14 @@ class Penetrations:
         """Check layer selection before modifying any of the host's meshes."""
         if value is None:
             return None
-        count = len(Authoring.array(host.data.get("layers", [])))
-        indices = Authoring.array(value)
-        if any(
-            not isinstance(index, int)
-            or isinstance(index, bool)
-            or not 0 <= index < count
-            for index in indices
-        ):
+        try:
+            return [
+                LayerAssembly.index(
+                    host.data.get("layers", []), selection, f"Host {host.element_id}"
+                )
+                for selection in Authoring.array(value)
+            ]
+        except ResolutionError as error:
             raise ResolutionError(
-                f"Penetration selects an unavailable layer on {host.element_id}"
-            )
-        return [int(number(index, "cut layer index")) for index in indices]
+                f"Penetration selects an unavailable layer on {host.element_id}: {error}"
+            ) from error

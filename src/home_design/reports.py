@@ -100,15 +100,12 @@ class ModelReports:
                         for mesh in element.meshes
                         if mesh.role.endswith(f"layer:{layer.index}")
                     )
-                    components = layer.source.get("components")
-                    if isinstance(components, list):
-                        for component in components:
-                            value = Authoring.object(component)
-                            material_id = Authoring.text(value.get("material"))
-                            material_volumes[material_id] = material_volumes.get(
-                                material_id, 0
-                            ) + layer_volume * number(
-                                value.get("fraction"), "material fraction"
+                    if layer.components:
+                        for component in layer.components:
+                            material_id = component.material_id
+                            material_volumes[material_id] = (
+                                material_volumes.get(material_id, 0)
+                                + layer_volume * component.fraction
                             )
                     elif layer.material is not None:
                         material_volumes[layer.material] = (
@@ -183,10 +180,10 @@ class ModelReports:
                 for cavity in Authoring.array(element.data.get("cavities", []))
             ],
             "generatedMembers": [
-                {"assemblyId": element.element_id, **Authoring.object(member)}
+                {"assemblyId": element.element_id, **member.to_dict()}
                 for element in self.model.elements
                 if element.kind in MemberAssemblies.KINDS
-                for member in Authoring.array(element.data["members"])
+                for member in MemberAssemblies.records(element)
             ],
             **categories,
             "circuitSchedules": [

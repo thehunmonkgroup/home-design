@@ -1,0 +1,870 @@
+{
+  "changeVersion": "0.1",
+  "id": "change.adapt.assembly.deck.copy",
+  "description": "Adapt assembly.deck.copy using recipe.coordinated-deck; preserve independent occurrence edits",
+  "baseRevision": 2,
+  "preconditions": [
+    {
+      "path": "/elements/assembly.deck.copy",
+      "equals": {
+        "kind": "assembly",
+        "name": "Coordinated raised deck",
+        "assemblyType": "deckSystem",
+        "recipeInstance": {
+          "recipeId": "recipe.coordinated-deck",
+          "recipeDigest": "1acfc5daab6a8094e25110a743bffab9a5e306235035f0d2b194b6c1cdfcec2c",
+          "parameters": {
+            "origin": [
+              25000,
+              -5000
+            ],
+            "width": 4800,
+            "length": 4000,
+            "height": 2000
+          },
+          "bindings": {
+            "binding.storey": "level.ground"
+          },
+          "objectIds": {
+            "levels": {},
+            "anchors": {
+              "anchor.origin": "assembly.deck.copy.anchor.origin"
+            },
+            "materials": {
+              "material.timber": "assembly.deck.copy.material.timber",
+              "material.concrete": "assembly.deck.copy.material.concrete"
+            },
+            "types": {
+              "type.deck": "assembly.deck.copy.type.deck",
+              "stock.joist": "assembly.deck.copy.stock.joist",
+              "stock.beam": "assembly.deck.copy.stock.beam",
+              "stock.post": "assembly.deck.copy.stock.post",
+              "type.joists": "assembly.deck.copy.type.joists",
+              "type.pad": "assembly.deck.copy.type.pad"
+            },
+            "elements": {
+              "assembly.root": "assembly.deck.copy",
+              "slab.deck": "assembly.deck.copy.slab.deck",
+              "framing.joists": "assembly.deck.copy.framing.joists",
+              "beam.south": "assembly.deck.copy.beam.south",
+              "post.south.west": "assembly.deck.copy.post.south.west",
+              "pad.south.west": "assembly.deck.copy.pad.south.west",
+              "post.south.east": "assembly.deck.copy.post.south.east",
+              "pad.south.east": "assembly.deck.copy.pad.south.east",
+              "beam.north": "assembly.deck.copy.beam.north",
+              "post.north.west": "assembly.deck.copy.post.north.west",
+              "pad.north.west": "assembly.deck.copy.pad.north.west",
+              "post.north.east": "assembly.deck.copy.post.north.east",
+              "pad.north.east": "assembly.deck.copy.pad.north.east"
+            },
+            "relationships": {
+              "supports.south.joists": "assembly.deck.copy.supports.south.joists",
+              "supports.south.west.post": "assembly.deck.copy.supports.south.west.post",
+              "supports.south.west.beam": "assembly.deck.copy.supports.south.west.beam",
+              "supports.south.east.post": "assembly.deck.copy.supports.south.east.post",
+              "supports.south.east.beam": "assembly.deck.copy.supports.south.east.beam",
+              "supports.north.joists": "assembly.deck.copy.supports.north.joists",
+              "supports.north.west.post": "assembly.deck.copy.supports.north.west.post",
+              "supports.north.west.beam": "assembly.deck.copy.supports.north.west.beam",
+              "supports.north.east.post": "assembly.deck.copy.supports.north.east.post",
+              "supports.north.east.beam": "assembly.deck.copy.supports.north.east.beam",
+              "relationship.parts": "assembly.deck.copy.relationship.parts"
+            }
+          },
+          "overrides": {},
+          "sharedTypes": {},
+          "connectionPoints": {
+            "northBeam": {
+              "element": "assembly.deck.copy.beam.north",
+              "description": "North-side beam for explicit building/support coordination"
+            },
+            "surface": {
+              "element": "assembly.deck.copy.slab.deck",
+              "description": "Deck host for guards, stairs and accessories"
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.beam.north",
+      "equals": {
+        "kind": "member",
+        "name": "North deck beam",
+        "type": "assembly.deck.copy.stock.beam",
+        "role": "beam",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              3925.0,
+              1680.0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              3925.0,
+              1680.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.beam.south",
+      "equals": {
+        "kind": "member",
+        "name": "South deck beam",
+        "type": "assembly.deck.copy.stock.beam",
+        "role": "beam",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              75,
+              1680.0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              75,
+              1680.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.pad.north.east",
+      "equals": {
+        "kind": "footing",
+        "name": "north.east concrete pad",
+        "type": "assembly.deck.copy.type.pad",
+        "shape": "pad",
+        "storey": "level.ground",
+        "datum": {
+          "kind": "level",
+          "level": "level.ground",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4525.0,
+                3725.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4925.0,
+                3725.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4925.0,
+                4125.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4525.0,
+                4125.0
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.pad.north.west",
+      "equals": {
+        "kind": "footing",
+        "name": "north.west concrete pad",
+        "type": "assembly.deck.copy.type.pad",
+        "shape": "pad",
+        "storey": "level.ground",
+        "datum": {
+          "kind": "level",
+          "level": "level.ground",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                -125,
+                3725.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                275,
+                3725.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                275,
+                4125.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                -125,
+                4125.0
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.post.north.east",
+      "equals": {
+        "kind": "member",
+        "name": "north.east post",
+        "type": "assembly.deck.copy.stock.post",
+        "role": "column",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              3925.0,
+              0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              3925.0,
+              1580.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.post.north.west",
+      "equals": {
+        "kind": "member",
+        "name": "north.west post",
+        "type": "assembly.deck.copy.stock.post",
+        "role": "column",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              3925.0,
+              0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              3925.0,
+              1580.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.post.south.east",
+      "equals": {
+        "kind": "member",
+        "name": "south.east post",
+        "type": "assembly.deck.copy.stock.post",
+        "role": "column",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              75,
+              0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              75,
+              1580.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.post.south.west",
+      "equals": {
+        "kind": "member",
+        "name": "south.west post",
+        "type": "assembly.deck.copy.stock.post",
+        "role": "column",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              75,
+              0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              75,
+              1580.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.slab.deck",
+      "equals": {
+        "kind": "slab",
+        "name": "Deck surface and joist host",
+        "type": "assembly.deck.copy.type.deck",
+        "role": "deck",
+        "storey": "level.ground",
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                0,
+                0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4800,
+                0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4800,
+                4000
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                0,
+                4000
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        },
+        "datum": {
+          "kind": "level",
+          "level": "level.ground",
+          "offset": 2000
+        },
+        "extrusionDirection": "down"
+      }
+    },
+    {
+      "path": "/levels/level.ground",
+      "equals": {
+        "kind": "storey",
+        "name": "Ground floor",
+        "elevation": 0
+      }
+    }
+  ],
+  "operations": [
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy",
+      "value": {
+        "kind": "assembly",
+        "name": "Coordinated raised deck",
+        "assemblyType": "deckSystem",
+        "recipeInstance": {
+          "recipeId": "recipe.coordinated-deck",
+          "recipeDigest": "1acfc5daab6a8094e25110a743bffab9a5e306235035f0d2b194b6c1cdfcec2c",
+          "parameters": {
+            "origin": [
+              25000,
+              -5000
+            ],
+            "width": 4800,
+            "length": 4800,
+            "height": 2400
+          },
+          "bindings": {
+            "binding.storey": "level.ground"
+          },
+          "objectIds": {
+            "levels": {},
+            "anchors": {
+              "anchor.origin": "assembly.deck.copy.anchor.origin"
+            },
+            "materials": {
+              "material.timber": "assembly.deck.copy.material.timber",
+              "material.concrete": "assembly.deck.copy.material.concrete"
+            },
+            "types": {
+              "type.deck": "assembly.deck.copy.type.deck",
+              "stock.joist": "assembly.deck.copy.stock.joist",
+              "stock.beam": "assembly.deck.copy.stock.beam",
+              "stock.post": "assembly.deck.copy.stock.post",
+              "type.joists": "assembly.deck.copy.type.joists",
+              "type.pad": "assembly.deck.copy.type.pad"
+            },
+            "elements": {
+              "assembly.root": "assembly.deck.copy",
+              "slab.deck": "assembly.deck.copy.slab.deck",
+              "framing.joists": "assembly.deck.copy.framing.joists",
+              "beam.south": "assembly.deck.copy.beam.south",
+              "post.south.west": "assembly.deck.copy.post.south.west",
+              "pad.south.west": "assembly.deck.copy.pad.south.west",
+              "post.south.east": "assembly.deck.copy.post.south.east",
+              "pad.south.east": "assembly.deck.copy.pad.south.east",
+              "beam.north": "assembly.deck.copy.beam.north",
+              "post.north.west": "assembly.deck.copy.post.north.west",
+              "pad.north.west": "assembly.deck.copy.pad.north.west",
+              "post.north.east": "assembly.deck.copy.post.north.east",
+              "pad.north.east": "assembly.deck.copy.pad.north.east"
+            },
+            "relationships": {
+              "supports.south.joists": "assembly.deck.copy.supports.south.joists",
+              "supports.south.west.post": "assembly.deck.copy.supports.south.west.post",
+              "supports.south.west.beam": "assembly.deck.copy.supports.south.west.beam",
+              "supports.south.east.post": "assembly.deck.copy.supports.south.east.post",
+              "supports.south.east.beam": "assembly.deck.copy.supports.south.east.beam",
+              "supports.north.joists": "assembly.deck.copy.supports.north.joists",
+              "supports.north.west.post": "assembly.deck.copy.supports.north.west.post",
+              "supports.north.west.beam": "assembly.deck.copy.supports.north.west.beam",
+              "supports.north.east.post": "assembly.deck.copy.supports.north.east.post",
+              "supports.north.east.beam": "assembly.deck.copy.supports.north.east.beam",
+              "relationship.parts": "assembly.deck.copy.relationship.parts"
+            }
+          },
+          "overrides": {},
+          "sharedTypes": {},
+          "connectionPoints": {
+            "northBeam": {
+              "element": "assembly.deck.copy.beam.north",
+              "description": "North-side beam for explicit building/support coordination"
+            },
+            "surface": {
+              "element": "assembly.deck.copy.slab.deck",
+              "description": "Deck host for guards, stairs and accessories"
+            }
+          }
+        }
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.beam.north",
+      "value": {
+        "kind": "member",
+        "name": "North deck beam",
+        "type": "assembly.deck.copy.stock.beam",
+        "role": "beam",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              4725.0,
+              2080.0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              4725.0,
+              2080.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.beam.south",
+      "value": {
+        "kind": "member",
+        "name": "South deck beam",
+        "type": "assembly.deck.copy.stock.beam",
+        "role": "beam",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              75,
+              2080.0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              75,
+              2080.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.pad.north.east",
+      "value": {
+        "kind": "footing",
+        "name": "north.east concrete pad",
+        "type": "assembly.deck.copy.type.pad",
+        "shape": "pad",
+        "storey": "level.ground",
+        "datum": {
+          "kind": "level",
+          "level": "level.ground",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4525.0,
+                4525.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4925.0,
+                4525.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4925.0,
+                4925.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4525.0,
+                4925.0
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.pad.north.west",
+      "value": {
+        "kind": "footing",
+        "name": "north.west concrete pad",
+        "type": "assembly.deck.copy.type.pad",
+        "shape": "pad",
+        "storey": "level.ground",
+        "datum": {
+          "kind": "level",
+          "level": "level.ground",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                -125,
+                4525.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                275,
+                4525.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                275,
+                4925.0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                -125,
+                4925.0
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.post.north.east",
+      "value": {
+        "kind": "member",
+        "name": "north.east post",
+        "type": "assembly.deck.copy.stock.post",
+        "role": "column",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              4725.0,
+              0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              4725.0,
+              1980.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.post.north.west",
+      "value": {
+        "kind": "member",
+        "name": "north.west post",
+        "type": "assembly.deck.copy.stock.post",
+        "role": "column",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              4725.0,
+              0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              4725.0,
+              1980.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.post.south.east",
+      "value": {
+        "kind": "member",
+        "name": "south.east post",
+        "type": "assembly.deck.copy.stock.post",
+        "role": "column",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              75,
+              0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              4725.0,
+              75,
+              1980.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.post.south.west",
+      "value": {
+        "kind": "member",
+        "name": "south.west post",
+        "type": "assembly.deck.copy.stock.post",
+        "role": "column",
+        "storey": "level.ground",
+        "axis": [
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              75,
+              0
+            ]
+          },
+          {
+            "anchor": "assembly.deck.copy.anchor.origin",
+            "offset": [
+              75,
+              75,
+              1980.0
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.slab.deck",
+      "value": {
+        "kind": "slab",
+        "name": "Deck surface and joist host",
+        "type": "assembly.deck.copy.type.deck",
+        "role": "deck",
+        "storey": "level.ground",
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                0,
+                0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4800,
+                0
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                4800,
+                4800
+              ]
+            },
+            {
+              "anchor": "assembly.deck.copy.anchor.origin",
+              "offset": [
+                0,
+                4800
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        },
+        "datum": {
+          "kind": "level",
+          "level": "level.ground",
+          "offset": 2400
+        },
+        "extrusionDirection": "down"
+      }
+    }
+  ]
+}

@@ -22,6 +22,7 @@ import ifcopenshell.api.type
 from ifcopenshell.entity_instance import entity_instance
 
 from home_design.constants import GUID_NAMESPACE, IFC_SCHEMA
+from home_design.capabilities import ComponentRegistry
 from home_design.errors import ExportError
 from home_design.geometry import vector2, vector3
 from home_design.json_types import JsonObject
@@ -40,79 +41,16 @@ from home_design.adapters.ifc_quantities import IfcQuantities
 from home_design.mounted_parts import MountedParts
 from home_design.member_assemblies import MemberAssemblies
 from home_design.construction import Authoring
+from home_design.layers import LayerAssembly
 
 
 class IfcExporter:
     """Export the resolved model to semantically structured IFC4."""
 
     _ENTITY_CLASSES: ClassVar[dict[str, str]] = {
-        "wall": "IfcWall",
-        "slab": "IfcSlab",
-        "roof": "IfcRoof",
-        "opening": "IfcOpeningElement",
-        "penetration": "IfcOpeningElement",
-        "door": "IfcDoor",
-        "window": "IfcWindow",
-        "space": "IfcSpace",
-        "assembly": "IfcElementAssembly",
-        "member": "IfcMember",
-        "framing": "IfcElementAssembly",
-        "wallFraming": "IfcElementAssembly",
-        "planarFraming": "IfcElementAssembly",
-        "memberAssembly": "IfcElementAssembly",
-        "curvedMember": "IfcMember",
-        "hardware": "IfcDiscreteAccessory",
-        "masonryPart": "IfcBuildingElementPart",
-        "accessory": "IfcBuildingElementPart",
-        "envelopePart": "IfcCovering",
-        "clearanceZone": "IfcVirtualElement",
-        "barrierCheck": "IfcVirtualElement",
-        "serviceDevice": "IfcDistributionElement",
-        "serviceRoute": "IfcFlowSegment",
-        "serviceFitting": "IfcFlowFitting",
-        "serviceInsulation": "IfcCovering",
-        "serviceSystem": "IfcDistributionSystem",
-        "serviceCircuit": "IfcDistributionCircuit",
-        "reinforcingBar": "IfcReinforcingBar",
-        "reinforcingMesh": "IfcReinforcingMesh",
-        "fastenerGroup": "IfcMechanicalFastener",
-        "footing": "IfcFooting",
-        "stair": "IfcStairFlight",
-        "railing": "IfcRailing",
-        "panel": "IfcPlate",
-        "terrain": "IfcGeographicElement",
-        "sweep": "IfcBuildingElementProxy",
-        "load": "IfcBuildingElementProxy",
-        "detail": "IfcBuildingElementProxy",
+        kind: item.ifc_class for kind, item in ComponentRegistry.components.items()
     }
-    _TYPE_CLASSES: ClassVar[dict[str, str]] = {
-        "wallType": "IfcWallType",
-        "slabType": "IfcSlabType",
-        "roofType": "IfcRoofType",
-        "doorType": "IfcDoorType",
-        "windowType": "IfcWindowType",
-        "spaceType": "IfcSpaceType",
-        "memberType": "IfcMemberType",
-        "wallFramingType": "IfcElementAssemblyType",
-        "planarFramingType": "IfcElementAssemblyType",
-        "hardwareType": "IfcDiscreteAccessoryType",
-        "masonryPartType": "IfcBuildingElementPartType",
-        "accessoryType": "IfcBuildingElementPartType",
-        "envelopePartType": "IfcCoveringType",
-        "serviceDeviceType": "IfcDistributionElementType",
-        "serviceRouteType": "IfcDistributionElementType",
-        "serviceFittingType": "IfcDistributionElementType",
-        "serviceInsulationType": "IfcCoveringType",
-        "reinforcingBarType": "IfcReinforcingBarType",
-        "reinforcingMeshType": "IfcReinforcingMeshType",
-        "fastenerType": "IfcMechanicalFastenerType",
-        "footingType": "IfcFootingType",
-        "stairType": "IfcStairFlightType",
-        "railingType": "IfcRailingType",
-        "panelType": "IfcPlateType",
-        "sweepType": "IfcBuildingElementProxyType",
-        "detailType": "IfcBuildingElementProxyType",
-    }
+    _TYPE_CLASSES: ClassVar[dict[str, str]] = ComponentRegistry.type_classes()
 
     def export(self, model: ResolvedModel, output_path: Path) -> None:
         """Write a deterministic IFC4 file.
@@ -161,10 +99,11 @@ class IfcExporter:
                 ):
                     contribution = Authoring.object(value)
                     host_id = Authoring.text(contribution.get("host"))
-                    layer = contribution["layer"]
+                    layer = contribution.get("layerId", contribution["layer"])
+                    layer_key = LayerAssembly.export_key(layer)
                     self._connects(
                         ifc,
-                        f"{element.element_id}/cavity/{host_id}/{layer}",
+                        f"{element.element_id}/cavity/{host_id}/{layer_key}",
                         {
                             "kind": "attaches",
                             "primary": host_id,
@@ -569,30 +508,11 @@ class IfcExporter:
         """Export repeated members as typed children with stable source-derived IDs."""
         elements: list[ResolvedElement] = []
         for element in model.elements:
-            if element.kind in MemberAssemblies.KINDS:
+            if element.kind in MemberAssemblies.CHILD_KINDS:
                 elements.append(replace(element, meshes=()))
                 elements.extend(MemberAssemblies.children(element))
                 continue
-            if element.kind != "framing":
-                elements.append(element)
-                continue
-            elements.append(replace(element, meshes=()))
-            for mesh in element.meshes:
-                index = mesh.role.split(":")[-1]
-                elements.append(
-                    ResolvedElement(
-                        f"{element.element_id}/member/{index}",
-                        "member",
-                        f"{element.name} {index}",
-                        None,
-                        (mesh,),
-                        {
-                            **element.data,
-                            "generatedFrom": element.element_id,
-                            "memberIndex": int(index),
-                        },
-                    )
-                )
+            elements.append(element)
         return tuple(elements)
 
     @staticmethod

@@ -5,6 +5,7 @@ from __future__ import annotations
 from home_design.graph import ModelIndex
 from home_design.json_types import JsonObject
 from home_design.loader import ModelLoader
+from home_design.construction import Authoring
 
 
 def test_reference_model_satisfies_schema(
@@ -67,3 +68,37 @@ def test_opening_and_fill_relationship_lookups(reference_model: JsonObject) -> N
     index = ModelIndex(reference_model)
     assert index.host_for_opening("opening.window.north") == "wall.north"
     assert index.opening_for_fill("window.north") == "opening.window.north"
+
+
+def test_schema_error_selects_authored_kind_and_exact_field(
+    loader: ModelLoader, reference_model: JsonObject
+) -> None:
+    """A window dimension error does not report unrelated device/framing variants."""
+    window_type = Authoring.object(
+        Authoring.object(reference_model["types"])["windowType.casement-1500x1200"]
+    )
+    window_type["nominalWidth"] = -1
+    report = loader.validate_schema(reference_model)
+    assert not report.is_valid
+    assert any(
+        item.path == "/types/windowType.casement-1500x1200/nominalWidth"
+        for item in report.errors
+    )
+    assert all(
+        item.subject_id == "windowType.casement-1500x1200" for item in report.errors
+    )
+    assert len(report.errors) <= 3
+    assert not any("serviceDevice" in item.message for item in report.errors)
+
+
+def test_schema_error_for_unknown_kind_stays_compact(
+    loader: ModelLoader, reference_model: JsonObject
+) -> None:
+    """An unsupported variant retains its source identity without copying the object."""
+    Authoring.object(Authoring.object(reference_model["elements"])["wall.north"])[
+        "kind"
+    ] = "unknownPart"
+    report = loader.validate_schema(reference_model)
+    assert not report.is_valid
+    assert any("unknownPart" in item.message for item in report.errors)
+    assert all(len(item.message) < 200 for item in report.errors)

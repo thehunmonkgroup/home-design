@@ -1,0 +1,72 @@
+{
+  "changeVersion": "0.1",
+  "id": "change.insert-named-layer",
+  "description": "Edit gypsum lining leaves while retaining the named explicit cavity and its participants.",
+  "baseRevision": 1,
+  "preconditions": [
+    {
+      "path": "/types/assembly.partition.demo.type.partition/layers",
+      "equals": [
+        {
+          "id": "finish.exterior",
+          "name": "First gypsum face",
+          "thickness": 12,
+          "material": "assembly.partition.demo.material.gypsum",
+          "function": "finish"
+        },
+        {
+          "id": "cavity",
+          "name": "Explicit framing and insulation",
+          "thickness": 140,
+          "material": "assembly.partition.demo.material.insulation",
+          "function": "structure",
+          "representation": "explicit"
+        },
+        {
+          "id": "finish.interior",
+          "name": "Second gypsum face",
+          "thickness": 12,
+          "material": "assembly.partition.demo.material.gypsum",
+          "function": "finish"
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "op": "set",
+      "path": "/types/assembly.partition.demo.type.partition/layers",
+      "value": [
+        {
+          "id": "finish.additional",
+          "name": "Additional gypsum lining",
+          "thickness": 6,
+          "material": "assembly.partition.demo.material.gypsum",
+          "function": "finish"
+        },
+        {
+          "id": "finish.exterior",
+          "name": "First gypsum face",
+          "thickness": 12,
+          "material": "assembly.partition.demo.material.gypsum",
+          "function": "finish"
+        },
+        {
+          "id": "cavity",
+          "name": "Explicit framing and insulation",
+          "thickness": 140,
+          "material": "assembly.partition.demo.material.insulation",
+          "function": "structure",
+          "representation": "explicit"
+        },
+        {
+          "id": "finish.interior",
+          "name": "Second gypsum face",
+          "thickness": 12,
+          "material": "assembly.partition.demo.material.gypsum",
+          "function": "finish"
+        }
+      ]
+    }
+  ]
+}

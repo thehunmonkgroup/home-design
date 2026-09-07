@@ -1,0 +1,419 @@
+{
+  "recipeVersion": "0.1",
+  "modelVersion": "0.2",
+  "id": "recipe.serviced-partition",
+  "name": "Framed serviced partition",
+  "assembly": "assembly.root",
+  "bindings": {
+    "binding.storey": {
+      "registry": "levels",
+      "kind": "storey",
+      "description": "Existing building storey supplying the vertical datum"
+    }
+  },
+  "objects": {
+    "anchors": {
+      "anchor.origin": {
+        "kind": "point2",
+        "name": "Assembly plan origin",
+        "position": [
+          0,
+          0
+        ],
+        "level": "binding.storey"
+      }
+    },
+    "materials": {
+      "material.timber": {
+        "name": "Framing timber",
+        "category": "wood",
+        "appearance": {
+          "color": "#C69C6D",
+          "roughness": 0.8
+        }
+      },
+      "material.gypsum": {
+        "name": "Gypsum board",
+        "category": "finish",
+        "appearance": {
+          "color": "#E8E5DF",
+          "roughness": 0.95
+        }
+      },
+      "material.insulation": {
+        "name": "Illustrative cavity insulation",
+        "appearance": {
+          "color": "#d8b66a"
+        }
+      },
+      "material.device": {
+        "name": "Illustrative electrical enclosure stock",
+        "appearance": {
+          "color": "#e9e5d8"
+        }
+      }
+    },
+    "types": {
+      "type.partition": {
+        "kind": "wallType",
+        "name": "Illustrative insulated partition",
+        "layers": [
+          {
+            "id": "finish.exterior",
+            "name": "First gypsum face",
+            "thickness": 12,
+            "material": "material.gypsum",
+            "function": "finish"
+          },
+          {
+            "id": "cavity",
+            "name": "Explicit framing and insulation",
+            "thickness": 140,
+            "material": "material.insulation",
+            "function": "structure",
+            "representation": "explicit"
+          },
+          {
+            "id": "finish.interior",
+            "name": "Second gypsum face",
+            "thickness": 12,
+            "material": "material.gypsum",
+            "function": "finish"
+          }
+        ],
+        "layerOrder": "exteriorToInterior"
+      },
+      "stock.stud": {
+        "kind": "memberType",
+        "name": "Illustrative 40 by 140 timber",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 40,
+          "depth": 140
+        }
+      },
+      "stock.plate": {
+        "kind": "memberType",
+        "name": "Illustrative 140 by 40 timber",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 140,
+          "depth": 40
+        }
+      },
+      "stock.header": {
+        "kind": "memberType",
+        "name": "Illustrative 140 by 190 timber",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 140,
+          "depth": 190
+        }
+      },
+      "type.framing": {
+        "kind": "wallFramingType",
+        "name": "Illustrative partition framing",
+        "studType": "stock.stud",
+        "plateType": "stock.plate",
+        "headerType": "stock.header",
+        "spacing": 400
+      },
+      "type.box": {
+        "kind": "serviceDeviceType",
+        "name": "Illustrative flush box",
+        "role": "deviceBox",
+        "material": "material.device",
+        "electrical": {
+          "enclosureRating": "Illustrative specification"
+        },
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 50,
+              "depth": 50
+            },
+            "depth": 40
+          }
+        },
+        "cuts": {
+          "interior": {
+            "section": {
+              "kind": "rectangle",
+              "width": 44,
+              "depth": 44
+            },
+            "depth": 37,
+            "placement": {
+              "origin": [
+                0,
+                0,
+                3
+              ]
+            }
+          }
+        },
+        "ports": {
+          "entry": {
+            "position": [
+              0,
+              0,
+              3
+            ],
+            "direction": [
+              0,
+              0,
+              -1
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 10
+            },
+            "medium": "electrical",
+            "function": "containment",
+            "flow": "bidirectional",
+            "connectionType": "illustrativeFace"
+          }
+        }
+      }
+    },
+    "elements": {
+      "assembly.root": {
+        "kind": "assembly",
+        "name": "Framed serviced partition",
+        "assemblyType": "wallSystem"
+      },
+      "wall.partition": {
+        "kind": "wall",
+        "name": "Insulated partition",
+        "type": "type.partition",
+        "storey": "binding.storey",
+        "path": {
+          "kind": "line",
+          "start": {
+            "anchor": "anchor.origin"
+          },
+          "end": {
+            "anchor": "anchor.origin",
+            "offset": [
+              4000,
+              0
+            ]
+          },
+          "segmentIds": [
+            "run.main"
+          ]
+        },
+        "locationLine": "center",
+        "base": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "top": {
+          "kind": "height",
+          "height": 2400
+        }
+      },
+      "opening.entry": {
+        "kind": "opening",
+        "name": "Framed rough opening",
+        "geometry": {
+          "kind": "rectangle",
+          "width": 900,
+          "height": 2100,
+          "depth": 200
+        },
+        "placement": {
+          "station": 1000,
+          "stationReference": "start",
+          "verticalOffset": 0,
+          "verticalReference": "bottom",
+          "depthOffset": 0
+        }
+      },
+      "framing.partition": {
+        "kind": "wallFraming",
+        "name": "Partition plates, studs and opening package",
+        "type": "type.framing",
+        "host": "wall.partition",
+        "layer": "cavity",
+        "segment": "run.main",
+        "openingOverrides": {
+          "opening.entry": {
+            "headerType": "stock.header"
+          }
+        }
+      },
+      "device.box": {
+        "kind": "serviceDevice",
+        "name": "Flush box",
+        "type": "type.box",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall.partition",
+              "surface": "interior",
+              "station": 3500,
+              "height": 1200
+            }
+          }
+        },
+        "projection": -40,
+        "portStates": {
+          "entry": "open"
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall.partition",
+              "layer": "cavity"
+            }
+          ],
+          "fit": "intersect"
+        }
+      },
+      "cut.box": {
+        "kind": "penetration",
+        "name": "Owned box recess",
+        "host": "wall.partition",
+        "owner": "device.box",
+        "purpose": "recess",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall.partition",
+              "surface": "interior",
+              "station": 3500,
+              "height": 1200
+            }
+          },
+          "rotation": [
+            180,
+            0,
+            0
+          ]
+        },
+        "section": {
+          "kind": "rectangle",
+          "width": 50,
+          "depth": 50
+        },
+        "depth": 40
+      },
+      "system.roughIn": {
+        "kind": "serviceSystem",
+        "name": "Open electrical containment interface",
+        "systemType": "electrical",
+        "members": [
+          {
+            "element": "device.box",
+            "port": "entry"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "relationship.opening": {
+        "kind": "voids",
+        "host": "wall.partition",
+        "opening": "opening.entry"
+      },
+      "relationship.box": {
+        "kind": "attaches",
+        "primary": "wall.partition",
+        "attached": "device.box",
+        "connectionType": "direct"
+      },
+      "relationship.parts": {
+        "kind": "aggregates",
+        "assembly": "assembly.root",
+        "parts": [
+          "wall.partition",
+          "opening.entry",
+          "framing.partition",
+          "device.box",
+          "cut.box",
+          "system.roughIn"
+        ]
+      }
+    }
+  },
+  "description": "Insulated interior partition with a framed rough opening, electrical rough-in box, owned recess and an open containment interface. Stock dimensions are illustrative.",
+  "parameters": {
+    "origin": {
+      "valueType": "point2",
+      "description": "Wall start in model XY millimetres",
+      "default": [
+        -8000,
+        1000
+      ],
+      "targets": [
+        "/anchors/anchor.origin/position"
+      ]
+    },
+    "width": {
+      "valueType": "length",
+      "description": "Wall run in millimetres",
+      "default": 4000,
+      "minimum": 4000,
+      "maximum": 12000,
+      "targets": [
+        "/elements/wall.partition/path/end/offset/0"
+      ]
+    },
+    "height": {
+      "valueType": "length",
+      "description": "Wall height above the storey datum",
+      "default": 2400,
+      "minimum": 2400,
+      "maximum": 3600,
+      "targets": [
+        "/elements/wall.partition/top/height"
+      ]
+    },
+    "openingWidth": {
+      "valueType": "length",
+      "description": "Rough opening width; explicit header stock remains unchanged",
+      "default": 900,
+      "minimum": 600,
+      "maximum": 1200,
+      "targets": [
+        "/elements/opening.entry/geometry/width"
+      ]
+    },
+    "boxHeight": {
+      "valueType": "length",
+      "description": "Electrical rough-in box center height",
+      "default": 1200,
+      "minimum": 300,
+      "maximum": 2000,
+      "targets": [
+        "/elements/device.box/placement/origin/host/height",
+        "/elements/cut.box/placement/origin/host/height"
+      ]
+    }
+  },
+  "connectionPoints": {
+    "entry": {
+      "element": "device.box",
+      "port": "entry",
+      "description": "Open containment connection; coordinate an external conduit and connection before marking connected"
+    },
+    "partition": {
+      "element": "wall.partition",
+      "description": "Architectural partition host for additional accessories and connections"
+    }
+  },
+  "overridePaths": [
+    "/elements/assembly.root/name",
+    "/elements/wall.partition/name",
+    "/elements/framing.partition/memberOverrides",
+    "/types/type.partition/layers"
+  ]
+}

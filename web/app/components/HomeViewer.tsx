@@ -25,23 +25,23 @@ import {
   canToggleVisibility,
   defaultHiddenElementIds,
   elementIdForObject,
-  formatProperty,
   filterElementGroups,
-  groupElements,
   isolateElements,
   nodeElementIndex,
   reviewElementIds,
   withElementVisibility,
-  type ManifestElement,
   type RenderManifest,
   type ReviewPreset,
 } from '../lib/model';
-import { canonicalSectionPlane, configureDirectionalShadow, configureOrbitControls, disposeSceneResources, frameModel, modelNorthRotation } from '../lib/scene';
+import { canonicalSectionPlane, configureDirectionalShadow, configureOrbitControls, disposeSceneResources, frameBounds, frameModel, modelNorthRotation } from '../lib/scene';
 import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, type CatalogModel } from '../lib/catalog';
 import ViewOrientation from './ViewOrientation';
 import DesignRequirements from './DesignRequirements';
 import PanelControls from './PanelControls';
 import QuickStart from './QuickStart';
+import ElementDetails from './ElementDetails';
+import { contextElementIds, navigationGroups, selectionNodes, type NavigationGrouping, type ReviewScope } from '../lib/navigation';
+import type { DisplayUnits } from '../lib/properties';
 import { readPanelVisibility, savePanelVisibility, type PanelVisibility, type ReviewPanel } from '../lib/panels';
 
 interface SceneHandle {
@@ -117,13 +117,15 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const [sectionOffset, setSectionOffset] = useState(0);
   const [northRotation, setNorthRotation] = useState(0);
   const [componentQuery, setComponentQuery] = useState('');
+  const [grouping, setGrouping] = useState<NavigationGrouping>('kind');
+  const [displayUnits, setDisplayUnits] = useState<DisplayUnits>('metric');
   const [isolateOnClick, setIsolateOnClick] = useState(false);
   const [tourPanel, setTourPanel] = useState<ReviewPanel | 'none' | null>(null);
   const displayedPanels = tourPanel ? { components: tourPanel === 'components', details: tourPanel === 'details' } : panels;
 
-  const groups = useMemo(() => (manifest ? groupElements(manifest) : []), [manifest]);
+  const groups = useMemo(() => (manifest ? navigationGroups(manifest, grouping, Boolean(componentQuery.trim())) : []), [manifest, grouping, componentQuery]);
   const filteredGroups = useMemo(() => filterElementGroups(groups, componentQuery), [groups, componentQuery]);
-  const matchCount = filteredGroups.reduce((count, group) => count + group.elements.length, 0);
+  const matchCount = new Set(filteredGroups.flatMap((group) => group.elements.map(([id]) => id))).size;
   const selected = selectedId && manifest ? manifest.elements[selectedId] : null;
   const spaceIds = useMemo(() => manifest
     ? Object.entries(manifest.elements)
@@ -145,7 +147,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     if (!elementId) return;
     const element = currentManifest.elements[elementId];
     if (!element) return;
-    const objects = element.nodes
+    const objects = selectionNodes(currentManifest, elementId)
       .map((name) => handle.scene.getObjectByName(name))
       .filter((object): object is NonNullable<typeof object> => Boolean(object));
     if (!objects.length) return;
@@ -312,7 +314,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   useEffect(() => {
     if (!manifest || !sceneHandle.current) return;
     hiddenIdsRef.current = hiddenIds;
-    for (const [elementId, element] of Object.entries(manifest.elements)) {
+    for (const [elementId, element] of Object.entries(manifest.elements).sort(([, left], [, right]) => Number(Boolean(left.parentId)) - Number(Boolean(right.parentId)))) {
       applyElementVisibility(sceneHandle.current.scene, element, !hiddenIds.has(elementId));
     }
   }, [hiddenIds, manifest]);
@@ -354,6 +356,25 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     setHiddenIds(next);
   };
 
+  const isolateContext = (scope: ReviewScope | 'reveal') => {
+    if (!manifest || !selectedId) return;
+    const ids = contextElementIds(manifest, selectedId, scope === 'reveal' ? 'contents' : scope)
+      .filter((id) => scope !== 'reveal' || id !== selectedId);
+    const next = isolateElements(manifest, ids);
+    hiddenIdsRef.current = next;
+    setHiddenIds(next);
+    if (scope !== 'reveal' && next.has(selectedId)) selectElement(null);
+    const handle = sceneHandle.current;
+    if (handle) {
+      const bounds = new Box3();
+      for (const id of ids) for (const name of manifest.elements[id].nodes) {
+        const object = handle.scene.getObjectByName(name);
+        if (object) bounds.expandByObject(object);
+      }
+      frameBounds(handle.camera, handle.controls, bounds);
+    }
+  };
+
   return (
     <main className={`review-shell ${displayedPanels.components ? '' : 'components-hidden'} ${displayedPanels.details ? '' : 'details-hidden'}`}>
       <header className="review-header">
@@ -380,9 +401,13 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
       <aside id="components-panel" className="model-tree" hidden={!displayedPanels.components} aria-label="Model components">
         <div className="panel-heading">
           <div><p>Model index</p><h2>Components</h2></div>
-          <span>{manifest ? Object.keys(manifest.elements).length : '—'}</span>
+          <span>{manifest ? Object.values(manifest.elements).filter((element) => !element.parentId).length : '—'}</span>
         </div>
         <div className="component-filter" id="component-filter">
+          <label htmlFor="component-grouping">Group by</label>
+          <select id="component-grouping" value={grouping} onChange={(event) => setGrouping(event.target.value as NavigationGrouping)}>
+            <option value="kind">Component type</option><option value="assembly">Assembly</option><option value="room">Room</option><option value="host">Host</option><option value="system">Service system</option>
+          </select>
           <label htmlFor="component-search">Filter by name or ID</label>
           <div className="component-search-field">
             <input id="component-search" type="search" value={componentQuery}
@@ -395,13 +420,13 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           {manifest && <DesignRequirements manifest={manifest} />}
           {manifest && filteredGroups.length === 0 && <p className="no-components">No matching components.</p>}
           {filteredGroups.map((group) => {
-            const fullGroup = groups.find((entry) => entry.kind === group.kind)!;
+            const fullGroup = groups.find((entry) => (entry.id ?? entry.kind) === (group.id ?? group.kind))!;
             const groupIds = fullGroup.elements.filter(([, element]) => canToggleVisibility(element)).map(([id]) => id);
             const visibleCount = groupIds.filter((id) => !hiddenIds.has(id)).length;
             const groupVisible = visibleCount > 0;
             const mixed = groupVisible && visibleCount < groupIds.length;
             const groupAction = isolateOnClick ? 'Isolate' : visibleCount === groupIds.length ? 'Hide' : 'Show';
-            return <section key={group.kind}>
+            return <section key={group.id ?? group.kind}>
               <div className="component-group-heading">
                 <h3>{group.label}<span>{group.elements.length}</span></h3>
                 {groupIds.length > 0 && <button type="button" className="visibility-toggle"
@@ -498,12 +523,12 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
 
       <aside id="details-panel" className="inspector" hidden={!displayedPanels.details} aria-label="Element details">
         <div className="panel-heading">
-          <div><p>Selection</p><h2>{selected ? selected.kind : 'Nothing selected'}</h2></div>
+          <div><p>Selection</p><h2>{selected ? selected.kindLabel ?? selected.kind : 'Nothing selected'}</h2></div>
           {selected && <span className={`large-swatch kind-${selected.kind}`} />}
         </div>
-        {selected && selectedId ? (
+        {selected && selectedId && manifest ? (
           <>
-            <ElementDetails elementId={selectedId} element={selected} />
+            <ElementDetails key={selectedId} elementId={selectedId} manifest={manifest} units={displayUnits} onUnits={setDisplayUnits} onSelect={selectElement} onIsolate={isolateContext} />
             {manifest?.solarStudies?.filter((study) => study.id === solarStudyId).map((study) => {
               const opening = study.openings.find((entry) => entry.elementId === selectedId);
               return opening ? <p className="solar-result" key={study.id}>{study.name}: {Math.round(opening.unshadedFraction * 100)}% of sampled opening receives direct sun. {study.at}</p> : null;
@@ -534,32 +559,4 @@ function VisibilityIcon({ visible, mixed = false }: { visible: boolean; mixed?: 
       {mixed && <path className="visibility-slash" d="M3 21h18" />}
     </svg>
   );
-}
-
-function ElementDetails({ elementId, element }: { elementId: string; element: ManifestElement }) {
-  const measurements = Object.entries(element.data)
-    .map(([key, value]) => [key, formatProperty(key, value)] as const)
-    .filter((entry): entry is readonly [string, string] => Boolean(entry[1]));
-  return (
-    <div className="element-details">
-      <h3>{element.name}</h3>
-      <code>{elementId}</code>
-      {!canToggleVisibility(element) && <p>No independent 3D geometry. Properties remain available for inspection.</p>}
-      <dl>
-        <div><dt>Kind</dt><dd>{element.kind}</dd></div>
-        <div><dt>Storey</dt><dd>{element.storeyId ?? 'Hosted / none'}</dd></div>
-        {measurements.map(([key, value]) => (
-          <div key={key}><dt>{humanize(key)}</dt><dd>{value}</dd></div>
-        ))}
-      </dl>
-      <details>
-        <summary>Resolved properties</summary>
-        <pre>{JSON.stringify(element.data, null, 2)}</pre>
-      </details>
-    </div>
-  );
-}
-
-function humanize(value: string) {
-  return value.replace(/([A-Z])/g, ' $1').replace(/^./, (letter) => letter.toUpperCase());
 }

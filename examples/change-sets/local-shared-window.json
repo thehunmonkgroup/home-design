@@ -1,0 +1,57 @@
+{
+  "changeVersion": "0.1",
+  "id": "change.local-type.window.north",
+  "description": "Give window.north its own reusable type windowType.north-1400x1200; preserve other type users.",
+  "baseRevision": 1,
+  "preconditions": [
+    {
+      "path": "/types/windowType.north-1400x1200",
+      "exists": false
+    },
+    {
+      "path": "/types/windowType.casement-1500x1200",
+      "equals": {
+        "kind": "windowType",
+        "name": "Casement window 1500 x 1200",
+        "nominalWidth": 1500,
+        "nominalHeight": 1200,
+        "operation": "casement",
+        "frameDepth": 185,
+        "material": "material.timber"
+      }
+    },
+    {
+      "path": "/elements/window.north",
+      "equals": {
+        "kind": "window",
+        "name": "North living-room window",
+        "tags": [
+          "living-room",
+          "north"
+        ],
+        "type": "windowType.casement-1500x1200"
+      }
+    }
+  ],
+  "operations": [
+    {
+      "op": "putObject",
+      "registry": "types",
+      "objectId": "windowType.north-1400x1200",
+      "value": {
+        "kind": "windowType",
+        "name": "North casement 1400 x 1200",
+        "nominalWidth": 1400,
+        "nominalHeight": 1200,
+        "operation": "casement",
+        "frameDepth": 185,
+        "material": "material.timber"
+      }
+    },
+    {
+      "op": "set",
+      "path": "/elements/window.north/type",
+      "value": "windowType.north-1400x1200"
+    }
+  ]
+}

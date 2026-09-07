@@ -31,6 +31,7 @@ host materials after cavity ownership. Route passage checks run after those cuts
 | --- | --- |
 | `loader.py` | JSON loading and Draft 2020-12 schema diagnostics |
 | `graph.py` | ID registries, typed references, relationship lookup, dependency cycles |
+| `inspection.py` | Bounded source queries, typed incoming/outgoing edges, transitive dependents/type users and optional resolved member inspection |
 | `validation/semantic.py` | Cardinality, compatibility, and domain invariants |
 | `validation/topology.py` | Profiles, joins, opening fit/overlap, explicit roof planarity |
 | `locators.py` | Shared point, axis, station, level, path, and profile resolution |
@@ -65,7 +66,15 @@ host materials after cavity ownership. Route passage checks run after those cuts
 | `requirements.py` | Shared numeric requirement evaluation and failure diagnostics |
 | `solar.py`, `reports.py` | Geographic solar vectors, sampled geometric shading, schedules and envelope exports |
 | `changes.py` | Revision/precondition enforcement, operation dispatch, atomic commit |
+| `change_preparation.py`, `change_preview.py` | Explicit coordinated operation generation and authored/resolved before/after review with retained validation evidence |
+| `schema_diagnostics.py` | Kind/op discriminator-aware field diagnostics from the authoritative schema |
+| `capabilities.py` | Component/type pairing, resolver registration, host/cavity contracts, generated children, native IFC defaults and viewer labels |
+| `processing.py` | Declared construction-stage prerequisites and shared cavity/network state |
+| `recipes.py`, `assembly_instantiation.py`, `assembly_updates.py`, `assembly_duplication.py` | Declarative package inputs, deterministic expansion, three-way updates and nested reference-safe copying |
+| `assembly_scope.py`, `reference_remapping.py`, `scoped_remapping.py`, `recipe_interfaces.py` | Ownership scope, typed canonical/scoped identity remapping and resolved connection-point validation |
+| `part_contracts.py`, `port_contracts.py`, `quantities.py` | Typed generated stock, service interfaces and dimensioned measurements at shared boundaries |
 | `adapters/ifc.py` | IFC4 types, bodies, axes, containment, materials, and relationships |
+| `view_navigation.py`, `view_properties.py` | Explicit relationship navigation, generated-member review metadata and dimensioned human-readable properties |
 | `adapters/ifc_units.py` | Explicit millimetre, square/cubic-metre, volt/ampere, pascal, kelvin and cubic-metre-per-second project units, with native area/volume conversions |
 | `adapters/ifc_standard_services.py` | IFC4 common-set dimensions, storage/flow measures and optional signed pressure/absolute-temperature bounds from matching authored specifications |
 | `adapters/ifc_structural.py` | Shared native member classifications and role labels for straight/curved occurrences and matching reusable type variants |
@@ -78,9 +87,10 @@ host materials after cavity ownership. Route passage checks run after those cuts
 | `adapters/drawings.py` | Orthographic SVG projections, mesh-plane sections with holes and explicit dimensions |
 | `adapters/gltf.py` | Three.js coordinate conversion, materials, GLB, node manifest |
 | `batch.py` | Ordered input expansion, deduplication and per-model validation reports |
-| `build.py` | Batch staging, per-model directory replacement and publication rollback |
+| `build.py` | Evaluated source snapshots, adapter staging, per-model directory replacement and publication rollback |
+| `source_state.py`, `transactions.py` | Exact-byte source guards, cooperative writer locks, prepared commits and journal-based publication recovery |
 | `publication.py` | Immutable browser assets, managed cleanup and atomic catalog publication |
-| `cli.py` | Validate, inspect, apply, build, import-survey and solar workflows |
+| `cli.py` | Validation, inspection, preparation, previews, transactions/recovery, builds, resources, unit conversion, survey and solar workflows |
 
 All geometry stays in canonical millimetres through `ResolvedModel`. The glTF adapter alone converts to Three.js metres/Y-up. IFC declares millimetre project units and consumes resolved vertices without an implicit scale.
 
@@ -103,7 +113,18 @@ coordinate offset.
 replacing any generated model directory. Inputs are processed in order, with the
 last source for a filename stem supplying that output. `build` delegates a single
 source to the same workflow. Artifact paths in `BuildResult` include the model
-subdirectory; the guarded transaction script consumes those returned paths.
+subdirectory. Each input is captured once and `ModelValidator.evaluate` retains
+the resolved model. `PreparedBuild` binds validation evidence to a canonical source
+fingerprint and the exact captured bytes. Adapters consume that retained result;
+metadata hashes those bytes. Source guards reject changes before publication.
+
+`DesignTransaction` prepares candidate validation and all adapters before committing
+the source under a cooperative destination lock. Its atomic journal records
+`committing`, `committed` and `published` phases. Publication errors preserve the
+saved source and roll back generated model directories. `recover` verifies the
+candidate byte hash and rebuilds the saved revision without applying the changeset.
+This also recovers an interrupted journal phase when the committed bytes match.
+Journals remain under the build root and are excluded from browser assets.
 
 Build directory replacement preserves backups until browser publication succeeds
 and restores them on a caught publication error. This is not a filesystem-wide
@@ -126,9 +147,28 @@ Cleanup targets generated artifact filenames within managed version directories,
 preserving unrelated files. The catalog is revalidated on page load; versioned
 URLs keep manifests, geometry and reports tied to one completed build.
 
+## Installed authoring resources
+
+`build_support.ResourceBuild` copies the authoritative repository schemas, public
+examples, assembly recipes, documentation and progressive skill into wheel resources, preserving
+relative links. Source distributions contain the same inputs. Editable installs
+read checkout resources directly. `home-design resources` returns their installed
+locations; model workflows and unit conversion work outside a checkout. Website
+export additionally requires a viewer source tree and Node dependencies, selected
+with `--web-project` when that tree is elsewhere.
+
 ## Construction resolution and coordination
 
-The authoring schema uses `modelVersion: "0.1"`.
+The [shared resolved contracts](reference/resolved-contracts.md) define placement
+frames, physical stock, layers, ports and quantities used across module boundaries,
+and the explicit construction-stage prerequisites.
+
+The default authoring schema uses `modelVersion: "0.2"`; the reader also supports
+version `0.1`. [Schema evolution](reference/schema-evolution.md) defines explicit
+migration and durable subcomponent identities.
+The [recipe contract](reference/assembly-recipes.md) defines explicit parameters,
+bindings, compact provenance and three-way instance updates. Expanded assemblies
+remain ordinary canonical objects consumed by the existing resolver and adapters.
 `ModelResolver.resolve_component` caches dependency-resolved elements and rejects
 recursive placement. Surface datums can connect slabs, footings, member endpoints,
 stairs and roofs to other geometry, including terrain. Relationships alone do not
@@ -369,7 +409,8 @@ as IFC opening bodies, with layer-restricted native void relationships. Generate
 relationships use `<penetration-id>/voids` identities.
 
 Explicit cavity ownership exports as native element connections with identities
-`<part-id>/cavity/<host-id>/<layer-index>`. Host/part property sets retain the selected
+`<part-id>/cavity/<host-id>/<layer-id>` (migrated legacy layer IDs retain their
+original numeric GUID seed). Host/part property sets retain the selected
 regions and actual volume contributions. Aggregate material fractions remain an
 independent layer representation and cannot coexist with explicit ownership.
 
@@ -441,14 +482,30 @@ IFC header timestamps may vary between builds, so conformance tests compare the 
 
 ## Adding a component
 
-1. Add authoring intent to the JSON Schema and a representative fixture.
-2. Add typed reference extraction and semantic compatibility rules.
-3. Add topology checks that can reject invalid inputs before resolution.
-4. Resolve absolute, adapter-neutral geometry and metadata.
-5. Map the new resolved kind in IFC.
-6. Decide whether it is visible/selectable in GLB and the manifest.
-7. Add focused unit tests for its parameters and integration tests for its relationships and both adapters.
-8. Update end-user documentation and the project skill's edit guidance.
+1. Add authoring intent to the JSON Schema and a minimal public/synthetic fixture.
+2. Register a `ComponentCapability` in `capabilities.py`: kind/label, expected reusable
+   type and native IFC defaults, resolver route, discipline, host frame modes,
+   direct host targets, cavity eligibility and generated-member capabilities.
+   Shared stock types use a consistent IFC type class. `home-design capabilities`
+   audits schema coverage in both directions; `--kind KIND` returns one contract.
+3. Add typed extraction for new reference shapes and semantic compatibility rules.
+   The graph consumes registered type/host pairings and shared reference roles.
+   Placement drives geometry; ownership, connection and requirements remain distinct.
+4. Add topology checks and implement the domain resolver using shared geometry.
+   Bind a new resolver route in `ModelResolver` when needed. Unknown kinds and
+   missing bindings fail explicitly; nonphysical groups use dedicated handlers.
+5. Add specialized native IFC classification/properties when the default class is
+   insufficient. Keep adapter bodies based on final shared resolved meshes.
+6. Supply manifest defaults and labels through the registry. The viewer accepts
+   newly registered families without a second kind list; legacy labels/order remain
+   fallbacks for older manifests. Domain-specific controls may need UI support.
+7. Add focused parameter tests and integration tests for reference propagation,
+   host/cavity behavior, IFC/GLB identity and final quantities. Registration audits
+   verify schema and IFC class coverage; they do not establish geometric correctness.
+8. Update the project skill's relevant technical references and task routing.
+   Update user guides for user-visible capabilities and controls; keep component
+   field semantics in the authoritative skill references. The native export
+   contract is in `docs/reference/ifc-contract.md`.
 
 ## Test strategy
 
@@ -482,6 +539,9 @@ orientation/occlusion. End-to-end tests validate IFC4 and retain specifications,
 material layers, reports, survey transactions and web asset copies together.
 
 Integration tests exercise the supported workflow and cross-adapter contracts: canonical JSON through CLI, resolver, IFC4 validation, stable GUIDs, GLB scene nodes, render manifest, and web asset publication. TypeScript tests cover manifest compatibility, display grouping, scene-object selection, measurement formatting, and the generated Python-to-viewer manifest.
+
+The [viewer contract](reference/viewer-contract.md) describes navigation links,
+generated-member node ownership, parent/child visibility and explicit display units.
 
 Electrical integration coverage includes distinct circuits on a shared mounted
 panel, branch protection, communications, grounding/bonding conductors and an

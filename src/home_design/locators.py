@@ -51,6 +51,14 @@ class LocatorResolver:
         )
 
     def point2(self, locator: JsonValue, active: tuple[str, ...] = ()) -> Vec2:
+        """Resolve a plan point with an optional model-axis offset from a shared anchor."""
+        point = self._point2(locator, active)
+        if isinstance(locator, dict) and "anchor" in locator:
+            offset = vector2(locator.get("offset", [0, 0]), "anchor point offset")
+            return point[0] + offset[0], point[1] + offset[1]
+        return point
+
+    def _point2(self, locator: JsonValue, active: tuple[str, ...] = ()) -> Vec2:
         """Resolve a two-dimensional point locator.
 
         :param locator: Point literal or anchor locator.
@@ -179,6 +187,9 @@ class LocatorResolver:
             math.dist(a, b) <= 0.01 for a, b in zip(points, points[1:])
         ):
             raise ResolutionError("Path contains a zero-length segment")
+        from home_design.boundaries import BoundaryIdentity
+
+        BoundaryIdentity.path(path, len(points) - 1)
         return points
 
     def profile2(
@@ -204,6 +215,9 @@ class LocatorResolver:
             for loop in holes_value
             if isinstance(loop, list)
         )
+        from home_design.boundaries import BoundaryIdentity
+
+        BoundaryIdentity.profile(profile)
         return outer, holes
 
     def _registry(self, name: str) -> dict[str, JsonObject]:

@@ -52,6 +52,10 @@ const SHADOW_NORMAL_BIAS_RADIUS_MULTIPLIER = 0.0025;
 
 export function frameModel(camera: PerspectiveCamera, controls: OrbitControls, model: Object3D): void {
   const bounds = new Box3().setFromObject(model);
+  frameBounds(camera, controls, bounds);
+}
+
+export function frameBounds(camera: PerspectiveCamera, controls: OrbitControls, bounds: Box3): void {
   if (bounds.isEmpty() || camera.aspect <= 0) return;
 
   const damping = controls.enableDamping;

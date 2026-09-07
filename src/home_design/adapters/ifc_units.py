@@ -5,7 +5,7 @@ from __future__ import annotations
 import ifcopenshell
 import ifcopenshell.api.unit
 
-from home_design.constants import MILLIMETRES_PER_METRE
+from home_design.quantities import Quantity
 
 
 class IfcUnits:
@@ -46,9 +46,9 @@ class IfcUnits:
     @staticmethod
     def area(square_millimetres: float) -> float:
         """Convert a canonical area to the declared native square-metre unit."""
-        return square_millimetres / MILLIMETRES_PER_METRE**2
+        return Quantity(square_millimetres, "mm2").in_unit("m2").value
 
     @staticmethod
     def volume(cubic_millimetres: float) -> float:
         """Convert a canonical volume to the declared native cubic-metre unit."""
-        return cubic_millimetres / MILLIMETRES_PER_METRE**3
+        return Quantity(cubic_millimetres, "mm3").in_unit("m3").value

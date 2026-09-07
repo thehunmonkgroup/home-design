@@ -22,6 +22,8 @@ from home_design.resolved import ResolvedElement
 from home_design.resolver import ModelResolver
 from home_design.solids import SolidOperations
 from home_design.validation import ModelValidator
+from home_design.changes import ChangeEngine
+from home_design.migrations import ModelMigration
 
 
 class PlanarFixture:
@@ -104,6 +106,85 @@ class PlanarFixture:
             str(Authoring.object(value)["key"]): Authoring.object(value)
             for value in Authoring.array(element.data["members"])
         }
+
+
+def test_named_boundaries_preserve_members_when_loop_order_changes(
+    reference_model: JsonObject, loader: ModelLoader, validator: ModelValidator
+) -> None:
+    """Cyclic boundary edits retain the framing origin, physical boards and scoped IDs."""
+    PlanarFixture.configure(reference_model)
+    candidate = ChangeEngine(loader).apply(
+        reference_model, ModelMigration(loader).prepare(reference_model)
+    )
+    before = PlanarFixture.members(
+        ModelResolver(candidate).resolve().element("framing.deck")
+    )
+    slab = Authoring.object(Authoring.object(candidate["elements"])["slab.framed"])
+    profile = Authoring.object(slab["footprint"])
+    outer = Authoring.array(profile["outer"])
+    names = Authoring.object(profile["boundaryIds"])
+    ids = Authoring.array(names["outer"])
+    profile["outer"] = outer[2:] + outer[:2]
+    names["outer"] = ids[2:] + ids[:2]
+    report = validator.validate(candidate)
+    assert report.is_valid, report.to_dict()
+    after = PlanarFixture.members(
+        ModelResolver(candidate).resolve().element("framing.deck")
+    )
+    assert set(after) == set(before)
+    for identity in before:
+        assert after[identity]["axis"] == before[identity]["axis"]
+        assert after[identity]["netVolumeMm3"] == pytest.approx(
+            before[identity]["netVolumeMm3"]
+        )
+
+
+def test_new_hole_preserves_existing_hole_members_and_rejects_split_member_override(
+    reference_model: JsonObject, loader: ModelLoader, validator: ModelValidator
+) -> None:
+    """Adding a hole before another hole cannot shift its rim IDs or silently retarget a split joist."""
+    source = PlanarFixture.configure(reference_model)
+    source.pop("blocking")
+    candidate = ChangeEngine(loader).apply(
+        reference_model, ModelMigration(loader).prepare(reference_model)
+    )
+    before = PlanarFixture.members(
+        ModelResolver(candidate).resolve().element("framing.deck")
+    )
+    elements = Authoring.object(candidate["elements"])
+    slab = Authoring.object(elements["slab.framed"])
+    profile = Authoring.object(slab["footprint"])
+    holes = Authoring.array(profile["holes"])
+    holes.insert(
+        0,
+        [
+            {"point": [x, y]}
+            for x, y in ((3000, -7750), (3500, -7750), (3500, -7450), (3000, -7450))
+        ],
+    )
+    names = Authoring.object(profile["boundaryIds"])
+    Authoring.array(names["holes"]).insert(
+        0, ["new.south", "new.east", "new.north", "new.west"]
+    )
+    report = validator.validate(candidate)
+    assert report.is_valid, report.to_dict()
+    after = PlanarFixture.members(
+        ModelResolver(candidate).resolve().element("framing.deck")
+    )
+    retained = {key for key in before if key.startswith("rim/1/")}
+    assert retained <= set(after)
+    for key in retained:
+        assert after[key]["axis"] == before[key]["axis"]
+    assert "grid/1/0" in before and "grid/1/0" not in after
+    Authoring.object(elements["framing.deck"])["memberOverrides"] = {
+        "grid/1/0": {"omit": True}
+    }
+    report = validator.validate(candidate)
+    assert not report.is_valid
+    assert any(
+        "Unknown planar framing member overrides" in diagnostic.message
+        for diagnostic in report.errors
+    )
 
 
 def test_opposing_roof_rims_preserve_cavity_material_through_serialization(

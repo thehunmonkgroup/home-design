@@ -80,6 +80,12 @@ an interior ledge and a sleeved, sealed service penetration. Its interior
 partition controls the mounted circuits, water supply, recess and interface parts.
 Use the framing and services views to inspect the concealed components.
 
+[Integrated Authoring House](examples/integrated-authoring-house.json) adds named
+version `0.2` construction identities, two windows sharing stock and reusable
+partition/deck assemblies. Its [worked edits](skills/home-design/references/examples.md#complete-changeset-examples)
+demonstrate coordinated movement, local stock changes, layer insertion/reordering
+and assembly duplication/adaptation.
+
 ## The conversational workflow
 
 Ask the AI for a specific design outcome in ordinary language, for example:
@@ -94,7 +100,10 @@ The AI should:
 4. Save the canonical JSON after validation succeeds.
 5. Rebuild the IFC and browser assets for your review.
 
-See [AI design workflow](docs/guides/ai-design-workflow.md) for the exact safe sequence and [Model authoring guide](docs/guides/model-authoring.md) for the underlying concepts.
+See [Working with the AI](docs/guides/ai-design-workflow.md) for requesting and
+reviewing edits and [Understanding your home model](docs/guides/model-authoring.md)
+for the underlying concepts. The [home-design skill](skills/home-design/SKILL.md)
+routes AI authors to task-specific field references and the guarded edit protocol.
 
 ## Common commands
 
@@ -111,11 +120,11 @@ home-design inspect design/home.json \
   --relationships
 
 # Validate a proposed change while preserving source files
-home-design apply design/home.json changes/move-window.json --dry-run
+home-design transact design/home.json changes/move-window.json --dry-run
 
-# Save to a new revision file
-home-design apply design/home.json changes/move-window.json \
-  --output design/home-rev-1.json
+# Prepare exports, save a new revision file and publish it
+home-design transact design/home.json changes/move-window.json \
+  --output design/home-rev-1.json --web-assets web/public/model
 
 # Regenerate CAD and web artifacts
 home-design build design/home-rev-1.json \
@@ -124,6 +133,17 @@ home-design build design/home-rev-1.json \
 ```
 
 Add `--debug` before the command name for diagnostic logging, such as `home-design --debug build ...`. Use `--schema PATH` before the command only when developing a compatible schema variant.
+
+`home-design resources` locates schemas, public examples, recipes and the progressive skill
+in either an installed package or a checkout. `home-design convert-length "8 ft 6 1/2 in"`
+returns canonical millimetres. `transact` prepares all adapters before saving and
+returns a journal for recovering interrupted publication with `home-design recover JOURNAL`.
+See the [editing reference](skills/home-design/references/editing.md) for failure states.
+
+`home-design recipes` discovers reusable partition and deck packages. Their named
+parameters coordinate construction; `prepare` creates ordinary changesets for
+instantiation, duplication and updates that preserve independent local edits.
+See [reusable assemblies](skills/home-design/references/assemblies.md).
 
 `validate` and `build` accept multiple files or quoted globs such as `'examples/*.json'`.
 Outputs default to `build/<filename-stem>/`. Browser publication keeps other models
@@ -159,14 +179,16 @@ The canonical home JSON and intentional change-set JSON form the authoring histo
 
 ## Documentation
 
-- [AI design workflow](docs/guides/ai-design-workflow.md)
-- [Model authoring guide](docs/guides/model-authoring.md)
+- [Working with the AI](docs/guides/ai-design-workflow.md)
+- [Understanding your home model](docs/guides/model-authoring.md)
+- [Home-design skill and technical authoring references](skills/home-design/SKILL.md)
+- [IFC representation contract](docs/reference/ifc-contract.md)
 - [Browser viewer guide](docs/guides/viewer-guide.md)
 - [IFC export and website sharing](docs/guides/export-and-sharing.md)
 - [Website export and deployment](docs/guides/website-deployment.md)
 - [Architecture and developer guide](docs/architecture.md)
 - [Accepted model ADR](docs/adr/0001-ifc-aligned-home-model.md)
-- [Canonical model schema](schema/home-model-0.1.schema.json)
+- [Canonical model schema](schema/home-model-0.2.schema.json)
 - [Change-set schema](schema/change-set-0.1.schema.json)
 - [Development backlog](TODO.md)
 

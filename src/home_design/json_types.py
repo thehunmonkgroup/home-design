@@ -46,7 +46,7 @@ class JsonPointer:
             if isinstance(current, dict):
                 current = current[token]
             elif isinstance(current, list):
-                current = current[int(token)]
+                current = current[cls._array_index(token, len(current))]
             else:
                 raise TypeError(f"Cannot traverse scalar at {pointer}")
         return deepcopy(current)
@@ -71,7 +71,7 @@ class JsonPointer:
         if isinstance(parent, dict):
             parent[token] = deepcopy(value)
         elif isinstance(parent, list):
-            index = len(parent) if token == "-" else int(token)
+            index = cls._array_index(token, len(parent), append=True)
             if index == len(parent):
                 parent.append(deepcopy(value))
             else:
@@ -99,17 +99,35 @@ class JsonPointer:
         if isinstance(parent, dict):
             return parent.pop(token)
         if isinstance(parent, list):
-            return parent.pop(int(token))
+            return parent.pop(cls._array_index(token, len(parent)))
         raise TypeError(f"Cannot remove a child of a scalar at {pointer}")
 
-    @staticmethod
-    def _resolve_parent(document: JsonValue, tokens: list[str]) -> JsonValue:
+    @classmethod
+    def _resolve_parent(cls, document: JsonValue, tokens: list[str]) -> JsonValue:
         current = document
         for token in tokens:
             if isinstance(current, dict):
                 current = current[token]
             elif isinstance(current, list):
-                current = current[int(token)]
+                current = current[cls._array_index(token, len(current))]
             else:
                 raise TypeError("Cannot traverse a scalar JSON value")
         return current
+
+    @staticmethod
+    def _array_index(token: str, length: int, append: bool = False) -> int:
+        """Reject negative and noncanonical array positions before an edit can target another item."""
+        if append and token == "-":
+            return length
+        if (
+            not token.isascii()
+            or not token.isdecimal()
+            or (len(token) > 1 and token.startswith("0"))
+        ):
+            raise ValueError(f"Invalid JSON Pointer array index {token}")
+        index = int(token)
+        if index >= length + int(append):
+            raise IndexError(
+                f"JSON Pointer array index {index} is outside length {length}"
+            )
+        return index

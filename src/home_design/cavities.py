@@ -5,6 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass, replace
 
 from home_design.construction import Authoring
+from home_design.capabilities import ComponentRegistry
+from home_design.layers import LayerAssembly
 from home_design.errors import ResolutionError
 from home_design.geometry import number
 from home_design.json_types import JsonObject, JsonValue
@@ -21,35 +23,14 @@ class CavityRegion:
     material: str | None
     meshes: tuple[MeshData, ...]
     mask: MeshData | None
+    layer_id: str | None = None
 
 
 class CavityComposition:
     """Replace aggregate cavity geometry with disjoint infill and owned parts."""
 
     VOLUME_TOLERANCE: float = 1e-5
-    PART_KINDS: frozenset[str] = frozenset(
-        {
-            "member",
-            "framing",
-            "wallFraming",
-            "planarFraming",
-            "memberAssembly",
-            "curvedMember",
-            "hardware",
-            "masonryPart",
-            "accessory",
-            "envelopePart",
-            "serviceDevice",
-            "serviceRoute",
-            "serviceFitting",
-            "serviceInsulation",
-            "reinforcingBar",
-            "reinforcingMesh",
-            "fastenerGroup",
-            "sweep",
-            "panel",
-        }
-    )
+    PART_KINDS: frozenset[str] = ComponentRegistry.kinds("cavity_part")
 
     @classmethod
     def apply(
@@ -74,7 +55,7 @@ class CavityComposition:
                 )
             specification = Authoring.object(part.data["occupies"])
             keys = [
-                cls._key(Authoring.object(region))
+                cls._key(Authoring.object(region), elements)
                 for region in Authoring.array(specification.get("regions"))
             ]
             mask = cls._combined_mask(part.element_id, keys, regions)
@@ -87,9 +68,10 @@ class CavityComposition:
                 volume = cls._allocate(
                     part.element_id, fitted, region_mask, occupied[key], key
                 )
-                contributions.append(
-                    {"host": key[0], "layer": key[1], "volumeMm3": volume}
-                )
+                contribution: JsonObject = {"host": key[0], "layer": key[1], "volumeMm3": volume}
+                if regions[key].layer_id is not None:
+                    contribution["layerId"] = regions[key].layer_id
+                contributions.append(contribution)
             data: JsonObject = {
                 **part.data,
                 "cavityContributions": contributions,
@@ -136,7 +118,7 @@ class CavityComposition:
                     entry = Authoring.object(item)
                     contributions.append(
                         {**entry, "volumeMm3": volume}
-                        if cls._key(entry) == (region.host, region.index)
+                        if cls._key(entry, elements) == (region.host, region.index)
                         else entry
                     )
                 elements[part_id] = replace(
@@ -247,10 +229,14 @@ class CavityComposition:
         return volume
 
     @staticmethod
-    def _key(value: JsonObject) -> tuple[str, int]:
+    def _key(
+        value: JsonObject, elements: dict[str, ResolvedElement]
+    ) -> tuple[str, int]:
         """Read an explicit host/layer ownership identity."""
-        return Authoring.text(value.get("host")), int(
-            number(value.get("layer"), "cavity layer")
+        identity = Authoring.text(value.get("host"))
+        host = elements[identity]
+        return identity, LayerAssembly.index(
+            host.data.get("layers", []), value.get("layer"), f"Host {identity}"
         )
 
     @classmethod
@@ -260,7 +246,7 @@ class CavityComposition:
         """Collect layer masks without counting disconnected or overlapping pieces twice."""
         regions: dict[tuple[str, int], CavityRegion] = {}
         for host in elements.values():
-            if host.kind not in {"wall", "roof", "slab", "footing"}:
+            if host.kind not in ComponentRegistry.kinds("cavity_host"):
                 continue
             for index, value in enumerate(Authoring.array(host.data.get("layers", []))):
                 layer = Authoring.object(value)
@@ -280,6 +266,7 @@ class CavityComposition:
                     material if isinstance(material, str) else None,
                     meshes,
                     SolidOperations.union(meshes, None, "cavity-mask"),
+                    str(layer["id"]) if "id" in layer else None,
                 )
         return regions
 
@@ -361,6 +348,8 @@ class CavityComposition:
                 for part_id, volume in sorted(by_part.items())
             ],
         }
+        if region.layer_id is not None:
+            composition["layerId"] = region.layer_id
         elements[region.host] = replace(
             host,
             meshes=replacement,

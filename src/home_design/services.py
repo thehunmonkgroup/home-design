@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from home_design.capabilities import ComponentRegistry
+
 from dataclasses import replace
 from itertools import combinations
 
@@ -24,9 +26,7 @@ from home_design.solids import SolidOperations
 class ServiceComponents:
     """Resolve reusable device geometry before checking its external network."""
 
-    KINDS: frozenset[str] = frozenset(
-        {"serviceDevice", "serviceSystem", "serviceCircuit"}
-    )
+    KINDS: frozenset[str] = ComponentRegistry.resolver_kinds("service")
     SYSTEM_MEDIA: dict[str, str] = {
         "electrical": "electrical",
         "communications": "communications",

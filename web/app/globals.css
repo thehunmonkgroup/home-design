@@ -154,6 +154,20 @@ button { color: inherit; }
 .element-details { height: calc(100% - 160px); overflow: auto; padding: 22px 18px 35px; }
 .element-details h3 { margin: 0 0 5px; font: 500 20px/1.2 Georgia, serif; }
 .element-details code { color: var(--muted); font-size: 10px; }
+.component-filter select, .display-units select { width: 100%; padding: 7px; border: 1px solid var(--line); border-radius: 4px; background: white; color: var(--ink); }
+.component-filter select { margin-bottom: 10px; }
+.display-units { display: grid; gap: 6px; margin-top: 18px; color: var(--muted); font-size: 11px; }
+.component-note { font-size: 12px; line-height: 1.5; color: var(--muted); }
+.context-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.context-actions button, .more-components { padding: 7px 9px; border: 1px solid var(--line); border-radius: 4px; background: white; color: var(--green); font-size: 11px; cursor: pointer; }
+.related-components, .generated-components { margin: 20px 0; }
+.related-components h4, .generated-components h4 { display: flex; justify-content: space-between; gap: 10px; margin: 12px 0; font-size: 12px; }
+.related-link { display: grid; gap: 4px; width: 100%; padding: 9px 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--green); text-align: left; font-size: 12px; cursor: pointer; }
+.related-link small { font-size: 10px; color: var(--muted); overflow-wrap: anywhere; }
+.related-link span { overflow-wrap: anywhere; }
+.related-link:hover, .related-link:focus-visible { background: #eef1ed; }
+.parent-link { margin-top: 12px; }
+.generated-components input { width: 100%; padding: 8px; border: 1px solid var(--line); border-radius: 4px; }
 .element-details dl { margin: 24px 0; border-top: 1px solid var(--line); }
 .element-details dl div { display: grid; grid-template-columns: 1fr 1.15fr; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .element-details dt { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }

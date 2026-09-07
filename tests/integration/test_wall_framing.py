@@ -19,6 +19,9 @@ from home_design.resolved import ResolvedElement
 from home_design.resolver import ModelResolver
 from home_design.solids import SolidOperations
 from home_design.validation import ModelValidator
+from home_design.changes import ChangeEngine
+from home_design.migrations import ModelMigration
+from home_design.layers import LayerAssembly
 
 
 class WallFramingFixture:
@@ -322,6 +325,44 @@ def test_generated_member_host_follows_opening_and_rejects_missing_key(
     assert number(second[0], "x") - number(first[0], "x") == pytest.approx(100)
     host["part"] = "missing"
     assert not validator.validate(reference_model).is_valid
+
+
+def test_named_cavity_framing_follows_layer_insertion_and_reordering(
+    reference_model: JsonObject, loader: ModelLoader, validator: ModelValidator
+) -> None:
+    """A layout keeps its physical layer and generated IDs after stack positions change."""
+    WallFramingFixture.configure(reference_model)
+    candidate = ChangeEngine(loader).apply(
+        reference_model, ModelMigration(loader).prepare(reference_model)
+    )
+    definition = Authoring.object(
+        Authoring.object(candidate["types"])["type.framedWall"]
+    )
+    layers = Authoring.array(definition["layers"])
+    source = Authoring.object(Authoring.object(candidate["elements"])["framing.wall"])
+    before = ModelResolver(candidate).resolve().element("framing.wall")
+    selected = source["layer"]
+    first = deepcopy(Authoring.object(layers[0]))
+    first.update({"id": "additional.skin", "thickness": 2})
+    layers.insert(0, first)
+    layers.append(layers.pop(1))
+    report = validator.validate(candidate)
+    assert report.is_valid, report.to_dict()
+    after = ModelResolver(candidate).resolve().element("framing.wall")
+    assert after.data["memberIdentities"] == before.data["memberIdentities"]
+    assert source["layer"] == selected
+    assert (
+        Authoring.object(layers[LayerAssembly.index(layers, selected)])[
+            "representation"
+        ]
+        == "explicit"
+    )
+    layers.pop(LayerAssembly.index(layers, selected))
+    report = validator.validate(candidate)
+    assert not report.is_valid
+    assert any(
+        diagnostic.code == "layer.identity-unavailable" for diagnostic in report.errors
+    )
 
 
 def test_cut_generated_header_updates_member_schedule_and_cavity_balance(

@@ -9,6 +9,8 @@ from typing import Protocol
 from shapely.geometry import Point, Polygon
 
 from home_design.constants import GEOMETRY_TOLERANCE_MM
+from home_design.capabilities import ComponentRegistry
+from home_design.layers import LayerAssembly
 from home_design.construction import Authoring, ConstructionGeometry
 from home_design.errors import ResolutionError
 from home_design.member_assemblies import MemberAssemblies
@@ -49,6 +51,8 @@ class HostPlacement:
         host_id = Authoring.text(placement.get("element"), "placement host")
         host = self.context.resolve_component(host_id)
         kind = placement.get("kind")
+        if kind not in ComponentRegistry.get(host.kind).host_modes:
+            raise ResolutionError(f"Placement kind {kind} cannot host on {host.kind}")
         if kind == "member" and host.kind in MemberAssemblies.KINDS:
             host = MemberAssemblies.member(
                 host, Authoring.text(placement.get("part"), "assembly member key")
@@ -72,9 +76,7 @@ class HostPlacement:
             value = Authoring.object(
                 host.data.get("placement"), "component placement frame"
             )
-            frame = LocalFrame(
-                *(vector3(value[key], key) for key in ("origin", "x", "y", "z"))
-            )
+            frame = LocalFrame.from_dict(value)
         else:
             raise ResolutionError(f"Placement kind {kind} cannot host on {host.kind}")
         return frame.adjusted(
@@ -106,9 +108,7 @@ class HostPlacement:
         )
         if host.kind == "serviceFitting":
             source = Authoring.object(host.data["placement"])
-            world = LocalFrame(
-                *(vector3(source[key], key) for key in ("origin", "x", "y", "z"))
-            )
+            world = LocalFrame.from_dict(source)
             frame = LocalFrame(
                 world.point(frame.origin),
                 *(world.vector(axis) for axis in (frame.x, frame.y, frame.z)),
@@ -121,13 +121,9 @@ class HostPlacement:
     ) -> tuple[float, float]:
         """Return selected layer start/end depth from the exterior or top."""
         layers = Authoring.array(host.data.get("layers", []))
-        index = placement.get("layer")
-        if (
-            not isinstance(index, int)
-            or isinstance(index, bool)
-            or not 0 <= index < len(layers)
-        ):
-            raise ResolutionError(f"Host {host.element_id} has no layer {index}")
+        index = LayerAssembly.index(
+            layers, placement.get("layer"), f"Host {host.element_id}"
+        )
         depths = [
             number(Authoring.object(layer).get("thickness"), "layer thickness")
             for layer in layers
@@ -274,9 +270,7 @@ class HostPlacement:
         if not 0 <= station <= number(host.data["memberLength"], "arc length"):
             raise ResolutionError("Host station is outside the curved member axis")
         data = Authoring.object(host.data["placement"])
-        frame = LocalFrame(
-            *(vector3(data[key], key) for key in ("origin", "x", "y", "z"))
-        )
+        frame = LocalFrame.from_dict(data)
         radius = number(host.data["radius"], "arc radius")
         sign = 1 if number(host.data["sweepAngle"], "arc sweep") > 0 else -1
         theta = (

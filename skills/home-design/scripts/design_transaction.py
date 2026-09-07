@@ -9,12 +9,9 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from home_design.build import BuildService
-from home_design.changes import ChangeEngine
 from home_design.errors import HomeDesignError
 from home_design.json_types import JsonObject
-from home_design.loader import ModelLoader
-from home_design.validation import ModelValidator
+from home_design.transactions import DesignTransaction
 
 LOGGER = logging.getLogger("home_design.skill")
 
@@ -37,28 +34,27 @@ class DesignTransactionWorkflow:
             level=logging.DEBUG if args.debug else logging.INFO,
             format="%(levelname)s %(name)s: %(message)s",
         )
-        loader = ModelLoader()
-        validator = ModelValidator(loader)
-        engine = ChangeEngine(loader, validator)
         try:
-            source = loader.load(args.model)
-            change = engine.load_change(args.change)
-            candidate = engine.apply(source, change)
-            if args.dry_run:
-                self._print_result(candidate, None, False)
-                return 0
-            destination = (args.output or args.model).resolve()
-            committed = engine.apply_to_file(args.model, args.change, destination)
-            build = BuildService(loader, validator).build(
-                destination,
+            result = DesignTransaction().apply(
+                args.model,
+                args.change,
+                args.output,
                 args.build_directory,
                 args.web_assets,
+                args.dry_run,
             )
-            self._print_result(committed, build.output_directory, True)
+            self._print_result(result)
             return 0
         except (HomeDesignError, OSError, ValueError, KeyError) as error:
             LOGGER.debug("Guarded design transaction failed", exc_info=True)
-            print(f"error: {error}", file=sys.stderr)
+            detail = (
+                error.to_dict()
+                if isinstance(error, HomeDesignError)
+                else {"message": str(error)}
+            )
+            print(
+                json.dumps({"valid": False, "error": detail}, indent=2), file=sys.stderr
+            )
             return 1
 
     @staticmethod
@@ -96,21 +92,10 @@ class DesignTransactionWorkflow:
         return parser
 
     @staticmethod
-    def _print_result(
-        model: JsonObject, build_directory: Path | None, written: bool
-    ) -> None:
-        revision = model.get("revision")
-        result = {
-            "valid": True,
-            "revision": revision,
-            "written": written,
-            "buildDirectory": str(build_directory) if build_directory else None,
-            "ifc": str(build_directory / "model.ifc") if build_directory else None,
-            "viewerModel": (
-                str(build_directory / "model.glb") if build_directory else None
-            ),
-        }
-        print(json.dumps(result, indent=2))
+    def _print_result(result: JsonObject) -> None:
+        """Preserve the legacy success shape; the package CLI exposes journal status."""
+        keys = ("valid", "revision", "written", "buildDirectory", "ifc", "viewerModel")
+        print(json.dumps({key: result[key] for key in keys}, indent=2))
 
 
 def main(arguments: Sequence[str] | None = None) -> int:

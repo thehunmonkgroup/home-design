@@ -1,0 +1,818 @@
+{
+  "recipeVersion": "0.1",
+  "modelVersion": "0.2",
+  "id": "recipe.coordinated-deck",
+  "name": "Coordinated raised deck",
+  "assembly": "assembly.root",
+  "bindings": {
+    "binding.storey": {
+      "registry": "levels",
+      "kind": "storey",
+      "description": "Existing building storey supplying the vertical datum"
+    }
+  },
+  "objects": {
+    "anchors": {
+      "anchor.origin": {
+        "kind": "point2",
+        "name": "Assembly plan origin",
+        "position": [
+          0,
+          0
+        ],
+        "level": "binding.storey"
+      }
+    },
+    "materials": {
+      "material.timber": {
+        "name": "Framing timber",
+        "category": "wood",
+        "appearance": {
+          "color": "#C69C6D",
+          "roughness": 0.8
+        }
+      },
+      "material.concrete": {
+        "name": "Concrete",
+        "category": "concrete",
+        "appearance": {
+          "color": "#A8A8A8",
+          "roughness": 0.9
+        }
+      }
+    },
+    "types": {
+      "type.deck": {
+        "kind": "slabType",
+        "name": "Deck boards and explicit framing cavity",
+        "layerOrder": "topToBottom",
+        "layers": [
+          {
+            "id": "decking",
+            "name": "Deck board envelope",
+            "material": "material.timber",
+            "thickness": 40,
+            "function": "finish"
+          },
+          {
+            "id": "cavity",
+            "name": "Open joist layer",
+            "thickness": 180,
+            "function": "structure",
+            "representation": "explicit"
+          }
+        ]
+      },
+      "stock.joist": {
+        "kind": "memberType",
+        "name": "Illustrative 40 by 180 timber",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 40,
+          "depth": 180
+        }
+      },
+      "stock.beam": {
+        "kind": "memberType",
+        "name": "Illustrative 150 by 200 timber",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 150,
+          "depth": 200
+        }
+      },
+      "stock.post": {
+        "kind": "memberType",
+        "name": "Illustrative 150 by 150 timber",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 150,
+          "depth": 150
+        }
+      },
+      "type.joists": {
+        "kind": "planarFramingType",
+        "name": "Illustrative deck joists and rims",
+        "memberType": "stock.joist",
+        "rimType": "stock.joist",
+        "spacing": 400
+      },
+      "type.pad": {
+        "kind": "footingType",
+        "name": "Illustrative concrete pad",
+        "depth": 300,
+        "material": "material.concrete"
+      }
+    },
+    "elements": {
+      "assembly.root": {
+        "kind": "assembly",
+        "name": "Coordinated raised deck",
+        "assemblyType": "deckSystem"
+      },
+      "slab.deck": {
+        "kind": "slab",
+        "name": "Deck surface and joist host",
+        "type": "type.deck",
+        "role": "deck",
+        "storey": "binding.storey",
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                0,
+                0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                6000,
+                0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                6000,
+                4000
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                0,
+                4000
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        },
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 2000
+        },
+        "extrusionDirection": "down"
+      },
+      "framing.joists": {
+        "kind": "planarFraming",
+        "name": "Fitted deck joists and rim boards",
+        "type": "type.joists",
+        "host": "slab.deck",
+        "layer": "cavity",
+        "originBoundary": "south",
+        "direction": [
+          0,
+          1
+        ]
+      },
+      "beam.south": {
+        "kind": "member",
+        "name": "South deck beam",
+        "type": "stock.beam",
+        "role": "beam",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              75,
+              1680
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              5925,
+              75,
+              1680
+            ]
+          }
+        ]
+      },
+      "post.south.west": {
+        "kind": "member",
+        "name": "south.west post",
+        "type": "stock.post",
+        "role": "column",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              75,
+              0
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              75,
+              1580
+            ]
+          }
+        ]
+      },
+      "pad.south.west": {
+        "kind": "footing",
+        "name": "south.west concrete pad",
+        "type": "type.pad",
+        "shape": "pad",
+        "storey": "binding.storey",
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                -125,
+                -125
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                275,
+                -125
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                275,
+                275
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                -125,
+                275
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      },
+      "post.south.east": {
+        "kind": "member",
+        "name": "south.east post",
+        "type": "stock.post",
+        "role": "column",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              5925,
+              75,
+              0
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              5925,
+              75,
+              1580
+            ]
+          }
+        ]
+      },
+      "pad.south.east": {
+        "kind": "footing",
+        "name": "south.east concrete pad",
+        "type": "type.pad",
+        "shape": "pad",
+        "storey": "binding.storey",
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                5725,
+                -125
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                6125,
+                -125
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                6125,
+                275
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                5725,
+                275
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      },
+      "beam.north": {
+        "kind": "member",
+        "name": "North deck beam",
+        "type": "stock.beam",
+        "role": "beam",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              3925,
+              1680
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              5925,
+              3925,
+              1680
+            ]
+          }
+        ]
+      },
+      "post.north.west": {
+        "kind": "member",
+        "name": "north.west post",
+        "type": "stock.post",
+        "role": "column",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              3925,
+              0
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              3925,
+              1580
+            ]
+          }
+        ]
+      },
+      "pad.north.west": {
+        "kind": "footing",
+        "name": "north.west concrete pad",
+        "type": "type.pad",
+        "shape": "pad",
+        "storey": "binding.storey",
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                -125,
+                3725
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                275,
+                3725
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                275,
+                4125
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                -125,
+                4125
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      },
+      "post.north.east": {
+        "kind": "member",
+        "name": "north.east post",
+        "type": "stock.post",
+        "role": "column",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              5925,
+              3925,
+              0
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              5925,
+              3925,
+              1580
+            ]
+          }
+        ]
+      },
+      "pad.north.east": {
+        "kind": "footing",
+        "name": "north.east concrete pad",
+        "type": "type.pad",
+        "shape": "pad",
+        "storey": "binding.storey",
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                5725,
+                3725
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                6125,
+                3725
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                6125,
+                4125
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                5725,
+                4125
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      }
+    },
+    "relationships": {
+      "supports.south.joists": {
+        "kind": "supports",
+        "support": "beam.south",
+        "supported": "framing.joists"
+      },
+      "supports.south.west.post": {
+        "kind": "supports",
+        "support": "pad.south.west",
+        "supported": "post.south.west"
+      },
+      "supports.south.west.beam": {
+        "kind": "supports",
+        "support": "post.south.west",
+        "supported": "beam.south"
+      },
+      "supports.south.east.post": {
+        "kind": "supports",
+        "support": "pad.south.east",
+        "supported": "post.south.east"
+      },
+      "supports.south.east.beam": {
+        "kind": "supports",
+        "support": "post.south.east",
+        "supported": "beam.south"
+      },
+      "supports.north.joists": {
+        "kind": "supports",
+        "support": "beam.north",
+        "supported": "framing.joists"
+      },
+      "supports.north.west.post": {
+        "kind": "supports",
+        "support": "pad.north.west",
+        "supported": "post.north.west"
+      },
+      "supports.north.west.beam": {
+        "kind": "supports",
+        "support": "post.north.west",
+        "supported": "beam.north"
+      },
+      "supports.north.east.post": {
+        "kind": "supports",
+        "support": "pad.north.east",
+        "supported": "post.north.east"
+      },
+      "supports.north.east.beam": {
+        "kind": "supports",
+        "support": "post.north.east",
+        "supported": "beam.north"
+      },
+      "relationship.parts": {
+        "kind": "aggregates",
+        "assembly": "assembly.root",
+        "parts": [
+          "slab.deck",
+          "framing.joists",
+          "beam.south",
+          "post.south.west",
+          "pad.south.west",
+          "post.south.east",
+          "pad.south.east",
+          "beam.north",
+          "post.north.west",
+          "pad.north.west",
+          "post.north.east",
+          "pad.north.east"
+        ]
+      }
+    }
+  },
+  "description": "Freestanding rectangular deck with explicit fitted joists and rims, two beams, four posts and concrete pads. Parameters coordinate geometry; member and footing sizes are illustrative.",
+  "parameters": {
+    "origin": {
+      "valueType": "point2",
+      "description": "Southwest deck corner in model XY millimetres",
+      "default": [
+        -6500,
+        -5000
+      ],
+      "targets": [
+        "/anchors/anchor.origin/position"
+      ]
+    },
+    "width": {
+      "valueType": "length",
+      "description": "East-west deck extent; stock sizing remains explicit",
+      "default": 6000,
+      "minimum": 2400,
+      "maximum": 8000,
+      "targets": [
+        "/elements/slab.deck/footprint/outer/1/offset/0",
+        "/elements/slab.deck/footprint/outer/2/offset/0",
+        {
+          "path": "/elements/beam.south/axis/1/offset/0",
+          "offset": -75
+        },
+        {
+          "path": "/elements/post.south.east/axis/0/offset/0",
+          "offset": -75
+        },
+        {
+          "path": "/elements/post.south.east/axis/1/offset/0",
+          "offset": -75
+        },
+        {
+          "path": "/elements/pad.south.east/footprint/outer/0/offset/0",
+          "offset": -275
+        },
+        {
+          "path": "/elements/pad.south.east/footprint/outer/1/offset/0",
+          "offset": 125
+        },
+        {
+          "path": "/elements/pad.south.east/footprint/outer/2/offset/0",
+          "offset": 125
+        },
+        {
+          "path": "/elements/pad.south.east/footprint/outer/3/offset/0",
+          "offset": -275
+        },
+        {
+          "path": "/elements/beam.north/axis/1/offset/0",
+          "offset": -75
+        },
+        {
+          "path": "/elements/post.north.east/axis/0/offset/0",
+          "offset": -75
+        },
+        {
+          "path": "/elements/post.north.east/axis/1/offset/0",
+          "offset": -75
+        },
+        {
+          "path": "/elements/pad.north.east/footprint/outer/0/offset/0",
+          "offset": -275
+        },
+        {
+          "path": "/elements/pad.north.east/footprint/outer/1/offset/0",
+          "offset": 125
+        },
+        {
+          "path": "/elements/pad.north.east/footprint/outer/2/offset/0",
+          "offset": 125
+        },
+        {
+          "path": "/elements/pad.north.east/footprint/outer/3/offset/0",
+          "offset": -275
+        }
+      ]
+    },
+    "length": {
+      "valueType": "length",
+      "description": "North-south joist span; stock sizing remains explicit",
+      "default": 4000,
+      "minimum": 2400,
+      "maximum": 6000,
+      "targets": [
+        "/elements/slab.deck/footprint/outer/2/offset/1",
+        "/elements/slab.deck/footprint/outer/3/offset/1",
+        {
+          "path": "/elements/beam.north/axis/0/offset/1",
+          "offset": -75
+        },
+        {
+          "path": "/elements/beam.north/axis/1/offset/1",
+          "offset": -75
+        },
+        {
+          "path": "/elements/post.north.west/axis/0/offset/1",
+          "offset": -75
+        },
+        {
+          "path": "/elements/post.north.west/axis/1/offset/1",
+          "offset": -75
+        },
+        {
+          "path": "/elements/pad.north.west/footprint/outer/0/offset/1",
+          "offset": -275
+        },
+        {
+          "path": "/elements/pad.north.west/footprint/outer/1/offset/1",
+          "offset": -275
+        },
+        {
+          "path": "/elements/pad.north.west/footprint/outer/2/offset/1",
+          "offset": 125
+        },
+        {
+          "path": "/elements/pad.north.west/footprint/outer/3/offset/1",
+          "offset": 125
+        },
+        {
+          "path": "/elements/post.north.east/axis/0/offset/1",
+          "offset": -75
+        },
+        {
+          "path": "/elements/post.north.east/axis/1/offset/1",
+          "offset": -75
+        },
+        {
+          "path": "/elements/pad.north.east/footprint/outer/0/offset/1",
+          "offset": -275
+        },
+        {
+          "path": "/elements/pad.north.east/footprint/outer/1/offset/1",
+          "offset": -275
+        },
+        {
+          "path": "/elements/pad.north.east/footprint/outer/2/offset/1",
+          "offset": 125
+        },
+        {
+          "path": "/elements/pad.north.east/footprint/outer/3/offset/1",
+          "offset": 125
+        }
+      ]
+    },
+    "height": {
+      "valueType": "length",
+      "description": "Deck finished top above the bound storey datum",
+      "default": 2000,
+      "minimum": 800,
+      "maximum": 4000,
+      "targets": [
+        "/elements/slab.deck/datum/offset",
+        {
+          "path": "/elements/beam.south/axis/0/offset/2",
+          "offset": -320
+        },
+        {
+          "path": "/elements/beam.south/axis/1/offset/2",
+          "offset": -320
+        },
+        {
+          "path": "/elements/post.south.west/axis/1/offset/2",
+          "offset": -420
+        },
+        {
+          "path": "/elements/post.south.east/axis/1/offset/2",
+          "offset": -420
+        },
+        {
+          "path": "/elements/beam.north/axis/0/offset/2",
+          "offset": -320
+        },
+        {
+          "path": "/elements/beam.north/axis/1/offset/2",
+          "offset": -320
+        },
+        {
+          "path": "/elements/post.north.west/axis/1/offset/2",
+          "offset": -420
+        },
+        {
+          "path": "/elements/post.north.east/axis/1/offset/2",
+          "offset": -420
+        }
+      ]
+    }
+  },
+  "connectionPoints": {
+    "northBeam": {
+      "element": "beam.north",
+      "description": "North-side beam for explicit building/support coordination"
+    },
+    "surface": {
+      "element": "slab.deck",
+      "description": "Deck host for guards, stairs and accessories"
+    }
+  },
+  "overridePaths": [
+    "/elements/assembly.root/name",
+    "/elements/framing.joists/memberOverrides",
+    "/types/stock.joist/section",
+    "/types/stock.beam/section",
+    "/types/stock.post/section"
+  ]
+}

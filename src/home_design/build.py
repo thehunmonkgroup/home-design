@@ -12,15 +12,39 @@ from pathlib import Path
 from typing import ClassVar
 
 from home_design.adapters import GltfExporter, IfcExporter
-from home_design.errors import ModelValidationError
-from home_design.json_types import JsonObject
+from home_design.errors import HomeDesignError, ModelValidationError
+from home_design.json_types import JsonObject, JsonValue
 from home_design.loader import ModelLoader
-from home_design.resolver import ModelResolver
 from home_design.validation import ModelValidator
+from home_design.validation.validator import ModelEvaluation
 from home_design.reports import ModelReports
 from home_design.adapters.drawings import DrawingExporter
-from home_design.batch import ModelBatch
 from home_design.publication import ModelPublisher
+from home_design.source_state import SourceState
+
+
+@dataclass(frozen=True, slots=True)
+class PreparedBuild:
+    """One captured source and its retained validation and resolved geometry."""
+
+    model: JsonObject
+    source_bytes: bytes
+    evaluation: ModelEvaluation
+
+    def check(self) -> None:
+        """Reject stale evaluation evidence or bytes belonging to another source."""
+        if (
+            ModelLoader.fingerprint(self.model) != self.evaluation.source_fingerprint
+            or ModelLoader.parse(self.source_bytes) != self.model
+        ):
+            raise HomeDesignError(
+                "Prepared build no longer matches its evaluated source",
+                code="build.snapshot-mismatch",
+            )
+        if not self.evaluation.report.is_valid or self.evaluation.resolved is None:
+            raise ModelValidationError(
+                "Model must validate before export", self.evaluation.report
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -122,9 +146,29 @@ class BuildService:
             raise ValueError("At least one model is required")
         if web_assets_mode not in ("merge", "replace"):
             raise ValueError(f"Unsupported web assets mode: {web_assets_mode}")
-        report = ModelBatch.validate(model_paths, self.loader, self.validator)
-        if report["valid"] is not True:
-            raise ModelValidationError(json.dumps(report, indent=2))
+        self.check_destinations(model_paths, output_directory, web_assets)
+        prepared, sources = self._prepare_sources(model_paths)
+        output_directory = output_directory.resolve()
+        output_directory.parent.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(
+            prefix="home-design-batch-", dir=output_directory.parent
+        ) as temporary:
+            staging = Path(temporary)
+            winners: dict[str, Path] = {}
+            for position, (path, item) in enumerate(zip(model_paths, prepared)):
+                result = self.export_prepared(item, staging / str(position))
+                winners[path.stem] = result.output_directory
+            return self.install(
+                winners, output_directory, web_assets, web_assets_mode, tuple(sources)
+            )
+
+    @staticmethod
+    def check_destinations(
+        model_paths: Sequence[Path],
+        output_directory: Path,
+        web_assets: Path | None = None,
+    ) -> None:
+        """Keep canonical sources outside replaceable generated directories."""
         output_directory = output_directory.resolve()
         for path in model_paths:
             ModelPublisher.check_key(path.stem)
@@ -147,17 +191,79 @@ class BuildService:
                 raise ValueError(
                     "Build model directories and web assets must not overlap"
                 )
+
+    def prepare(
+        self,
+        model: JsonObject,
+        source_bytes: bytes | None = None,
+        evaluation: ModelEvaluation | None = None,
+    ) -> PreparedBuild:
+        """Evaluate once or reuse evidence bound to exactly this source snapshot."""
+        prepared = PreparedBuild(
+            model,
+            source_bytes if source_bytes is not None else self.loader.serialize(model),
+            evaluation if evaluation is not None else self.validator.evaluate(model),
+        )
+        prepared.check()
+        return prepared
+
+    def _prepare_sources(
+        self, paths: Sequence[Path]
+    ) -> tuple[list[PreparedBuild], list[SourceState]]:
+        """Capture and evaluate every input before allowing any adapter to export."""
+        prepared: list[PreparedBuild] = []
+        sources: list[SourceState] = []
+        reports: list[JsonValue] = []
+        valid = True
+        for path in paths:
+            try:
+                source = SourceState.capture(path)
+                model = source.model
+                evaluation = self.validator.evaluate(model)
+                reports.append({"source": str(path), **evaluation.report.to_dict()})
+                valid = valid and evaluation.report.is_valid
+                prepared.append(PreparedBuild(model, source.content or b"", evaluation))
+                sources.append(source)
+            except (HomeDesignError, OSError, ValueError, KeyError) as error:
+                valid = False
+                reports.append(
+                    {
+                        "source": str(path),
+                        "valid": False,
+                        "diagnostics": [
+                            {
+                                "severity": "error",
+                                "code": "model.load",
+                                "message": str(error),
+                            }
+                        ],
+                    }
+                )
+        if not valid:
+            raise ModelValidationError(
+                json.dumps({"valid": False, "models": reports}, indent=2)
+            )
+        return prepared, sources
+
+    @staticmethod
+    def install(
+        winners: dict[str, Path],
+        output_directory: Path,
+        web_assets: Path | None = None,
+        web_assets_mode: str = "merge",
+        sources: tuple[SourceState, ...] = (),
+    ) -> BatchBuildResult:
+        """Install complete staged builds and roll back artifacts on publication failure."""
+        output_directory = output_directory.resolve()
         output_directory.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(
-            prefix="home-design-batch-", dir=output_directory.parent
+            prefix="home-design-backup-", dir=output_directory.parent
         ) as temporary:
             staging = Path(temporary)
-            winners: dict[str, Path] = {}
-            for position, path in enumerate(model_paths):
-                result = self._export_one(path, staging / str(position))
-                winners[path.stem] = result.output_directory
             publication = None
             with ModelPublisher.lock(output_directory):
+                for snapshot in sources:
+                    snapshot.assert_unchanged()
                 installed: list[str] = []
                 backups: dict[str, Path] = {}
                 try:
@@ -190,23 +296,24 @@ class BuildService:
                 publication,
             )
 
-    def _export_one(self, model_path: Path, output_directory: Path) -> BuildResult:
-        """Validate and atomically publish all derived artifacts.
+    def export_prepared(
+        self, prepared: PreparedBuild, output_directory: Path
+    ) -> BuildResult:
+        """Export every adapter from one retained, validated source snapshot.
 
-        :param model_path: Canonical model JSON path.
+        :param prepared: Captured source and matching validation evidence.
         :param output_directory: Derived artifact destination.
         :returns: Build artifact paths.
         :raises ModelValidationError: If the source model fails any validation layer.
         """
-        source_bytes = model_path.read_bytes()
-        model = self.loader.load(model_path)
-        report = self.validator.validate(model)
-        if not report.is_valid:
-            summary = "; ".join(
-                f"{item.code}: {item.message}" for item in report.errors
+        prepared.check()
+        source_bytes = prepared.source_bytes
+        report = prepared.evaluation.report
+        resolved = prepared.evaluation.resolved
+        if resolved is None:
+            raise ModelValidationError(
+                "Prepared build has no resolved geometry", report
             )
-            raise ModelValidationError(summary)
-        resolved = ModelResolver(model).resolve()
         output_directory = output_directory.resolve()
         output_directory.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(

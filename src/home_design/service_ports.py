@@ -10,6 +10,7 @@ from home_design.geometry import number, vector3
 from home_design.json_types import JsonObject, JsonValue
 from home_design.placement import LocalFrame, PlacementContext
 from home_design.resolved import Vec3
+from home_design.port_contracts import ResolvedPort
 
 
 class ServicePorts:
@@ -71,10 +72,7 @@ class ServicePorts:
     @staticmethod
     def frame(port: JsonObject) -> LocalFrame:
         """Read an already resolved port frame."""
-        value = Authoring.object(port["frame"])
-        return LocalFrame(
-            *(vector3(value[key], f"port {key}") for key in ("origin", "x", "y", "z"))
-        )
+        return LocalFrame.from_dict(port["frame"])
 
     @classmethod
     def _corners(cls, port: JsonObject) -> list[Vec3]:
@@ -95,20 +93,24 @@ class ServicePorts:
 
         :raises ResolutionError: For a connection that cannot mate as authored.
         """
-        for field in ("medium", "connectionType"):
-            if a[field] != b[field]:
+        port_a, port_b = ResolvedPort.from_dict(a), ResolvedPort.from_dict(b)
+        for field, first_value, second_value in (
+            ("medium", port_a.medium, port_b.medium),
+            ("connectionType", port_a.connection_type, port_b.connection_type),
+        ):
+            if first_value != second_value:
                 raise ResolutionError(
                     f"Service connection {identity} has incompatible {field}"
                 )
-        if a.get("function") != b.get("function"):
+        if port_a.function != port_b.function:
             raise ResolutionError(
                 f"Service connection {identity} has incompatible port function"
             )
-        if a["flow"] == b["flow"] and a["flow"] != "bidirectional":
+        if port_a.flow == port_b.flow and port_a.flow != "bidirectional":
             raise ResolutionError(
                 f"Service connection {identity} has incompatible flow directions"
             )
-        first, second = cls.frame(a), cls.frame(b)
+        first, second = port_a.frame, port_b.frame
         if math.dist(first.origin, second.origin) > cls.POSITION_TOLERANCE_MM:
             raise ResolutionError(
                 f"Service connection {identity} has misaligned endpoints"
@@ -120,19 +122,14 @@ class ServicePorts:
             raise ResolutionError(
                 f"Service connection {identity} requires opposing port directions"
             )
-        section_a, section_b = Authoring.object(a["section"]), Authoring.object(
-            b["section"]
-        )
-        if section_a["kind"] != section_b["kind"]:
+        section_a, section_b = port_a.section, port_b.section
+        if section_a.kind != section_b.kind:
             raise ResolutionError(
                 f"Service connection {identity} requires a transition between section shapes"
             )
-        if section_a["kind"] == "circle":
+        if section_a.kind == "circle":
             matches = (
-                abs(
-                    number(section_a["diameter"], "diameter")
-                    - number(section_b["diameter"], "diameter")
-                )
+                abs(section_a.width.value - section_b.width.value)
                 <= cls.POSITION_TOLERANCE_MM
             )
         else:

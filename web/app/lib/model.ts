@@ -1,6 +1,6 @@
 import type { Object3D } from 'three';
 
-export type ElementKind =
+type KnownElementKind =
   | 'assembly'
   | 'member'
   | 'framing'
@@ -40,13 +40,36 @@ export type ElementKind =
   | 'wall'
   | 'window';
 
+export type ElementKind = KnownElementKind | (string & Record<never, never>);
+
 export interface ManifestElement {
   kind: ElementKind;
+  kindLabel?: string;
   name: string;
   storeyId: string | null;
   nodes: string[];
   defaultVisible: boolean;
   data: Record<string, unknown>;
+  parentId?: string;
+  children?: string[];
+  properties?: DisplayProperty[];
+}
+
+export interface DisplayProperty {
+  id: string;
+  label: string;
+  value: number | string;
+  unit: string | null;
+  group: string;
+}
+
+export interface NavigationLink {
+  sourceId: string;
+  targetId: string;
+  kind: 'assembly' | 'room' | 'host' | 'ownership' | 'system' | 'connection' | 'support' | 'placement' | 'reference' | 'generated';
+  sourceLabel: string;
+  targetLabel: string;
+  path?: string;
 }
 
 export interface RenderManifest {
@@ -64,6 +87,9 @@ export interface RenderManifest {
   requirementResults?: RequirementResult[];
   solarStudies?: SolarStudy[];
   reports?: { schedules: string; envelope: string; drawings: string };
+  navigation?: { format: 'home-design-navigation-0.1'; links: NavigationLink[] };
+  propertyFormat?: 'home-design-view-properties-0.1';
+  storeys?: Record<string, { name?: string }>;
 }
 
 export interface DesignRequirement {
@@ -107,12 +133,13 @@ export interface SolarStudy {
 }
 
 export interface ElementGroup {
+  id?: string;
   kind: ElementKind;
   label: string;
   elements: Array<[string, ManifestElement]>;
 }
 
-const KIND_LABELS: Record<ElementKind, string> = {
+const KIND_LABELS: Partial<Record<ElementKind, string>> = {
   assembly: 'Assemblies',
   member: 'Structural members',
   framing: 'Framing',
@@ -204,24 +231,58 @@ export function isRenderManifest(value: unknown): value is RenderManifest {
     !!candidate.project &&
     typeof candidate.project.name === 'string' &&
     !!candidate.elements &&
-    typeof candidate.elements === 'object'
+    typeof candidate.elements === 'object' &&
+    !Array.isArray(candidate.elements) &&
+    Object.values(candidate.elements).every(isManifestElement) &&
+    Object.entries(candidate.elements).every(([id, element]) =>
+      (!element.parentId || Boolean(candidate.elements?.[element.parentId])) &&
+      (element.children ?? []).every((child) => candidate.elements?.[child]?.parentId === id)) &&
+    (candidate.navigation === undefined || validNavigation(candidate.navigation, candidate.elements)) &&
+    (candidate.propertyFormat === undefined || candidate.propertyFormat === 'home-design-view-properties-0.1')
   );
 }
 
-export function groupElements(manifest: RenderManifest): ElementGroup[] {
-  const entries = Object.entries(manifest.elements);
-  return KIND_ORDER.map((kind) => ({
+function isManifestElement(value: unknown): value is ManifestElement {
+  if (!value || typeof value !== 'object') return false;
+  const element = value as Partial<ManifestElement>;
+  return typeof element.kind === 'string' && typeof element.name === 'string'
+    && (element.storeyId === null || typeof element.storeyId === 'string')
+    && Array.isArray(element.nodes) && element.nodes.every((node) => typeof node === 'string')
+    && typeof element.defaultVisible === 'boolean' && Boolean(element.data) && typeof element.data === 'object' && !Array.isArray(element.data)
+    && (element.parentId === undefined || typeof element.parentId === 'string')
+    && (element.children === undefined || Array.isArray(element.children) && element.children.every((child) => typeof child === 'string'))
+    && (element.properties === undefined || Array.isArray(element.properties) && element.properties.every((property) =>
+      property && typeof property.id === 'string' && typeof property.label === 'string' && typeof property.group === 'string'
+      && (property.unit === null || typeof property.unit === 'string')
+      && (typeof property.value === 'string' || typeof property.value === 'number' && Number.isFinite(property.value))));
+}
+
+function validNavigation(navigation: NonNullable<RenderManifest['navigation']>, elements: Record<string, ManifestElement>): boolean {
+  return navigation !== null && navigation.format === 'home-design-navigation-0.1' && Array.isArray(navigation.links)
+    && navigation.links.every((link) => link && Boolean(elements[link.sourceId]) && Boolean(elements[link.targetId])
+      && ['assembly', 'room', 'host', 'ownership', 'system', 'connection', 'support', 'placement', 'reference', 'generated'].includes(link.kind)
+      && typeof link.sourceLabel === 'string' && typeof link.targetLabel === 'string');
+}
+
+export function groupElements(manifest: RenderManifest, includeGenerated = false): ElementGroup[] {
+  const entries = Object.entries(manifest.elements).filter(([, element]) => includeGenerated || !element.parentId);
+  const kinds = [...new Set(entries.map(([, element]) => element.kind))];
+  const order = new Map(KIND_ORDER.map((kind, index) => [kind, index]));
+  kinds.sort((left, right) =>
+    (order.get(left) ?? Infinity) - (order.get(right) ?? Infinity) || left.localeCompare(right),
+  );
+  return kinds.map((kind) => ({
     kind,
-    label: KIND_LABELS[kind],
+    label: entries.find(([, element]) => element.kind === kind)?.[1].kindLabel ?? KIND_LABELS[kind] ?? kind,
     elements: entries
       .filter(([, element]) => element.kind === kind)
       .sort(([, left], [, right]) => left.name.localeCompare(right.name)),
-  })).filter((group) => group.elements.length > 0);
+  }));
 }
 
 export function nodeElementIndex(manifest: RenderManifest): Map<string, string> {
   const index = new Map<string, string>();
-  for (const [elementId, element] of Object.entries(manifest.elements)) {
+  for (const [elementId, element] of Object.entries(manifest.elements).sort(([, left], [, right]) => Number(Boolean(left.parentId)) - Number(Boolean(right.parentId)))) {
     for (const node of element.nodes) index.set(node, elementId);
   }
   return index;
@@ -238,7 +299,7 @@ export function filterElementGroups(groups: ElementGroup[], query: string): Elem
 }
 
 export function isolateElements(manifest: RenderManifest, elementIds: Iterable<string>): Set<string> {
-  const visibleIds = new Set(elementIds);
+  const visibleIds = generatedElementIds(manifest, elementIds);
   return new Set(Object.entries(manifest.elements)
     .filter(([id, element]) => canToggleVisibility(element) && !visibleIds.has(id))
     .map(([id]) => id));
@@ -282,13 +343,27 @@ export function withElementVisibility(
     const element = manifest.elements[id];
     return element && canToggleVisibility(element);
   }));
-  for (const id of elementIds) {
+  for (const id of generatedElementIds(manifest, elementIds)) {
     const element = manifest.elements[id];
     if (!element || !canToggleVisibility(element)) continue;
     if (visible) next.delete(id);
     else next.add(id);
   }
   return next;
+}
+
+export function generatedElementIds(manifest: RenderManifest, ids: Iterable<string>): Set<string> {
+  const result = new Set(ids);
+  const pending = [...result];
+  for (let index = 0; index < pending.length; index++) {
+    for (const child of manifest.elements[pending[index]]?.children ?? []) {
+      if (!result.has(child) && manifest.elements[child]) {
+        result.add(child);
+        pending.push(child);
+      }
+    }
+  }
+  return result;
 }
 
 export function applyElementVisibility(

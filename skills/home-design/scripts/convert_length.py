@@ -33,24 +33,9 @@ class LengthConversionCli:
             format="%(levelname)s %(name)s: %(message)s",
         )
         try:
-            millimetres = LengthConverter.parse_millimetres(args.measurement)
-            if args.target == "ft-in":
-                value = LengthConverter.format_feet_inches(
-                    args.measurement,
-                    args.fraction_denominator,
-                )
-            else:
-                converted = LengthConverter.convert(args.measurement, args.target)
-                value = LengthConverter.format_decimal(converted, args.precision)
-            result = {
-                "input": args.measurement,
-                "millimetres": LengthConverter.format_decimal(
-                    millimetres,
-                    args.precision,
-                ),
-                "targetUnit": args.target,
-                "value": value,
-            }
+            result = LengthConverter.report(
+                args.measurement, args.target, args.precision, args.fraction_denominator
+            )
             LOGGER.debug("Converted length: %s", result)
             print(json.dumps(result, indent=2))
             return 0

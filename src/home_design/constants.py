@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
-MODEL_VERSION = "0.1"
-DEFAULT_SCHEMA_NAME = "home-model-0.1.schema.json"
+MODEL_VERSION = "0.2"
+SUPPORTED_MODEL_VERSIONS = ("0.1", "0.2")
+DEFAULT_SCHEMA_NAME = "home-model-0.2.schema.json"
 IFC_SCHEMA = "IFC4"
 MILLIMETRES_PER_METRE = 1000.0
 GEOMETRY_TOLERANCE_MM = 0.01
@@ -31,4 +32,12 @@ def default_schema_path() -> Path:
 
     :returns: Absolute JSON Schema path.
     """
-    return repository_root() / "schema" / DEFAULT_SCHEMA_NAME
+    return resource_root() / "schema" / DEFAULT_SCHEMA_NAME
+
+
+def resource_root() -> Path:
+    """Locate authoritative checkout resources or the matching installed bundle."""
+    bundled = Path(__file__).resolve().parent / "_resources"
+    if (bundled / "schema" / DEFAULT_SCHEMA_NAME).is_file():
+        return bundled
+    return repository_root()

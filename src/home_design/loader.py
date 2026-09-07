@@ -3,16 +3,23 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from copy import deepcopy
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
 from jsonschema.exceptions import SchemaError
 
-from home_design.constants import MODEL_VERSION, default_schema_path
+from home_design.constants import (
+    MODEL_VERSION,
+    SUPPORTED_MODEL_VERSIONS,
+    default_schema_path,
+    resource_root,
+)
 from home_design.diagnostics import Diagnostic, ValidationReport
 from home_design.errors import ModelLoadError
 from home_design.json_types import JsonObject, JsonValue
+from home_design.schema_diagnostics import SchemaDiagnostics
 
 
 class ModelLoader:
@@ -31,6 +38,22 @@ class ModelLoader:
         except SchemaError as error:
             raise ModelLoadError(f"Invalid JSON Schema: {error.message}") from error
         self.validator: Draft202012Validator = Draft202012Validator(self.schema)
+        self._explicit_schema: bool = schema_path is not None
+        self._versions: dict[str, tuple[JsonObject, Draft202012Validator]] = {
+            MODEL_VERSION: (self.schema, self.validator)
+        }
+
+    def schema_for(self, version: str) -> tuple[JsonObject, Draft202012Validator]:
+        """Read legacy versions explicitly without silently migrating source documents."""
+        if self._explicit_schema or version not in SUPPORTED_MODEL_VERSIONS:
+            return self.schema, self.validator
+        if version not in self._versions:
+            schema = self._read_object(
+                resource_root() / "schema" / f"home-model-{version}.schema.json"
+            )
+            Draft202012Validator.check_schema(schema)
+            self._versions[version] = schema, Draft202012Validator(schema)
+        return self._versions[version]
 
     def load(self, model_path: Path) -> JsonObject:
         """Load a model without silently modifying it.
@@ -40,6 +63,31 @@ class ModelLoader:
         :raises ModelLoadError: If the file is unavailable, invalid JSON, or not an object.
         """
         return deepcopy(self._read_object(model_path.resolve()))
+
+    @staticmethod
+    def parse(source: bytes, label: str = "model") -> JsonObject:
+        """Parse a single captured source snapshot without reading the file again."""
+        try:
+            value: JsonValue = json.loads(source.decode("utf-8"))
+        except (ValueError, UnicodeError) as error:
+            raise ModelLoadError(
+                f"Cannot load JSON object from {label}: {error}"
+            ) from error
+        if not isinstance(value, dict):
+            raise ModelLoadError(f"Expected a JSON object in {label}")
+        return value
+
+    @staticmethod
+    def serialize(model: JsonObject) -> bytes:
+        """Return the exact canonical bytes used when saving a model revision."""
+        return (json.dumps(model, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
+
+    @staticmethod
+    def fingerprint(model: JsonObject) -> str:
+        """Fingerprint source values independently of whitespace and key ordering."""
+        return hashlib.sha256(
+            json.dumps(model, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        ).hexdigest()
 
     def validate_schema(self, model: JsonObject) -> ValidationReport:
         """Validate model structure and version against JSON Schema.
@@ -61,22 +109,13 @@ class ModelLoader:
                     path="/modelVersion",
                 )
             )
+        schema, validator = self.schema_for(str(version))
         errors = sorted(
-            self.validator.iter_errors(model), key=lambda item: list(item.absolute_path)
+            validator.iter_errors(model), key=lambda item: list(item.absolute_path)
         )
+        selector = SchemaDiagnostics(schema)
         for error in errors:
-            pointer = "".join(
-                f"/{self._escape_pointer_token(str(part))}"
-                for part in error.absolute_path
-            )
-            diagnostics.append(
-                Diagnostic(
-                    severity="error",
-                    code=f"schema.{error.validator}",
-                    message=error.message,
-                    path=pointer,
-                )
-            )
+            diagnostics.extend(selector.relevant(error))
         return ValidationReport(tuple(diagnostics))
 
     @staticmethod
@@ -87,9 +126,7 @@ class ModelLoader:
         :param model_path: Destination JSON path.
         """
         model_path.parent.mkdir(parents=True, exist_ok=True)
-        model_path.write_text(
-            json.dumps(model, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
-        )
+        model_path.write_bytes(ModelLoader.serialize(model))
 
     @staticmethod
     def _read_object(path: Path) -> JsonObject:

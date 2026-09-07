@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, replace
 
 from shapely.affinity import translate
@@ -10,9 +11,11 @@ from shapely.geometry import LineString, MultiPoint, MultiPolygon, Point, Polygo
 from shapely.ops import polygonize
 
 from home_design.errors import ResolutionError
+from home_design.capabilities import ComponentRegistry
 from home_design.components import ConstructionResolver
 from home_design.terrain import TerrainSurface
 from home_design.layers import LayerAssembly
+from home_design.boundaries import BoundaryIdentity
 from home_design.construction import Authoring, ConstructionGeometry
 from home_design.coordination import GradeReport
 from home_design.doors import DoorGeometry
@@ -31,19 +34,20 @@ from home_design.geometry import (
     roof_face_boundaries,
     vector2,
     vector3,
+    polygon_normal,
 )
 from home_design.graph import ModelIndex
 from home_design.json_types import JsonObject, JsonValue
 from home_design.locators import LocatorResolver, point_at_station
 from home_design.resolved import MeshData, ResolvedElement, ResolvedModel, Vec2, Vec3
 from home_design.roof_controls import RoofControls
+from home_design.roof_identity import RoofIdentity
+from home_design.topology import PartIdentity
 from home_design.requirements import RequirementEvaluator
 from home_design.placement import HostPlacement
 from home_design.penetrations import Penetrations
-from home_design.cavities import CavityComposition
 from home_design.review import ReviewDiscipline
 from home_design.wall_framing import FramedOpening, WallFraming
-from home_design.member_assemblies import MemberAssemblies
 from home_design.planar_framing import PlanarFraming
 from home_design.assembly_geometry import AssemblyGeometry
 from home_design.curved_members import CurvedMember
@@ -51,10 +55,8 @@ from home_design.hardware import HardwareComponents
 from home_design.masonry import MasonryParts
 from home_design.reinforcement import Reinforcement
 from home_design.mounted_parts import MountedParts, CoordinationVolumes
-from home_design.service_interfaces import ServiceInterfaces
-from home_design.service_coordination import ServiceCoordination
-from home_design.services import ServiceComponents, ServiceNetworks
-from home_design.circuit_schedules import CircuitSchedules
+from home_design.services import ServiceComponents
+from home_design.processing import ConstructionPipeline
 from home_design.service_routes import ServiceRoutes
 from home_design.service_fittings import ServiceFittings
 from home_design.service_insulation import ServiceInsulation
@@ -94,6 +96,62 @@ class ModelResolver:
         self._resolved: dict[str, ResolvedElement] = {}
         self._active_elements: set[str] = set()
         self.construction: ConstructionResolver = ConstructionResolver(self)
+        self._handlers: dict[str, Callable[[str, JsonObject], ResolvedElement]] = {
+            "service": lambda identity, value: ServiceComponents.resolve(
+                self.construction, identity, value
+            ),
+            "route": lambda identity, value: ServiceRoutes.resolve(
+                self.construction, identity, value
+            ),
+            "fitting": lambda identity, value: ServiceFittings.resolve(
+                self.construction, identity, value
+            ),
+            "insulation": lambda identity, value: ServiceInsulation.resolve(
+                self.construction, identity, value
+            ),
+            "mounted": lambda identity, value: MountedParts.resolve(
+                self.construction, identity, value
+            ),
+            "coordination": lambda identity, value: CoordinationVolumes.resolve(
+                self.construction, identity, value
+            ),
+            "reinforcement": lambda identity, value: Reinforcement.resolve(
+                self.construction, identity, value
+            ),
+            "masonry": lambda identity, value: MasonryParts.resolve(
+                self.construction, identity, value
+            ),
+            "hardware": lambda identity, value: HardwareComponents.resolve(
+                self.construction, identity, value
+            ),
+            "curved": lambda identity, value: CurvedMember.resolve(
+                self.construction, identity, value
+            ),
+            "member-assembly": lambda identity, value: AssemblyGeometry(
+                self.construction, value
+            ).resolve(identity),
+            "planar-framing": lambda identity, value: PlanarFraming(
+                value, self.resolve_component(Authoring.text(value["host"])), self.types
+            ).resolve(identity),
+            "wall-framing": self._resolve_wall_framing,
+            "penetration": Penetrations(self.construction).resolve,
+            "panel": self._resolve_panel,
+            "construction": self.construction.resolve,
+            "slab": self._resolve_slab,
+            "roof": self._resolve_roof,
+            "wall": self._resolve_wall,
+            "opening": self._resolve_opening,
+            "fill": self._resolve_fill,
+            "space": self._resolve_space,
+            "assembly": self._resolve_assembly,
+        }
+        missing = {
+            item.resolver for item in ComponentRegistry.components.values()
+        } - self._handlers.keys()
+        if missing:
+            raise ResolutionError(
+                f"Component registry has unbound resolvers: {sorted(missing)}"
+            )
 
     def resolve(self) -> ResolvedModel:
         """Resolve all architectural components and integrations.
@@ -105,22 +163,10 @@ class ModelResolver:
         self._prepare_openings()
         for element_id in self.elements:
             self.resolve_component(element_id)
-        resolved_elements = dict(self._resolved)
-        cavity_regions = CavityComposition.apply(resolved_elements)
-        Penetrations.apply(resolved_elements)
-        CavityComposition.refresh(resolved_elements, cavity_regions)
-        ServiceRoutes.refresh(resolved_elements)
-        ServiceInsulation.refresh(resolved_elements)
-        MemberAssemblies.refresh(resolved_elements)
-        HardwareComponents.participants(resolved_elements)
-        MountedParts.refresh(resolved_elements)
-        ServiceInterfaces.refresh(resolved_elements)
-        ServiceCoordination.refresh(resolved_elements)
-        CoordinationVolumes.access(resolved_elements)
-        CoordinationVolumes.barriers(resolved_elements)
-        networks = ServiceNetworks(resolved_elements, self._object("relationships"))
-        networks.resolve()
-        CircuitSchedules(resolved_elements, networks.adjacency).resolve()
+        processed = ConstructionPipeline.standard().run(
+            self._resolved, self._object("relationships")
+        )
+        resolved_elements = processed.elements
         result = ResolvedModel(
             model_version=str(self.model.get("modelVersion")),
             source_revision=int(number(self.model.get("revision", 0), "revision")),
@@ -136,6 +182,12 @@ class ModelResolver:
             requirements=tuple(Authoring.array(self.model.get("requirements", []))),
             solar_studies=tuple(Authoring.array(self.model.get("solarStudies", []))),
             drawings=tuple(Authoring.array(self.model.get("drawings", []))),
+            component_references=tuple(
+                reference.to_dict(self.model)
+                for reference in self.index.references
+                if reference.owner_registry == "elements"
+                and reference.registry == "elements"
+            ),
         )
         if result.solar_studies:
             solar = SolarAnalysis(result)
@@ -162,6 +214,20 @@ class ModelResolver:
             result = self._with_specifications(result, self.elements[element_id])
             self._resolved[element_id] = result
             return result
+        except ResolutionError as error:
+            if error.subject_id is not None:
+                raise
+            raise ResolutionError(
+                str(error),
+                code=(
+                    error.code
+                    if error.code != "workflow.failed"
+                    else "geometry.resolution-failed"
+                ),
+                path=f"/elements/{element_id}",
+                subject_id=element_id,
+                details=error.details,
+            ) from error
         finally:
             self._active_elements.remove(element_id)
 
@@ -210,78 +276,56 @@ class ModelResolver:
         return replace(resolved, data=data)
 
     def _resolve_element(self, element_id: str, element: JsonObject) -> ResolvedElement:
-        kind = str(element.get("kind"))
-        mounted_handlers = {
-            **dict.fromkeys(ServiceComponents.KINDS, ServiceComponents.resolve),
-            **dict.fromkeys(ServiceRoutes.KINDS, ServiceRoutes.resolve),
-            **dict.fromkeys(ServiceFittings.KINDS, ServiceFittings.resolve),
-            **dict.fromkeys(ServiceInsulation.KINDS, ServiceInsulation.resolve),
-            **dict.fromkeys(MountedParts.KINDS, MountedParts.resolve),
-            **dict.fromkeys(CoordinationVolumes.KINDS, CoordinationVolumes.resolve),
-        }
-        if mounted_handler := mounted_handlers.get(kind):
-            return mounted_handler(self.construction, element_id, element)
-        if kind in Reinforcement.KINDS:
-            return Reinforcement.resolve(self.construction, element_id, element)
-        if kind == "masonryPart":
-            return MasonryParts.resolve(self.construction, element_id, element)
-        if kind in HardwareComponents.KINDS:
-            return HardwareComponents.resolve(self.construction, element_id, element)
-        if kind == "curvedMember":
-            return CurvedMember.resolve(self.construction, element_id, element)
-        if kind == "memberAssembly":
-            return AssemblyGeometry(self.construction, element).resolve(element_id)
-        if kind == "planarFraming":
-            return PlanarFraming(
-                element,
-                self.resolve_component(Authoring.text(element["host"])),
-                self.types,
-            ).resolve(element_id)
-        if kind == "wallFraming":
-            host_id = Authoring.text(element["host"])
-            return WallFraming(
-                element,
-                self.resolve_component(host_id),
-                self.types,
-                [
-                    FramedOpening(
-                        item.opening_id,
-                        item.start_station,
-                        item.start_station + item.width,
-                        item.bottom,
-                        item.bottom + item.height,
-                    )
-                    for item in self.openings.values()
-                    if item.host_id == host_id
-                ],
-            ).resolve(element_id)
-        if kind == "penetration":
-            return Penetrations(self.construction).resolve(element_id, element)
-        if kind == "panel" and (
-            "top" in element
-            or any(opening.host_id == element_id for opening in self.openings.values())
+        capability = ComponentRegistry.get(str(element.get("kind")))
+        return self._handlers[capability.resolver](element_id, element)
+
+    def _resolve_wall_framing(
+        self, element_id: str, element: JsonObject
+    ) -> ResolvedElement:
+        """Integrate wall framing with its host and authoritative opening extents."""
+        host_id = Authoring.text(element["host"])
+        return WallFraming(
+            element,
+            self.resolve_component(host_id),
+            self.types,
+            [
+                FramedOpening(
+                    item.opening_id,
+                    item.start_station,
+                    item.start_station + item.width,
+                    item.bottom,
+                    item.bottom + item.height,
+                )
+                for item in self.openings.values()
+                if item.host_id == host_id
+            ],
+        ).resolve(element_id)
+
+    def _resolve_panel(self, element_id: str, element: JsonObject) -> ResolvedElement:
+        """Select profiled screen geometry when openings or a connected top require it."""
+        if "top" in element or any(
+            opening.host_id == element_id for opening in self.openings.values()
         ):
             return self._resolve_screen(element_id, element)
-        if kind in ConstructionResolver.KINDS:
-            return self.construction.resolve(element_id, element)
-        if kind == "slab":
-            return self._resolve_slab(element_id, element)
-        if kind == "roof":
-            return self._resolve_roof(element_id, element)
-        if kind == "wall":
-            return self._resolve_wall(element_id, element)
-        if kind == "opening":
-            return self._resolve_opening(element_id, element)
-        if kind in {"door", "window"}:
-            return self._resolve_fill(element_id, element)
-        if kind == "space":
-            return self._resolve_space(element_id, element)
+        return self.construction.resolve(element_id, element)
+
+    def _resolve_assembly(
+        self, element_id: str, element: JsonObject
+    ) -> ResolvedElement:
+        """Resolve the explicitly nonphysical grouping family."""
         return ResolvedElement(
             element_id,
-            kind,
+            "assembly",
             str(element.get("name")),
             self._string(element.get("storey")),
-            data={"assemblyType": element.get("assemblyType")},
+            data={
+                "assemblyType": element.get("assemblyType"),
+                **(
+                    {"recipeInstance": element["recipeInstance"]}
+                    if "recipeInstance" in element
+                    else {}
+                ),
+            },
         )
 
     def _resolve_slab(self, element_id: str, element: JsonObject) -> ResolvedElement:
@@ -314,6 +358,9 @@ class ModelResolver:
                 "footprint": {
                     "outer": [list(point) for point in outer],
                     "holes": [[list(point) for point in loop] for loop in holes],
+                    "boundaryIds": BoundaryIdentity.metadata(
+                        self._dict(element["footprint"], "footprint")
+                    ),
                 },
             },
         )
@@ -322,6 +369,8 @@ class ModelResolver:
         component_type = self._type_for(element)
         thickness = layer_thickness(component_type)
         geometry = self._dict(element.get("geometry"), "roof geometry")
+        identities: list[str] = []
+        boundary_ids: list[JsonObject] = []
         if geometry.get("kind") == "faceSet":
             faces_value = geometry.get("faces")
             if not isinstance(faces_value, list):
@@ -331,6 +380,7 @@ class ModelResolver:
             for face in faces_value:
                 face_object = self._dict(face, "roof face")
                 boundary = self._dict(face_object.get("boundary"), "roof boundary")
+                boundary_ids.append(BoundaryIdentity.metadata(boundary))
                 outer_value = boundary.get("outer")
                 if not isinstance(outer_value, list):
                     raise ResolutionError(
@@ -343,9 +393,23 @@ class ModelResolver:
         else:
             surface = self.roof_surfaces[element_id]
             boundaries = list(roof_face_boundaries(surface))
+            footprint, _ = self.locators.profile2(geometry["footprint"])
+            keys, metadata = RoofIdentity.describe(geometry, footprint, boundaries)
+            identities = list(keys)
+            boundary_ids = list(metadata)
+            aliases = Authoring.object(geometry.get("faceIds", {}))
             face_ids = [
-                f"{element_id}.face-{index + 1}" for index in range(len(boundaries))
+                (
+                    Authoring.text(aliases.get(identity, f"{element_id}.{identity}"))
+                    if self.model.get("modelVersion") == "0.2"
+                    else f"{element_id}.face-{index + 1}"
+                )
+                for index, identity in enumerate(identities)
             ]
+        if len(set(face_ids)) != len(face_ids):
+            raise ResolutionError(
+                "Roof face IDs must be unique", code="roof.duplicate-face-id"
+            )
         meshes = tuple(
             mesh
             for boundary, face_id in zip(boundaries, face_ids)
@@ -363,9 +427,16 @@ class ModelResolver:
                 "typeId": element.get("type"),
                 "thickness": thickness,
                 "faceIds": face_id_values,
+                "faceIdentities": dict(zip(identities, face_ids)),
                 "planes": [
-                    {"id": face_id, "boundary": [list(point) for point in boundary]}
-                    for face_id, boundary in zip(face_ids, boundaries)
+                    {
+                        "id": face_id,
+                        "boundary": [list(point) for point in boundary],
+                        "boundaryIds": names,
+                    }
+                    for face_id, boundary, names in zip(
+                        face_ids, boundaries, boundary_ids
+                    )
                 ],
                 "layers": LayerAssembly.metadata(component_type),
                 "form": (
@@ -473,9 +544,21 @@ class ModelResolver:
             {
                 "typeId": element.get("type"),
                 "axis": [list(point) for point in axis_points],
+                "length": cumulative,
+                "segmentIds": list(
+                    BoundaryIdentity.path(
+                        self._dict(element["path"], "wall path"), len(axis_points) - 1
+                    )
+                ),
                 "topProfile": [
                     [point[0], point[1], self._wall_top(element, point, base_z)]
                     for point in points
+                ],
+                "topProfileIds": [
+                    self._wall_top_identity(
+                        element, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+                    )
+                    for a, b in zip(points, points[1:])
                 ],
                 "baseElevation": base_z,
                 "topElevationRange": [min(top_elevations), max(top_elevations)],
@@ -768,6 +851,14 @@ class ModelResolver:
         outer, holes = self.locators.profile2(geometry.get("footprint"))
         bearing = polygon_from_loops(outer, holes)
         edge_offsets = geometry.get("edgeOverhangs")
+        if isinstance(edge_offsets, dict):
+            names = BoundaryIdentity.profile(Authoring.object(geometry["footprint"]))[0]
+            if set(edge_offsets) != set(names):
+                raise ResolutionError(
+                    "Named edge overhangs must cover exactly the roof footprint edges",
+                    code="roof.edge-overhang-identities",
+                )
+            edge_offsets = [edge_offsets[name] for name in names]
         polygon = (
             RoofControls.edge_footprint(
                 bearing, [number(value, "edge overhang") for value in edge_offsets]
@@ -947,6 +1038,61 @@ class ModelResolver:
         if constraint.get("kind") == "height":
             return base_z + number(constraint.get("height"), "wall height")
         return self._constraint_height(constraint, point, "underside")
+
+    def _wall_top_identity(self, wall: JsonObject, point: Vec2) -> str:
+        """Name the controlling top surface independently of sampled profile-knot positions."""
+        constraint = Authoring.object(wall["top"])
+        kind = Authoring.text(constraint["kind"])
+        if kind != "surface":
+            return f"{kind}.{constraint.get('level', 'top')}"
+        identity = Authoring.text(constraint["element"])
+        if self.elements[identity].get("kind") != "roof":
+            return f"surface.{identity}"
+        roof = self.resolve_component(identity)
+        candidates: list[tuple[str, float]] = []
+        selector = (
+            constraint.get("selector") if identity not in self.roof_surfaces else None
+        )
+        underside = constraint.get("surface", "underside") in {"underside", "bottom"}
+        for value in Authoring.array(roof.data["planes"]):
+            plane = Authoring.object(value)
+            face = Authoring.text(plane["id"])
+            if selector is not None and selector != face:
+                continue
+            boundary = [
+                vector3(vertex, "roof plane vertex")
+                for vertex in Authoring.array(plane["boundary"])
+            ]
+            if (
+                not Polygon([(vertex[0], vertex[1]) for vertex in boundary])
+                .buffer(0.01)
+                .covers(Point(point))
+            ):
+                continue
+            normal = polygon_normal(boundary)
+            origin = boundary[0]
+            elevation = (
+                origin[2]
+                - (
+                    normal[0] * (point[0] - origin[0])
+                    + normal[1] * (point[1] - origin[1])
+                )
+                / normal[2]
+            )
+            if underside:
+                elevation -= number(roof.data["thickness"], "roof thickness") / abs(
+                    normal[2]
+                )
+            candidates.append((face, elevation))
+        if not candidates:
+            raise ResolutionError(
+                "Wall top has no controlling roof plane",
+                code="wall.missing-top-identity",
+            )
+        selected = (min if underside else max)(height for _, height in candidates)
+        return PartIdentity.token(
+            [face for face, height in candidates if abs(height - selected) <= 0.01]
+        )
 
     def _wall_resolution_points(
         self, wall: JsonObject, points: tuple[Vec2, ...]

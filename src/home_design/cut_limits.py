@@ -12,6 +12,7 @@ from home_design.components import ConstructionResolver
 from home_design.construction import Authoring
 from home_design.diagnostics import Diagnostic
 from home_design.errors import ResolutionError
+from home_design.layers import LayerAssembly
 from home_design.geometry import number, vector3
 from home_design.json_types import JsonObject, JsonValue
 from home_design.member_assemblies import MemberAssemblies
@@ -64,10 +65,11 @@ class CutLimits:
                 if mesh.role.startswith(f"roof-face:{locator['face']}:")
             )
         if "layer" in locator:
+            index = LayerAssembly.index(
+                host.data.get("layers", []), locator["layer"], f"Host {host.element_id}"
+            )
             meshes = tuple(
-                mesh
-                for mesh in meshes
-                if mesh.role.endswith(f"layer:{locator['layer']}")
+                mesh for mesh in meshes if mesh.role.endswith(f"layer:{index}")
             )
         return meshes
 

@@ -18,6 +18,7 @@ from home_design.geometry import vector3
 from home_design.json_types import JsonObject
 from home_design.resolved import ResolvedModel
 from home_design.service_ports import ServicePorts
+from home_design.port_contracts import ResolvedPort
 from home_design.solids import SolidOperations
 from home_design.adapters.ifc_units import IfcUnits
 
@@ -55,13 +56,14 @@ class IfcServices:
             children: list[entity_instance] = []
             for key, value in Authoring.object(element.data.get("ports", {})).items():
                 data = Authoring.object(value)
+                resolved_port = ResolvedPort.from_dict(data)
                 identity = f"{element.element_id}/port/{key}"
-                frame = ServicePorts.frame(data)
+                frame = resolved_port.frame
                 system = model.element(Authoring.text(data["systemId"]))
                 native_type = cls.SYSTEM_TYPES[
                     Authoring.text(system.data["systemType"])
                 ]
-                medium = Authoring.text(data["medium"])
+                medium = resolved_port.medium
                 port = ifc.create_entity(
                     "IfcDistributionPort",
                     GlobalId=guid(identity),
@@ -71,7 +73,7 @@ class IfcServices:
                         "source": "SOURCE",
                         "sink": "SINK",
                         "bidirectional": "SOURCEANDSINK",
-                    }[Authoring.text(data["flow"])],
+                    }[resolved_port.flow],
                     PredefinedType=(
                         "CABLECARRIER"
                         if data.get("function") == "containment"

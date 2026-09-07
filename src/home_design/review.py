@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from home_design.json_types import JsonObject
+from home_design.capabilities import ComponentRegistry
 
 
 class ReviewDiscipline:
@@ -17,35 +18,6 @@ class ReviewDiscipline:
         kind = source.get("kind")
         if kind == "envelopePart" and "interface" in source:
             return "services"
-        if kind in {
-            "serviceDevice",
-            "serviceRoute",
-            "serviceFitting",
-            "serviceInsulation",
-            "serviceSystem",
-            "serviceCircuit",
-        }:
-            return "services"
-        if kind in {
-            "member",
-            "framing",
-            "wallFraming",
-            "planarFraming",
-            "memberAssembly",
-            "curvedMember",
-            "hardware",
-            "masonryPart",
-            "reinforcingBar",
-            "reinforcingMesh",
-            "fastenerGroup",
-            "footing",
-            "stair",
-        }:
-            return "framing"
-        if kind == "terrain":
-            return "site"
-        if kind == "accessory":
-            return "accessories"
         if kind == "sweep" and source.get("role") in {
             "gutter",
             "downspout",
@@ -53,4 +25,4 @@ class ReviewDiscipline:
             "interceptor",
         }:
             return "services"
-        return "envelope"
+        return ComponentRegistry.get(str(kind)).discipline

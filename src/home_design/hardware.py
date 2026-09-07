@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from home_design.capabilities import ComponentRegistry
+
 from dataclasses import replace
 
 from home_design.components import ConstructionResolver
@@ -18,7 +20,7 @@ from home_design.solids import SolidOperations
 class HardwareComponents:
     """Keep rendered hardware and scheduled fasteners on one authored type contract."""
 
-    KINDS: frozenset[str] = frozenset({"hardware", "fastenerGroup"})
+    KINDS: frozenset[str] = ComponentRegistry.resolver_kinds("hardware")
 
     @classmethod
     def resolve(

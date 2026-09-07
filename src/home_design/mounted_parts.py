@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+from home_design.capabilities import ComponentRegistry
+
 import math
 from dataclasses import replace
 
 from home_design.components import ConstructionResolver
 from home_design.construction import Authoring
 from home_design.errors import ResolutionError
+from home_design.layers import LayerAssembly
 from home_design.diagnostics import Diagnostic
 from home_design.fabrication import FabricationGeometry
 from home_design.geometry import number, vector3
@@ -21,7 +24,7 @@ from home_design.solids import SolidOperations
 class MountedParts:
     """Place authored material geometry and reject unresolved material overlap at its host."""
 
-    KINDS: frozenset[str] = frozenset({"accessory", "envelopePart"})
+    KINDS: frozenset[str] = ComponentRegistry.resolver_kinds("mounted")
 
     @classmethod
     def resolve(
@@ -139,7 +142,7 @@ class MountedParts:
 class CoordinationVolumes:
     """Resolve nonmaterial coordination volumes independently of physical parts."""
 
-    KINDS: frozenset[str] = frozenset({"clearanceZone", "barrierCheck"})
+    KINDS: frozenset[str] = ComponentRegistry.resolver_kinds("coordination")
     NON_OBSTACLES: frozenset[str] = frozenset(
         {
             "space",
@@ -264,15 +267,11 @@ class CoordinationVolumes:
                 reference = Authoring.object(value)
                 target = elements[Authoring.text(reference["element"])]
                 if "layer" in reference:
-                    index = int(number(reference["layer"], "barrier layer"))
-                    if (
-                        not 0
-                        <= index
-                        < len(Authoring.array(target.data.get("layers", [])))
-                    ):
-                        raise ResolutionError(
-                            f"Barrier participant {target.element_id} has no layer {index}"
-                        )
+                    index = LayerAssembly.index(
+                        target.data.get("layers", []),
+                        reference["layer"],
+                        f"Barrier participant {target.element_id}",
+                    )
                     meshes = tuple(
                         mesh
                         for mesh in target.meshes

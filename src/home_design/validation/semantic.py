@@ -35,6 +35,60 @@ class SemanticValidator:
         diagnostics.extend(self._direction_rules())
         diagnostics.extend(self._opening_fill_rules())
         diagnostics.extend(self._aggregate_rules())
+        diagnostics.extend(self._layer_identities())
+        diagnostics.extend(self._named_follow_edges())
+        return diagnostics
+
+    def _named_follow_edges(self) -> list[Diagnostic]:
+        """Require named outer edges for version 0.2 follows with planar hosts."""
+        if self.model.get("modelVersion") != "0.2":
+            return []
+        diagnostics: list[Diagnostic] = []
+        for identity, element in self.elements.items():
+            follow = element.get("follow")
+            if not isinstance(follow, dict):
+                continue
+            host_id = follow.get("element")
+            host = self.elements.get(host_id) if isinstance(host_id, str) else None
+            if (
+                host is not None
+                and host.get("kind") in {"slab", "footing"}
+                and "edge" not in follow
+            ):
+                diagnostics.append(
+                    Diagnostic(
+                        "error",
+                        "boundary.required-edge",
+                        "A slab or footing follow requires a named outer edge",
+                        f"/elements/{identity}/follow/edge",
+                        identity,
+                    )
+                )
+        return diagnostics
+
+    def _layer_identities(self) -> list[Diagnostic]:
+        """Reject duplicate scoped layer identities even in unused reusable types."""
+        diagnostics: list[Diagnostic] = []
+        for identity, definition in self.index.registries["types"].items():
+            layers = definition.get("layers")
+            if not isinstance(layers, list):
+                continue
+            seen: set[str] = set()
+            for position, layer in enumerate(layers):
+                key = layer.get("id") if isinstance(layer, dict) else None
+                if not isinstance(key, str):
+                    continue
+                if key in seen:
+                    diagnostics.append(
+                        Diagnostic(
+                            "error",
+                            "layer.duplicate-id",
+                            f"Layer ID {key} is repeated in {identity}",
+                            f"/types/{identity}/layers/{position}/id",
+                            identity,
+                        )
+                    )
+                seen.add(key)
         return diagnostics
 
     def _relationship_cardinality(self) -> list[Diagnostic]:

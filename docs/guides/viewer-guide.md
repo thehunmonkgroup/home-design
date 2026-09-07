@@ -62,10 +62,35 @@ Use the **Show/Hide Components** and **Show/Hide Details** buttons below the pro
 title to toggle each panel. This browser remembers your choices for this site
 across reloads and model switches, when browser storage is available.
 
-The Components panel groups components by kind, including terrain, stairs, framing
-and drainage. Select a component in the model or in the list to inspect its
+Use **Group by** to explore component types, assemblies, rooms, hosts or service
+systems. **Other components** retains parts outside the selected groups. Select a component in the model or in the list to inspect its
 human-readable name, canonical ID, resolved dimensions and design properties in
 the Details panel, including any component-specific requirements.
+
+**Display units** switches between metric and feet/inches without changing the
+design. Measurements include their units; **Technical properties** contains the
+complete resolved details. Feet/inches are rounded to the nearest sixteenth for
+display. Model switching resets grouping and display units along with selection.
+
+### Follow construction relationships
+
+The **Related components** list links a part to its assembly, room, host,
+owned parts, service system and explicit connections. Selecting a link opens that
+component's details. **Show more relationships** reveals additional entries.
+
+**Isolate with contents** shows the selected component and its contained or
+hosted parts. For a wall, **Reveal wall contents** hides the wall surface and
+shows its framing, devices and other modeled contents while retaining the wall's
+inspector. **Isolate system** shows the selected service system or the system a
+component belongs to. **Isolate connected parts** follows explicit connections.
+These actions frame the selected geometry. **Show all** restores visibility;
+**Frame model** returns to the complete home.
+
+A framing component's **Generated members** list lets you find and select a
+specific stud, joist, plate or other modeled member. Its details show stock
+dimensions and material volume, with a link back to the generating component.
+Members can also be selected directly in the model. Search includes generated
+members; the default index keeps them inside their generating components.
 
 Service parts with authored coordination checks expose `serviceCoordination`
 in their details. Review each obstructing component/member ID, measured overlap
@@ -142,7 +167,7 @@ no evaluation result.
 Violation severity describes how a failed check is handled, not whether it failed.
 Error-level violations block a build; warning- and info-level violations can
 appear in a completed build. These checks cover authored numeric constraints, not
-engineering approval. See [Clearances and executable requirements](model-authoring.md#clearances-and-executable-requirements)
+engineering approval. See [Clearances and executable requirements](../../skills/home-design/references/site.md#clearances-and-executable-requirements)
 to author the checks.
 
 ## Inspect sections and sun studies
@@ -156,7 +181,7 @@ When a model includes sun studies, select one with **Sun study** to set the
 lighting. Select an opening to see its direct-sun result in Details. Solar
 percentages come from the built study; moving the camera or section plane does
 not recompute them. **Presentation light** is not a site/date calculation. Rebuild
-after adding or changing persistent studies. See [Solar review](ai-design-workflow.md#solar-review)
+after adding or changing persistent studies. See [Terrain and sun studies](ai-design-workflow.md#terrain-and-sun-studies)
 for study setup and analysis limits.
 
 ## Open drawings and reports

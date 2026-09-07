@@ -16,10 +16,12 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["path", "equals"],
+        "required": ["path"],
+        "oneOf": [{"required": ["equals"]}, {"required": ["exists"]}],
         "properties": {
           "path": {"type": "string", "pattern": "^(|/.*)$"},
-          "equals": true
+          "equals": true,
+          "exists": {"type": "boolean"}
         }
       }
     },

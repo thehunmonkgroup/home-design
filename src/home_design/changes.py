@@ -3,23 +3,22 @@
 from __future__ import annotations
 
 import json
-import os
-import tempfile
 from copy import deepcopy
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from home_design.constants import repository_root
+from home_design.constants import resource_root
+from home_design.diagnostics import ValidationReport
 from home_design.errors import (
     ChangeConflictError,
     ModelLoadError,
     ModelValidationError,
-    ResolutionError,
 )
 from home_design.json_types import JsonObject, JsonPointer, JsonValue
 from home_design.loader import ModelLoader
-from home_design.resolver import ModelResolver
+from home_design.schema_diagnostics import SchemaDiagnostics
+from home_design.source_state import SourceState
 from home_design.validation import ModelValidator
 
 
@@ -37,7 +36,7 @@ class ChangeEngine:
         """
         self.loader: ModelLoader = loader
         self.validator: ModelValidator = validator or ModelValidator(loader)
-        schema_path = repository_root() / "schema" / "change-set-0.1.schema.json"
+        schema_path = resource_root() / "schema" / "change-set-0.1.schema.json"
         try:
             schema_value = json.loads(schema_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as error:
@@ -45,6 +44,7 @@ class ChangeEngine:
         if not isinstance(schema_value, dict):
             raise ModelLoadError("Change-set schema must be a JSON object")
         self.change_validator: Draft202012Validator = Draft202012Validator(schema_value)
+        self.change_schema: JsonObject = schema_value
 
     def load_change(self, change_path: Path) -> JsonObject:
         """Load and validate a change-set file.
@@ -61,14 +61,24 @@ class ChangeEngine:
             ) from error
         if not isinstance(value, dict):
             raise ModelLoadError("Change set must be a JSON object")
-        errors = sorted(
-            self.change_validator.iter_errors(value),
-            key=lambda item: list(item.absolute_path),
-        )
-        if errors:
-            message = "; ".join(error.message for error in errors)
-            raise ModelLoadError(f"Invalid change set: {message}")
+        self.validate_change(value)
         return value
+
+    def validate_change(self, value: JsonObject) -> None:
+        """Validate operations while retaining precise field-level diagnostics."""
+        selector = SchemaDiagnostics(self.change_schema)
+        diagnostics = tuple(
+            diagnostic
+            for error in self.change_validator.iter_errors(value)
+            for diagnostic in selector.relevant(error)
+        )
+        if diagnostics:
+            message = "; ".join(item.message for item in diagnostics)
+            raise ModelLoadError(
+                f"Invalid change set: {message}",
+                code="change.schema-invalid",
+                report=ValidationReport(diagnostics),
+            )
 
     def apply(self, model: JsonObject, change: JsonObject) -> JsonObject:
         """Apply a change in memory and validate the complete result.
@@ -79,18 +89,32 @@ class ChangeEngine:
         :raises ChangeConflictError: If revision or value preconditions fail.
         :raises ModelValidationError: If the resulting model is invalid.
         """
-        errors = sorted(
-            self.change_validator.iter_errors(change),
-            key=lambda item: list(item.absolute_path),
-        )
-        if errors:
-            message = "; ".join(error.message for error in errors)
-            raise ModelLoadError(f"Invalid change set: {message}")
+        candidate = self.candidate(model, change)
+        report = self.validator.validate(candidate)
+        if not report.is_valid:
+            summary = "; ".join(
+                f"{item.code}: {item.message}" for item in report.errors
+            )
+            raise ModelValidationError(f"Change rejected: {summary}", report)
+        return candidate
+
+    def candidate(self, model: JsonObject, change: JsonObject) -> JsonObject:
+        """Apply guarded operations in memory for evaluation without asserting validity.
+
+        :param model: Source model, which remains unchanged.
+        :param change: Revision-checked operations and value preconditions.
+        :returns: Unvalidated candidate for preview or final validation.
+        :raises ChangeConflictError: If source assumptions do not hold.
+        """
+        self.validate_change(change)
         expected_revision = change.get("baseRevision")
         actual_revision = model.get("revision")
         if expected_revision != actual_revision:
             raise ChangeConflictError(
-                f"Change expects revision {expected_revision}, but model is revision {actual_revision}"
+                f"Change expects revision {expected_revision}, but model is revision {actual_revision}",
+                code="change.revision-conflict",
+                path="/revision",
+                details={"expected": expected_revision, "actual": actual_revision},
             )
         candidate = deepcopy(model)
         self._check_preconditions(candidate, change)
@@ -104,18 +128,6 @@ class ChangeEngine:
         candidate["revision"] = (
             int(actual_revision) + 1 if isinstance(actual_revision, int) else 1
         )
-        report = self.validator.validate(candidate)
-        if not report.is_valid:
-            summary = "; ".join(
-                f"{item.code}: {item.message}" for item in report.errors
-            )
-            raise ModelValidationError(f"Change rejected: {summary}")
-        try:
-            ModelResolver(candidate).resolve()
-        except ResolutionError as error:
-            raise ModelValidationError(
-                f"Change rejected during geometry resolution: {error}"
-            ) from error
         return candidate
 
     def apply_to_file(
@@ -129,28 +141,19 @@ class ChangeEngine:
         :returns: Written next model revision.
         :raises OSError: If the validated result cannot be committed.
         """
-        model = self.loader.load(model_path)
-        change = self.load_change(change_path)
-        candidate = self.apply(model, change)
+        source = SourceState.capture(model_path)
         destination = (output_path or model_path).resolve()
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        descriptor, temporary_name = tempfile.mkstemp(
-            dir=destination.parent,
-            prefix=f".{destination.name}.",
-            suffix=".tmp",
-            text=True,
+        previous_destination = (
+            source
+            if destination == source.path
+            else SourceState.capture(destination, required=False)
         )
-        temporary_path = Path(temporary_name)
-        try:
-            with os.fdopen(descriptor, "w", encoding="utf-8") as stream:
-                json.dump(candidate, stream, indent=2, ensure_ascii=False)
-                stream.write("\n")
-                stream.flush()
-                os.fsync(stream.fileno())
-            temporary_path.replace(destination)
-        except Exception:
-            temporary_path.unlink(missing_ok=True)
-            raise
+        change = self.load_change(change_path)
+        candidate = self.apply(source.model, change)
+        with SourceState.lock(destination):
+            source.assert_unchanged()
+            previous_destination.assert_unchanged()
+            SourceState.write(destination, ModelLoader.serialize(candidate))
         return candidate
 
     def _check_preconditions(self, model: JsonObject, change: JsonObject) -> None:
@@ -166,12 +169,27 @@ class ChangeEngine:
             try:
                 actual = JsonPointer.get(model, path)
             except (KeyError, IndexError, TypeError, ValueError) as error:
+                if precondition.get("exists") is False:
+                    continue
                 raise ChangeConflictError(
-                    f"Precondition path does not exist: {path}"
+                    f"Precondition path does not exist: {path}",
+                    code="change.precondition-missing",
+                    path=path,
                 ) from error
+            if "exists" in precondition:
+                if precondition["exists"] is True:
+                    continue
+                raise ChangeConflictError(
+                    f"Precondition requires an absent path: {path}",
+                    code="change.precondition-exists",
+                    path=path,
+                )
             if actual != precondition.get("equals"):
                 raise ChangeConflictError(
-                    f"Precondition failed at {path}: expected {precondition.get('equals')!r}, found {actual!r}"
+                    f"Precondition failed at {path}: expected {precondition.get('equals')!r}, found {actual!r}",
+                    code="change.precondition-failed",
+                    path=path,
+                    details={"expected": precondition.get("equals"), "actual": actual},
                 )
 
     def _apply_operation(self, model: JsonObject, operation: JsonObject) -> None:

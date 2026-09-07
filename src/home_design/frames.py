@@ -5,8 +5,10 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from home_design.construction import ConstructionGeometry
-from home_design.json_types import JsonObject
+from home_design.construction import Authoring, ConstructionGeometry
+from home_design.errors import ResolutionError
+from home_design.geometry import vector3
+from home_design.json_types import JsonObject, JsonValue
 from home_design.resolved import MeshData, Vec3
 
 
@@ -18,6 +20,39 @@ class LocalFrame:
     x: Vec3
     y: Vec3
     z: Vec3
+
+    @classmethod
+    def from_dict(cls, value: JsonValue) -> LocalFrame:
+        """Read and validate a shared placement contract at a module boundary."""
+        source = Authoring.object(value, "resolved placement frame")
+        frame = cls(*(vector3(source[key], key) for key in ("origin", "x", "y", "z")))
+        vectors = (frame.origin, frame.x, frame.y, frame.z)
+        if any(not math.isfinite(number) for vector in vectors for number in vector):
+            raise ResolutionError(
+                "Resolved frame coordinates must be finite",
+                code="contract.invalid-frame",
+            )
+        axes = (frame.x, frame.y, frame.z)
+        if (
+            any(
+                not math.isclose(sum(value * value for value in axis), 1, abs_tol=1e-7)
+                for axis in axes
+            )
+            or any(
+                abs(sum(a * b for a, b in zip(axes[i], axes[j]))) > 1e-7
+                for i, j in ((0, 1), (0, 2), (1, 2))
+            )
+            or sum(
+                a * b
+                for a, b in zip(ConstructionGeometry.cross(frame.x, frame.y), frame.z)
+            )
+            < 1 - 1e-7
+        ):
+            raise ResolutionError(
+                "Resolved frame axes must be orthonormal and right-handed",
+                code="contract.invalid-frame",
+            )
+        return frame
 
     def vector(self, value: Vec3) -> Vec3:
         """Transform a local vector without translation."""

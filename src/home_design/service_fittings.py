@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from home_design.capabilities import ComponentRegistry
+
 from dataclasses import replace
 
 from home_design.components import ConstructionResolver
@@ -23,7 +25,7 @@ from home_design.solids import SolidOperations
 class ServiceFittings:
     """Place generated fitting geometry without decoupling its ports from its solid interfaces."""
 
-    KINDS: frozenset[str] = frozenset({"serviceFitting"})
+    KINDS: frozenset[str] = ComponentRegistry.resolver_kinds("fitting")
 
     @staticmethod
     def ports(definition: JsonObject, shape: FittingShape) -> JsonObject:

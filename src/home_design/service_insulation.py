@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from home_design.capabilities import ComponentRegistry
+
 import math
 from copy import deepcopy
 from dataclasses import replace
@@ -24,7 +26,7 @@ from home_design.solids import SolidOperations
 class ServiceInsulation:
     """Generate separate material stock without duplicating the service body or its passage."""
 
-    KINDS: frozenset[str] = frozenset({"serviceInsulation"})
+    KINDS: frozenset[str] = ComponentRegistry.resolver_kinds("insulation")
 
     @staticmethod
     def _outer(
@@ -65,9 +67,7 @@ class ServiceInsulation:
             recipe["depth"] = number(recipe["depth"], "cap depth") + thickness
         outer = FittingGeometry(definition, thickness).resolve().volumes["clearance"]
         placement = Authoring.object(host.data["placement"])
-        frame = LocalFrame(
-            *(vector3(placement[key], key) for key in ("origin", "x", "y", "z"))
-        )
+        frame = LocalFrame.from_dict(placement)
         return frame.mesh(outer)
 
     @staticmethod

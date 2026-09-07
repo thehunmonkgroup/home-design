@@ -7,6 +7,8 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from fractions import Fraction
 from typing import ClassVar
 
+from home_design.json_types import JsonObject
+
 
 class LengthConversionError(ValueError):
     """Report an invalid or unsupported architectural length expression."""
@@ -64,6 +66,28 @@ class LengthConverter:
         re.IGNORECASE,
     )
     _SEPARATOR_PATTERN: ClassVar[re.Pattern[str]] = re.compile(r"^[\s,+]*$")
+
+    @classmethod
+    def report(
+        cls,
+        expression: str,
+        target: str = "mm",
+        precision: int = 6,
+        denominator: int = 16,
+    ) -> JsonObject:
+        """Return canonical millimetres and a requested human-readable unit value."""
+        millimetres = cls.parse_millimetres(expression)
+        value = (
+            cls.format_feet_inches(expression, denominator)
+            if target == "ft-in"
+            else cls.format_decimal(cls.convert(expression, target), precision)
+        )
+        return {
+            "input": expression,
+            "millimetres": cls.format_decimal(millimetres, precision),
+            "targetUnit": target,
+            "value": value,
+        }
 
     @classmethod
     def parse_millimetres(cls, expression: str) -> Decimal:

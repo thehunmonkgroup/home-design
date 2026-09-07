@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Literal
+
+from home_design.json_types import JsonObject
 
 Severity = Literal["info", "warning", "error"]
 
@@ -17,13 +19,17 @@ class Diagnostic:
     message: str
     path: str = ""
     subject_id: str | None = None
+    details: JsonObject = field(default_factory=dict)
 
-    def to_dict(self) -> dict[str, str | None]:
+    def to_dict(self) -> JsonObject:
         """Serialize the diagnostic.
 
         :returns: JSON-compatible diagnostic mapping.
         """
-        return asdict(self)
+        result: JsonObject = asdict(self)
+        if not self.details:
+            result.pop("details")
+        return result
 
 
 @dataclass(frozen=True, slots=True)
@@ -48,7 +54,7 @@ class ValidationReport:
         """
         return tuple(item for item in self.diagnostics if item.severity == "error")
 
-    def to_dict(self) -> dict[str, object]:
+    def to_dict(self) -> JsonObject:
         """Serialize the validation report.
 
         :returns: JSON-compatible report mapping.

@@ -20,6 +20,28 @@ from home_design.resolved import MeshData, Vec2, Vec3
 
 
 @dataclass(frozen=True)
+class MaterialShare:
+    """One concurrent material fraction within a single physical layer thickness."""
+
+    material_id: str
+    fraction: float
+    source: JsonObject
+
+    @classmethod
+    def from_dict(cls, value: JsonValue) -> MaterialShare:
+        """Read the shared material ownership contract used by geometry and reports."""
+        source = Authoring.object(value, "layer material share")
+        fraction = number(source["fraction"], "cavity material fraction")
+        if not math.isfinite(fraction) or fraction <= 0 or fraction > 1:
+            raise ResolutionError(
+                "Layer material fraction must be greater than zero and at most one"
+            )
+        return cls(
+            Authoring.text(source["material"], "layer material"), fraction, source
+        )
+
+
+@dataclass(frozen=True)
 class AssemblyLayer:
     """One thickness-bearing layer, optionally containing concurrent materials."""
 
@@ -27,10 +49,52 @@ class AssemblyLayer:
     thickness: float
     material: str | None
     source: JsonObject
+    components: tuple[MaterialShare, ...] = ()
+
+    @property
+    def identity(self) -> str | None:
+        """Return a durable authored layer ID when the model supplies one."""
+        value = self.source.get("id")
+        return value if isinstance(value, str) else None
 
 
 class LayerAssembly:
     """Generate contiguous material layers without counting cavity infill twice."""
+
+    @staticmethod
+    def export_key(identity: JsonValue) -> str:
+        """Preserve legacy IFC relationship seeds through explicit identity migration."""
+        text = str(identity)
+        prefix = "layer.legacy."
+        suffix = text.removeprefix(prefix)
+        return suffix if text.startswith(prefix) and suffix.isdigit() else text
+
+    @staticmethod
+    def index(layers: JsonValue, selection: JsonValue, label: str = "host") -> int:
+        """Resolve a durable layer ID or a legacy integer without silently retargeting."""
+        values = Authoring.array(layers, "host layers")
+        if isinstance(selection, str):
+            matches = [
+                index
+                for index, value in enumerate(values)
+                if Authoring.object(value).get("id") == selection
+            ]
+            if len(matches) == 1:
+                return matches[0]
+            reason = "ambiguous" if matches else "missing"
+            raise ResolutionError(
+                f"{label} has {reason} layer ID {selection}",
+                code="layer.identity-unavailable",
+            )
+        if (
+            isinstance(selection, int)
+            and not isinstance(selection, bool)
+            and 0 <= selection < len(values)
+        ):
+            return selection
+        raise ResolutionError(
+            f"{label} has no layer {selection}", code="layer.selection-unavailable"
+        )
 
     @staticmethod
     def layers(component_type: JsonObject) -> tuple[AssemblyLayer, ...]:
@@ -39,31 +103,34 @@ class LayerAssembly:
         for index, value in enumerate(Authoring.array(component_type.get("layers"))):
             source = Authoring.object(value)
             material = source.get("material")
-            components = source.get("components")
-            if isinstance(components, list):
-                fractions = [
-                    number(
-                        Authoring.object(component).get("fraction"),
-                        "cavity material fraction",
-                    )
-                    for component in components
-                ]
+            values = source.get("components")
+            components = (
+                tuple(MaterialShare.from_dict(value) for value in values)
+                if isinstance(values, list)
+                else ()
+            )
+            if isinstance(values, list):
+                fractions = [component.fraction for component in components]
                 if not math.isclose(sum(fractions), 1, abs_tol=1e-6):
                     raise ResolutionError(
                         "Concurrent layer component fractions must sum to one"
                     )
                 if not isinstance(material, str):
-                    representative = Authoring.object(
-                        components[fractions.index(max(fractions))]
-                    )
-                    material = representative.get("material")
+                    material = components[fractions.index(max(fractions))].material_id
             result.append(
                 AssemblyLayer(
                     index,
                     number(source.get("thickness"), "layer thickness"),
                     material if isinstance(material, str) else None,
                     source,
+                    components,
                 )
+            )
+        identities = [layer.identity for layer in result if layer.identity is not None]
+        if len(identities) != len(set(identities)):
+            raise ResolutionError(
+                "Layer IDs must be unique within their reusable type",
+                code="layer.duplicate-id",
             )
         return tuple(result)
 

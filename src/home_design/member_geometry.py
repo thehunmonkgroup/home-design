@@ -11,6 +11,7 @@ from home_design.json_types import JsonObject
 from home_design.placement import LocalFrame, tuple3
 from home_design.resolved import MeshData, Vec3
 from home_design.solids import SolidOperations
+from home_design.part_contracts import GeneratedMember
 
 
 class MemberGeometry:
@@ -66,17 +67,8 @@ class MemberGeometry:
         cls, mesh: MeshData, record: JsonObject, cuts: JsonObject
     ) -> MeshData:
         """Apply the same cut controls to a generated member's retained stock frame."""
-        start, end = [
-            vector3(value, "member axis") for value in Authoring.array(record["axis"])
-        ]
-        axes = Authoring.object(record["sectionFrame"])
-        frame = LocalFrame(
-            start,
-            vector3(axes["x"], "section X"),
-            vector3(axes["y"], "section Y"),
-            vector3(axes["z"], "section Z"),
-        )
-        result = cls.end_cuts(mesh, frame, math.dist(start, end), cuts)
+        member = GeneratedMember.from_dict(record)
+        result = cls.end_cuts(mesh, member.frame, math.dist(*member.axis), cuts)
         record["endCuts"] = cuts
         record["netVolumeMm3"] = SolidOperations.volume(result)
         return result

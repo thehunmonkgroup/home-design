@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from home_design.capabilities import ComponentRegistry
+
 import math
 
 from home_design.components import ConstructionResolver
@@ -17,7 +19,7 @@ from home_design.solids import SolidOperations
 class Reinforcement:
     """Resolve authored steel geometry without inferring bar sizes or reinforcement design."""
 
-    KINDS: frozenset[str] = frozenset({"reinforcingBar", "reinforcingMesh"})
+    KINDS: frozenset[str] = ComponentRegistry.resolver_kinds("reinforcement")
 
     @classmethod
     def resolve(

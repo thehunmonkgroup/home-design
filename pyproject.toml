@@ -19,6 +19,9 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "build>=1.2",
+  "setuptools>=75",
+  "wheel",
   "basedpyright",
   "black",
   "flake8",
@@ -33,11 +36,14 @@ home-design = "home_design.cli:main"
 [tool.setuptools]
 package-dir = {"" = "src"}
 
+[tool.setuptools.cmdclass]
+build_py = "build_support.ResourceBuild"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.pytest.ini_options]
-addopts = "--strict-config --strict-markers -ra"
+addopts = "--strict-config --strict-markers -ra --cov-config=pyproject.toml"
 testpaths = ["tests"]
 markers = [
   "integration: exercises two or more project components",
@@ -46,6 +52,9 @@ markers = [
 [tool.coverage.run]
 branch = true
 source = ["home_design"]
+
+[tool.coverage.paths]
+source = ["src/home_design", "*/installed/home_design"]
 
 [tool.coverage.report]
 show_missing = true

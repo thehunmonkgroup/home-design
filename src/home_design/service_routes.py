@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from home_design.capabilities import ComponentRegistry
+
 import math
 from dataclasses import replace
 
@@ -142,7 +144,7 @@ class RouteGeometry:
 class ServiceRoutes:
     """Resolve two-port pipe, duct, cable and conduit routes on authored 3D paths."""
 
-    KINDS: frozenset[str] = frozenset({"serviceRoute"})
+    KINDS: frozenset[str] = ComponentRegistry.resolver_kinds("route")
     FAMILY_MEDIA: dict[str, frozenset[str]] = {
         "pipe": frozenset(
             {"water", "waste", "vent", "gas", "refrigerant", "condensate", "other"}

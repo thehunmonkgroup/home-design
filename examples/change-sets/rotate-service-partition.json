@@ -1,0 +1,13 @@
+{
+  "changeVersion": "0.1",
+  "id": "change.rotate-service-partition",
+  "description": "Rotate the service partition around its start, carrying its hosted components and preserving the independent mechanical branch.",
+  "baseRevision": 1,
+  "preconditions": [
+    {"path": "/anchors/electrical.anchor.wall.start/position", "equals": [1500, 2500]},
+    {"path": "/anchors/electrical.anchor.wall.end/position", "equals": [5500, 2500]}
+  ],
+  "operations": [
+    {"op": "moveAnchor", "anchorId": "electrical.anchor.wall.end", "position": [1500, 6500]}
+  ]
+}

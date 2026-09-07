@@ -81,6 +81,7 @@ class ResolvedModel:
     solar_studies: tuple[JsonValue, ...] = ()
     drawings: tuple[JsonValue, ...] = ()
     requirement_results: tuple[JsonObject, ...] = ()
+    component_references: tuple[JsonObject, ...] = ()
 
     def element(self, element_id: str) -> ResolvedElement:
         """Return a resolved element by stable ID.
@@ -111,6 +112,7 @@ class ResolvedModel:
             "types": self.types,
             "elements": [element.to_dict() for element in self.elements],
             "relationships": self.relationships,
+            "componentReferences": list(self.component_references),
             "requirements": list(self.requirements),
             "requirementResults": list(self.requirement_results),
             "solarStudies": list(self.solar_studies),

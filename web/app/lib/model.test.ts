@@ -72,6 +72,18 @@ describe('render manifest helpers', () => {
     expect(groupElements(manifest).map((group) => group.kind)).toEqual(['wall', 'roof', 'space']);
   });
 
+  it('uses engine labels and keeps new component families discoverable', () => {
+    const extended: RenderManifest = { ...manifest, elements: {
+      ...manifest.elements,
+      'new.part': { kind: 'futureFamily', kindLabel: 'New construction family', name: 'Part', storeyId: null, nodes: ['new.part'], defaultVisible: true, data: {} },
+      'wall.north': { ...manifest.elements['wall.north'], kindLabel: 'Engine wall label' },
+    } };
+    const groups = groupElements(extended);
+    expect(groups[0].label).toBe('Engine wall label');
+    expect(groups.at(-1)?.label).toBe('New construction family');
+    expect(groups.at(-1)?.elements[0][0]).toBe('new.part');
+  });
+
   it('derives initial hidden state from manifest defaults', () => {
     expect([...defaultHiddenElementIds(manifest)]).toEqual(['space.living']);
   });

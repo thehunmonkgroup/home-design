@@ -63,8 +63,7 @@ class IfcProperties:
         layers: list[entity_instance] = []
         for layer in LayerAssembly.layers(definition):
             material = materials.get(layer.material or "")
-            components = layer.source.get("components")
-            if isinstance(components, list):
+            if layer.components:
                 material = ifcopenshell.api.material.add_material(
                     ifc, name=str(layer.source.get("name")), category="Framed cavity"
                 )
@@ -72,7 +71,11 @@ class IfcProperties:
                     "IfcPropertySingleValue",
                     Name="ConcurrentMaterials",
                     NominalValue=ifc.create_entity(
-                        "IfcText", json.dumps(components, sort_keys=True)
+                        "IfcText",
+                        json.dumps(
+                            [component.source for component in layer.components],
+                            sort_keys=True,
+                        ),
                     ),
                 )
                 ifc.create_entity(
@@ -86,6 +89,7 @@ class IfcProperties:
                     "IfcMaterialLayer",
                     Material=material,
                     LayerThickness=layer.thickness,
+                    Description=layer.identity,
                     Name=str(layer.source.get("name")),
                     Category=str(layer.source.get("function")),
                 )

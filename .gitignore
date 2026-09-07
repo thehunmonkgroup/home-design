@@ -1,4 +1,5 @@
-.coverage
+.coverage*
+.playwright-cli/
 /dist/
 /build/
 

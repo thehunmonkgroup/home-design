@@ -88,7 +88,18 @@ class KernelFixture(IfcExporter):
                 assert isinstance(mesh, trimesh.Trimesh)
                 mesh.apply_transform(transform)
                 scene_volume += abs(float(mesh.volume))
-                assert mesh.metadata["homeDesignId"] == identity
+                selected = [
+                    child_id
+                    for child_id in Authoring.array(entry.get("children", []))
+                    if node
+                    in Authoring.array(
+                        Authoring.object(entries[Authoring.text(child_id)])["nodes"]
+                    )
+                ]
+                assert mesh.metadata["homeDesignId"] == (
+                    Authoring.text(selected[0]) if selected else identity
+                )
+                assert len(selected) <= 1
                 expected_points = np.asarray(
                     [
                         (x / 1000, z / 1000, -y / 1000)
@@ -139,6 +150,7 @@ class KernelFixture(IfcExporter):
         "single-story-gable-house",
         "hillside-deck-house",
         "complete-shell-coordination-house",
+        "integrated-authoring-house",
         "trimmed-member",
     ],
 )

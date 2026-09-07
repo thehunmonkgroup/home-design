@@ -6,7 +6,6 @@ import glob
 import logging
 from collections.abc import Sequence
 from pathlib import Path
-from typing import cast
 
 from home_design.errors import HomeDesignError
 from home_design.json_types import JsonObject, JsonValue
@@ -57,9 +56,7 @@ class ModelBatch:
             LOGGER.debug("Validating %s", path)
             report: JsonObject
             try:
-                report = cast(
-                    JsonObject, validator.validate(loader.load(path)).to_dict()
-                )
+                report = validator.validate(loader.load(path)).to_dict()
             except (HomeDesignError, OSError, ValueError, KeyError) as error:
                 report = {
                     "valid": False,
