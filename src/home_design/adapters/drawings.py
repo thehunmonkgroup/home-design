@@ -91,7 +91,15 @@ class DrawingExporter:
         include = view.get("includeKinds")
         items: list[tuple[float, list[Polygon], str, str]] = []
         for element in model.elements:
-            if element.kind in {"space", "opening", "load", "detail"}:
+            if element.kind in {
+                "space",
+                "opening",
+                "penetration",
+                "load",
+                "detail",
+                "clearanceZone",
+                "barrierCheck",
+            }:
                 continue
             if isinstance(include, list) and element.kind not in include:
                 continue

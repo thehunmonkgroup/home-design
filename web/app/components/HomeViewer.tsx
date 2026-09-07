@@ -30,9 +30,11 @@ import {
   groupElements,
   isolateElements,
   nodeElementIndex,
+  reviewElementIds,
   withElementVisibility,
   type ManifestElement,
   type RenderManifest,
+  type ReviewPreset,
 } from '../lib/model';
 import { canonicalSectionPlane, configureDirectionalShadow, configureOrbitControls, disposeSceneResources, frameModel, modelNorthRotation } from '../lib/scene';
 import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, type CatalogModel } from '../lib/catalog';
@@ -344,6 +346,14 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     setHiddenIds(next);
   }, []);
 
+  const showDiscipline = (preset: ReviewPreset) => {
+    if (!manifest) return;
+    const next = isolateElements(manifest, reviewElementIds(manifest, preset));
+    if (selectedId && next.has(selectedId)) selectElement(null);
+    hiddenIdsRef.current = next;
+    setHiddenIds(next);
+  };
+
   return (
     <main className={`review-shell ${displayedPanels.components ? '' : 'components-hidden'} ${displayedPanels.details ? '' : 'details-hidden'}`}>
       <header className="review-header">
@@ -443,6 +453,13 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           <button onClick={showAll} disabled={hiddenIds.size === 0} title="Show every component with 3D geometry">
             Show all
           </button>
+          {(['envelope', 'framing', 'services'] as const).map((preset) => (
+            <button key={preset} onClick={() => showDiscipline(preset)}
+              disabled={!manifest || reviewElementIds(manifest, preset).length === 0}
+              title={`Show only ${preset} components`}>
+              {preset[0].toUpperCase() + preset.slice(1)}
+            </button>
+          ))}
           <label title="Eye clicks show only the chosen component or group. Turning this off keeps current visibility.">
             <input type="checkbox" checked={isolateOnClick} onChange={(event) => setIsolateOnClick(event.target.checked)} />
             <span>Isolate on eye click</span>

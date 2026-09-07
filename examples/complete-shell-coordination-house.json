@@ -1,0 +1,4856 @@
+{
+  "$schema": "../schema/home-model-0.1.schema.json",
+  "modelVersion": "0.1",
+  "revision": 1,
+  "project": {
+    "id": "project.complete-shell",
+    "name": "Complete Shell Coordination House",
+    "description": "Public coordination example with explicit wall, floor, roof and irregular deck framing, mounted accessories and connected shell services. Dimensions and specifications are illustrative authoring inputs, not engineered product selections.",
+    "site": {
+      "id": "site.reference",
+      "name": "Reference site"
+    },
+    "building": {
+      "id": "building.main",
+      "name": "Main house"
+    }
+  },
+  "units": {
+    "length": "mm",
+    "angle": "deg"
+  },
+  "coordinateSystem": {
+    "handedness": "right",
+    "upAxis": "Z",
+    "xDirection": "east",
+    "yDirection": "north",
+    "localOrigin": [
+      0,
+      0,
+      0
+    ],
+    "trueNorthDegrees": 0
+  },
+  "levels": {
+    "level.ground": {
+      "kind": "storey",
+      "name": "Ground floor",
+      "elevation": 0
+    },
+    "level.eave": {
+      "kind": "reference",
+      "name": "Roof eave",
+      "elevation": 2700
+    }
+  },
+  "anchors": {
+    "anchor.house.sw": {
+      "kind": "point2",
+      "name": "House southwest corner",
+      "level": "level.ground",
+      "position": [
+        0,
+        0
+      ]
+    },
+    "anchor.house.se": {
+      "kind": "point2",
+      "name": "House southeast corner",
+      "level": "level.ground",
+      "position": [
+        10000,
+        0
+      ]
+    },
+    "anchor.house.ne": {
+      "kind": "point2",
+      "name": "House northeast corner",
+      "level": "level.ground",
+      "position": [
+        10000,
+        8000
+      ]
+    },
+    "anchor.house.nw": {
+      "kind": "point2",
+      "name": "House northwest corner",
+      "level": "level.ground",
+      "position": [
+        0,
+        8000
+      ]
+    },
+    "anchor.deck.sw": {
+      "kind": "point2",
+      "name": "Deck southwest corner",
+      "level": "level.ground",
+      "position": [
+        3000,
+        -3000
+      ]
+    },
+    "anchor.deck.se": {
+      "kind": "point2",
+      "name": "Deck southeast corner",
+      "level": "level.ground",
+      "position": [
+        6200,
+        -3000
+      ]
+    },
+    "anchor.deck.ne": {
+      "kind": "point2",
+      "name": "Deck northeast corner",
+      "level": "level.ground",
+      "position": [
+        7000,
+        0
+      ]
+    },
+    "anchor.deck.nw": {
+      "kind": "point2",
+      "name": "Deck northwest corner",
+      "level": "level.ground",
+      "position": [
+        3000,
+        0
+      ]
+    },
+    "anchor.wall.north-axis": {
+      "kind": "axis2",
+      "name": "North wall axis",
+      "level": "level.ground",
+      "start": {
+        "anchor": "anchor.house.nw"
+      },
+      "end": {
+        "anchor": "anchor.house.ne"
+      }
+    },
+    "anchor.deck.bevel": {
+      "kind": "point2",
+      "name": "Deck angled corner",
+      "level": "level.ground",
+      "position": [
+        7000,
+        -2200
+      ]
+    },
+    "electrical.anchor.wall.start": {
+      "kind": "point2",
+      "name": "Wall start",
+      "position": [
+        1500,
+        2500
+      ],
+      "level": "level.ground"
+    },
+    "electrical.anchor.wall.end": {
+      "kind": "point2",
+      "name": "Wall end",
+      "position": [
+        5500,
+        2500
+      ],
+      "level": "level.ground"
+    },
+    "mechanical.anchor.mechanical": {
+      "kind": "point3",
+      "name": "Mechanical network origin",
+      "position": [
+        7300,
+        2200,
+        1800
+      ]
+    }
+  },
+  "materials": {
+    "material.concrete": {
+      "name": "Concrete",
+      "category": "concrete",
+      "appearance": {
+        "color": "#A8A8A8",
+        "roughness": 0.9
+      }
+    },
+    "material.timber": {
+      "name": "Framing timber",
+      "category": "wood",
+      "appearance": {
+        "color": "#C69C6D",
+        "roughness": 0.8
+      }
+    },
+    "material.sheathing": {
+      "name": "Structural sheathing",
+      "category": "wood"
+    },
+    "material.gypsum": {
+      "name": "Gypsum board",
+      "category": "finish",
+      "appearance": {
+        "color": "#E8E5DF",
+        "roughness": 0.95
+      }
+    },
+    "material.siding": {
+      "name": "Wood siding",
+      "category": "finish",
+      "appearance": {
+        "color": "#8B6F47",
+        "roughness": 0.85
+      }
+    },
+    "material.roofing": {
+      "name": "Asphalt shingles",
+      "category": "roofing",
+      "appearance": {
+        "color": "#3F4448",
+        "roughness": 0.9
+      }
+    },
+    "material.insulation": {
+      "name": "Illustrative cavity insulation",
+      "appearance": {
+        "color": "#d8b66a"
+      }
+    },
+    "mechanical.material.cover": {
+      "name": "Illustrative service insulation"
+    },
+    "mechanical.material.support": {
+      "name": "Illustrative support stock"
+    },
+    "material.steel": {
+      "name": "Illustrative galvanized service stock",
+      "appearance": {
+        "color": "#8fabb8"
+      }
+    },
+    "material.copper": {
+      "name": "Illustrative bundled conductor stock",
+      "appearance": {
+        "color": "#bf6b34"
+      }
+    },
+    "material.device": {
+      "name": "Illustrative electrical enclosure stock",
+      "appearance": {
+        "color": "#e9e5d8"
+      }
+    }
+  },
+  "types": {
+    "wallType.exterior.wood-185": {
+      "kind": "wallType",
+      "name": "185 mm wood-framed exterior wall",
+      "layers": [
+        {
+          "name": "Siding",
+          "material": "material.siding",
+          "thickness": 20,
+          "function": "finish"
+        },
+        {
+          "name": "Sheathing",
+          "material": "material.sheathing",
+          "thickness": 12,
+          "function": "substrate"
+        },
+        {
+          "name": "Framed structure",
+          "material": "material.insulation",
+          "thickness": 140,
+          "function": "structure",
+          "representation": "explicit"
+        },
+        {
+          "name": "Interior gypsum",
+          "material": "material.gypsum",
+          "thickness": 13,
+          "function": "finish"
+        }
+      ],
+      "layerOrder": "exteriorToInterior",
+      "referencePlane": "center"
+    },
+    "slabType.concrete-200": {
+      "kind": "slabType",
+      "name": "200 mm concrete slab",
+      "layers": [
+        {
+          "name": "Concrete structure",
+          "material": "material.concrete",
+          "thickness": 200,
+          "function": "structure"
+        }
+      ],
+      "layerOrder": "topToBottom"
+    },
+    "slabType.deck-150": {
+      "kind": "slabType",
+      "name": "150 mm timber deck assembly",
+      "layers": [
+        {
+          "name": "Timber deck assembly",
+          "material": "material.timber",
+          "thickness": 150,
+          "function": "structure"
+        }
+      ],
+      "layerOrder": "topToBottom"
+    },
+    "roofType.shingle-250": {
+      "kind": "roofType",
+      "name": "Shingle roof assembly",
+      "layers": [
+        {
+          "name": "Asphalt shingles",
+          "material": "material.roofing",
+          "thickness": 10,
+          "function": "finish"
+        },
+        {
+          "name": "Sheathing",
+          "material": "material.sheathing",
+          "thickness": 20,
+          "function": "substrate"
+        },
+        {
+          "name": "Rafter and insulation zone",
+          "material": "material.insulation",
+          "thickness": 220,
+          "function": "structure",
+          "representation": "explicit"
+        }
+      ],
+      "layerOrder": "topToBottom"
+    },
+    "doorType.entry-900x2100": {
+      "kind": "doorType",
+      "name": "Single entry door 900 x 2100",
+      "nominalWidth": 900,
+      "nominalHeight": 2100,
+      "operation": "singleSwing",
+      "frameDepth": 185,
+      "material": "material.timber"
+    },
+    "windowType.casement-1500x1200": {
+      "kind": "windowType",
+      "name": "Casement window 1500 x 1200",
+      "nominalWidth": 1500,
+      "nominalHeight": 1200,
+      "operation": "casement",
+      "frameDepth": 185,
+      "material": "material.timber"
+    },
+    "spaceType.living": {
+      "kind": "spaceType",
+      "name": "Living space",
+      "occupancy": "residential",
+      "conditioned": true
+    },
+    "memberType.shell.stud": {
+      "kind": "memberType",
+      "name": "Illustrative stud stock",
+      "material": "material.timber",
+      "section": {
+        "kind": "rectangle",
+        "width": 40,
+        "depth": 140
+      }
+    },
+    "memberType.shell.plate": {
+      "kind": "memberType",
+      "name": "Illustrative plate stock",
+      "material": "material.timber",
+      "section": {
+        "kind": "rectangle",
+        "width": 140,
+        "depth": 40
+      }
+    },
+    "memberType.shell.header": {
+      "kind": "memberType",
+      "name": "Illustrative header stock",
+      "material": "material.timber",
+      "section": {
+        "kind": "rectangle",
+        "width": 140,
+        "depth": 140
+      }
+    },
+    "memberType.shell.joist": {
+      "kind": "memberType",
+      "name": "Illustrative joist stock",
+      "material": "material.timber",
+      "section": {
+        "kind": "rectangle",
+        "width": 40,
+        "depth": 220
+      }
+    },
+    "wallFramingType.shell": {
+      "kind": "wallFramingType",
+      "name": "Explicit shell wall framing",
+      "studType": "memberType.shell.stud",
+      "plateType": "memberType.shell.plate",
+      "headerType": "memberType.shell.header",
+      "spacing": 600
+    },
+    "planarFramingType.shell": {
+      "kind": "planarFramingType",
+      "name": "Explicit floor, deck and roof framing",
+      "memberType": "memberType.shell.joist",
+      "rimType": "memberType.shell.joist",
+      "spacing": 600
+    },
+    "slabType.shell.floor": {
+      "kind": "slabType",
+      "name": "Framed floor",
+      "layerOrder": "topToBottom",
+      "layers": [
+        {
+          "name": "Subfloor",
+          "thickness": 25,
+          "function": "substrate",
+          "material": "material.timber"
+        },
+        {
+          "name": "Explicit framing cavity",
+          "thickness": 220,
+          "function": "structure",
+          "representation": "explicit",
+          "material": "material.insulation"
+        }
+      ]
+    },
+    "slabType.shell.deck": {
+      "kind": "slabType",
+      "name": "Framed deck",
+      "layerOrder": "topToBottom",
+      "layers": [
+        {
+          "name": "Decking",
+          "thickness": 25,
+          "function": "substrate",
+          "material": "material.timber"
+        },
+        {
+          "name": "Explicit framing cavity",
+          "thickness": 220,
+          "function": "structure",
+          "representation": "explicit"
+        }
+      ]
+    },
+    "electrical.type.panel": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative panel",
+      "role": "distributionPanel",
+      "material": "material.device",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 240,
+            "depth": 40
+          },
+          "depth": 50
+        }
+      },
+      "electrical": {
+        "ratedVoltageV": 120,
+        "ratedCurrentA": 20,
+        "poles": 1,
+        "supply": "AC",
+        "frequencyHz": 60
+      },
+      "ports": {
+        "out": {
+          "position": [
+            -70,
+            0,
+            50
+          ],
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "power",
+          "flow": "source",
+          "connectionType": "illustrativeFace"
+        },
+        "branch2": {
+          "position": [
+            70,
+            0,
+            50
+          ],
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "power",
+          "flow": "source",
+          "connectionType": "illustrativeFace"
+        }
+      },
+      "portGroups": [
+        [
+          "out",
+          "branch2"
+        ]
+      ]
+    },
+    "electrical.type.breaker": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative breaker",
+      "role": "circuitBreaker",
+      "material": "material.device",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 40
+          },
+          "depth": 30
+        }
+      },
+      "electrical": {
+        "ratedVoltageV": 120,
+        "ratedCurrentA": 20,
+        "poles": 1,
+        "supply": "AC",
+        "frequencyHz": 60
+      },
+      "ports": {
+        "in": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "power",
+          "flow": "sink",
+          "connectionType": "illustrativeFace"
+        },
+        "out": {
+          "position": [
+            0,
+            0,
+            30
+          ],
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "power",
+          "flow": "source",
+          "connectionType": "illustrativeFace"
+        }
+      },
+      "portGroups": [
+        [
+          "in",
+          "out"
+        ]
+      ]
+    },
+    "electrical.type.load": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative load",
+      "role": "light",
+      "material": "material.device",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 40
+          },
+          "depth": 20
+        }
+      },
+      "electrical": {
+        "ratedVoltageV": 120,
+        "ratedCurrentA": 20,
+        "poles": 1,
+        "supply": "AC",
+        "frequencyHz": 60
+      },
+      "ports": {
+        "in": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "power",
+          "flow": "sink",
+          "connectionType": "illustrativeFace"
+        }
+      }
+    },
+    "electrical.type.cable": {
+      "kind": "serviceRouteType",
+      "name": "Illustrative cable",
+      "family": "cable",
+      "material": "material.copper",
+      "medium": "electrical",
+      "function": "power",
+      "connectionType": "illustrativeFace",
+      "section": {
+        "kind": "circle",
+        "diameter": 10
+      },
+      "flow": "forward",
+      "cable": {
+        "designation": "Illustrative three-conductor stock",
+        "ratedVoltageV": 600,
+        "allowableCurrentA": 20,
+        "maximumProtectionA": 20,
+        "conductors": [
+          {
+            "function": "power",
+            "count": 1,
+            "areaMm2": 2.5,
+            "materialSpec": "Illustrative copper",
+            "insulationSpec": "Illustrative insulation"
+          },
+          {
+            "function": "neutral",
+            "count": 1,
+            "areaMm2": 2.5,
+            "materialSpec": "Illustrative copper",
+            "insulationSpec": "Illustrative insulation"
+          },
+          {
+            "function": "protectiveEarth",
+            "count": 1,
+            "areaMm2": 2.5,
+            "materialSpec": "Illustrative copper",
+            "insulationSpec": "Illustrative insulation"
+          }
+        ]
+      }
+    },
+    "electrical.type.receptacle": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative receptacle",
+      "role": "receptacle",
+      "material": "material.device",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 40
+          },
+          "depth": 20
+        }
+      },
+      "electrical": {
+        "ratedVoltageV": 120,
+        "ratedCurrentA": 20,
+        "poles": 1,
+        "supply": "AC",
+        "frequencyHz": 60
+      },
+      "ports": {
+        "in": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "power",
+          "flow": "sink",
+          "connectionType": "illustrativeFace"
+        }
+      }
+    },
+    "electrical.type.earth": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative load",
+      "role": "groundingElectrode",
+      "material": "material.device",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 40
+          },
+          "depth": 20
+        }
+      },
+      "electrical": {
+        "enclosureRating": "Illustrative specification"
+      },
+      "ports": {
+        "in": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "protectiveEarth",
+          "flow": "bidirectional",
+          "connectionType": "illustrativeFace"
+        }
+      }
+    },
+    "electrical.type.wire.earth": {
+      "kind": "serviceRouteType",
+      "name": "Illustrative cable",
+      "family": "cable",
+      "material": "material.copper",
+      "medium": "electrical",
+      "function": "protectiveEarth",
+      "connectionType": "illustrativeFace",
+      "section": {
+        "kind": "circle",
+        "diameter": 10
+      },
+      "flow": "bidirectional",
+      "cable": {
+        "designation": "Illustrative protectiveEarth conductor",
+        "construction": "conductor",
+        "conductors": [
+          {
+            "function": "protectiveEarth",
+            "count": 1,
+            "areaMm2": 2.5,
+            "materialSpec": "Illustrative copper"
+          }
+        ]
+      }
+    },
+    "electrical.type.bond": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative load",
+      "role": "bondingClamp",
+      "material": "material.device",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 40
+          },
+          "depth": 20
+        }
+      },
+      "electrical": {
+        "enclosureRating": "Illustrative specification"
+      },
+      "ports": {
+        "in": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "bonding",
+          "flow": "bidirectional",
+          "connectionType": "illustrativeFace"
+        }
+      }
+    },
+    "electrical.type.wire.bond": {
+      "kind": "serviceRouteType",
+      "name": "Illustrative cable",
+      "family": "cable",
+      "material": "material.copper",
+      "medium": "electrical",
+      "function": "bonding",
+      "connectionType": "illustrativeFace",
+      "section": {
+        "kind": "circle",
+        "diameter": 10
+      },
+      "flow": "bidirectional",
+      "cable": {
+        "designation": "Illustrative bonding conductor",
+        "construction": "conductor",
+        "conductors": [
+          {
+            "function": "bonding",
+            "count": 1,
+            "areaMm2": 2.5,
+            "materialSpec": "Illustrative copper"
+          }
+        ]
+      }
+    },
+    "electrical.type.groundBar": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative panel",
+      "role": "groundingBar",
+      "material": "material.device",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 240,
+            "depth": 40
+          },
+          "depth": 50
+        }
+      },
+      "electrical": {
+        "enclosureRating": "Illustrative specification"
+      },
+      "ports": {
+        "earth": {
+          "position": [
+            -70,
+            0,
+            50
+          ],
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "protectiveEarth",
+          "flow": "bidirectional",
+          "connectionType": "illustrativeFace"
+        },
+        "bond": {
+          "position": [
+            70,
+            0,
+            50
+          ],
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "bonding",
+          "flow": "bidirectional",
+          "connectionType": "illustrativeFace"
+        }
+      },
+      "portGroups": [
+        [
+          "earth",
+          "bond"
+        ]
+      ]
+    },
+    "electrical.type.flushBox": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative flush box",
+      "role": "deviceBox",
+      "material": "material.device",
+      "electrical": {
+        "enclosureRating": "Illustrative specification"
+      },
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 50,
+            "depth": 50
+          },
+          "depth": 40
+        }
+      },
+      "cuts": {
+        "interior": {
+          "section": {
+            "kind": "rectangle",
+            "width": 44,
+            "depth": 44
+          },
+          "depth": 37,
+          "placement": {
+            "origin": [
+              0,
+              0,
+              3
+            ]
+          }
+        }
+      },
+      "ports": {
+        "entry": {
+          "position": [
+            0,
+            0,
+            3
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 10
+          },
+          "medium": "electrical",
+          "function": "containment",
+          "flow": "bidirectional",
+          "connectionType": "illustrativeFace"
+        }
+      }
+    },
+    "mechanical.type.ahu": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative airHandler",
+      "role": "airHandler",
+      "material": "material.steel",
+      "mechanical": {
+        "designation": "airHandler"
+      },
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 100,
+            "depth": 80
+          },
+          "depth": 100
+        }
+      },
+      "cuts": {
+        "passage": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 40
+          },
+          "depth": 100
+        }
+      },
+      "ports": {
+        "in": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "height": 40
+          },
+          "medium": "air",
+          "flow": "bidirectional",
+          "connectionType": "illustrativeFlange"
+        },
+        "out": {
+          "position": [
+            0,
+            0,
+            100
+          ],
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "height": 40
+          },
+          "medium": "air",
+          "flow": "bidirectional",
+          "connectionType": "illustrativeFlange"
+        }
+      },
+      "portGroups": [
+        [
+          "in",
+          "out"
+        ]
+      ]
+    },
+    "mechanical.type.damper": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative damper",
+      "role": "damper",
+      "material": "material.steel",
+      "mechanical": {
+        "designation": "damper",
+        "damperType": "balancing"
+      },
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 100,
+            "depth": 80
+          },
+          "depth": 50
+        }
+      },
+      "cuts": {
+        "passage": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 40
+          },
+          "depth": 50
+        }
+      },
+      "ports": {
+        "in": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "height": 40
+          },
+          "medium": "air",
+          "flow": "bidirectional",
+          "connectionType": "illustrativeFlange"
+        },
+        "out": {
+          "position": [
+            0,
+            0,
+            50
+          ],
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "height": 40
+          },
+          "medium": "air",
+          "flow": "bidirectional",
+          "connectionType": "illustrativeFlange"
+        }
+      },
+      "portGroups": [
+        [
+          "in",
+          "out"
+        ]
+      ]
+    },
+    "mechanical.type.terminal": {
+      "kind": "serviceDeviceType",
+      "name": "Illustrative airTerminal",
+      "role": "airTerminal",
+      "material": "material.steel",
+      "mechanical": {
+        "designation": "airTerminal",
+        "terminalType": "register"
+      },
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 100,
+            "depth": 80
+          },
+          "depth": 50
+        }
+      },
+      "cuts": {
+        "passage": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 40
+          },
+          "depth": 50
+        }
+      },
+      "ports": {
+        "in": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "height": 40
+          },
+          "medium": "air",
+          "flow": "bidirectional",
+          "connectionType": "illustrativeFlange"
+        }
+      },
+      "portGroups": []
+    },
+    "mechanical.type.duct": {
+      "kind": "serviceRouteType",
+      "name": "Illustrative branch duct",
+      "family": "duct",
+      "material": "material.steel",
+      "section": {
+        "kind": "rectangle",
+        "width": 60,
+        "height": 40
+      },
+      "wallThickness": 1,
+      "medium": "air",
+      "connectionType": "illustrativeFlange",
+      "duct": {
+        "designation": "Branch stock",
+        "construction": "rigid"
+      }
+    },
+    "mechanical.type.branch": {
+      "kind": "serviceFittingType",
+      "name": "Illustrative duct tee",
+      "family": "duct",
+      "material": "material.steel",
+      "wallThickness": 1,
+      "chordTolerance": 0.1,
+      "medium": "air",
+      "connectionType": "illustrativeFlange",
+      "geometry": {
+        "kind": "branch",
+        "trunk": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "height": 40
+          },
+          "path": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              400
+            ]
+          ],
+          "up": [
+            0,
+            1,
+            0
+          ]
+        },
+        "branches": {
+          "side": {
+            "section": {
+              "kind": "rectangle",
+              "width": 60,
+              "height": 40
+            },
+            "path": [
+              [
+                0,
+                0,
+                200
+              ],
+              [
+                200,
+                0,
+                200
+              ]
+            ],
+            "up": [
+              0,
+              1,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "mechanical.type.cover": {
+      "kind": "serviceInsulationType",
+      "name": "Ten millimetre covering",
+      "material": "mechanical.material.cover",
+      "thickness": 10
+    },
+    "mechanical.type.support": {
+      "kind": "hardwareType",
+      "name": "Illustrative insulated duct strap",
+      "role": "hanger",
+      "material": "mechanical.material.support",
+      "solids": {
+        "ring": {
+          "section": {
+            "kind": "rectangle",
+            "width": 100,
+            "depth": 80
+          },
+          "depth": 6
+        },
+        "arm": {
+          "section": {
+            "kind": "rectangle",
+            "width": 20,
+            "depth": 80
+          },
+          "depth": 6,
+          "placement": {
+            "origin": [
+              0,
+              -70,
+              0
+            ]
+          }
+        }
+      },
+      "cuts": {
+        "passage": {
+          "section": {
+            "kind": "rectangle",
+            "width": 84,
+            "depth": 64
+          },
+          "depth": 6
+        }
+      }
+    },
+    "mechanical.type.beam": {
+      "kind": "memberType",
+      "name": "Illustrative support framing",
+      "material": "material.timber",
+      "section": {
+        "kind": "rectangle",
+        "width": 20,
+        "depth": 20
+      }
+    },
+    "wallType.service.partition": {
+      "kind": "wallType",
+      "name": "Framed service partition",
+      "layerOrder": "exteriorToInterior",
+      "layers": [
+        {
+          "name": "Back gypsum",
+          "material": "material.gypsum",
+          "thickness": 13,
+          "function": "finish"
+        },
+        {
+          "name": "Framed service cavity",
+          "material": "material.insulation",
+          "thickness": 140,
+          "function": "structure",
+          "representation": "explicit"
+        },
+        {
+          "name": "Front gypsum",
+          "material": "material.gypsum",
+          "thickness": 13,
+          "function": "finish"
+        }
+      ]
+    },
+    "accessoryType.service.ledge": {
+      "kind": "accessoryType",
+      "name": "Timber service ledge",
+      "role": "ledge",
+      "material": "material.timber",
+      "solids": {
+        "shelf": {
+          "section": {
+            "kind": "rectangle",
+            "width": 600,
+            "depth": 30
+          },
+          "depth": 250
+        }
+      }
+    },
+    "plumbing.type.pipe": {
+      "kind": "serviceRouteType",
+      "name": "Water branch pipe",
+      "family": "pipe",
+      "material": "material.copper",
+      "section": {
+        "kind": "circle",
+        "diameter": 40
+      },
+      "wallThickness": 2,
+      "medium": "water",
+      "connectionType": "illustrativeWaterFace",
+      "flow": "bidirectional",
+      "pipe": {
+        "designation": "Illustrative water branch stock",
+        "construction": "rigid",
+        "pressureRatingPa": 1000000,
+        "minimumTemperatureC": 0,
+        "maximumTemperatureC": 90
+      }
+    },
+    "plumbing.type.tee": {
+      "kind": "serviceFittingType",
+      "name": "Water branch tee",
+      "family": "pipe",
+      "material": "material.copper",
+      "wallThickness": 2,
+      "medium": "water",
+      "connectionType": "illustrativeWaterFace",
+      "flow": "bidirectional",
+      "chordTolerance": 0.1,
+      "pipe": {
+        "designation": "Illustrative water branch stock",
+        "construction": "rigid",
+        "pressureRatingPa": 1000000,
+        "minimumTemperatureC": 0,
+        "maximumTemperatureC": 90
+      },
+      "geometry": {
+        "kind": "branch",
+        "trunk": {
+          "section": {
+            "kind": "circle",
+            "diameter": 40
+          },
+          "path": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              400
+            ]
+          ]
+        },
+        "branches": {
+          "side": {
+            "section": {
+              "kind": "circle",
+              "diameter": 40
+            },
+            "path": [
+              [
+                0,
+                0,
+                200
+              ],
+              [
+                200,
+                0,
+                200
+              ]
+            ]
+          }
+        }
+      }
+    },
+    "plumbing.type.valve": {
+      "kind": "serviceDeviceType",
+      "name": "Water valve",
+      "role": "valve",
+      "material": "material.steel",
+      "plumbing": {
+        "designation": "Illustrative valve",
+        "valveType": "isolating"
+      },
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 60
+          },
+          "depth": 100
+        }
+      },
+      "cuts": {
+        "passage": {
+          "section": {
+            "kind": "circle",
+            "diameter": 40
+          },
+          "depth": 100
+        }
+      },
+      "ports": {
+        "in": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 40
+          },
+          "medium": "water",
+          "connectionType": "illustrativeWaterFace",
+          "flow": "bidirectional"
+        },
+        "out": {
+          "position": [
+            0,
+            0,
+            100
+          ],
+          "direction": [
+            0,
+            0,
+            1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 40
+          },
+          "medium": "water",
+          "connectionType": "illustrativeWaterFace",
+          "flow": "bidirectional"
+        }
+      },
+      "portGroups": [
+        [
+          "in",
+          "out"
+        ]
+      ]
+    },
+    "plumbing.type.terminal": {
+      "kind": "serviceDeviceType",
+      "name": "Water terminal",
+      "role": "fixtureConnection",
+      "material": "material.steel",
+      "plumbing": {
+        "designation": "Illustrative terminal"
+      },
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 60
+          },
+          "depth": 100
+        }
+      },
+      "cuts": {
+        "passage": {
+          "section": {
+            "kind": "circle",
+            "diameter": 40
+          },
+          "depth": 100
+        }
+      },
+      "ports": {
+        "in": {
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "direction": [
+            0,
+            0,
+            -1
+          ],
+          "section": {
+            "kind": "circle",
+            "diameter": 40
+          },
+          "medium": "water",
+          "connectionType": "illustrativeWaterFace",
+          "flow": "bidirectional"
+        }
+      },
+      "portGroups": []
+    },
+    "interface.type.sleeve": {
+      "kind": "envelopePartType",
+      "name": "Illustrative penetration sleeve",
+      "role": "sleeve",
+      "material": "material.steel",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 64,
+            "depth": 64
+          },
+          "depth": 166
+        }
+      },
+      "cuts": {
+        "passage": {
+          "section": {
+            "kind": "rectangle",
+            "width": 60,
+            "depth": 60
+          },
+          "depth": 166
+        }
+      }
+    },
+    "interface.type.fireStop": {
+      "kind": "envelopePartType",
+      "name": "Illustrative penetration fireStop",
+      "role": "fireStop",
+      "material": "material.insulation",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 80,
+            "depth": 80
+          },
+          "depth": 10
+        }
+      },
+      "cuts": {
+        "passage": {
+          "section": {
+            "kind": "rectangle",
+            "width": 64,
+            "depth": 64
+          },
+          "depth": 10
+        }
+      }
+    },
+    "interface.type.acousticSeal": {
+      "kind": "envelopePartType",
+      "name": "Illustrative penetration acousticSeal",
+      "role": "acousticSeal",
+      "material": "material.insulation",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 80,
+            "depth": 80
+          },
+          "depth": 10
+        }
+      },
+      "cuts": {
+        "passage": {
+          "section": {
+            "kind": "rectangle",
+            "width": 64,
+            "depth": 64
+          },
+          "depth": 10
+        }
+      }
+    },
+    "interface.type.protectivePlate": {
+      "kind": "envelopePartType",
+      "name": "Illustrative penetration protectivePlate",
+      "role": "protectivePlate",
+      "material": "material.steel",
+      "solids": {
+        "body": {
+          "section": {
+            "kind": "rectangle",
+            "width": 100,
+            "depth": 100
+          },
+          "depth": 2
+        }
+      },
+      "cuts": {
+        "passage": {
+          "section": {
+            "kind": "rectangle",
+            "width": 80,
+            "depth": 80
+          },
+          "depth": 2
+        }
+      }
+    },
+    "footingType.shell.pad": {
+      "kind": "footingType",
+      "name": "Illustrative concrete pad",
+      "depth": 200,
+      "material": "material.concrete"
+    },
+    "memberType.shell.bearer": {
+      "kind": "memberType",
+      "name": "Illustrative floor bearer",
+      "material": "material.timber",
+      "section": {
+        "kind": "rectangle",
+        "width": 200,
+        "depth": 300
+      }
+    },
+    "memberType.shell.pier": {
+      "kind": "memberType",
+      "name": "Illustrative pier",
+      "material": "material.concrete",
+      "section": {
+        "kind": "rectangle",
+        "width": 400,
+        "depth": 400
+      }
+    },
+    "memberType.shell.post": {
+      "kind": "memberType",
+      "name": "Illustrative post",
+      "material": "material.timber",
+      "section": {
+        "kind": "rectangle",
+        "width": 140,
+        "depth": 140
+      }
+    },
+    "hardwareType.shell.floorPlate": {
+      "kind": "hardwareType",
+      "name": "Illustrative floor bearing plate",
+      "role": "postCap",
+      "material": "material.steel",
+      "solids": {
+        "plate": {
+          "section": {
+            "kind": "rectangle",
+            "width": 400,
+            "depth": 400
+          },
+          "depth": 4
+        }
+      }
+    },
+    "hardwareType.shell.deckPlate": {
+      "kind": "hardwareType",
+      "name": "Illustrative deck bearing plate",
+      "role": "postCap",
+      "material": "material.steel",
+      "solids": {
+        "plate": {
+          "section": {
+            "kind": "rectangle",
+            "width": 220,
+            "depth": 220
+          },
+          "depth": 4
+        }
+      }
+    }
+  },
+  "elements": {
+    "slab.ground": {
+      "kind": "slab",
+      "name": "Ground floor slab",
+      "tags": [
+        "ground-floor",
+        "foundation"
+      ],
+      "storey": "level.ground",
+      "type": "slabType.shell.floor",
+      "role": "floor",
+      "footprint": {
+        "outer": [
+          {
+            "anchor": "anchor.house.sw"
+          },
+          {
+            "anchor": "anchor.house.se"
+          },
+          {
+            "anchor": "anchor.house.ne"
+          },
+          {
+            "anchor": "anchor.house.nw"
+          }
+        ]
+      },
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": 0
+      },
+      "extrusionDirection": "down"
+    },
+    "wall.north": {
+      "kind": "wall",
+      "name": "North exterior wall",
+      "tags": [
+        "exterior",
+        "north"
+      ],
+      "storey": "level.ground",
+      "type": "wallType.exterior.wood-185",
+      "path": {
+        "kind": "axisAnchor",
+        "anchor": "anchor.wall.north-axis"
+      },
+      "locationLine": "center",
+      "base": {
+        "kind": "surface",
+        "element": "slab.ground",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "selector": "north-slope",
+        "offset": 0
+      }
+    },
+    "wall.east": {
+      "kind": "wall",
+      "name": "East exterior wall",
+      "tags": [
+        "exterior",
+        "east"
+      ],
+      "storey": "level.ground",
+      "type": "wallType.exterior.wood-185",
+      "path": {
+        "kind": "line",
+        "start": {
+          "anchor": "anchor.house.ne"
+        },
+        "end": {
+          "anchor": "anchor.house.se"
+        }
+      },
+      "locationLine": "center",
+      "base": {
+        "kind": "surface",
+        "element": "slab.ground",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "offset": 0
+      }
+    },
+    "wall.south": {
+      "kind": "wall",
+      "name": "South exterior wall facing the deck",
+      "tags": [
+        "exterior",
+        "south",
+        "deck-connection"
+      ],
+      "storey": "level.ground",
+      "type": "wallType.exterior.wood-185",
+      "path": {
+        "kind": "line",
+        "start": {
+          "anchor": "anchor.house.se"
+        },
+        "end": {
+          "anchor": "anchor.house.sw"
+        }
+      },
+      "locationLine": "center",
+      "base": {
+        "kind": "surface",
+        "element": "slab.ground",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "selector": "south-slope",
+        "offset": 0
+      }
+    },
+    "wall.west": {
+      "kind": "wall",
+      "name": "West exterior wall",
+      "tags": [
+        "exterior",
+        "west"
+      ],
+      "storey": "level.ground",
+      "type": "wallType.exterior.wood-185",
+      "path": {
+        "kind": "line",
+        "start": {
+          "anchor": "anchor.house.sw"
+        },
+        "end": {
+          "anchor": "anchor.house.nw"
+        }
+      },
+      "locationLine": "center",
+      "base": {
+        "kind": "surface",
+        "element": "slab.ground",
+        "surface": "top",
+        "offset": 0
+      },
+      "top": {
+        "kind": "surface",
+        "element": "roof.main",
+        "surface": "underside",
+        "offset": 0
+      }
+    },
+    "roof.main": {
+      "kind": "roof",
+      "name": "Main gable roof",
+      "tags": [
+        "main-roof",
+        "gable"
+      ],
+      "storey": "level.ground",
+      "type": "roofType.shingle-250",
+      "geometry": {
+        "kind": "parametric",
+        "form": "gable",
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.house.sw"
+            },
+            {
+              "anchor": "anchor.house.se"
+            },
+            {
+              "anchor": "anchor.house.ne"
+            },
+            {
+              "anchor": "anchor.house.nw"
+            }
+          ]
+        },
+        "eaveDatum": {
+          "kind": "level",
+          "level": "level.eave",
+          "offset": 0
+        },
+        "pitch": 30,
+        "ridgeDirection": [
+          1,
+          0
+        ],
+        "overhang": 600
+      }
+    },
+    "opening.window.north": {
+      "kind": "opening",
+      "name": "North living-room window rough opening",
+      "tags": [
+        "window-opening",
+        "north"
+      ],
+      "geometry": {
+        "kind": "rectangle",
+        "width": 1540,
+        "height": 1240,
+        "depth": 300
+      },
+      "placement": {
+        "station": 4000,
+        "stationReference": "center",
+        "verticalOffset": 900,
+        "verticalReference": "bottom",
+        "depthOffset": 0
+      }
+    },
+    "window.north": {
+      "kind": "window",
+      "name": "North living-room window",
+      "tags": [
+        "living-room",
+        "north"
+      ],
+      "type": "windowType.casement-1500x1200"
+    },
+    "opening.door.south": {
+      "kind": "opening",
+      "name": "South entry door rough opening",
+      "tags": [
+        "door-opening",
+        "south"
+      ],
+      "geometry": {
+        "kind": "rectangle",
+        "width": 940,
+        "height": 2140,
+        "depth": 300
+      },
+      "placement": {
+        "station": 5000,
+        "stationReference": "center",
+        "verticalOffset": 0,
+        "verticalReference": "bottom",
+        "depthOffset": 0
+      }
+    },
+    "door.south-entry": {
+      "kind": "door",
+      "name": "South entry door",
+      "tags": [
+        "entry",
+        "south"
+      ],
+      "type": "doorType.entry-900x2100",
+      "handing": "right",
+      "swingDirection": "inward"
+    },
+    "space.living": {
+      "kind": "space",
+      "name": "Living space",
+      "tags": [
+        "conditioned",
+        "living"
+      ],
+      "storey": "level.ground",
+      "type": "spaceType.living",
+      "geometry": {
+        "kind": "explicit",
+        "footprint": {
+          "outer": [
+            {
+              "point": [
+                92.5,
+                92.5
+              ]
+            },
+            {
+              "point": [
+                9907.5,
+                92.5
+              ]
+            },
+            {
+              "point": [
+                9907.5,
+                7907.5
+              ]
+            },
+            {
+              "point": [
+                92.5,
+                7907.5
+              ]
+            }
+          ]
+        }
+      },
+      "height": 2600
+    },
+    "slab.deck.south": {
+      "kind": "slab",
+      "name": "Attached south deck",
+      "tags": [
+        "exterior",
+        "deck",
+        "attached"
+      ],
+      "storey": "level.ground",
+      "type": "slabType.shell.deck",
+      "role": "deck",
+      "footprint": {
+        "outer": [
+          {
+            "anchor": "anchor.deck.nw"
+          },
+          {
+            "anchor": "anchor.deck.ne"
+          },
+          {
+            "anchor": "anchor.deck.bevel"
+          },
+          {
+            "anchor": "anchor.deck.se"
+          },
+          {
+            "anchor": "anchor.deck.sw"
+          }
+        ]
+      },
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": -25
+      },
+      "extrusionDirection": "down"
+    },
+    "assembly.roof-system": {
+      "kind": "assembly",
+      "name": "Main roof system",
+      "tags": [
+        "roof",
+        "assembly"
+      ],
+      "assemblyType": "roofSystem"
+    },
+    "framing.wall.north": {
+      "kind": "wallFraming",
+      "name": "North wall framing",
+      "type": "wallFramingType.shell",
+      "host": "wall.north",
+      "layer": 2
+    },
+    "framing.wall.east": {
+      "kind": "wallFraming",
+      "name": "East wall framing",
+      "type": "wallFramingType.shell",
+      "host": "wall.east",
+      "layer": 2
+    },
+    "framing.wall.south": {
+      "kind": "wallFraming",
+      "name": "South wall framing",
+      "type": "wallFramingType.shell",
+      "host": "wall.south",
+      "layer": 2
+    },
+    "framing.wall.west": {
+      "kind": "wallFraming",
+      "name": "West wall framing",
+      "type": "wallFramingType.shell",
+      "host": "wall.west",
+      "layer": 2
+    },
+    "framing.floor": {
+      "kind": "planarFraming",
+      "name": "Floor framing",
+      "type": "planarFramingType.shell",
+      "host": "slab.ground",
+      "layer": 1,
+      "direction": [
+        1,
+        0
+      ]
+    },
+    "framing.deck": {
+      "kind": "planarFraming",
+      "name": "Deck framing",
+      "type": "planarFramingType.shell",
+      "host": "slab.deck.south",
+      "layer": 1,
+      "direction": [
+        1,
+        0
+      ]
+    },
+    "framing.roof.1": {
+      "kind": "planarFraming",
+      "name": "Roof face 1 rafters",
+      "type": "planarFramingType.shell",
+      "host": "roof.main",
+      "layer": 2,
+      "face": "roof.main.face-1",
+      "direction": [
+        0,
+        1
+      ]
+    },
+    "framing.roof.2": {
+      "kind": "planarFraming",
+      "name": "Roof face 2 rafters",
+      "type": "planarFramingType.shell",
+      "host": "roof.main",
+      "layer": 2,
+      "face": "roof.main.face-2",
+      "direction": [
+        0,
+        1
+      ]
+    },
+    "electrical.device.panel": {
+      "kind": "serviceDevice",
+      "name": "panel",
+      "type": "electrical.type.panel",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 600,
+            "height": 1800
+          }
+        },
+        "rotation": [
+          90,
+          0,
+          0
+        ]
+      },
+      "projection": 20
+    },
+    "electrical.device.breaker": {
+      "kind": "serviceDevice",
+      "name": "breaker",
+      "type": "electrical.type.breaker",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "component",
+            "element": "electrical.device.panel",
+            "offset": [
+              -70,
+              0,
+              50
+            ]
+          }
+        }
+      }
+    },
+    "electrical.device.load": {
+      "kind": "serviceDevice",
+      "name": "load",
+      "type": "electrical.type.load",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 530,
+            "height": 1220
+          }
+        },
+        "rotation": [
+          90,
+          0,
+          0
+        ]
+      },
+      "projection": 20
+    },
+    "electrical.route.cable": {
+      "kind": "serviceRoute",
+      "name": "Cable",
+      "type": "electrical.type.cable",
+      "chordTolerance": 0.1,
+      "path": [
+        {
+          "port": {
+            "element": "electrical.device.breaker",
+            "port": "out"
+          }
+        },
+        {
+          "port": {
+            "element": "electrical.device.load",
+            "port": "in"
+          }
+        }
+      ]
+    },
+    "electrical.system.test": {
+      "kind": "serviceSystem",
+      "name": "Circuit system",
+      "systemType": "electrical",
+      "members": [
+        {
+          "element": "electrical.device.panel",
+          "port": "out"
+        },
+        {
+          "element": "electrical.device.breaker",
+          "port": "in"
+        },
+        {
+          "element": "electrical.device.breaker",
+          "port": "out"
+        },
+        {
+          "element": "electrical.device.load",
+          "port": "in"
+        },
+        {
+          "element": "electrical.route.cable",
+          "port": "start"
+        },
+        {
+          "element": "electrical.route.cable",
+          "port": "end"
+        },
+        {
+          "element": "electrical.device.panel",
+          "port": "branch2"
+        },
+        {
+          "element": "electrical.device.breaker2",
+          "port": "in"
+        },
+        {
+          "element": "electrical.device.breaker2",
+          "port": "out"
+        },
+        {
+          "element": "electrical.device.load2",
+          "port": "in"
+        },
+        {
+          "element": "electrical.route.cable2",
+          "port": "start"
+        },
+        {
+          "element": "electrical.route.cable2",
+          "port": "end"
+        }
+      ]
+    },
+    "electrical.circuit.test": {
+      "kind": "serviceCircuit",
+      "name": "Circuit 1",
+      "system": "electrical.system.test",
+      "members": [
+        {
+          "element": "electrical.device.panel",
+          "port": "out"
+        },
+        {
+          "element": "electrical.device.breaker",
+          "port": "in"
+        },
+        {
+          "element": "electrical.device.breaker",
+          "port": "out"
+        },
+        {
+          "element": "electrical.device.load",
+          "port": "in"
+        },
+        {
+          "element": "electrical.route.cable",
+          "port": "start"
+        },
+        {
+          "element": "electrical.route.cable",
+          "port": "end"
+        }
+      ],
+      "schedule": {
+        "panel": {
+          "element": "electrical.device.panel",
+          "port": "out"
+        },
+        "number": "1",
+        "electrical": {
+          "nominalVoltageV": 120,
+          "supply": "AC",
+          "poles": 1,
+          "frequencyHz": 60,
+          "designCurrentA": 10,
+          "overcurrentProtection": {
+            "element": "electrical.device.breaker",
+            "port": "out"
+          },
+          "loads": [
+            {
+              "terminal": {
+                "element": "electrical.device.load",
+                "port": "in"
+              },
+              "apparentPowerVA": 900
+            }
+          ]
+        }
+      }
+    },
+    "electrical.wall.host": {
+      "kind": "wall",
+      "name": "Interior service partition",
+      "storey": "level.ground",
+      "type": "wallType.service.partition",
+      "locationLine": "center",
+      "path": {
+        "kind": "line",
+        "start": {
+          "anchor": "electrical.anchor.wall.start"
+        },
+        "end": {
+          "anchor": "electrical.anchor.wall.end"
+        }
+      },
+      "base": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": 0
+      },
+      "top": {
+        "kind": "height",
+        "height": 2700
+      }
+    },
+    "electrical.device.breaker2": {
+      "kind": "serviceDevice",
+      "name": "breaker",
+      "type": "electrical.type.breaker",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "component",
+            "element": "electrical.device.panel",
+            "offset": [
+              70,
+              0,
+              50
+            ]
+          }
+        }
+      }
+    },
+    "electrical.device.load2": {
+      "kind": "serviceDevice",
+      "name": "load",
+      "type": "electrical.type.receptacle",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 670,
+            "height": 920
+          }
+        },
+        "rotation": [
+          90,
+          0,
+          0
+        ]
+      },
+      "projection": 20
+    },
+    "electrical.route.cable2": {
+      "kind": "serviceRoute",
+      "name": "Cable",
+      "type": "electrical.type.cable",
+      "chordTolerance": 0.1,
+      "path": [
+        {
+          "port": {
+            "element": "electrical.device.breaker2",
+            "port": "out"
+          }
+        },
+        {
+          "port": {
+            "element": "electrical.device.load2",
+            "port": "in"
+          }
+        }
+      ]
+    },
+    "electrical.circuit.second": {
+      "kind": "serviceCircuit",
+      "name": "Circuit 2",
+      "system": "electrical.system.test",
+      "members": [
+        {
+          "element": "electrical.device.panel",
+          "port": "branch2"
+        },
+        {
+          "element": "electrical.device.breaker2",
+          "port": "in"
+        },
+        {
+          "element": "electrical.device.breaker2",
+          "port": "out"
+        },
+        {
+          "element": "electrical.device.load2",
+          "port": "in"
+        },
+        {
+          "element": "electrical.route.cable2",
+          "port": "start"
+        },
+        {
+          "element": "electrical.route.cable2",
+          "port": "end"
+        }
+      ],
+      "schedule": {
+        "panel": {
+          "element": "electrical.device.panel",
+          "port": "branch2"
+        },
+        "number": "2",
+        "electrical": {
+          "nominalVoltageV": 120,
+          "supply": "AC",
+          "poles": 1,
+          "frequencyHz": 60,
+          "designCurrentA": 10,
+          "overcurrentProtection": {
+            "element": "electrical.device.breaker2",
+            "port": "out"
+          },
+          "loads": [
+            {
+              "terminal": {
+                "element": "electrical.device.load2",
+                "port": "in"
+              },
+              "apparentPowerVA": 900
+            }
+          ]
+        }
+      }
+    },
+    "electrical.device.earth": {
+      "kind": "serviceDevice",
+      "name": "groundingElectrode",
+      "type": "electrical.type.earth",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 2430,
+            "height": 1100
+          }
+        },
+        "rotation": [
+          90,
+          0,
+          0
+        ]
+      },
+      "projection": 20
+    },
+    "electrical.route.earth": {
+      "kind": "serviceRoute",
+      "name": "protectiveEarth wire",
+      "type": "electrical.type.wire.earth",
+      "chordTolerance": 0.1,
+      "path": [
+        {
+          "port": {
+            "element": "electrical.device.groundBar",
+            "port": "earth"
+          }
+        },
+        {
+          "port": {
+            "element": "electrical.device.earth",
+            "port": "in"
+          }
+        }
+      ]
+    },
+    "electrical.device.bond": {
+      "kind": "serviceDevice",
+      "name": "bondingClamp",
+      "type": "electrical.type.bond",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 2570,
+            "height": 1000
+          }
+        },
+        "rotation": [
+          90,
+          0,
+          0
+        ]
+      },
+      "projection": 20
+    },
+    "electrical.route.bond": {
+      "kind": "serviceRoute",
+      "name": "bonding wire",
+      "type": "electrical.type.wire.bond",
+      "chordTolerance": 0.1,
+      "path": [
+        {
+          "port": {
+            "element": "electrical.device.groundBar",
+            "port": "bond"
+          }
+        },
+        {
+          "port": {
+            "element": "electrical.device.bond",
+            "port": "in"
+          }
+        }
+      ]
+    },
+    "electrical.device.groundBar": {
+      "kind": "serviceDevice",
+      "name": "Grounding bar",
+      "type": "electrical.type.groundBar",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 2500,
+            "height": 1800
+          }
+        },
+        "rotation": [
+          90,
+          0,
+          0
+        ]
+      },
+      "projection": 20
+    },
+    "electrical.system.earthing": {
+      "kind": "serviceSystem",
+      "name": "Explicit earthing and bonding",
+      "systemType": "electrical",
+      "members": [
+        {
+          "element": "electrical.device.groundBar",
+          "port": "earth"
+        },
+        {
+          "element": "electrical.route.earth",
+          "port": "start"
+        },
+        {
+          "element": "electrical.route.earth",
+          "port": "end"
+        },
+        {
+          "element": "electrical.device.earth",
+          "port": "in"
+        },
+        {
+          "element": "electrical.device.groundBar",
+          "port": "bond"
+        },
+        {
+          "element": "electrical.route.bond",
+          "port": "start"
+        },
+        {
+          "element": "electrical.route.bond",
+          "port": "end"
+        },
+        {
+          "element": "electrical.device.bond",
+          "port": "in"
+        }
+      ]
+    },
+    "electrical.device.flushBox": {
+      "kind": "serviceDevice",
+      "name": "Flush box",
+      "type": "electrical.type.flushBox",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 3500,
+            "height": 1200
+          }
+        }
+      },
+      "projection": -40,
+      "portStates": {
+        "entry": "open"
+      },
+      "occupies": {
+        "regions": [
+          {
+            "host": "electrical.wall.host",
+            "layer": 1
+          }
+        ],
+        "fit": "intersect"
+      }
+    },
+    "electrical.cut.flushBox": {
+      "kind": "penetration",
+      "name": "Owned box recess",
+      "host": "electrical.wall.host",
+      "owner": "electrical.device.flushBox",
+      "purpose": "recess",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 3500,
+            "height": 1200
+          }
+        },
+        "rotation": [
+          180,
+          0,
+          0
+        ]
+      },
+      "section": {
+        "kind": "rectangle",
+        "width": 50,
+        "depth": 50
+      },
+      "depth": 40
+    },
+    "electrical.system.boxEntry": {
+      "kind": "serviceSystem",
+      "name": "Open rough-in entry",
+      "systemType": "electrical",
+      "members": [
+        {
+          "element": "electrical.device.flushBox",
+          "port": "entry"
+        }
+      ]
+    },
+    "mechanical.device.ahu": {
+      "kind": "serviceDevice",
+      "name": "Air handler",
+      "type": "mechanical.type.ahu",
+      "placement": {
+        "origin": {
+          "anchor": "mechanical.anchor.mechanical"
+        },
+        "rotation": [
+          0,
+          90,
+          0
+        ]
+      },
+      "portStates": {
+        "in": "open"
+      }
+    },
+    "mechanical.device.damper": {
+      "kind": "serviceDevice",
+      "name": "Branch damper",
+      "type": "mechanical.type.damper",
+      "placement": {
+        "origin": {
+          "port": {
+            "element": "mechanical.duct.feed",
+            "port": "end"
+          }
+        }
+      }
+    },
+    "mechanical.fitting.branch": {
+      "kind": "serviceFitting",
+      "name": "Branch tee",
+      "type": "mechanical.type.branch",
+      "placement": {
+        "origin": {
+          "port": {
+            "element": "mechanical.duct.trunk",
+            "port": "end"
+          }
+        }
+      }
+    },
+    "mechanical.duct.feed": {
+      "kind": "serviceRoute",
+      "name": "Duct feed",
+      "type": "mechanical.type.duct",
+      "chordTolerance": 0.1,
+      "path": [
+        {
+          "port": {
+            "element": "mechanical.device.ahu",
+            "port": "out"
+          }
+        },
+        {
+          "host": {
+            "kind": "component",
+            "element": "mechanical.device.ahu",
+            "offset": [
+              0,
+              0,
+              400
+            ]
+          }
+        }
+      ]
+    },
+    "mechanical.duct.trunk": {
+      "kind": "serviceRoute",
+      "name": "Duct trunk",
+      "type": "mechanical.type.duct",
+      "chordTolerance": 0.1,
+      "path": [
+        {
+          "port": {
+            "element": "mechanical.device.damper",
+            "port": "out"
+          }
+        },
+        {
+          "host": {
+            "kind": "component",
+            "element": "mechanical.device.damper",
+            "offset": [
+              0,
+              0,
+              350
+            ]
+          }
+        }
+      ]
+    },
+    "mechanical.duct.end": {
+      "kind": "serviceRoute",
+      "name": "Duct end",
+      "type": "mechanical.type.duct",
+      "chordTolerance": 0.1,
+      "path": [
+        {
+          "port": {
+            "element": "mechanical.fitting.branch",
+            "port": "end"
+          }
+        },
+        {
+          "host": {
+            "kind": "component",
+            "element": "mechanical.fitting.branch",
+            "offset": [
+              0,
+              0,
+              700
+            ]
+          }
+        }
+      ]
+    },
+    "mechanical.duct.side": {
+      "kind": "serviceRoute",
+      "name": "Duct side",
+      "type": "mechanical.type.duct",
+      "chordTolerance": 0.1,
+      "path": [
+        {
+          "port": {
+            "element": "mechanical.fitting.branch",
+            "port": "side"
+          }
+        },
+        {
+          "host": {
+            "kind": "component",
+            "element": "mechanical.fitting.branch",
+            "offset": [
+              500,
+              0,
+              200
+            ]
+          }
+        }
+      ]
+    },
+    "mechanical.terminal.end": {
+      "kind": "serviceDevice",
+      "name": "Register end",
+      "type": "mechanical.type.terminal",
+      "placement": {
+        "origin": {
+          "port": {
+            "element": "mechanical.duct.end",
+            "port": "end"
+          }
+        }
+      }
+    },
+    "mechanical.terminal.side": {
+      "kind": "serviceDevice",
+      "name": "Register side",
+      "type": "mechanical.type.terminal",
+      "placement": {
+        "origin": {
+          "port": {
+            "element": "mechanical.duct.side",
+            "port": "end"
+          }
+        }
+      }
+    },
+    "mechanical.cover.duct.feed": {
+      "kind": "serviceInsulation",
+      "name": "Cover for duct.feed",
+      "type": "mechanical.type.cover",
+      "host": "mechanical.duct.feed",
+      "chordTolerance": 0.1
+    },
+    "mechanical.cover.duct.trunk": {
+      "kind": "serviceInsulation",
+      "name": "Cover for duct.trunk",
+      "type": "mechanical.type.cover",
+      "host": "mechanical.duct.trunk",
+      "chordTolerance": 0.1
+    },
+    "mechanical.cover.duct.end": {
+      "kind": "serviceInsulation",
+      "name": "Cover for duct.end",
+      "type": "mechanical.type.cover",
+      "host": "mechanical.duct.end",
+      "chordTolerance": 0.1
+    },
+    "mechanical.cover.duct.side": {
+      "kind": "serviceInsulation",
+      "name": "Cover for duct.side",
+      "type": "mechanical.type.cover",
+      "host": "mechanical.duct.side",
+      "chordTolerance": 0.1
+    },
+    "mechanical.cover.fitting.branch": {
+      "kind": "serviceInsulation",
+      "name": "Cover for fitting.branch",
+      "type": "mechanical.type.cover",
+      "host": "mechanical.fitting.branch",
+      "chordTolerance": 0.1
+    },
+    "mechanical.member.support": {
+      "kind": "member",
+      "name": "Support framing",
+      "type": "mechanical.type.beam",
+      "role": "beam",
+      "axis": [
+        {
+          "host": {
+            "kind": "component",
+            "element": "mechanical.device.ahu",
+            "offset": [
+              -200,
+              -100,
+              240
+            ]
+          }
+        },
+        {
+          "host": {
+            "kind": "component",
+            "element": "mechanical.device.ahu",
+            "offset": [
+              200,
+              -100,
+              240
+            ]
+          }
+        }
+      ]
+    },
+    "mechanical.hardware.support": {
+      "kind": "hardware",
+      "name": "Duct support",
+      "type": "mechanical.type.support",
+      "discipline": "services",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "route",
+            "element": "mechanical.duct.feed",
+            "station": 150
+          }
+        }
+      },
+      "participants": [
+        {
+          "element": "mechanical.duct.feed"
+        },
+        {
+          "element": "mechanical.cover.duct.feed"
+        },
+        {
+          "element": "mechanical.member.support"
+        }
+      ]
+    },
+    "mechanical.zone.access": {
+      "kind": "clearanceZone",
+      "name": "Equipment maintenance access",
+      "owner": "mechanical.device.ahu",
+      "purpose": "maintenance",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "component",
+            "element": "mechanical.device.ahu",
+            "offset": [
+              0,
+              -200,
+              0
+            ]
+          }
+        }
+      },
+      "geometry": {
+        "section": {
+          "kind": "rectangle",
+          "width": 300,
+          "depth": 200
+        },
+        "depth": 200
+      }
+    },
+    "mechanical.system.air": {
+      "kind": "serviceSystem",
+      "name": "Connected supply air",
+      "systemType": "supplyAir",
+      "members": [
+        {
+          "element": "mechanical.device.ahu",
+          "port": "in"
+        },
+        {
+          "element": "mechanical.device.ahu",
+          "port": "out"
+        },
+        {
+          "element": "mechanical.device.damper",
+          "port": "in"
+        },
+        {
+          "element": "mechanical.device.damper",
+          "port": "out"
+        },
+        {
+          "element": "mechanical.fitting.branch",
+          "port": "start"
+        },
+        {
+          "element": "mechanical.fitting.branch",
+          "port": "end"
+        },
+        {
+          "element": "mechanical.fitting.branch",
+          "port": "side"
+        },
+        {
+          "element": "mechanical.duct.feed",
+          "port": "start"
+        },
+        {
+          "element": "mechanical.duct.feed",
+          "port": "end"
+        },
+        {
+          "element": "mechanical.duct.trunk",
+          "port": "start"
+        },
+        {
+          "element": "mechanical.duct.trunk",
+          "port": "end"
+        },
+        {
+          "element": "mechanical.duct.end",
+          "port": "start"
+        },
+        {
+          "element": "mechanical.duct.end",
+          "port": "end"
+        },
+        {
+          "element": "mechanical.duct.side",
+          "port": "start"
+        },
+        {
+          "element": "mechanical.duct.side",
+          "port": "end"
+        },
+        {
+          "element": "mechanical.terminal.end",
+          "port": "in"
+        },
+        {
+          "element": "mechanical.terminal.side",
+          "port": "in"
+        }
+      ]
+    },
+    "framing.partition": {
+      "kind": "wallFraming",
+      "name": "Interior partition framing",
+      "type": "wallFramingType.shell",
+      "host": "electrical.wall.host",
+      "layer": 1
+    },
+    "accessory.service.ledge": {
+      "kind": "accessory",
+      "name": "Interior service ledge",
+      "type": "accessoryType.service.ledge",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 1600,
+            "height": 1000
+          }
+        }
+      }
+    },
+    "plumbing.device.valve": {
+      "kind": "serviceDevice",
+      "name": "Partition water isolation valve",
+      "type": "plumbing.type.valve",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "exterior",
+            "station": 3200,
+            "height": 1000,
+            "offset": [
+              0,
+              0,
+              200
+            ]
+          }
+        },
+        "rotation": [
+          0,
+          -90,
+          0
+        ]
+      }
+    },
+    "plumbing.fitting.tee": {
+      "kind": "serviceFitting",
+      "name": "Connected water branch",
+      "type": "plumbing.type.tee",
+      "placement": {
+        "origin": {
+          "port": {
+            "element": "plumbing.pipe.feed",
+            "port": "end"
+          }
+        }
+      }
+    },
+    "plumbing.pipe.supply": {
+      "kind": "serviceRoute",
+      "name": "Water supply through service partition",
+      "type": "plumbing.type.pipe",
+      "path": [
+        {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 2700,
+            "height": 1000,
+            "offset": [
+              0,
+              0,
+              300
+            ]
+          }
+        },
+        {
+          "host": {
+            "kind": "component",
+            "element": "plumbing.device.valve",
+            "offset": [
+              0,
+              0,
+              -500
+            ]
+          }
+        },
+        {
+          "port": {
+            "element": "plumbing.device.valve",
+            "port": "in"
+          }
+        }
+      ],
+      "up": [
+        0,
+        0,
+        1
+      ],
+      "bendRadius": 100,
+      "chordTolerance": 0.1,
+      "clearance": 10,
+      "portStates": {
+        "start": "open"
+      },
+      "conditions": {
+        "pressurePa": 300000,
+        "temperatureC": 20
+      },
+      "occupies": {
+        "regions": [
+          {
+            "host": "electrical.wall.host",
+            "layer": 1
+          }
+        ],
+        "fit": "intersect"
+      },
+      "coordinationChecks": {
+        "interference": "error",
+        "clearance": {
+          "severity": "error"
+        }
+      }
+    },
+    "plumbing.pipe.feed": {
+      "kind": "serviceRoute",
+      "name": "Water feed branch",
+      "type": "plumbing.type.pipe",
+      "path": [
+        {
+          "port": {
+            "element": "plumbing.device.valve",
+            "port": "out"
+          }
+        },
+        {
+          "host": {
+            "kind": "component",
+            "element": "plumbing.device.valve",
+            "offset": [
+              0,
+              0,
+              400
+            ]
+          }
+        }
+      ],
+      "chordTolerance": 0.1
+    },
+    "plumbing.pipe.end": {
+      "kind": "serviceRoute",
+      "name": "Water end branch",
+      "type": "plumbing.type.pipe",
+      "path": [
+        {
+          "port": {
+            "element": "plumbing.fitting.tee",
+            "port": "end"
+          }
+        },
+        {
+          "host": {
+            "kind": "component",
+            "element": "plumbing.fitting.tee",
+            "offset": [
+              0,
+              0,
+              800
+            ]
+          }
+        }
+      ],
+      "chordTolerance": 0.1
+    },
+    "plumbing.pipe.side": {
+      "kind": "serviceRoute",
+      "name": "Water side branch",
+      "type": "plumbing.type.pipe",
+      "path": [
+        {
+          "port": {
+            "element": "plumbing.fitting.tee",
+            "port": "side"
+          }
+        },
+        {
+          "host": {
+            "kind": "component",
+            "element": "plumbing.fitting.tee",
+            "offset": [
+              600,
+              0,
+              200
+            ]
+          }
+        }
+      ],
+      "chordTolerance": 0.1
+    },
+    "plumbing.terminal.end": {
+      "kind": "serviceDevice",
+      "name": "Water rough-in end",
+      "type": "plumbing.type.terminal",
+      "placement": {
+        "origin": {
+          "port": {
+            "element": "plumbing.pipe.end",
+            "port": "end"
+          }
+        }
+      }
+    },
+    "plumbing.terminal.side": {
+      "kind": "serviceDevice",
+      "name": "Water rough-in side",
+      "type": "plumbing.type.terminal",
+      "placement": {
+        "origin": {
+          "port": {
+            "element": "plumbing.pipe.side",
+            "port": "end"
+          }
+        }
+      }
+    },
+    "plumbing.system.water": {
+      "kind": "serviceSystem",
+      "name": "Connected cold water branches",
+      "systemType": "coldWater",
+      "members": [
+        {
+          "element": "plumbing.device.valve",
+          "port": "in"
+        },
+        {
+          "element": "plumbing.device.valve",
+          "port": "out"
+        },
+        {
+          "element": "plumbing.pipe.supply",
+          "port": "start"
+        },
+        {
+          "element": "plumbing.pipe.supply",
+          "port": "end"
+        },
+        {
+          "element": "plumbing.fitting.tee",
+          "port": "start"
+        },
+        {
+          "element": "plumbing.fitting.tee",
+          "port": "end"
+        },
+        {
+          "element": "plumbing.fitting.tee",
+          "port": "side"
+        },
+        {
+          "element": "plumbing.pipe.feed",
+          "port": "start"
+        },
+        {
+          "element": "plumbing.pipe.feed",
+          "port": "end"
+        },
+        {
+          "element": "plumbing.pipe.end",
+          "port": "start"
+        },
+        {
+          "element": "plumbing.pipe.end",
+          "port": "end"
+        },
+        {
+          "element": "plumbing.pipe.side",
+          "port": "start"
+        },
+        {
+          "element": "plumbing.pipe.side",
+          "port": "end"
+        },
+        {
+          "element": "plumbing.terminal.end",
+          "port": "in"
+        },
+        {
+          "element": "plumbing.terminal.side",
+          "port": "in"
+        }
+      ]
+    },
+    "interface.sleeve": {
+      "kind": "envelopePart",
+      "name": "Service partition sleeve",
+      "type": "interface.type.sleeve",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "route",
+            "element": "plumbing.pipe.supply",
+            "station": 300
+          }
+        }
+      },
+      "interface": {
+        "host": {
+          "element": "electrical.wall.host"
+        },
+        "services": [
+          {
+            "element": "plumbing.pipe.supply"
+          }
+        ]
+      },
+      "occupies": {
+        "regions": [
+          {
+            "host": "electrical.wall.host",
+            "layer": 1
+          }
+        ],
+        "fit": "intersect"
+      }
+    },
+    "interface.fireStop": {
+      "kind": "envelopePart",
+      "name": "Service partition fireStop",
+      "type": "interface.type.fireStop",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "route",
+            "element": "plumbing.pipe.supply",
+            "station": 300
+          }
+        }
+      },
+      "interface": {
+        "host": {
+          "element": "electrical.wall.host"
+        },
+        "services": [
+          {
+            "element": "plumbing.pipe.supply"
+          }
+        ]
+      }
+    },
+    "interface.acousticSeal": {
+      "kind": "envelopePart",
+      "name": "Service partition acousticSeal",
+      "type": "interface.type.acousticSeal",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "route",
+            "element": "plumbing.pipe.supply",
+            "station": 456
+          }
+        }
+      },
+      "interface": {
+        "host": {
+          "element": "electrical.wall.host"
+        },
+        "services": [
+          {
+            "element": "plumbing.pipe.supply"
+          }
+        ]
+      }
+    },
+    "interface.protectivePlate": {
+      "kind": "envelopePart",
+      "name": "Service partition protectivePlate",
+      "type": "interface.type.protectivePlate",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "route",
+            "element": "plumbing.pipe.supply",
+            "station": 298
+          }
+        }
+      },
+      "interface": {
+        "host": {
+          "element": "electrical.wall.host"
+        },
+        "services": [
+          {
+            "element": "plumbing.pipe.supply"
+          }
+        ]
+      }
+    },
+    "interface.cut.partition": {
+      "kind": "penetration",
+      "name": "Owned partition sleeve hole",
+      "host": "electrical.wall.host",
+      "owner": "interface.sleeve",
+      "purpose": "service",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "route",
+            "element": "plumbing.pipe.supply",
+            "station": 300
+          }
+        }
+      },
+      "section": {
+        "kind": "rectangle",
+        "width": 80,
+        "depth": 80
+      },
+      "depth": 166,
+      "limits": {
+        "authoredOpening": {
+          "host": {
+            "kind": "wall",
+            "element": "electrical.wall.host",
+            "surface": "interior",
+            "station": 2700,
+            "height": 1000
+          },
+          "maximumExtent": {
+            "x": 80,
+            "y": 80,
+            "z": 166
+          },
+          "reference": "Illustrative service opening geometry"
+        }
+      }
+    },
+    "beam.floor.west": {
+      "kind": "member",
+      "name": "floor.west bearer",
+      "type": "memberType.shell.bearer",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            2500,
+            0,
+            -395
+          ]
+        },
+        {
+          "point": [
+            2500,
+            8000,
+            -395
+          ]
+        }
+      ]
+    },
+    "footing.floor.west.1": {
+      "kind": "footing",
+      "name": "Pad floor.west.1",
+      "type": "footingType.shell.pad",
+      "shape": "pad",
+      "storey": "level.ground",
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": -1349
+      },
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              2200,
+              200
+            ]
+          },
+          {
+            "point": [
+              2800,
+              200
+            ]
+          },
+          {
+            "point": [
+              2800,
+              800
+            ]
+          },
+          {
+            "point": [
+              2200,
+              800
+            ]
+          }
+        ]
+      }
+    },
+    "column.floor.west.1": {
+      "kind": "member",
+      "name": "Pier floor.west.1",
+      "type": "memberType.shell.pier",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            2500,
+            500,
+            -1349
+          ]
+        },
+        {
+          "point": [
+            2500,
+            500,
+            -549
+          ]
+        }
+      ]
+    },
+    "hardware.floor.west.1": {
+      "kind": "hardware",
+      "name": "Bearing plate floor.west.1",
+      "type": "hardwareType.shell.floorPlate",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "member",
+            "element": "column.floor.west.1",
+            "surface": "end",
+            "station": 800
+          }
+        }
+      },
+      "participants": [
+        {
+          "element": "column.floor.west.1"
+        },
+        {
+          "element": "beam.floor.west"
+        }
+      ]
+    },
+    "footing.floor.west.2": {
+      "kind": "footing",
+      "name": "Pad floor.west.2",
+      "type": "footingType.shell.pad",
+      "shape": "pad",
+      "storey": "level.ground",
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": -1349
+      },
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              2200,
+              7200
+            ]
+          },
+          {
+            "point": [
+              2800,
+              7200
+            ]
+          },
+          {
+            "point": [
+              2800,
+              7800
+            ]
+          },
+          {
+            "point": [
+              2200,
+              7800
+            ]
+          }
+        ]
+      }
+    },
+    "column.floor.west.2": {
+      "kind": "member",
+      "name": "Pier floor.west.2",
+      "type": "memberType.shell.pier",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            2500,
+            7500,
+            -1349
+          ]
+        },
+        {
+          "point": [
+            2500,
+            7500,
+            -549
+          ]
+        }
+      ]
+    },
+    "hardware.floor.west.2": {
+      "kind": "hardware",
+      "name": "Bearing plate floor.west.2",
+      "type": "hardwareType.shell.floorPlate",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "member",
+            "element": "column.floor.west.2",
+            "surface": "end",
+            "station": 800
+          }
+        }
+      },
+      "participants": [
+        {
+          "element": "column.floor.west.2"
+        },
+        {
+          "element": "beam.floor.west"
+        }
+      ]
+    },
+    "beam.floor.east": {
+      "kind": "member",
+      "name": "floor.east bearer",
+      "type": "memberType.shell.bearer",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            7500,
+            0,
+            -395
+          ]
+        },
+        {
+          "point": [
+            7500,
+            8000,
+            -395
+          ]
+        }
+      ]
+    },
+    "footing.floor.east.1": {
+      "kind": "footing",
+      "name": "Pad floor.east.1",
+      "type": "footingType.shell.pad",
+      "shape": "pad",
+      "storey": "level.ground",
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": -1349
+      },
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              7200,
+              200
+            ]
+          },
+          {
+            "point": [
+              7800,
+              200
+            ]
+          },
+          {
+            "point": [
+              7800,
+              800
+            ]
+          },
+          {
+            "point": [
+              7200,
+              800
+            ]
+          }
+        ]
+      }
+    },
+    "column.floor.east.1": {
+      "kind": "member",
+      "name": "Pier floor.east.1",
+      "type": "memberType.shell.pier",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            7500,
+            500,
+            -1349
+          ]
+        },
+        {
+          "point": [
+            7500,
+            500,
+            -549
+          ]
+        }
+      ]
+    },
+    "hardware.floor.east.1": {
+      "kind": "hardware",
+      "name": "Bearing plate floor.east.1",
+      "type": "hardwareType.shell.floorPlate",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "member",
+            "element": "column.floor.east.1",
+            "surface": "end",
+            "station": 800
+          }
+        }
+      },
+      "participants": [
+        {
+          "element": "column.floor.east.1"
+        },
+        {
+          "element": "beam.floor.east"
+        }
+      ]
+    },
+    "footing.floor.east.2": {
+      "kind": "footing",
+      "name": "Pad floor.east.2",
+      "type": "footingType.shell.pad",
+      "shape": "pad",
+      "storey": "level.ground",
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": -1349
+      },
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              7200,
+              7200
+            ]
+          },
+          {
+            "point": [
+              7800,
+              7200
+            ]
+          },
+          {
+            "point": [
+              7800,
+              7800
+            ]
+          },
+          {
+            "point": [
+              7200,
+              7800
+            ]
+          }
+        ]
+      }
+    },
+    "column.floor.east.2": {
+      "kind": "member",
+      "name": "Pier floor.east.2",
+      "type": "memberType.shell.pier",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            7500,
+            7500,
+            -1349
+          ]
+        },
+        {
+          "point": [
+            7500,
+            7500,
+            -549
+          ]
+        }
+      ]
+    },
+    "hardware.floor.east.2": {
+      "kind": "hardware",
+      "name": "Bearing plate floor.east.2",
+      "type": "hardwareType.shell.floorPlate",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "member",
+            "element": "column.floor.east.2",
+            "surface": "end",
+            "station": 800
+          }
+        }
+      },
+      "participants": [
+        {
+          "element": "column.floor.east.2"
+        },
+        {
+          "element": "beam.floor.east"
+        }
+      ]
+    },
+    "beam.deck.west": {
+      "kind": "member",
+      "name": "deck.west bearer",
+      "type": "memberType.shell.bearer",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            3400,
+            -2800,
+            -420
+          ]
+        },
+        {
+          "point": [
+            3400,
+            -200,
+            -420
+          ]
+        }
+      ]
+    },
+    "footing.deck.west.1": {
+      "kind": "footing",
+      "name": "Pad deck.west.1",
+      "type": "footingType.shell.pad",
+      "shape": "pad",
+      "storey": "level.ground",
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": -1374
+      },
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              3100,
+              -2800
+            ]
+          },
+          {
+            "point": [
+              3700,
+              -2800
+            ]
+          },
+          {
+            "point": [
+              3700,
+              -2200
+            ]
+          },
+          {
+            "point": [
+              3100,
+              -2200
+            ]
+          }
+        ]
+      }
+    },
+    "column.deck.west.1": {
+      "kind": "member",
+      "name": "Post deck.west.1",
+      "type": "memberType.shell.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            3400,
+            -2500,
+            -1374
+          ]
+        },
+        {
+          "point": [
+            3400,
+            -2500,
+            -574
+          ]
+        }
+      ]
+    },
+    "hardware.deck.west.1": {
+      "kind": "hardware",
+      "name": "Bearing plate deck.west.1",
+      "type": "hardwareType.shell.deckPlate",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "member",
+            "element": "column.deck.west.1",
+            "surface": "end",
+            "station": 800
+          }
+        }
+      },
+      "participants": [
+        {
+          "element": "column.deck.west.1"
+        },
+        {
+          "element": "beam.deck.west"
+        }
+      ]
+    },
+    "footing.deck.west.2": {
+      "kind": "footing",
+      "name": "Pad deck.west.2",
+      "type": "footingType.shell.pad",
+      "shape": "pad",
+      "storey": "level.ground",
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": -1374
+      },
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              3100,
+              -800
+            ]
+          },
+          {
+            "point": [
+              3700,
+              -800
+            ]
+          },
+          {
+            "point": [
+              3700,
+              -200
+            ]
+          },
+          {
+            "point": [
+              3100,
+              -200
+            ]
+          }
+        ]
+      }
+    },
+    "column.deck.west.2": {
+      "kind": "member",
+      "name": "Post deck.west.2",
+      "type": "memberType.shell.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            3400,
+            -500,
+            -1374
+          ]
+        },
+        {
+          "point": [
+            3400,
+            -500,
+            -574
+          ]
+        }
+      ]
+    },
+    "hardware.deck.west.2": {
+      "kind": "hardware",
+      "name": "Bearing plate deck.west.2",
+      "type": "hardwareType.shell.deckPlate",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "member",
+            "element": "column.deck.west.2",
+            "surface": "end",
+            "station": 800
+          }
+        }
+      },
+      "participants": [
+        {
+          "element": "column.deck.west.2"
+        },
+        {
+          "element": "beam.deck.west"
+        }
+      ]
+    },
+    "beam.deck.east": {
+      "kind": "member",
+      "name": "deck.east bearer",
+      "type": "memberType.shell.bearer",
+      "role": "beam",
+      "axis": [
+        {
+          "point": [
+            6200,
+            -2800,
+            -420
+          ]
+        },
+        {
+          "point": [
+            6200,
+            -200,
+            -420
+          ]
+        }
+      ]
+    },
+    "footing.deck.east.1": {
+      "kind": "footing",
+      "name": "Pad deck.east.1",
+      "type": "footingType.shell.pad",
+      "shape": "pad",
+      "storey": "level.ground",
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": -1374
+      },
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              5900,
+              -2800
+            ]
+          },
+          {
+            "point": [
+              6500,
+              -2800
+            ]
+          },
+          {
+            "point": [
+              6500,
+              -2200
+            ]
+          },
+          {
+            "point": [
+              5900,
+              -2200
+            ]
+          }
+        ]
+      }
+    },
+    "column.deck.east.1": {
+      "kind": "member",
+      "name": "Post deck.east.1",
+      "type": "memberType.shell.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            6200,
+            -2500,
+            -1374
+          ]
+        },
+        {
+          "point": [
+            6200,
+            -2500,
+            -574
+          ]
+        }
+      ]
+    },
+    "hardware.deck.east.1": {
+      "kind": "hardware",
+      "name": "Bearing plate deck.east.1",
+      "type": "hardwareType.shell.deckPlate",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "member",
+            "element": "column.deck.east.1",
+            "surface": "end",
+            "station": 800
+          }
+        }
+      },
+      "participants": [
+        {
+          "element": "column.deck.east.1"
+        },
+        {
+          "element": "beam.deck.east"
+        }
+      ]
+    },
+    "footing.deck.east.2": {
+      "kind": "footing",
+      "name": "Pad deck.east.2",
+      "type": "footingType.shell.pad",
+      "shape": "pad",
+      "storey": "level.ground",
+      "datum": {
+        "kind": "level",
+        "level": "level.ground",
+        "offset": -1374
+      },
+      "footprint": {
+        "outer": [
+          {
+            "point": [
+              5900,
+              -800
+            ]
+          },
+          {
+            "point": [
+              6500,
+              -800
+            ]
+          },
+          {
+            "point": [
+              6500,
+              -200
+            ]
+          },
+          {
+            "point": [
+              5900,
+              -200
+            ]
+          }
+        ]
+      }
+    },
+    "column.deck.east.2": {
+      "kind": "member",
+      "name": "Post deck.east.2",
+      "type": "memberType.shell.post",
+      "role": "column",
+      "axis": [
+        {
+          "point": [
+            6200,
+            -500,
+            -1374
+          ]
+        },
+        {
+          "point": [
+            6200,
+            -500,
+            -574
+          ]
+        }
+      ]
+    },
+    "hardware.deck.east.2": {
+      "kind": "hardware",
+      "name": "Bearing plate deck.east.2",
+      "type": "hardwareType.shell.deckPlate",
+      "placement": {
+        "origin": {
+          "host": {
+            "kind": "member",
+            "element": "column.deck.east.2",
+            "surface": "end",
+            "station": 800
+          }
+        }
+      },
+      "participants": [
+        {
+          "element": "column.deck.east.2"
+        },
+        {
+          "element": "beam.deck.east"
+        }
+      ]
+    }
+  },
+  "relationships": {
+    "rel.voids.north-window": {
+      "kind": "voids",
+      "name": "North wall is voided by its window opening",
+      "host": "wall.north",
+      "opening": "opening.window.north"
+    },
+    "rel.fills.north-window": {
+      "kind": "fills",
+      "opening": "opening.window.north",
+      "element": "window.north"
+    },
+    "rel.voids.south-door": {
+      "kind": "voids",
+      "host": "wall.south",
+      "opening": "opening.door.south"
+    },
+    "rel.fills.south-door": {
+      "kind": "fills",
+      "opening": "opening.door.south",
+      "element": "door.south-entry"
+    },
+    "rel.joins.north-east": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.north",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.east",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "rel.joins.east-south": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.east",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.south",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "rel.joins.south-west": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.south",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.west",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "rel.joins.west-north": {
+      "kind": "joins",
+      "a": {
+        "element": "wall.west",
+        "at": "end"
+      },
+      "b": {
+        "element": "wall.north",
+        "at": "start"
+      },
+      "joinType": "miter"
+    },
+    "rel.supports.slab-north-wall": {
+      "kind": "supports",
+      "support": "slab.ground",
+      "supported": "wall.north",
+      "interface": {
+        "primarySurface": "top",
+        "secondarySurface": "base"
+      }
+    },
+    "rel.attaches.deck-south-wall": {
+      "kind": "attaches",
+      "primary": "wall.south",
+      "attached": "slab.deck.south",
+      "connectionType": "ledger",
+      "interface": {
+        "primarySurface": "exterior",
+        "secondarySurface": "north-edge",
+        "startStation": 3000,
+        "endStation": 7000,
+        "elevation": -25
+      }
+    },
+    "rel.bounds.living-north": {
+      "kind": "bounds",
+      "space": "space.living",
+      "element": "wall.north",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "rel.bounds.living-east": {
+      "kind": "bounds",
+      "space": "space.living",
+      "element": "wall.east",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "rel.bounds.living-south": {
+      "kind": "bounds",
+      "space": "space.living",
+      "element": "wall.south",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "rel.bounds.living-west": {
+      "kind": "bounds",
+      "space": "space.living",
+      "element": "wall.west",
+      "boundaryType": "physical",
+      "elementSide": "interior"
+    },
+    "rel.aggregates.roof": {
+      "kind": "aggregates",
+      "name": "Main roof system aggregates the generated roof",
+      "assembly": "assembly.roof-system",
+      "parts": [
+        "roof.main"
+      ]
+    },
+    "electrical.connection.supply": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "electrical.device.panel",
+        "port": "out"
+      },
+      "b": {
+        "element": "electrical.device.breaker",
+        "port": "in"
+      }
+    },
+    "electrical.connection.protected": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "electrical.device.breaker",
+        "port": "out"
+      },
+      "b": {
+        "element": "electrical.route.cable",
+        "port": "start"
+      }
+    },
+    "electrical.connection.load": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "electrical.route.cable",
+        "port": "end"
+      },
+      "b": {
+        "element": "electrical.device.load",
+        "port": "in"
+      }
+    },
+    "electrical.connection.branch2.supply": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "electrical.device.panel",
+        "port": "branch2"
+      },
+      "b": {
+        "element": "electrical.device.breaker2",
+        "port": "in"
+      }
+    },
+    "electrical.connection.branch2.protected": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "electrical.device.breaker2",
+        "port": "out"
+      },
+      "b": {
+        "element": "electrical.route.cable2",
+        "port": "start"
+      }
+    },
+    "electrical.connection.branch2.load": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "electrical.route.cable2",
+        "port": "end"
+      },
+      "b": {
+        "element": "electrical.device.load2",
+        "port": "in"
+      }
+    },
+    "electrical.connection.earth.earth": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "electrical.device.groundBar",
+        "port": "earth"
+      },
+      "b": {
+        "element": "electrical.route.earth",
+        "port": "start"
+      }
+    },
+    "electrical.connection.earth.end": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "electrical.route.earth",
+        "port": "end"
+      },
+      "b": {
+        "element": "electrical.device.earth",
+        "port": "in"
+      }
+    },
+    "electrical.connection.bond.bond": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "electrical.device.groundBar",
+        "port": "bond"
+      },
+      "b": {
+        "element": "electrical.route.bond",
+        "port": "start"
+      }
+    },
+    "electrical.connection.bond.end": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "electrical.route.bond",
+        "port": "end"
+      },
+      "b": {
+        "element": "electrical.device.bond",
+        "port": "in"
+      }
+    },
+    "mechanical.connection.0": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "mechanical.device.ahu",
+        "port": "out"
+      },
+      "b": {
+        "element": "mechanical.duct.feed",
+        "port": "start"
+      }
+    },
+    "mechanical.connection.1": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "mechanical.duct.feed",
+        "port": "end"
+      },
+      "b": {
+        "element": "mechanical.device.damper",
+        "port": "in"
+      }
+    },
+    "mechanical.connection.2": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "mechanical.device.damper",
+        "port": "out"
+      },
+      "b": {
+        "element": "mechanical.duct.trunk",
+        "port": "start"
+      }
+    },
+    "mechanical.connection.3": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "mechanical.duct.trunk",
+        "port": "end"
+      },
+      "b": {
+        "element": "mechanical.fitting.branch",
+        "port": "start"
+      }
+    },
+    "mechanical.connection.4": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "mechanical.fitting.branch",
+        "port": "end"
+      },
+      "b": {
+        "element": "mechanical.duct.end",
+        "port": "start"
+      }
+    },
+    "mechanical.connection.5": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "mechanical.duct.end",
+        "port": "end"
+      },
+      "b": {
+        "element": "mechanical.terminal.end",
+        "port": "in"
+      }
+    },
+    "mechanical.connection.6": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "mechanical.fitting.branch",
+        "port": "side"
+      },
+      "b": {
+        "element": "mechanical.duct.side",
+        "port": "start"
+      }
+    },
+    "mechanical.connection.7": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "mechanical.duct.side",
+        "port": "end"
+      },
+      "b": {
+        "element": "mechanical.terminal.side",
+        "port": "in"
+      }
+    },
+    "plumbing.connect.supply": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "plumbing.pipe.supply",
+        "port": "end"
+      },
+      "b": {
+        "element": "plumbing.device.valve",
+        "port": "in"
+      }
+    },
+    "plumbing.connect.feed": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "plumbing.device.valve",
+        "port": "out"
+      },
+      "b": {
+        "element": "plumbing.pipe.feed",
+        "port": "start"
+      }
+    },
+    "plumbing.connect.tee": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "plumbing.pipe.feed",
+        "port": "end"
+      },
+      "b": {
+        "element": "plumbing.fitting.tee",
+        "port": "start"
+      }
+    },
+    "plumbing.connect.end": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "plumbing.fitting.tee",
+        "port": "end"
+      },
+      "b": {
+        "element": "plumbing.pipe.end",
+        "port": "start"
+      }
+    },
+    "plumbing.connect.side": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "plumbing.fitting.tee",
+        "port": "side"
+      },
+      "b": {
+        "element": "plumbing.pipe.side",
+        "port": "start"
+      }
+    },
+    "plumbing.connect.terminal.end": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "plumbing.pipe.end",
+        "port": "end"
+      },
+      "b": {
+        "element": "plumbing.terminal.end",
+        "port": "in"
+      }
+    },
+    "plumbing.connect.terminal.side": {
+      "kind": "connectsPorts",
+      "a": {
+        "element": "plumbing.pipe.side",
+        "port": "end"
+      },
+      "b": {
+        "element": "plumbing.terminal.side",
+        "port": "in"
+      }
+    },
+    "support.floor.west.framing": {
+      "kind": "supports",
+      "support": "beam.floor.west",
+      "supported": "framing.floor"
+    },
+    "support.floor.west.1.column": {
+      "kind": "supports",
+      "support": "footing.floor.west.1",
+      "supported": "column.floor.west.1"
+    },
+    "support.floor.west.1.plate": {
+      "kind": "supports",
+      "support": "column.floor.west.1",
+      "supported": "hardware.floor.west.1"
+    },
+    "support.floor.west.1.beam": {
+      "kind": "supports",
+      "support": "hardware.floor.west.1",
+      "supported": "beam.floor.west"
+    },
+    "support.floor.west.2.column": {
+      "kind": "supports",
+      "support": "footing.floor.west.2",
+      "supported": "column.floor.west.2"
+    },
+    "support.floor.west.2.plate": {
+      "kind": "supports",
+      "support": "column.floor.west.2",
+      "supported": "hardware.floor.west.2"
+    },
+    "support.floor.west.2.beam": {
+      "kind": "supports",
+      "support": "hardware.floor.west.2",
+      "supported": "beam.floor.west"
+    },
+    "support.floor.east.framing": {
+      "kind": "supports",
+      "support": "beam.floor.east",
+      "supported": "framing.floor"
+    },
+    "support.floor.east.1.column": {
+      "kind": "supports",
+      "support": "footing.floor.east.1",
+      "supported": "column.floor.east.1"
+    },
+    "support.floor.east.1.plate": {
+      "kind": "supports",
+      "support": "column.floor.east.1",
+      "supported": "hardware.floor.east.1"
+    },
+    "support.floor.east.1.beam": {
+      "kind": "supports",
+      "support": "hardware.floor.east.1",
+      "supported": "beam.floor.east"
+    },
+    "support.floor.east.2.column": {
+      "kind": "supports",
+      "support": "footing.floor.east.2",
+      "supported": "column.floor.east.2"
+    },
+    "support.floor.east.2.plate": {
+      "kind": "supports",
+      "support": "column.floor.east.2",
+      "supported": "hardware.floor.east.2"
+    },
+    "support.floor.east.2.beam": {
+      "kind": "supports",
+      "support": "hardware.floor.east.2",
+      "supported": "beam.floor.east"
+    },
+    "support.deck.west.framing": {
+      "kind": "supports",
+      "support": "beam.deck.west",
+      "supported": "framing.deck"
+    },
+    "support.deck.west.1.column": {
+      "kind": "supports",
+      "support": "footing.deck.west.1",
+      "supported": "column.deck.west.1"
+    },
+    "support.deck.west.1.plate": {
+      "kind": "supports",
+      "support": "column.deck.west.1",
+      "supported": "hardware.deck.west.1"
+    },
+    "support.deck.west.1.beam": {
+      "kind": "supports",
+      "support": "hardware.deck.west.1",
+      "supported": "beam.deck.west"
+    },
+    "support.deck.west.2.column": {
+      "kind": "supports",
+      "support": "footing.deck.west.2",
+      "supported": "column.deck.west.2"
+    },
+    "support.deck.west.2.plate": {
+      "kind": "supports",
+      "support": "column.deck.west.2",
+      "supported": "hardware.deck.west.2"
+    },
+    "support.deck.west.2.beam": {
+      "kind": "supports",
+      "support": "hardware.deck.west.2",
+      "supported": "beam.deck.west"
+    },
+    "support.deck.east.framing": {
+      "kind": "supports",
+      "support": "beam.deck.east",
+      "supported": "framing.deck"
+    },
+    "support.deck.east.1.column": {
+      "kind": "supports",
+      "support": "footing.deck.east.1",
+      "supported": "column.deck.east.1"
+    },
+    "support.deck.east.1.plate": {
+      "kind": "supports",
+      "support": "column.deck.east.1",
+      "supported": "hardware.deck.east.1"
+    },
+    "support.deck.east.1.beam": {
+      "kind": "supports",
+      "support": "hardware.deck.east.1",
+      "supported": "beam.deck.east"
+    },
+    "support.deck.east.2.column": {
+      "kind": "supports",
+      "support": "footing.deck.east.2",
+      "supported": "column.deck.east.2"
+    },
+    "support.deck.east.2.plate": {
+      "kind": "supports",
+      "support": "column.deck.east.2",
+      "supported": "hardware.deck.east.2"
+    },
+    "support.deck.east.2.beam": {
+      "kind": "supports",
+      "support": "hardware.deck.east.2",
+      "supported": "beam.deck.east"
+    }
+  },
+  "requirements": [
+    {
+      "id": "requirement.entry-clearance",
+      "statement": "Maintain clear access between the south entry door and the attached deck.",
+      "severity": "warning",
+      "appliesTo": [
+        "door.south-entry",
+        "slab.deck.south"
+      ]
+    }
+  ],
+  "metadata": {
+    "purpose": "schema validation and adapter conformance fixture"
+  }
+}

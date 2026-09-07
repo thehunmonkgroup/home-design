@@ -43,6 +43,7 @@ class ResolvedElement:
     storey_id: str | None
     meshes: tuple[MeshData, ...] = ()
     data: JsonObject = field(default_factory=dict)
+    construction_volumes: dict[str, MeshData] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, JsonValue]:
         """Serialize a resolved element.
@@ -56,6 +57,10 @@ class ResolvedElement:
             "storeyId": self.storey_id,
             "meshes": [mesh.to_dict() for mesh in self.meshes],
             "data": self.data,
+            "constructionVolumes": {
+                key: mesh.to_dict()
+                for key, mesh in sorted(self.construction_volumes.items())
+            },
         }
 
 

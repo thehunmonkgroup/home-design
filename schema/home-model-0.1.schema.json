@@ -69,6 +69,274 @@
     }
   },
   "$defs": {
+    "MechanicalDeviceRole": {"enum": ["damper", "airTerminal", "fan", "airHandler", "heatRecoveryVentilator", "airFilter", "coil", "airConditioner", "dehumidifier", "refrigerantUnit"]},
+    "MechanicalSpecification": {
+      "type": "object", "additionalProperties": false, "required": ["designation"],
+      "properties": {
+        "designation": {"$ref": "#/$defs/NonEmptyString"},
+        "airflowRateM3s": {"type": "number", "minimum": 0}, "heatingCapacityW": {"type": "number", "minimum": 0}, "coolingCapacityW": {"type": "number", "minimum": 0},
+        "heatRecoveryEfficiency": {"type": "number", "minimum": 0, "maximum": 1}, "filterClass": {"$ref": "#/$defs/NonEmptyString"}, "refrigerant": {"$ref": "#/$defs/NonEmptyString"},
+        "damperType": {"enum": ["backdraft", "balancing", "control", "fire", "smoke", "fireSmoke", "gravity", "relief"]},
+        "terminalType": {"enum": ["register", "grille", "diffuser", "louvre"]},
+        "fanType": {"enum": ["centrifugalForwardCurved", "centrifugalRadial", "centrifugalBackwardCurved", "centrifugalAirfoil", "tubeAxial", "vaneAxial", "propellerAxial"]},
+        "coilType": {"enum": ["dxCooling", "electricHeating", "gasHeating", "hydronic", "waterCooling", "waterHeating"]},
+        "heatRecoveryType": {"enum": ["counterflowPlate", "crossflowPlate", "parallelflowPlate", "rotaryWheel", "runaroundCoil", "heatPipe"]}
+      }
+    },
+    "DuctSpecification": {
+      "type": "object", "additionalProperties": false, "required": ["designation"],
+      "properties": {
+        "designation": {"$ref": "#/$defs/NonEmptyString"}, "construction": {"enum": ["rigid", "flexible"]},
+        "jointing": {"$ref": "#/$defs/NonEmptyString"}, "lining": {"$ref": "#/$defs/NonEmptyString"}, "leakageClass": {"$ref": "#/$defs/NonEmptyString"},
+        "positivePressureRatingPa": {"type": "number", "exclusiveMinimum": 0}, "negativePressureRatingPa": {"type": "number", "exclusiveMinimum": 0},
+        "minimumTemperatureC": {"type": "number"}, "maximumTemperatureC": {"type": "number"}, "roughnessMm": {"type": "number", "minimum": 0}
+      }
+    },
+    "DuctConditions": {
+      "type": "object", "additionalProperties": false, "minProperties": 1,
+      "properties": {"pressurePa": {"type": "number"}, "temperatureC": {"type": "number"}, "flowRateM3s": {"type": "number", "minimum": 0}}
+    },
+    "ServiceInsulationType": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/TypeBase"},
+        {"required": ["material", "thickness"], "properties": {
+          "kind": {"const": "serviceInsulationType"}, "material": {"$ref": "#/$defs/Id"}, "thickness": {"$ref": "#/$defs/PositiveLength"}
+        }}], "unevaluatedProperties": false
+    },
+    "ServiceInsulation": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/ElementBase"},
+        {"required": ["type", "host", "chordTolerance"], "properties": {
+          "kind": {"const": "serviceInsulation"}, "type": {"$ref": "#/$defs/Id"}, "host": {"$ref": "#/$defs/Id"},
+          "chordTolerance": {"$ref": "#/$defs/PositiveLength"}, "storey": {"$ref": "#/$defs/Id"},
+          "coordinationChecks": {"$ref": "#/$defs/ServiceCoordination"}
+        }}], "unevaluatedProperties": false
+    },
+    "PlumbingDeviceRole": {"enum": ["valve", "manifold", "fixtureConnection", "cleanout", "waterHeater", "plumbingPump", "storageTank", "waterMeter"]},
+    "PlumbingSpecification": {
+      "type": "object", "additionalProperties": false, "required": ["designation"],
+      "properties": {
+        "designation": {"$ref": "#/$defs/NonEmptyString"}, "nominalSize": {"$ref": "#/$defs/NonEmptyString"},
+        "pressureRatingPa": {"type": "number", "exclusiveMinimum": 0}, "minimumTemperatureC": {"type": "number"}, "maximumTemperatureC": {"type": "number"},
+        "potableWater": {"type": "boolean"}, "capacityL": {"type": "number", "exclusiveMinimum": 0},
+        "valveType": {"enum": ["isolating", "check", "mixing", "pressureReducing", "pressureRelief", "regulating", "gasCock", "faucet"]}
+      }
+    },
+    "PipeSpecification": {
+      "type": "object", "additionalProperties": false, "required": ["designation"],
+      "properties": {
+        "designation": {"$ref": "#/$defs/NonEmptyString"}, "nominalSize": {"$ref": "#/$defs/NonEmptyString"},
+        "construction": {"enum": ["rigid", "flexible"]}, "jointing": {"$ref": "#/$defs/NonEmptyString"}, "lining": {"$ref": "#/$defs/NonEmptyString"},
+        "pressureRatingPa": {"type": "number", "exclusiveMinimum": 0}, "minimumTemperatureC": {"type": "number"}, "maximumTemperatureC": {"type": "number"},
+        "roughnessMm": {"type": "number", "minimum": 0}, "potableWater": {"type": "boolean"}
+      }
+    },
+    "PipeConditions": {
+      "type": "object", "additionalProperties": false, "minProperties": 1,
+      "properties": {"pressurePa": {"type": "number", "minimum": 0}, "temperatureC": {"type": "number"}, "flowRateM3s": {"type": "number", "minimum": 0}}
+    },
+    "RouteFallCheck": {
+      "type": "object", "additionalProperties": false, "required": ["minimumFall", "direction"],
+      "properties": {"minimumFall": {"type": "number", "minimum": 0}, "direction": {"enum": ["startToEnd", "endToStart"]}}
+    },
+    "CableSpecification": {
+      "type": "object", "additionalProperties": false, "required": ["designation"],
+      "properties": {
+        "designation": {"$ref": "#/$defs/NonEmptyString"}, "construction": {"enum": ["cable", "conductor", "core", "opticalFiber"]},
+        "conductors": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["function", "count", "areaMm2", "materialSpec"], "properties": {
+          "function": {"enum": ["power", "neutral", "protectiveEarth", "bonding", "signal"]}, "count": {"type": "integer", "minimum": 1},
+          "areaMm2": {"type": "number", "exclusiveMinimum": 0}, "materialSpec": {"$ref": "#/$defs/NonEmptyString"}, "insulationSpec": {"$ref": "#/$defs/NonEmptyString"}
+        }}},
+        "ratedVoltageV": {"type": "number", "exclusiveMinimum": 0}, "allowableCurrentA": {"type": "number", "exclusiveMinimum": 0},
+        "maximumProtectionA": {"type": "number", "exclusiveMinimum": 0}, "jacketSpec": {"$ref": "#/$defs/NonEmptyString"},
+        "signalCategory": {"$ref": "#/$defs/NonEmptyString"}, "dataRateMbps": {"type": "number", "exclusiveMinimum": 0}, "shielded": {"type": "boolean"}
+      }
+    },
+    "ConduitSpecification": {
+      "type": "object", "additionalProperties": false, "required": ["designation"],
+      "properties": {"designation": {"$ref": "#/$defs/NonEmptyString"}, "nominalSize": {"$ref": "#/$defs/NonEmptyString"}, "flexible": {"type": "boolean"}, "maximumFillFraction": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}}
+    },
+    "CircuitSchedule": {
+      "type": "object", "additionalProperties": false, "required": ["panel", "number"],
+      "properties": {
+        "panel": {"$ref": "#/$defs/ServicePortReference"}, "number": {"$ref": "#/$defs/NonEmptyString"},
+        "electrical": {"type": "object", "additionalProperties": false, "required": ["nominalVoltageV", "supply", "poles"], "properties": {
+          "nominalVoltageV": {"type": "number", "exclusiveMinimum": 0}, "supply": {"enum": ["AC", "DC"]}, "poles": {"type": "integer", "minimum": 1},
+          "frequencyHz": {"type": "number", "minimum": 0}, "designCurrentA": {"type": "number", "exclusiveMinimum": 0},
+          "overcurrentProtection": {"$ref": "#/$defs/ServicePortReference"},
+          "loads": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["terminal", "apparentPowerVA"], "properties": {"terminal": {"$ref": "#/$defs/ServicePortReference"}, "apparentPowerVA": {"type": "number", "minimum": 0}}}}
+        }},
+        "communications": {"type": "object", "additionalProperties": false, "required": ["signalCategory"], "properties": {"signalCategory": {"$ref": "#/$defs/NonEmptyString"}, "dataRateMbps": {"type": "number", "exclusiveMinimum": 0}}}
+      },
+      "oneOf": [{"required": ["electrical"]}, {"required": ["communications"]}]
+    },
+    "ElectricalDeviceRole": {"enum": ["receptacle", "switch", "deviceBox", "junctionBox", "distributionPanel", "circuitBreaker", "fuse", "surgeProtector", "light", "smokeDetector", "heatDetector", "carbonMonoxideDetector", "communicationsOutlet", "communicationsPanel", "groundingBar", "groundingElectrode", "bondingClamp"]},
+    "ElectricalRatings": {
+      "type": "object", "additionalProperties": false, "minProperties": 1,
+      "properties": {
+        "ratedVoltageV": {"type": "number", "exclusiveMinimum": 0},
+        "ratedCurrentA": {"type": "number", "exclusiveMinimum": 0},
+        "ratedPowerW": {"type": "number", "minimum": 0},
+        "supply": {"enum": ["AC", "DC"]}, "frequencyHz": {"type": "number", "minimum": 0},
+        "poles": {"type": "integer", "minimum": 1}, "ways": {"type": "integer", "minimum": 1},
+        "breakingCapacityA": {"type": "number", "exclusiveMinimum": 0},
+        "residualTripCurrentA": {"type": "number", "exclusiveMinimum": 0},
+        "protection": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["overcurrent", "residualCurrent", "arcFault", "surge"]}},
+        "enclosureRating": {"$ref": "#/$defs/NonEmptyString"},
+        "signalCategory": {"$ref": "#/$defs/NonEmptyString"},
+        "dataRateMbps": {"type": "number", "exclusiveMinimum": 0}, "shielded": {"type": "boolean"}
+      }
+    },
+    "ElectricalPortFunction": {"enum": ["power", "neutral", "protectiveEarth", "bonding", "signal", "containment"]},
+    "FittingPath": {
+      "type": "object", "required": ["section", "path"],
+      "properties": {
+        "section": {"$ref": "#/$defs/ServiceSection"},
+        "path": {"type": "array", "minItems": 2, "maxItems": 10000, "items": {"$ref": "#/$defs/Vec3"}},
+        "bendRadius": {"type": "number", "minimum": 0}, "up": {"$ref": "#/$defs/UnitVec3"}
+      }
+    },
+    "FittingGeometry": {
+      "oneOf": [
+        {"type": "object", "allOf": [{"$ref": "#/$defs/FittingPath"}, {"required": ["kind", "bendRadius"], "properties": {"kind": {"const": "trap"}, "bendRadius": {"$ref": "#/$defs/PositiveLength"}, "path": {"minItems": 4}, "section": {"properties": {"kind": {"const": "circle"}}}}}], "unevaluatedProperties": false},
+        {"type": "object", "allOf": [{"$ref": "#/$defs/FittingPath"}, {"required": ["kind", "bendRadius"], "properties": {"kind": {"const": "elbow"}, "bendRadius": {"$ref": "#/$defs/PositiveLength"}, "path": {"minItems": 3, "maxItems": 3}}}], "unevaluatedProperties": false},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "trunk", "branches"], "properties": {
+          "kind": {"const": "branch"}, "trunk": {"$ref": "#/$defs/FittingPath", "unevaluatedProperties": false},
+          "branches": {"type": "object", "minProperties": 1, "maxProperties": 32, "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"$ref": "#/$defs/FittingPath", "unevaluatedProperties": false}}
+        }},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "startSection", "endSection", "length"], "properties": {
+          "kind": {"const": "transition"}, "startSection": {"$ref": "#/$defs/ServiceSection"}, "endSection": {"$ref": "#/$defs/ServiceSection"},
+          "length": {"$ref": "#/$defs/PositiveLength"}, "offset": {"$ref": "#/$defs/Vec2"}
+        }},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "section", "depth"], "properties": {
+          "kind": {"const": "cap"}, "section": {"$ref": "#/$defs/ServiceSection"}, "depth": {"$ref": "#/$defs/PositiveLength"}
+        }}
+      ]
+    },
+    "ServiceFittingType": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/TypeBase"},
+        {"required": ["material", "family", "geometry", "medium", "connectionType", "chordTolerance"], "properties": {
+          "kind": {"const": "serviceFittingType"}, "material": {"$ref": "#/$defs/Id"},
+          "electrical": {"$ref": "#/$defs/ElectricalRatings"},
+          "pipe": {"$ref": "#/$defs/PipeSpecification"},
+          "duct": {"$ref": "#/$defs/DuctSpecification"},
+          "portOverrides": {"type": "object", "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"type": "object", "additionalProperties": false, "minProperties": 1, "properties": {"connectionType": {"$ref": "#/$defs/NonEmptyString"}, "flow": {"enum": ["source", "sink", "bidirectional"]}}}},
+          "family": {"enum": ["pipe", "duct", "cable", "conduit"]}, "geometry": {"$ref": "#/$defs/FittingGeometry"},
+          "wallThickness": {"$ref": "#/$defs/PositiveLength"}, "chordTolerance": {"$ref": "#/$defs/PositiveLength"},
+          "medium": {"$ref": "#/$defs/ServiceMedium"}, "connectionType": {"$ref": "#/$defs/NonEmptyString"}, "flow": {"enum": ["forward", "bidirectional"]},
+          "function": {"$ref": "#/$defs/ElectricalPortFunction"}
+        }},
+        {"if": {"properties": {"family": {"const": "cable"}}}, "then": {"not": {"required": ["wallThickness"]}}, "else": {"required": ["wallThickness"], "not": {"required": ["electrical"]}}},
+        {"if": {"properties": {"family": {"const": "pipe"}}}, "else": {"not": {"required": ["pipe"]}}},
+        {"if": {"properties": {"family": {"const": "duct"}}}, "else": {"not": {"required": ["duct"]}}}
+      ], "unevaluatedProperties": false
+    },
+    "ServiceFitting": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/ElementBase"},
+        {"required": ["type", "placement"], "properties": {
+          "kind": {"const": "serviceFitting"}, "type": {"$ref": "#/$defs/Id"}, "placement": {"$ref": "#/$defs/SolidPlacement"}, "storey": {"$ref": "#/$defs/Id"},
+          "conditions": {"$ref": "#/$defs/PipeConditions"},
+          "ductConditions": {"$ref": "#/$defs/DuctConditions"},
+          "coordinationChecks": {"$ref": "#/$defs/ServiceCoordination"},
+          "clearance": {"type": "number", "minimum": 0}, "portStates": {"type": "object", "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"enum": ["connected", "open", "capped"]}}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "ServiceRouteType": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/TypeBase"},
+        {"required": ["material", "family", "section", "medium", "connectionType"], "properties": {
+          "kind": {"const": "serviceRouteType"}, "material": {"$ref": "#/$defs/Id"},
+          "cable": {"$ref": "#/$defs/CableSpecification"}, "conduit": {"$ref": "#/$defs/ConduitSpecification"},
+          "pipe": {"$ref": "#/$defs/PipeSpecification"},
+          "duct": {"$ref": "#/$defs/DuctSpecification"},
+          "family": {"enum": ["pipe", "duct", "cable", "conduit"]},
+          "section": {"$ref": "#/$defs/ServiceSection"}, "wallThickness": {"$ref": "#/$defs/PositiveLength"},
+          "medium": {"$ref": "#/$defs/ServiceMedium"}, "connectionType": {"$ref": "#/$defs/NonEmptyString"},
+          "flow": {"enum": ["forward", "bidirectional"]}, "function": {"$ref": "#/$defs/ElectricalPortFunction"}
+        }},
+        {"if": {"properties": {"family": {"const": "cable"}}}, "then": {"not": {"required": ["wallThickness"]}}, "else": {"required": ["wallThickness"], "not": {"required": ["cable"]}}},
+        {"if": {"properties": {"family": {"const": "conduit"}}}, "else": {"not": {"required": ["conduit"]}}},
+        {"if": {"properties": {"family": {"const": "pipe"}}}, "else": {"not": {"required": ["pipe"]}}},
+        {"if": {"properties": {"family": {"const": "duct"}}}, "else": {"not": {"required": ["duct"]}}}
+      ], "unevaluatedProperties": false
+    },
+    "ServiceRoute": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/ElementBase"},
+        {"required": ["type", "path", "chordTolerance"], "properties": {
+          "kind": {"const": "serviceRoute"}, "type": {"$ref": "#/$defs/Id"}, "storey": {"$ref": "#/$defs/Id"},
+          "conditions": {"$ref": "#/$defs/PipeConditions"}, "fallCheck": {"$ref": "#/$defs/RouteFallCheck"},
+          "ductConditions": {"$ref": "#/$defs/DuctConditions"},
+          "coordinationChecks": {"$ref": "#/$defs/ServiceCoordination"},
+          "path": {"type": "array", "minItems": 2, "maxItems": 10000, "items": {"$ref": "#/$defs/PointLocator3"}},
+          "up": {"$ref": "#/$defs/UnitVec3"}, "bendRadius": {"type": "number", "minimum": 0},
+          "chordTolerance": {"$ref": "#/$defs/PositiveLength"}, "clearance": {"type": "number", "minimum": 0},
+          "portStates": {"type": "object", "additionalProperties": false, "properties": {"start": {"enum": ["connected", "open", "capped"]}, "end": {"enum": ["connected", "open", "capped"]}}}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "ServiceMedium": {"enum": ["electrical", "communications", "water", "waste", "vent", "gas", "air", "refrigerant", "condensate", "other"]},
+    "ServiceSection": {
+      "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["kind", "diameter"], "properties": {"kind": {"const": "circle"}, "diameter": {"$ref": "#/$defs/PositiveLength"}}},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "width", "height"], "properties": {"kind": {"const": "rectangle"}, "width": {"$ref": "#/$defs/PositiveLength"}, "height": {"$ref": "#/$defs/PositiveLength"}}}
+      ]
+    },
+    "ServicePort": {
+      "type": "object", "additionalProperties": false,
+      "required": ["position", "direction", "section", "medium", "flow", "connectionType"],
+      "properties": {
+        "position": {"$ref": "#/$defs/Vec3"}, "direction": {"$ref": "#/$defs/UnitVec3"}, "up": {"$ref": "#/$defs/UnitVec3"},
+        "section": {"$ref": "#/$defs/ServiceSection"}, "medium": {"$ref": "#/$defs/ServiceMedium"},
+        "flow": {"enum": ["source", "sink", "bidirectional"]}, "connectionType": {"$ref": "#/$defs/NonEmptyString"},
+        "function": {"$ref": "#/$defs/ElectricalPortFunction"}
+      }
+    },
+    "ServicePortReference": {
+      "type": "object", "additionalProperties": false, "required": ["element", "port"],
+      "properties": {"element": {"$ref": "#/$defs/Id"}, "port": {"$ref": "#/$defs/Id"}}
+    },
+    "ServiceMembers": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/ServicePortReference"}},
+    "ServiceDeviceType": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/TypeBase"}, {"$ref": "#/$defs/FabricatedShape"},
+        {"required": ["role", "ports"], "properties": {
+          "kind": {"const": "serviceDeviceType"}, "role": {"oneOf": [{"enum": ["equipment", "terminal", "junction", "control", "other"]}, {"$ref": "#/$defs/ElectricalDeviceRole"}, {"$ref": "#/$defs/PlumbingDeviceRole"}, {"$ref": "#/$defs/MechanicalDeviceRole"}]},
+          "electrical": {"$ref": "#/$defs/ElectricalRatings"},
+          "plumbing": {"$ref": "#/$defs/PlumbingSpecification"},
+          "mechanical": {"$ref": "#/$defs/MechanicalSpecification"},
+          "ports": {"type": "object", "minProperties": 1, "maxProperties": 256, "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"$ref": "#/$defs/ServicePort"}},
+          "portGroups": {"type": "array", "uniqueItems": true, "items": {"type": "array", "minItems": 2, "maxItems": 256, "uniqueItems": true, "items": {"$ref": "#/$defs/Id"}}}
+        }},
+        {"if": {"properties": {"role": {"$ref": "#/$defs/ElectricalDeviceRole"}}}, "then": {"required": ["electrical"]}, "else": {"if": {"properties": {"role": {"anyOf": [{"$ref": "#/$defs/PlumbingDeviceRole"}, {"$ref": "#/$defs/MechanicalDeviceRole"}]}}}, "else": {"not": {"required": ["electrical"]}}}},
+        {"if": {"properties": {"role": {"$ref": "#/$defs/MechanicalDeviceRole"}}}, "then": {"required": ["mechanical"]}, "else": {"not": {"required": ["mechanical"]}}},
+        {"if": {"properties": {"role": {"$ref": "#/$defs/PlumbingDeviceRole"}}}, "then": {"required": ["plumbing"]}, "else": {"not": {"required": ["plumbing"]}}}
+      ], "unevaluatedProperties": false
+    },
+    "ServiceDevice": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/ElementBase"},
+        {"required": ["type", "placement"], "properties": {
+          "kind": {"const": "serviceDevice"}, "type": {"$ref": "#/$defs/Id"}, "placement": {"$ref": "#/$defs/SolidPlacement"},
+          "projection": {"$ref": "#/$defs/Length"}, "storey": {"$ref": "#/$defs/Id"},
+          "coordinationChecks": {"$ref": "#/$defs/ServiceCoordination"},
+          "portStates": {"type": "object", "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"enum": ["connected", "open", "capped"]}}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "ServiceSystem": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/ElementBase"},
+        {"required": ["systemType", "members"], "properties": {
+          "kind": {"const": "serviceSystem"}, "members": {"$ref": "#/$defs/ServiceMembers"},
+          "systemType": {"enum": ["electrical", "communications", "water", "coldWater", "hotWater", "waste", "vent", "gas", "supplyAir", "exhaustAir", "refrigerant", "condensate", "other"]}
+        }}
+      ], "not": {"required": ["occupies"]}, "unevaluatedProperties": false
+    },
+    "ServiceCircuit": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/ElementBase"},
+        {"required": ["system", "members"], "properties": {"kind": {"const": "serviceCircuit"}, "system": {"$ref": "#/$defs/Id"}, "members": {"$ref": "#/$defs/ServiceMembers"}, "schedule": {"$ref": "#/$defs/CircuitSchedule"}}}
+      ], "not": {"required": ["occupies"]}, "unevaluatedProperties": false
+    },
+    "ConnectsPortsRelationship": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/RelationshipBase"},
+        {"required": ["a", "b"], "properties": {"kind": {"const": "connectsPorts"}, "a": {"$ref": "#/$defs/ServicePortReference"}, "b": {"$ref": "#/$defs/ServicePortReference"}}}
+      ], "unevaluatedProperties": false
+    },
     "SolarStudy": {
       "type": "object",
       "additionalProperties": false,
@@ -320,8 +588,149 @@
         }
       ]
     },
+    "CavityOccupancy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["regions"],
+      "properties": {
+        "fit": {"enum": ["contained", "clip", "intersect"]},
+        "regions": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["host", "layer"],
+            "properties": {
+              "host": {"$ref": "#/$defs/Id"},
+              "layer": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
+    "SolidPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin"],
+      "properties": {
+        "origin": {"$ref": "#/$defs/PointLocator3"},
+        "rotation": {"$ref": "#/$defs/Vec3"}
+      }
+    },
+    "Penetration": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/$defs/ElementBase"},
+        {
+          "required": ["host", "purpose"],
+          "properties": {
+            "kind": {"const": "penetration"},
+            "host": {"$ref": "#/$defs/Id"},
+            "owner": {"$ref": "#/$defs/Id"},
+            "storey": {"$ref": "#/$defs/Id"},
+            "placement": {"$ref": "#/$defs/SolidPlacement"},
+            "section": {"$ref": "#/$defs/Section"},
+            "depth": {"$ref": "#/$defs/PositiveLength"},
+            "limits": {"type": "object", "minProperties": 1, "maxProperties": 32, "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"$ref": "#/$defs/CutLimit"}},
+            "geometrySource": {"type": "object", "additionalProperties": false, "required": ["element", "volume"], "properties": {"element": {"$ref": "#/$defs/Id"}, "volume": {"enum": ["bore", "envelope", "clearance"]}}},
+            "purpose": {"enum": ["service", "opening", "recess", "notch", "bearingSeat", "other"]},
+            "layers": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "integer", "minimum": 0}}
+          }
+        },
+        {"oneOf": [
+          {"required": ["placement", "section", "depth"], "not": {"required": ["geometrySource"]}},
+          {"required": ["geometrySource", "owner"], "not": {"anyOf": [{"required": ["placement"]}, {"required": ["section"]}, {"required": ["depth"]}]}}
+        ]}
+      ],
+      "unevaluatedProperties": false
+    },
+    "CutAxisLengths": {
+      "type": "object", "minProperties": 1, "additionalProperties": false,
+      "properties": {"x": {"$ref": "#/$defs/PositiveLength"}, "y": {"$ref": "#/$defs/PositiveLength"}, "z": {"$ref": "#/$defs/PositiveLength"}}
+    },
+    "CutAxisFractions": {
+      "type": "object", "minProperties": 1, "additionalProperties": false,
+      "properties": {"x": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}, "y": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}, "z": {"type": "number", "exclusiveMinimum": 0, "maximum": 1}}
+    },
+    "CutLimit": {
+      "type": "object", "required": ["host"], "additionalProperties": false,
+      "anyOf": [{"required": ["maximumExtent"]}, {"required": ["maximumExtentFraction"]}, {"required": ["minimumEdgeDistance"]}],
+      "properties": {
+        "host": {"$ref": "#/$defs/HostPlacement"}, "severity": {"enum": ["error", "warning"]}, "reference": {"$ref": "#/$defs/NonEmptyString"},
+        "maximumExtent": {"$ref": "#/$defs/CutAxisLengths"}, "maximumExtentFraction": {"$ref": "#/$defs/CutAxisFractions"},
+        "minimumEdgeDistance": {"type": "object", "minProperties": 1, "additionalProperties": false, "properties": {
+          "positiveX": {"$ref": "#/$defs/PositiveLength"}, "negativeX": {"$ref": "#/$defs/PositiveLength"},
+          "positiveY": {"$ref": "#/$defs/PositiveLength"}, "negativeY": {"$ref": "#/$defs/PositiveLength"},
+          "positiveZ": {"$ref": "#/$defs/PositiveLength"}, "negativeZ": {"$ref": "#/$defs/PositiveLength"}
+        }}
+      }
+    },
+    "HostPlacement": {
+      "description": "A right-handed local frame on an authored host surface. Offsets are local millimetres; rotations are intrinsic XYZ degrees.",
+      "type": "object",
+      "allOf": [
+        {
+          "required": ["kind", "element"],
+          "properties": {
+            "element": {"$ref": "#/$defs/Id"},
+            "offset": {"$ref": "#/$defs/Vec3"},
+            "rotation": {"$ref": "#/$defs/Vec3"}
+          }
+        },
+        {
+          "oneOf": [
+            {"properties": {"kind": {"const": "component"}}},
+            {"required": ["station"], "properties": {
+              "kind": {"const": "route"}, "station": {"type": "number", "minimum": 0}, "branch": {"$ref": "#/$defs/Id"}
+            }},
+            {
+              "required": ["station", "height", "surface"],
+              "properties": {
+                "kind": {"const": "wall"},
+                "station": {"type": "number", "minimum": 0},
+                "height": {"type": "number", "minimum": 0},
+                "surface": {"enum": ["exterior", "interior", "layerExterior", "layerInterior", "layerCenter"]},
+                "layer": {"type": "integer", "minimum": 0}
+              },
+              "if": {"properties": {"surface": {"enum": ["layerExterior", "layerInterior", "layerCenter"]}}},
+              "then": {"required": ["layer"]},
+              "else": {"not": {"required": ["layer"]}}
+            },
+            {
+              "required": ["point", "surface"],
+              "properties": {
+                "kind": {"const": "surface"},
+                "point": {"$ref": "#/$defs/Vec2"},
+                "surface": {"enum": ["top", "bottom", "layerTop", "layerBottom", "layerCenter"]},
+                "face": {"$ref": "#/$defs/Id"},
+                "layer": {"type": "integer", "minimum": 0}
+              },
+              "if": {"properties": {"surface": {"enum": ["layerTop", "layerBottom", "layerCenter"]}}},
+              "then": {"required": ["layer"]},
+              "else": {"not": {"required": ["layer"]}}
+            },
+            {
+              "required": ["station"],
+              "properties": {
+                "kind": {"const": "member"},
+                "part": {"$ref": "#/$defs/NonEmptyString"},
+                "station": {"type": "number", "minimum": 0},
+                "surface": {"enum": ["axis", "positiveX", "negativeX", "positiveY", "negativeY", "start", "end"]}
+              }
+            }
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
     "PointLocator3": {
       "oneOf": [
+        {"type": "object", "additionalProperties": false, "required": ["port"], "properties": {"port": {"$ref": "#/$defs/ServicePortReference"}}},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["host"],
+          "properties": {"host": {"$ref": "#/$defs/HostPlacement"}}
+        },
         {
           "type": "object",
           "additionalProperties": false,
@@ -439,6 +848,7 @@
             "kind": {
               "const": "footingType"
             },
+            "representation": {"enum": ["aggregate", "explicit"]},
             "depth": {
               "$ref": "#/$defs/PositiveLength"
             },
@@ -639,6 +1049,352 @@
         }
       }
     },
+    "LocalPlacement": {
+      "type": "object", "additionalProperties": false,
+      "properties": {"origin": {"$ref": "#/$defs/Vec3"}, "rotation": {"$ref": "#/$defs/Vec3"}}
+    },
+    "LocalExtrusion": {
+      "type": "object", "additionalProperties": false, "required": ["section", "depth"],
+      "properties": {"section": {"$ref": "#/$defs/Section"}, "depth": {"$ref": "#/$defs/PositiveLength"}, "placement": {"$ref": "#/$defs/LocalPlacement"}}
+    },
+    "FabricatedShape": {
+      "type": "object", "required": ["material", "solids"],
+      "properties": {
+        "material": {"$ref": "#/$defs/Id"},
+        "solids": {"type": "object", "minProperties": 1, "maxProperties": 256, "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"$ref": "#/$defs/LocalFabricatedSolid"}},
+        "cuts": {"type": "object", "maxProperties": 256, "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"$ref": "#/$defs/LocalFabricatedSolid"}}
+      }
+    },
+    "LocalFabricatedSolid": {
+      "oneOf": [{"$ref": "#/$defs/LocalExtrusion"}, {"$ref": "#/$defs/LocalRevolution"}]
+    },
+    "LocalRevolution": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "profile", "chordTolerance"],
+      "properties": {
+        "kind": {"const": "revolve"},
+        "profile": {"$ref": "#/$defs/LocalProfile2"},
+        "chordTolerance": {"$ref": "#/$defs/PositiveLength"},
+        "placement": {"$ref": "#/$defs/LocalPlacement"}
+      }
+    },
+    "ComponentReference": {
+      "type": "object", "required": ["element"], "additionalProperties": false,
+      "properties": {"element": {"$ref": "#/$defs/Id"}, "part": {"$ref": "#/$defs/NonEmptyString"}}
+    },
+    "ConnectionParticipants": {
+      "type": "array", "minItems": 1, "maxItems": 16, "uniqueItems": true,
+      "items": {"$ref": "#/$defs/ComponentReference"}
+    },
+    "MountedPlacement": {
+      "type": "object", "required": ["origin"], "additionalProperties": false,
+      "properties": {"origin": {"type": "object", "required": ["host"], "additionalProperties": false, "properties": {"host": {"$ref": "#/$defs/HostPlacement"}}}, "rotation": {"$ref": "#/$defs/Vec3"}}
+    },
+    "MountedPartProperties": {
+      "type": "object", "required": ["type", "placement"],
+      "properties": {"type": {"$ref": "#/$defs/Id"}, "storey": {"$ref": "#/$defs/Id"}, "placement": {"$ref": "#/$defs/MountedPlacement"}, "projection": {"$ref": "#/$defs/Length"}}
+    },
+    "AccessoryType": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/TypeBase"}, {"$ref": "#/$defs/FabricatedShape"},
+        {"required": ["role"], "properties": {"kind": {"const": "accessoryType"}, "role": {"enum": ["ledge", "windowStool", "shelf", "niche", "backing", "accessPanel", "grille", "fixedEquipment", "other"]}}}
+      ], "unevaluatedProperties": false
+    },
+    "EnvelopePartType": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/TypeBase"}, {"$ref": "#/$defs/FabricatedShape"},
+        {"required": ["role"], "properties": {"kind": {"const": "envelopePartType"}, "role": {"enum": ["membrane", "sillPan", "roofBoot", "flashing", "airSeal", "vaporSeal", "weatherSeal", "fireStop", "acousticSeal", "sleeve", "protectivePlate", "cavityBarrier", "ventBaffle", "ventMesh", "ridgeVent", "soffitVent", "dripEdge", "other"]}}}
+      ], "unevaluatedProperties": false
+    },
+    "Accessory": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/ElementBase"}, {"$ref": "#/$defs/MountedPartProperties"}, {"properties": {"kind": {"const": "accessory"}}}], "unevaluatedProperties": false
+    },
+    "EnvelopePart": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/ElementBase"}, {"$ref": "#/$defs/MountedPartProperties"}, {"properties": {"kind": {"const": "envelopePart"}, "interface": {"$ref": "#/$defs/ServiceInterface"}}}], "unevaluatedProperties": false
+    },
+    "ServiceCoordination": {
+      "type": "object", "required": ["interference"], "additionalProperties": false,
+      "properties": {
+        "interference": {"enum": ["error", "warning"]},
+        "clearance": {"type": "object", "required": ["severity"], "additionalProperties": false, "properties": {
+          "severity": {"enum": ["error", "warning"]},
+          "allow": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/ComponentReference"}}
+        }}
+      }
+    },
+    "ServiceInterface": {
+      "type": "object", "required": ["host", "services"], "additionalProperties": false,
+      "properties": {
+        "host": {"$ref": "#/$defs/ComponentReference"},
+        "services": {"type": "array", "minItems": 1, "maxItems": 32, "uniqueItems": true, "items": {"type": "object", "required": ["element"], "additionalProperties": false, "properties": {"element": {"$ref": "#/$defs/Id"}}}}
+      }
+    },
+    "CoordinationVolumeProperties": {
+      "type": "object", "required": ["placement", "geometry", "purpose"],
+      "properties": {"placement": {"$ref": "#/$defs/SolidPlacement"}, "geometry": {"$ref": "#/$defs/LocalExtrusion"}, "storey": {"$ref": "#/$defs/Id"}, "severity": {"enum": ["error", "warning"]}}
+    },
+    "ClearanceZone": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/ElementBase"}, {"$ref": "#/$defs/CoordinationVolumeProperties"},
+        {"required": ["owner"], "properties": {
+          "kind": {"const": "clearanceZone"}, "owner": {"$ref": "#/$defs/Id"}, "purpose": {"enum": ["access", "maintenance", "operation", "ventilation", "installation", "other"]},
+          "allow": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/ComponentReference"}}
+        }}
+      ], "not": {"required": ["occupies"]}, "unevaluatedProperties": false
+    },
+    "BarrierCheck": {
+      "type": "object", "allOf": [{"$ref": "#/$defs/ElementBase"}, {"$ref": "#/$defs/CoordinationVolumeProperties"},
+        {"required": ["participants"], "properties": {
+          "kind": {"const": "barrierCheck"}, "purpose": {"enum": ["air", "water", "vapor", "fire", "acoustic"]},
+          "maximumGapVolumeMm3": {"type": "number", "minimum": 0},
+          "participants": {"type": "array", "minItems": 2, "maxItems": 16, "uniqueItems": true, "items": {"type": "object", "required": ["element"], "additionalProperties": false, "properties": {"element": {"$ref": "#/$defs/Id"}, "layer": {"type": "integer", "minimum": 0}}}}
+        }}
+      ], "not": {"required": ["occupies"]}, "unevaluatedProperties": false
+    },
+    "ReinforcingBarType": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/TypeBase"},
+        {"required": ["material", "nominalDiameter", "role"], "properties": {
+          "kind": {"const": "reinforcingBarType"}, "material": {"$ref": "#/$defs/Id"},
+          "nominalDiameter": {"$ref": "#/$defs/PositiveLength"}, "minimumBendRadius": {"$ref": "#/$defs/PositiveLength"},
+          "role": {"enum": ["main", "shear", "tie", "ring", "anchoring", "edge", "punching", "stud", "other"]},
+          "steelGrade": {"$ref": "#/$defs/NonEmptyString"}, "surface": {"enum": ["plain", "ribbed"]}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "ReinforcingBar": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/ElementBase"},
+        {"required": ["type", "path", "bendRadius", "chordTolerance"], "properties": {
+          "kind": {"const": "reinforcingBar"}, "type": {"$ref": "#/$defs/Id"}, "storey": {"$ref": "#/$defs/Id"},
+          "path": {"type": "array", "minItems": 2, "maxItems": 1000, "items": {"$ref": "#/$defs/PointLocator3"}},
+          "bendRadius": {"$ref": "#/$defs/PositiveLength"}, "chordTolerance": {"$ref": "#/$defs/PositiveLength"}, "closed": {"type": "boolean"}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "ReinforcingMeshType": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/TypeBase"},
+        {"required": ["material", "longitudinalDiameter", "transverseDiameter", "longitudinalSpacing", "transverseSpacing"], "properties": {
+          "kind": {"const": "reinforcingMeshType"}, "material": {"$ref": "#/$defs/Id"}, "steelGrade": {"$ref": "#/$defs/NonEmptyString"},
+          "longitudinalDiameter": {"$ref": "#/$defs/PositiveLength"}, "transverseDiameter": {"$ref": "#/$defs/PositiveLength"},
+          "longitudinalSpacing": {"$ref": "#/$defs/PositiveLength"}, "transverseSpacing": {"$ref": "#/$defs/PositiveLength"}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "ReinforcingMesh": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/ElementBase"},
+        {"required": ["type", "placement", "length", "width"], "properties": {
+          "kind": {"const": "reinforcingMesh"}, "type": {"$ref": "#/$defs/Id"}, "storey": {"$ref": "#/$defs/Id"},
+          "placement": {"$ref": "#/$defs/SolidPlacement"}, "length": {"$ref": "#/$defs/PositiveLength"}, "width": {"$ref": "#/$defs/PositiveLength"},
+          "layerSeparation": {"type": "number", "minimum": 0}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "MasonryPartType": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/TypeBase"}, {"$ref": "#/$defs/FabricatedShape"},
+        {"required": ["role"], "properties": {"kind": {"const": "masonryPartType"}, "role": {"enum": ["unit", "mortar", "grout", "fill", "other"]}}}
+      ], "unevaluatedProperties": false
+    },
+    "MasonryPart": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/ElementBase"},
+        {"required": ["type", "placement"], "properties": {
+          "kind": {"const": "masonryPart"}, "type": {"$ref": "#/$defs/Id"}, "storey": {"$ref": "#/$defs/Id"},
+          "placement": {"$ref": "#/$defs/SolidPlacement"}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "HardwareType": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/TypeBase"}, {"$ref": "#/$defs/FabricatedShape"},
+        {"required": ["role"], "properties": {
+          "kind": {"const": "hardwareType"},
+          "role": {"enum": ["hanger", "strap", "holdDown", "postBase", "postCap", "bracket", "anchor", "anchorPlate", "embed", "other"]}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "FastenerType": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/TypeBase"}, {"$ref": "#/$defs/FabricatedShape"},
+        {"required": ["role", "nominalDiameter", "nominalLength"], "properties": {
+          "kind": {"const": "fastenerType"},
+          "role": {"enum": ["anchorBolt", "bolt", "dowel", "nail", "nailPlate", "rivet", "screw", "shearConnector", "staple", "studShearConnector", "other"]},
+          "nominalDiameter": {"$ref": "#/$defs/PositiveLength"}, "nominalLength": {"$ref": "#/$defs/PositiveLength"}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "Hardware": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/ElementBase"},
+        {"required": ["type", "placement", "participants"], "properties": {
+          "kind": {"const": "hardware"}, "type": {"$ref": "#/$defs/Id"}, "storey": {"$ref": "#/$defs/Id"},
+          "placement": {"$ref": "#/$defs/SolidPlacement"}, "participants": {"$ref": "#/$defs/ConnectionParticipants"}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "FastenerGroup": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/ElementBase"},
+        {"required": ["type", "placement", "participants", "quantity", "representation"], "properties": {
+          "kind": {"const": "fastenerGroup"}, "type": {"$ref": "#/$defs/Id"}, "storey": {"$ref": "#/$defs/Id"},
+          "placement": {"$ref": "#/$defs/SolidPlacement"}, "participants": {"$ref": "#/$defs/ConnectionParticipants"},
+          "quantity": {"type": "integer", "minimum": 1, "maximum": 1000000},
+          "representation": {"enum": ["scheduled", "detailed"]},
+          "instances": {"type": "object", "minProperties": 1, "maxProperties": 10000, "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"$ref": "#/$defs/LocalPlacement"}}
+        }}
+      ],
+      "if": {"properties": {"representation": {"const": "detailed"}}},
+      "then": {"required": ["instances"]}, "else": {"not": {"required": ["instances"]}},
+      "unevaluatedProperties": false
+    },
+    "EndCut": {
+      "type": "object", "required": ["normal"], "additionalProperties": false,
+      "properties": {"normal": {"$ref": "#/$defs/UnitVec3"}, "offset": {"$ref": "#/$defs/Length"}}
+    },
+    "EndCuts": {
+      "type": "object", "minProperties": 1, "additionalProperties": false,
+      "properties": {"start": {"$ref": "#/$defs/EndCut"}, "end": {"$ref": "#/$defs/EndCut"}}
+    },
+    "AssemblyNode": {
+      "oneOf": [
+        {"type": "object", "required": ["local"], "additionalProperties": false,
+         "properties": {"local": {"$ref": "#/$defs/Vec3"}}},
+        {"$ref": "#/$defs/PointLocator3"}
+      ]
+    },
+    "AssemblyMember": {
+      "type": "object", "required": ["start", "end", "memberType", "role"], "additionalProperties": false,
+      "properties": {
+        "start": {"$ref": "#/$defs/Id"}, "end": {"$ref": "#/$defs/Id"},
+        "memberType": {"$ref": "#/$defs/Id"},
+        "role": {"enum": ["topChord", "bottomChord", "web", "tie", "hip", "valley", "ridge", "bridging", "brace", "beam", "column", "joist", "rafter", "other"]},
+        "roll": {"$ref": "#/$defs/Angle"}, "endCuts": {"$ref": "#/$defs/EndCuts"},
+        "trimAgainst": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/Id"}}
+      }
+    },
+    "CurvedMember": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/ElementBase"},
+        {"type": "object", "required": ["type", "role", "placement", "radius", "sweepAngle", "chordTolerance"], "properties": {
+          "kind": {"const": "curvedMember"}, "storey": {"$ref": "#/$defs/Id"},
+          "type": {"$ref": "#/$defs/Id"},
+          "role": {"enum": ["beam", "joist", "rafter", "rim", "brace", "other"]},
+          "placement": {"$ref": "#/$defs/SolidPlacement"},
+          "radius": {"$ref": "#/$defs/PositiveLength"},
+          "sweepAngle": {"type": "number", "minimum": -360, "maximum": 360, "not": {"const": 0}},
+          "startAngle": {"$ref": "#/$defs/Angle"}, "roll": {"$ref": "#/$defs/Angle"},
+          "chordTolerance": {"$ref": "#/$defs/PositiveLength"}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "MemberAssembly": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/ElementBase"},
+        {"type": "object", "required": ["assemblyType", "placement", "nodes", "members"], "properties": {
+          "kind": {"const": "memberAssembly"}, "storey": {"$ref": "#/$defs/Id"},
+          "assemblyType": {"enum": ["truss", "roofSystem", "floorSystem", "deckSystem", "bracing", "other"]},
+          "placement": {"$ref": "#/$defs/SolidPlacement"},
+          "nodes": {"type": "object", "minProperties": 2, "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"$ref": "#/$defs/AssemblyNode"}},
+          "members": {"type": "object", "minProperties": 1, "propertyNames": {"$ref": "#/$defs/Id"}, "additionalProperties": {"$ref": "#/$defs/AssemblyMember"}}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "PlanarFramingType": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/TypeBase"},
+        {"type": "object", "required": ["memberType", "spacing"], "properties": {
+          "kind": {"const": "planarFramingType"},
+          "memberType": {"$ref": "#/$defs/Id"},
+          "rimType": {"$ref": "#/$defs/Id"},
+          "blockingType": {"$ref": "#/$defs/Id"},
+          "spacing": {"$ref": "#/$defs/PositiveLength"}
+        }}
+      ], "unevaluatedProperties": false
+    },
+    "PlanarFraming": {
+      "type": "object", "allOf": [
+        {"$ref": "#/$defs/ElementBase"},
+        {"type": "object", "required": ["type", "host", "layer", "direction"], "properties": {
+          "kind": {"const": "planarFraming"},
+          "type": {"$ref": "#/$defs/Id"}, "host": {"$ref": "#/$defs/Id"},
+          "layer": {"type": "integer", "minimum": 0},
+          "direction": {"$ref": "#/$defs/Vec2"}, "face": {"$ref": "#/$defs/Id"},
+          "role": {"enum": ["joist", "rafter", "decking", "purlin", "other"]},
+          "gridOffset": {"$ref": "#/$defs/Length"},
+          "blocking": {"type": "object", "propertyNames": {"$ref": "#/$defs/Id"},
+            "additionalProperties": {"$ref": "#/$defs/Length"}},
+          "memberOverrides": {"type": "object", "additionalProperties": {
+            "type": "object", "additionalProperties": false, "properties": {
+              "omit": {"type": "boolean"}, "memberType": {"$ref": "#/$defs/Id"},
+              "endCuts": {"$ref": "#/$defs/EndCuts"}
+            }
+          }}
+        }}
+      ], "not": {"required": ["occupies"]}, "unevaluatedProperties": false
+    },
+    "WallFramingType": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/$defs/TypeBase"},
+        {"type": "object", "required": ["studType", "plateType", "headerType", "spacing"],
+         "properties": {
+           "kind": {"const": "wallFramingType"},
+           "studType": {"$ref": "#/$defs/Id"},
+           "plateType": {"$ref": "#/$defs/Id"},
+           "headerType": {"$ref": "#/$defs/Id"},
+           "sillType": {"$ref": "#/$defs/Id"},
+           "blockingType": {"$ref": "#/$defs/Id"},
+           "spacing": {"$ref": "#/$defs/PositiveLength"},
+           "bottomPlates": {"type": "integer", "minimum": 1},
+           "topPlates": {"type": "integer", "minimum": 1},
+           "kingStuds": {"type": "integer", "minimum": 1},
+           "jackStuds": {"type": "integer", "minimum": 1},
+           "endStuds": {"type": "integer", "minimum": 1}
+         }}
+      ], "unevaluatedProperties": false
+    },
+    "WallFraming": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "#/$defs/ElementBase"},
+        {"type": "object", "required": ["type", "host", "layer"],
+         "properties": {
+           "kind": {"const": "wallFraming"},
+           "segment": {"type": "integer", "minimum": 0},
+           "type": {"$ref": "#/$defs/Id"},
+           "host": {"$ref": "#/$defs/Id"},
+           "layer": {"type": "integer", "minimum": 0},
+           "startInset": {"type": "number", "minimum": 0},
+           "endInset": {"type": "number", "minimum": 0},
+           "gridOffset": {"type": "number", "minimum": 0},
+           "blocking": {"type": "object", "propertyNames": {"$ref": "#/$defs/Id"},
+             "additionalProperties": {"oneOf": [
+               {"$ref": "#/$defs/PositiveLength"},
+               {"type": "object", "required": ["height"], "additionalProperties": false,
+                "properties": {
+                  "height": {"$ref": "#/$defs/PositiveLength"},
+                  "memberType": {"$ref": "#/$defs/Id"},
+                  "depthOffset": {"$ref": "#/$defs/Length"},
+                  "role": {"enum": ["blocking", "backing"]}
+                }}
+             ]}},
+           "openingOverrides": {"type": "object", "propertyNames": {"$ref": "#/$defs/Id"},
+             "additionalProperties": {"type": "object", "additionalProperties": false,
+               "properties": {
+                 "headerType": {"$ref": "#/$defs/Id"}, "sillType": {"$ref": "#/$defs/Id"},
+                 "kingStuds": {"type": "integer", "minimum": 1},
+                 "jackStuds": {"type": "integer", "minimum": 1}
+               }}},
+           "memberOverrides": {"type": "object", "additionalProperties": {
+             "type": "object", "additionalProperties": false,
+             "properties": {
+               "omit": {"type": "boolean"},
+               "endCuts": {"$ref": "#/$defs/EndCuts"},
+               "offset": {"$ref": "#/$defs/Vec2"},
+               "memberType": {"$ref": "#/$defs/Id"}
+             }}}
+         }}
+      ], "not": {"required": ["occupies"]}, "unevaluatedProperties": false
+    },
     "Member": {
       "type": "object",
       "allOf": [
@@ -656,6 +1412,7 @@
             "kind": {
               "const": "member"
             },
+            "endCuts": {"$ref": "#/$defs/EndCuts"},
             "storey": {
               "$ref": "#/$defs/Id"
             },
@@ -706,6 +1463,7 @@
             "kind": {
               "const": "framing"
             },
+            "endCuts": {"$ref": "#/$defs/EndCuts"},
             "storey": {
               "$ref": "#/$defs/Id"
             },
@@ -1990,12 +2748,17 @@
     "Layer": {
       "type": "object",
       "additionalProperties": false,
+      "allOf": [{
+        "if": {"required": ["representation"], "properties": {"representation": {"const": "explicit"}}},
+        "then": {"not": {"required": ["components"]}}
+      }],
       "required": [
         "name",
         "thickness",
         "function"
       ],
       "properties": {
+        "representation": {"enum": ["aggregate", "explicit"]},
         "components": {
           "type": "array",
           "minItems": 2,
@@ -2042,6 +2805,19 @@
     },
     "ComponentType": {
       "oneOf": [
+        {"$ref": "#/$defs/ServiceDeviceType"},
+        {"$ref": "#/$defs/ServiceRouteType"},
+        {"$ref": "#/$defs/ServiceFittingType"},
+        {"$ref": "#/$defs/ServiceInsulationType"},
+        {"$ref": "#/$defs/PlanarFramingType"},
+        {"$ref": "#/$defs/HardwareType"},
+        {"$ref": "#/$defs/MasonryPartType"},
+        {"$ref": "#/$defs/AccessoryType"},
+        {"$ref": "#/$defs/EnvelopePartType"},
+        {"$ref": "#/$defs/ReinforcingBarType"},
+        {"$ref": "#/$defs/ReinforcingMeshType"},
+        {"$ref": "#/$defs/FastenerType"},
+        {"$ref": "#/$defs/WallFramingType"},
         {"$ref": "#/$defs/MemberType"},
         {"$ref": "#/$defs/FootingType"},
         {"$ref": "#/$defs/StairType"},
@@ -2326,6 +3102,26 @@
     },
     "Element": {
       "oneOf": [
+        {"$ref": "#/$defs/ServiceDevice"},
+        {"$ref": "#/$defs/ServiceRoute"},
+        {"$ref": "#/$defs/ServiceFitting"},
+        {"$ref": "#/$defs/ServiceInsulation"},
+        {"$ref": "#/$defs/ServiceSystem"},
+        {"$ref": "#/$defs/ServiceCircuit"},
+        {"$ref": "#/$defs/MemberAssembly"},
+        {"$ref": "#/$defs/CurvedMember"},
+        {"$ref": "#/$defs/Hardware"},
+        {"$ref": "#/$defs/MasonryPart"},
+        {"$ref": "#/$defs/Accessory"},
+        {"$ref": "#/$defs/EnvelopePart"},
+        {"$ref": "#/$defs/ClearanceZone"},
+        {"$ref": "#/$defs/BarrierCheck"},
+        {"$ref": "#/$defs/ReinforcingBar"},
+        {"$ref": "#/$defs/ReinforcingMesh"},
+        {"$ref": "#/$defs/FastenerGroup"},
+        {"$ref": "#/$defs/PlanarFraming"},
+        {"$ref": "#/$defs/WallFraming"},
+        {"$ref": "#/$defs/Penetration"},
         {"$ref": "#/$defs/Member"},
         {"$ref": "#/$defs/Framing"},
         {"$ref": "#/$defs/Footing"},
@@ -2369,6 +3165,8 @@
         "name"
       ],
       "properties": {
+        "occupies": {"$ref": "#/$defs/CavityOccupancy"},
+        "discipline": {"enum": ["envelope", "framing", "services", "site", "accessories"]},
         "specifications": {"$ref": "#/$defs/ScalarProperties"},
         "performance": {"$ref": "#/$defs/Performance"},
         "grade": {"$ref": "#/$defs/Id"},
@@ -3093,6 +3891,7 @@
     },
     "Relationship": {
       "oneOf": [
+        {"$ref": "#/$defs/ConnectsPortsRelationship"},
         {"$ref": "#/$defs/DrainsToRelationship"},
         {
           "$ref": "#/$defs/VoidsRelationship"

@@ -12,6 +12,7 @@ import {
   isolateElements,
   isRenderManifest,
   nodeElementIndex,
+  reviewElementIds,
   withElementVisibility,
   type ElementKind,
   type RenderManifest,
@@ -35,6 +36,33 @@ const manifest: RenderManifest = {
 };
 
 describe('render manifest helpers', () => {
+  it('keeps service insulation independently selectable in the services view', () => {
+    const parts: RenderManifest = { ...manifest, elements: {
+      cover: { kind: 'serviceInsulation', name: 'Pipe insulation', storeyId: null, nodes: ['cover'], defaultVisible: true, data: { discipline: 'services' } },
+      pipe: { kind: 'serviceRoute', name: 'Pipe', storeyId: null, nodes: ['pipe'], defaultVisible: true, data: { discipline: 'services' } },
+    } };
+    expect(isRenderManifest(parts)).toBe(true);
+    expect(groupElements(parts).map((group) => group.label)).toEqual(['Service routes', 'Service insulation']);
+    expect(reviewElementIds(parts, 'services')).toEqual(['cover', 'pipe']);
+    expect([...isolateElements(parts, ['pipe'])]).toEqual(['cover']);
+  });
+  it('provides discipline views without exposing space or property-only geometry', () => {
+    const parts: RenderManifest = { ...manifest, elements: {
+      ...manifest.elements,
+      'stud': { kind: 'member', name: 'Stud', storeyId: null, nodes: ['stud'], defaultVisible: true, data: {} },
+      'run': { kind: 'sweep', name: 'Drain', storeyId: null, nodes: ['run'], defaultVisible: true, data: { role: 'drain' } },
+      'box': { kind: 'member', name: 'Service box', storeyId: null, nodes: ['box'], defaultVisible: true, data: { discipline: 'services' } },
+      'detail': { kind: 'detail', name: 'Service detail', storeyId: null, nodes: [], defaultVisible: true, data: { discipline: 'services' } },
+      'shelf': { kind: 'member', name: 'Shelf', storeyId: null, nodes: ['shelf'], defaultVisible: true, data: { discipline: 'accessories' } },
+    } };
+    expect(reviewElementIds(parts, 'framing')).toEqual(['stud']);
+    expect(reviewElementIds(parts, 'services')).toEqual(['run', 'box']);
+    expect(reviewElementIds(parts, 'envelope')).toEqual(['roof.main', 'wall.north', 'shelf']);
+    const hidden = isolateElements(parts, reviewElementIds(parts, 'framing'));
+    expect(hidden.has('wall.north')).toBe(true);
+    expect(hidden.has('stud')).toBe(false);
+    expect(hidden.has('detail')).toBe(false);
+  });
   it('rejects incompatible payloads and accepts the contract shape', () => {
     expect(isRenderManifest({ ...manifest, format: 'unknown' })).toBe(false);
     expect(isRenderManifest(manifest)).toBe(true);

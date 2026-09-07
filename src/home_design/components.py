@@ -9,6 +9,7 @@ from shapely.geometry import Point
 
 from home_design.construction import Authoring, ConstructionGeometry
 from home_design.errors import ResolutionError
+from home_design.drainage import DrainageFall
 from home_design.geometry import (
     extrude_polygon,
     normalize2,
@@ -20,8 +21,11 @@ from home_design.geometry import (
 )
 from home_design.json_types import JsonObject, JsonValue
 from home_design.locators import LocatorResolver
+from home_design.placement import HostPlacement, LocalFrame
+from home_design.service_ports import ServicePorts
 from home_design.resolved import MeshData, ResolvedElement, Vec3
 from home_design.terrain import TerrainSurface
+from home_design.member_geometry import MemberGeometry
 
 
 class ResolutionContext(Protocol):
@@ -65,6 +69,16 @@ class ConstructionResolver:
     def point(self, value: JsonValue) -> Vec3:
         """Resolve a literal, shared anchor or grade/element-connected 3D point."""
         locator = Authoring.object(value, "3D locator")
+        if "port" in locator:
+            return ServicePorts.frame(
+                ServicePorts.lookup(self.context, Authoring.object(locator["port"]))
+            ).origin
+        if "host" in locator:
+            return (
+                HostPlacement(self.context)
+                .resolve(Authoring.object(locator["host"], "host placement"))
+                .origin
+            )
         if "anchor" in locator:
             return self.context.locators.point3_anchor(
                 Authoring.text(locator["anchor"])
@@ -101,6 +115,24 @@ class ConstructionResolver:
             data,
         )
 
+    def placement(self, value: JsonObject) -> LocalFrame:
+        """Resolve a solid's origin and intrinsic orientation from shared locators."""
+        origin = Authoring.object(value.get("origin"), "placement origin")
+        if "port" in origin:
+            frame = ServicePorts.frame(
+                ServicePorts.lookup(self.context, Authoring.object(origin["port"]))
+            )
+        elif "host" in origin:
+            frame = HostPlacement(self.context).resolve(
+                Authoring.object(origin["host"])
+            )
+        else:
+            frame = LocalFrame(self.point(origin), (1, 0, 0), (0, 1, 0), (0, 0, 1))
+        return frame.adjusted(
+            (0, 0, 0),
+            vector3(value.get("rotation", [0, 0, 0]), "placement rotation"),
+        )
+
     def component_type(self, element: JsonObject) -> JsonObject:
         """Return a validated reusable construction type."""
         return self.context.types[Authoring.text(element.get("type"), "component type")]
@@ -135,6 +167,14 @@ class ConstructionResolver:
             "member",
             number(element.get("roll", 0), "member roll"),
         )
+        cuts = Authoring.object(element.get("endCuts", {}))
+        if cuts:
+            frame = MemberGeometry.frame(
+                start, end, number(element.get("roll", 0), "member roll")
+            )
+            template = MemberGeometry.end_cuts(
+                template, frame, math.dist(start, end), cuts
+            )
         meshes = tuple(
             ConstructionGeometry.translated(
                 template,
@@ -150,6 +190,7 @@ class ConstructionResolver:
         )
         return meshes, {
             "axis": [list(start), list(end)],
+            **({"endCuts": cuts} if cuts else {}),
             "memberCount": len(meshes),
             "memberLength": math.dist(start, end),
             "section": section,
@@ -170,13 +211,35 @@ class ConstructionResolver:
         top = self.context.elevation(Authoring.object(element.get("datum")))
         depth = number(component_type.get("depth"), "footing depth")
         material = Authoring.text(component_type.get("material"))
-        mesh = extrude_polygon(polygon, top - depth, top, material, "footing")
+        explicit = component_type.get("representation") == "explicit"
+        mesh = extrude_polygon(
+            polygon,
+            top - depth,
+            top,
+            material,
+            "footing:layer:0" if explicit else "footing",
+        )
         return (mesh,), {
             "shape": element.get("shape"),
             "topElevation": top,
             "bottomElevation": top - depth,
             "area": polygon.area,
             "volume": polygon.area * depth,
+            **(
+                {
+                    "layers": [
+                        {
+                            "name": "Foundation body",
+                            "thickness": depth,
+                            "material": material,
+                            "function": "structure",
+                            "representation": "explicit",
+                        }
+                    ]
+                }
+                if explicit
+                else {}
+            ),
             "footprint": {
                 "outer": [list(point) for point in list(polygon.exterior.coords)[:-1]]
             },
@@ -496,17 +559,10 @@ class ConstructionResolver:
         section = Authoring.object(component_type.get("section"))
         material = Authoring.text(component_type.get("material"))
         meshes = ConstructionGeometry.sweep(points, section, material)
-        falls: list[JsonValue] = [
-            (a[2] - b[2]) / max(math.dist(a[:2], b[:2]), 0.001)
-            for a, b in zip(points, points[1:])
-        ]
+        falls = DrainageFall.ratios(points)
         minimum = element.get("minFall")
-        if isinstance(minimum, (int, float)) and any(
-            number(fall, "segment fall") < minimum - 1e-9 for fall in falls
-        ):
-            raise ResolutionError(
-                "Drainage path rises or falls less than its specified minimum"
-            )
+        if isinstance(minimum, (int, float)):
+            DrainageFall.check(points, minimum)
         return meshes, {
             "path": [list(point) for point in points],
             "length": sum(math.dist(a, b) for a, b in zip(points, points[1:])),

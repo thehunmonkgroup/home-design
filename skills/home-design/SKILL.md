@@ -61,6 +61,13 @@ home-design build MODEL --output build --web-assets web/public/model
 
 Completion requires both commands to succeed. IFC4 is the CAD output, including for import into FreeCAD.
 
+Use `examples/complete-shell-coordination-house.json` (Complete Shell Coordination
+House) for explicit wall/floor/roof/deck framing, service branches and sealed
+penetrations. Its service-partition anchors coordinate mounted electrical/water
+components, an interior ledge and owned cuts. Its mechanical anchor controls the
+separate insulated air branch. Inspect cavity, generated-member, circuit and
+service schedules alongside the framing/services views after edits.
+
 ## Model collections
 
 `validate` and `build` accept multiple paths or quoted glob patterns, such as
@@ -92,16 +99,171 @@ requests deployment to the intended audience. Read
 
 - Keep X east, Y north, Z up; keep local geometry near the building origin.
 - Distinguish placement constraints from semantic relationships even when both connect the same components.
+- Use host locators for construction points that must follow a wall face/layer,
+  roof plane, slab/footing surface or individual member. Inspect layer indices and
+  roof face IDs before editing. Local offsets position geometry without creating
+  cuts or support relationships; retain explicit connection intent separately.
 - Model doors and windows through an opening plus `voids` and `fills`; derive wall or screen-panel cuts from those relationships.
+- Use `penetration` elements for owned service holes, recesses, notches and bearing
+  seats. Inspect each host and selected layer before cutting; review the actual
+  removed and remaining volumes after the transaction. Cutters extrude along local
+  positive Z, so outward host frames normally need a 180-degree local rotation to
+  cut inward. Author one cut per host and avoid overlapping cut ownership.
+- Add named penetration `limits` for supplied hole/notch dimensions, extent
+  fractions and directional material margins. Use a locator on the cut's own host,
+  selecting the affected member, layer or roof face. Review actual removed extents
+  and margin results after host edits; neighboring cuts remain material boundaries.
+  Directional margins test a continuous sweep, not a radial nearest-edge distance.
+  Preserve the requirement reference and severity without inventing engineering
+  limits or treating a passing geometric check as approval.
 - Use roof surface constraints for walls intended to follow roofs.
 - Use bearing-referenced roofs when overhang edits must preserve plate/ridge geometry. Roof layer thickness is normal to the slope; sample actual undersides and add explicit porch/entry clearance checks.
 - Compose decks and stair landings with slabs, flights with stairs, repeated framing with member arrays, and stepped foundations with coordinated footing/wall segments. Screens and structural guards are separate components; preserve clear stair widths with following handrails.
 - For enclosed porches, use roof-constrained screen tops on horizontal two-point baselines. Check closure at the roof, deck and house, and separation from guards/posts. Host screen doors in panels with explicit screen infill materials and review their swing envelopes against adjacent equipment.
 - Record explicit loads and support paths for ridge/spa/deck systems. Bearing-point and connectivity checks do not calculate capacity or certify structure.
 - Preserve existing/proposed terrain separately. Use `home-design import-survey` to prepare a revision-checked change; review coordinate units/origin before the guarded transaction. Never extrapolate unknown grade.
-- Use one physical cavity layer with concurrent material fractions, not stacked insulation and framing depths. Preserve energy inputs in unit-explicit performance fields and record consultant requirements/references.
+- For aggregate cavities, use one physical layer with concurrent material fractions,
+  not stacked insulation and framing depths. Preserve energy inputs in unit-explicit
+  performance fields and record consultant requirements/references.
+- For individually modeled cavity parts, use an explicit layer with its infill
+  material and part `occupies.regions`; remove aggregate material fractions from
+  that layer. Use host locators for coordinated placement. Review fit mode,
+  ownership conflicts and the final infill/part/void balance after cuts, then
+  inspect the framing or services view.
+- Use `wallFraming` with authored rectangular member types for host-driven plates,
+  stud packs, opening framing, blocking and backing. Inspect generated member keys
+  before overriding or mounting to them; use scoped member host `part` references.
+  Coordinate segment indices and end insets at wall bends/corners. Review actual
+  member and cavity quantities after cuts; framing recipes do not size structure.
+- Use `planarFraming` for boundary-fitted floor/deck framing or a selected roof
+  face. Inspect its layer, face ID and resolved plane before setting directions,
+  grid offsets and blocking stations. Keep roof measurements in the surface
+  plane; review adjacent-face miters, hole rims and generated member quantities.
 - Use profile sweeps for drainage/trim and details for reusable interface instructions. Check drainage fall, connected endpoints and outlet/footing exclusions.
+- Use `memberAssembly` for authored truss chords/webs, ties and bracing networks.
+  Inspect scoped node/member keys, declare intersecting joints with `trimAgainst`,
+  and retain host locators for coordinated endpoints. Review final child solids
+  and connections after cuts. Use `endCuts` for planar stock end treatments and
+  owned penetrations for local bearing seats or notches.
+- Use `curvedMember` for circular structural arcs with explicit `chordTolerance`.
+  Review the resolved error bound, analytic lengths and tessellated material
+  quantities. Curved mounts use analytic axis stations; skin mounts are unsupported.
+- Use `hardware` with reusable local stock/cut recipes for construction connectors.
+  Specify connection participants separately from mounting coordinates, including
+  scoped generated member keys where needed. Inspect the surviving participants
+  and actual hardware volume after cuts. Use `fastenerGroup` with authored counts
+  and either scheduled representation or named detailed placements; scheduled
+  groups contribute type-based material quantities without individual meshes.
+- Place service hangers with a `route` host locator and an analytic `station`.
+  Select `branch` for a fitting trunk or named branch. Review the transported
+  section axes before applying offsets/rotations, retain explicit hardware
+  participants, and use the services discipline for service supports. Stations
+  follow route edits and reject locations beyond a shortened path; support
+  dimensions, spacing and fastening remain authored inputs.
+- Use explicit footing representation and body layer 0 when reinforcement or
+  grout displaces foundation concrete. Author bar/tie paths with bend radii and
+  approximation tolerances, and mesh dimensions with explicit wire spacing and
+  layer separation. Review nominal stock lengths alongside actual net volumes.
+  Place masonry units, grout and mortar as disjoint `masonryPart` solids or use
+  host infill for remaining material; review the final cavity balance after cuts.
 - Use an `attaches` relationship for interfaces such as a deck connection so the canonical graph carries durable connection intent.
+- Use `serviceDevice` for generic fabricated equipment with authored local ports.
+  Specify each port's medium, mating technology, section, outward direction and
+  source/sink/bidirectional flow. Declare internal buses/passages with type
+  `portGroups`; branches require distinct external ports. Use `connectsPorts`
+  relationships and explicit port membership in `serviceSystem` and optional
+  `serviceCircuit` elements. Review connectedness, system separation and exact
+  mating alignment. Unconnected ends need authored open/capped `portStates`;
+  these states do not create termination solids.
+- Use port locators when geometry must follow a device interface. Inspect the
+  resolved port frame and retained `portPlacements` before changing orientations.
+  Semantic connections do not position equipment; geometry references must stay
+  acyclic even when the service network itself forms a loop.
+- Use explicit electrical device roles on `serviceDeviceType` for receptacles,
+  boxes, switches, panels/protection, lighting/detection, communications and
+  grounding/bonding parts. Supply typed `electrical` ratings and purposeful ports.
+  Match `function` on device, route and fitting interfaces; distinguish carrier
+  entries from conductors. Inspect native IFC types, retained ratings and actual
+  mounting/cavity geometry. Author bonds and buses explicitly with port groups.
+- Use typed cable/conduit specifications on route types for stock designations,
+  nominal conductor schedules and authored current/data/fill limits. Keep actual
+  outside dimensions independent of trade sizes; nominal stock schedules do not
+  create extra material. Add a circuit `schedule` with its actual panel output,
+  unique panel number and electrical or communications specification. Include
+  complete route endpoint membership. Inspect unknown rating checks, declared
+  loads and any path bypassing the authored protective device after edits.
+- Use `serviceRoute` for pipe, duct, cable and conduit paths with authored outside
+  dimensions, wall thickness where hollow, bend radius and chord tolerance.
+  Inspect transported `start`/`end` port frames, especially for rectangular routes.
+  Coordinate both ports through explicit service systems and external mates.
+  For cavity routes, displace physical stock with `occupies` and empty the bore
+  with an owned `penetration.geometrySource` referencing the route's `bore`,
+  `envelope` or `clearance` construction volume. Review actual removed volume and
+  final infill balance; construction masks are nonmaterial and do not render.
+- Use typed pipe specifications and occurrence `conditions` for authored stock,
+  pressure and temperature limits. Add `fallCheck` with an explicit direction and
+  minimum drop/run ratio for gravity coordination. Inspect each span after moving
+  endpoints; a net drop does not permit a rising intermediate leg. Keep all ports
+  on a route/fitting within one system and use equipment interfaces between
+  systems. Retain unknown ratings and flow inputs without inferring hydraulics.
+- Use plumbing device roles for valves, manifolds, fixture connections, cleanouts,
+  heaters, pumps, tanks and meters. Supply typed `plumbing` specifications and
+  actual fabricated bodies/ports. Keep separate system interfaces explicit on
+  equipment, including powered interfaces with electrical ratings/functions.
+  Use a pipe `trap` fitting for a rounded return passage; inspect its lowered
+  centerline after placement. The return check does not calculate a water seal.
+- Use `serviceInsulation` with a pipe/duct route or fitting `host`, a reusable
+  material/thickness type and `chordTolerance`. Review its separate stock volume,
+  fitting branches and covered cap ends. Declare cavity ownership and insulation
+  cuts explicitly, retaining the pipe's own bore cut. Refine host and covering
+  tolerances for thin layers; final insulation parts on one host cannot overlap.
+  Size route-mounted supports around the finished cover and include it among
+  connection participants when appropriate; thickness edits do not resize hardware.
+- Add `duct` stock specifications and `ductConditions` to duct routes/fittings
+  when pressure, temperature or airflow inputs are known. Pressure conditions are
+  signed; positive/negative pressure ratings are positive magnitudes. Review
+  `ductRatingChecks` and preserve unchecked airflow performance. Nominal lining
+  and leakage specifications do not create material or inferred calculations.
+- Use mechanical device roles with a typed `mechanical` designation, actual
+  fabrication geometry and explicit air/fluid interfaces. Heat-recovery units
+  require two disjoint air passage groups; specified coil technologies require
+  matching energy interfaces. Keep refrigerant, condensate, power and signal
+  systems separate. Add electrical ratings/functions to powered equipment and
+  author service-access volumes with `clearanceZone`.
+- Use `serviceFitting` for reusable elbows, branched passages, size/shape transitions
+  and physical caps. Inspect generated `start`/`end` and named branch ports before
+  connecting routes. Branch roots must fit their trunk's passage; keep external
+  mating faces exposed. For port-based placement, author the type's starting face
+  at the local origin facing negative Z. Apply the same cavity ownership and
+  construction-volume cuts as routes. Review native IFC fitting and port families,
+  material volume and explicit system membership after coordinated edits.
+- Use `accessory` and `envelopePart` for physical hosted ledges, niches, access
+  panels, membranes, flashing and seals. Supply actual reusable fabrication
+  geometry: extrusions, full revolutions of nonnegative radius/height profiles,
+  and local stock/cut placements. Review projection and final mounting extents.
+  Recessed parts require explicit cavity ownership or owned host penetrations.
+- Use envelope `sleeve` and `protectivePlate` roles with an explicit `interface`
+  construction host and service references. Add the same declaration to service
+  fire, acoustic and weather seals. Keep route-relative mounting separate from
+  these participants; author each passage, stock dimension and host cut. Review
+  surviving scoped host identity, disjoint material and cavity contributions after
+  edits. Interface declarations do not create holes, resize parts or establish
+  rated performance; use authored specifications and barrier probes as needed.
+- Use component host frames for access spaces and cuts that follow a placed
+  part's complete pose. `clearanceZone` checks final physical obstructions,
+  excluding its owner and explicit allowed parts. `barrierCheck` probes an
+  authored interface between envelope pieces or selected host layers; inspect
+  missing participants, connected regions and actual uncovered volume. Treat
+  these as local geometric checks, with authored error/warning severity. Their
+  nonmaterial volumes remain outside material schedules, drawings and shading.
+- Add service `coordinationChecks` with authored interference severity for
+  physical clash review after cuts and cavity composition. Routes/fittings also
+  support clearance checks against their outside envelope plus authored margin.
+  Inspect individual obstacle IDs and measured volumes, then resolve real stock
+  overlaps. Clearance allowances and explicit cover/interface/support connections
+  apply only to installation space; they do not suppress material collisions.
+  Review retained exclusion reasons, use scoped member references when needed,
+  and keep equipment maintenance spaces in `clearanceZone`.
 - Represent spaces explicitly by default. Derive a space from boundary walls when they form one unambiguous closed loop around its seed.
 - State analysis limits explicitly: coordination geometry and authored requirements do not replace structural engineering, hydraulic analysis, annual energy/certification modeling, code review or permit/fabrication drawings. Preserve professional inputs without claiming independent verification.
 

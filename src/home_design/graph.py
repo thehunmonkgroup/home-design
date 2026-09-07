@@ -102,22 +102,28 @@ class ModelIndex:
         :returns: Canonically ordered cycles without duplicates.
         """
         graph: dict[str, set[str]] = defaultdict(set)
-        geometry_paths = (
-            "/base",
-            "/top",
-            "/bottom",
-            "/datum",
-            "/path",
-            "/footprint",
-            "/geometry",
-            "/axis",
-            "/follow",
-            "/target",
-            "/location",
-        )
+        geometry_fields = {
+            "base",
+            "top",
+            "bottom",
+            "datum",
+            "path",
+            "footprint",
+            "geometry",
+            "geometrySource",
+            "axis",
+            "follow",
+            "target",
+            "location",
+            "host",
+            "placement",
+            "nodes",
+            "port",
+        }
         for reference in self.references:
-            if reference.registry in {"elements", "anchors"} and any(
-                marker in reference.path for marker in geometry_paths
+            if reference.registry in {"elements", "anchors"} and (
+                reference.path.startswith("/anchors/")
+                or set(reference.path.split("/")[3:]) & geometry_fields
             ):
                 graph[reference.owner_id].add(reference.target_id)
         cycles: set[tuple[str, ...]] = set()
@@ -261,6 +267,18 @@ class ModelIndex:
 
     def _type_references(self) -> Iterable[Reference]:
         for type_id, component_type in self.registries["types"].items():
+            for field in (
+                "memberType",
+                "rimType",
+                "studType",
+                "plateType",
+                "headerType",
+                "sillType",
+                "blockingType",
+            ):
+                yield from self._field_reference(
+                    type_id, component_type, field, "types", "types", ("memberType",)
+                )
             layers = component_type.get("layers", [])
             if isinstance(layers, list):
                 for index, layer in enumerate(layers):
@@ -303,6 +321,12 @@ class ModelIndex:
 
     def _element_references(self) -> Iterable[Reference]:
         expected_type = {
+            "serviceDevice": ("serviceDeviceType",),
+            "serviceRoute": ("serviceRouteType",),
+            "serviceFitting": ("serviceFittingType",),
+            "serviceInsulation": ("serviceInsulationType",),
+            "planarFraming": ("planarFramingType",),
+            "wallFraming": ("wallFramingType",),
             "wall": ("wallType",),
             "slab": ("slabType",),
             "roof": ("roofType",),
@@ -310,6 +334,14 @@ class ModelIndex:
             "window": ("windowType",),
             "space": ("spaceType",),
             "member": ("memberType",),
+            "curvedMember": ("memberType",),
+            "hardware": ("hardwareType",),
+            "masonryPart": ("masonryPartType",),
+            "accessory": ("accessoryType",),
+            "envelopePart": ("envelopePartType",),
+            "reinforcingBar": ("reinforcingBarType",),
+            "reinforcingMesh": ("reinforcingMeshType",),
+            "fastenerGroup": ("fastenerType",),
             "framing": ("memberType",),
             "footing": ("footingType",),
             "stair": ("stairType",),
@@ -320,6 +352,79 @@ class ModelIndex:
         }
         for element_id, element in self.registries["elements"].items():
             kind = element.get("kind")
+            if kind == "serviceCircuit":
+                yield from self._field_reference(
+                    element_id,
+                    element,
+                    "system",
+                    "elements",
+                    "elements",
+                    ("serviceSystem",),
+                )
+            if kind == "clearanceZone":
+                yield from self._field_reference(
+                    element_id, element, "owner", "elements", "elements"
+                )
+            if kind == "planarFraming":
+                yield from self._field_reference(
+                    element_id,
+                    element,
+                    "host",
+                    "elements",
+                    "elements",
+                    ("slab", "roof"),
+                )
+            if kind == "serviceInsulation":
+                yield from self._field_reference(
+                    element_id,
+                    element,
+                    "host",
+                    "elements",
+                    "elements",
+                    ("serviceRoute", "serviceFitting"),
+                )
+            if kind == "wallFraming":
+                yield from self._field_reference(
+                    element_id, element, "host", "elements", "elements", ("wall",)
+                )
+            if kind == "penetration":
+                yield from self._field_reference(
+                    element_id,
+                    element,
+                    "host",
+                    "elements",
+                    "elements",
+                    (
+                        "wall",
+                        "slab",
+                        "roof",
+                        "footing",
+                        "member",
+                        "framing",
+                        "wallFraming",
+                        "planarFraming",
+                        "memberAssembly",
+                        "curvedMember",
+                        "hardware",
+                        "masonryPart",
+                        "accessory",
+                        "envelopePart",
+                        "serviceDevice",
+                        "serviceRoute",
+                        "serviceFitting",
+                        "serviceInsulation",
+                        "reinforcingBar",
+                        "reinforcingMesh",
+                        "panel",
+                    ),
+                )
+                yield from self._field_reference(
+                    element_id,
+                    element,
+                    "owner",
+                    "elements",
+                    "elements",
+                )
             yield from self._field_reference(
                 element_id, element, "storey", "elements", "levels", ("storey",)
             )
@@ -379,6 +484,11 @@ class ModelIndex:
         for relationship_id, relationship in self.registries["relationships"].items():
             kind = str(relationship.get("kind", ""))
             base_path = f"/relationships/{relationship_id}"
+            if kind == "connectsPorts":
+                for field in ("a", "b"):
+                    yield from self._value_references(
+                        relationship_id, relationship.get(field), f"{base_path}/{field}"
+                    )
             for field, expected in roles.get(kind, ()):
                 target = relationship.get(field)
                 if isinstance(target, str):
@@ -435,10 +545,63 @@ class ModelIndex:
             child_path = f"{path}/{field}"
             if field == "anchor" and isinstance(child, str):
                 yield Reference(owner_id, child, child_path, "anchors")
+            elif field in {"memberType", "headerType", "sillType"} and isinstance(
+                child, str
+            ):
+                yield Reference(owner_id, child, child_path, "types", ("memberType",))
             elif field == "level" and isinstance(child, str):
                 yield Reference(owner_id, child, child_path, "levels")
             elif field == "element" and isinstance(child, str):
-                yield Reference(owner_id, child, child_path, "elements")
+                expected = ()
+                if "/interface/services/" in path:
+                    expected = (
+                        "serviceDevice",
+                        "serviceRoute",
+                        "serviceFitting",
+                        "serviceInsulation",
+                    )
+                if path.endswith("/host"):
+                    expected = {
+                        "component": (
+                            "hardware",
+                            "fastenerGroup",
+                            "masonryPart",
+                            "reinforcingMesh",
+                            "accessory",
+                            "envelopePart",
+                            "serviceDevice",
+                            "serviceRoute",
+                            "serviceFitting",
+                            "serviceInsulation",
+                            "curvedMember",
+                            "memberAssembly",
+                            "clearanceZone",
+                            "barrierCheck",
+                        ),
+                        "wall": ("wall",),
+                        "route": ("serviceRoute", "serviceFitting"),
+                        "surface": ("slab", "roof", "footing"),
+                        "member": (
+                            "member",
+                            "wallFraming",
+                            "planarFraming",
+                            "memberAssembly",
+                            "curvedMember",
+                        ),
+                    }.get(str(value.get("kind")), ())
+                yield Reference(owner_id, child, child_path, "elements", expected)
+            elif (
+                field == "host"
+                and isinstance(child, str)
+                and "/occupies/regions/" in path
+            ):
+                yield Reference(
+                    owner_id,
+                    child,
+                    child_path,
+                    "elements",
+                    ("wall", "slab", "roof", "footing"),
+                )
             else:
                 yield from self._value_references(owner_id, child, child_path)
 

@@ -8,6 +8,9 @@ from home_design.graph import ModelIndex
 from home_design.json_types import JsonObject
 from home_design.loader import ModelLoader
 from home_design.resolver import ModelResolver
+from home_design.mounted_parts import CoordinationVolumes
+from home_design.service_coordination import ServiceCoordination
+from home_design.cut_limits import CutLimits
 from home_design.coordination import CoordinationValidator
 from home_design.validation.semantic import SemanticValidator
 from home_design.validation.topology import TopologyValidator
@@ -48,6 +51,9 @@ class ModelValidator:
                 if not any(item.severity == "error" for item in diagnostics):
                     resolver = ModelResolver(model)
                     resolved = resolver.resolve()
+                    diagnostics.extend(CoordinationVolumes.diagnostics(resolved))
+                    diagnostics.extend(ServiceCoordination.diagnostics(resolved))
+                    diagnostics.extend(CutLimits.diagnostics(resolved))
                     diagnostics.extend(self._clearances(resolver))
                     diagnostics.extend(
                         CoordinationValidator(model, resolved).diagnostics()

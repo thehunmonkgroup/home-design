@@ -4,6 +4,25 @@ export type ElementKind =
   | 'assembly'
   | 'member'
   | 'framing'
+  | 'wallFraming'
+  | 'planarFraming'
+  | 'memberAssembly'
+  | 'curvedMember'
+  | 'hardware'
+  | 'masonryPart'
+  | 'accessory'
+  | 'envelopePart'
+  | 'clearanceZone'
+  | 'barrierCheck'
+  | 'serviceDevice'
+  | 'serviceRoute'
+  | 'serviceFitting'
+  | 'serviceInsulation'
+  | 'serviceSystem'
+  | 'serviceCircuit'
+  | 'reinforcingBar'
+  | 'reinforcingMesh'
+  | 'fastenerGroup'
   | 'footing'
   | 'stair'
   | 'railing'
@@ -14,6 +33,7 @@ export type ElementKind =
   | 'detail'
   | 'door'
   | 'opening'
+  | 'penetration'
   | 'roof'
   | 'slab'
   | 'space'
@@ -96,6 +116,25 @@ const KIND_LABELS: Record<ElementKind, string> = {
   assembly: 'Assemblies',
   member: 'Structural members',
   framing: 'Framing',
+  wallFraming: 'Wall framing',
+  planarFraming: 'Floor and roof framing',
+  memberAssembly: 'Trusses and member assemblies',
+  curvedMember: 'Curved structural members',
+  hardware: 'Connection hardware',
+  masonryPart: 'Masonry and grout',
+  accessory: 'Interior accessories',
+  envelopePart: 'Envelope interfaces',
+  clearanceZone: 'Access and clearance zones',
+  barrierCheck: 'Barrier continuity checks',
+  serviceDevice: 'Service devices',
+  serviceRoute: 'Service routes',
+  serviceFitting: 'Service fittings',
+  serviceInsulation: 'Service insulation',
+  serviceSystem: 'Service systems',
+  serviceCircuit: 'Service circuits',
+  reinforcingBar: 'Reinforcing bars and ties',
+  reinforcingMesh: 'Reinforcement mesh',
+  fastenerGroup: 'Fastener groups',
   footing: 'Footings',
   stair: 'Stairs',
   railing: 'Guards & handrails',
@@ -106,6 +145,7 @@ const KIND_LABELS: Record<ElementKind, string> = {
   detail: 'Interface details',
   door: 'Doors',
   opening: 'Openings',
+  penetration: 'Penetrations & recesses',
   roof: 'Roofs',
   slab: 'Slabs & decks',
   space: 'Spaces',
@@ -121,9 +161,29 @@ const KIND_ORDER: ElementKind[] = [
   'window',
   'space',
   'opening',
+  'penetration',
   'assembly',
   'member',
   'framing',
+  'wallFraming',
+  'planarFraming',
+  'memberAssembly',
+  'curvedMember',
+  'hardware',
+  'masonryPart',
+  'accessory',
+  'envelopePart',
+  'clearanceZone',
+  'barrierCheck',
+  'serviceDevice',
+  'serviceRoute',
+  'serviceFitting',
+  'serviceInsulation',
+  'serviceSystem',
+  'serviceCircuit',
+  'reinforcingBar',
+  'reinforcingMesh',
+  'fastenerGroup',
   'footing',
   'stair',
   'railing',
@@ -186,6 +246,22 @@ export function isolateElements(manifest: RenderManifest, elementIds: Iterable<s
 
 export function canToggleVisibility(element: ManifestElement): boolean {
   return element.nodes.length > 0;
+}
+
+export type ReviewPreset = 'envelope' | 'framing' | 'services';
+
+export function reviewElementIds(manifest: RenderManifest, preset: ReviewPreset): string[] {
+  return Object.entries(manifest.elements).filter(([, element]) => {
+    if (!canToggleVisibility(element) || element.kind === 'space') return false;
+    let discipline = element.data.discipline;
+    if (typeof discipline !== 'string') {
+      if (['member', 'framing', 'wallFraming', 'planarFraming', 'memberAssembly', 'curvedMember', 'hardware', 'fastenerGroup', 'masonryPart', 'reinforcingBar', 'reinforcingMesh', 'footing', 'stair'].includes(element.kind)) discipline = 'framing';
+      else if (element.kind === 'terrain') discipline = 'site';
+      else if (element.kind === 'sweep' && ['gutter', 'downspout', 'drain', 'interceptor'].includes(String(element.data.role))) discipline = 'services';
+      else discipline = 'envelope';
+    }
+    return discipline === preset || (preset === 'envelope' && discipline === 'accessories');
+  }).map(([id]) => id);
 }
 
 export function defaultHiddenElementIds(manifest: RenderManifest): Set<string> {

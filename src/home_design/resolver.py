@@ -38,6 +38,27 @@ from home_design.locators import LocatorResolver, point_at_station
 from home_design.resolved import MeshData, ResolvedElement, ResolvedModel, Vec2, Vec3
 from home_design.roof_controls import RoofControls
 from home_design.requirements import RequirementEvaluator
+from home_design.placement import HostPlacement
+from home_design.penetrations import Penetrations
+from home_design.cavities import CavityComposition
+from home_design.review import ReviewDiscipline
+from home_design.wall_framing import FramedOpening, WallFraming
+from home_design.member_assemblies import MemberAssemblies
+from home_design.planar_framing import PlanarFraming
+from home_design.assembly_geometry import AssemblyGeometry
+from home_design.curved_members import CurvedMember
+from home_design.hardware import HardwareComponents
+from home_design.masonry import MasonryParts
+from home_design.reinforcement import Reinforcement
+from home_design.mounted_parts import MountedParts, CoordinationVolumes
+from home_design.service_interfaces import ServiceInterfaces
+from home_design.service_coordination import ServiceCoordination
+from home_design.services import ServiceComponents, ServiceNetworks
+from home_design.circuit_schedules import CircuitSchedules
+from home_design.service_routes import ServiceRoutes
+from home_design.service_fittings import ServiceFittings
+from home_design.service_insulation import ServiceInsulation
+from home_design.service_ports import ServicePorts
 
 
 @dataclass(frozen=True, slots=True)
@@ -84,6 +105,22 @@ class ModelResolver:
         self._prepare_openings()
         for element_id in self.elements:
             self.resolve_component(element_id)
+        resolved_elements = dict(self._resolved)
+        cavity_regions = CavityComposition.apply(resolved_elements)
+        Penetrations.apply(resolved_elements)
+        CavityComposition.refresh(resolved_elements, cavity_regions)
+        ServiceRoutes.refresh(resolved_elements)
+        ServiceInsulation.refresh(resolved_elements)
+        MemberAssemblies.refresh(resolved_elements)
+        HardwareComponents.participants(resolved_elements)
+        MountedParts.refresh(resolved_elements)
+        ServiceInterfaces.refresh(resolved_elements)
+        ServiceCoordination.refresh(resolved_elements)
+        CoordinationVolumes.access(resolved_elements)
+        CoordinationVolumes.barriers(resolved_elements)
+        networks = ServiceNetworks(resolved_elements, self._object("relationships"))
+        networks.resolve()
+        CircuitSchedules(resolved_elements, networks.adjacency).resolve()
         result = ResolvedModel(
             model_version=str(self.model.get("modelVersion")),
             source_revision=int(number(self.model.get("revision", 0), "revision")),
@@ -92,7 +129,9 @@ class ModelResolver:
             levels=self._object("levels"),
             materials=self._object("materials"),
             types=self._object("types"),
-            elements=tuple(self._resolved[element_id] for element_id in self.elements),
+            elements=tuple(
+                resolved_elements[element_id] for element_id in self.elements
+            ),
             relationships=self._object("relationships"),
             requirements=tuple(Authoring.array(self.model.get("requirements", []))),
             solar_studies=tuple(Authoring.array(self.model.get("solarStudies", []))),
@@ -130,6 +169,17 @@ class ModelResolver:
         self, resolved: ResolvedElement, source: JsonObject
     ) -> ResolvedElement:
         data = dict(resolved.data)
+        data["discipline"] = ReviewDiscipline.classify(source)
+        if "occupies" in source:
+            data["occupies"] = source["occupies"]
+        if "coordinationChecks" in source:
+            data["coordinationChecks"] = source["coordinationChecks"]
+        host_placements = HostPlacement.references(source)
+        if host_placements:
+            data["hostPlacements"] = host_placements
+        port_placements = ServicePorts.references(source)
+        if port_placements:
+            data["portPlacements"] = port_placements
         component_type = self.types.get(str(source.get("type")), {})
         for field in ("specifications", "performance", "properties"):
             inherited = component_type.get(field, {})
@@ -161,6 +211,52 @@ class ModelResolver:
 
     def _resolve_element(self, element_id: str, element: JsonObject) -> ResolvedElement:
         kind = str(element.get("kind"))
+        mounted_handlers = {
+            **dict.fromkeys(ServiceComponents.KINDS, ServiceComponents.resolve),
+            **dict.fromkeys(ServiceRoutes.KINDS, ServiceRoutes.resolve),
+            **dict.fromkeys(ServiceFittings.KINDS, ServiceFittings.resolve),
+            **dict.fromkeys(ServiceInsulation.KINDS, ServiceInsulation.resolve),
+            **dict.fromkeys(MountedParts.KINDS, MountedParts.resolve),
+            **dict.fromkeys(CoordinationVolumes.KINDS, CoordinationVolumes.resolve),
+        }
+        if mounted_handler := mounted_handlers.get(kind):
+            return mounted_handler(self.construction, element_id, element)
+        if kind in Reinforcement.KINDS:
+            return Reinforcement.resolve(self.construction, element_id, element)
+        if kind == "masonryPart":
+            return MasonryParts.resolve(self.construction, element_id, element)
+        if kind in HardwareComponents.KINDS:
+            return HardwareComponents.resolve(self.construction, element_id, element)
+        if kind == "curvedMember":
+            return CurvedMember.resolve(self.construction, element_id, element)
+        if kind == "memberAssembly":
+            return AssemblyGeometry(self.construction, element).resolve(element_id)
+        if kind == "planarFraming":
+            return PlanarFraming(
+                element,
+                self.resolve_component(Authoring.text(element["host"])),
+                self.types,
+            ).resolve(element_id)
+        if kind == "wallFraming":
+            host_id = Authoring.text(element["host"])
+            return WallFraming(
+                element,
+                self.resolve_component(host_id),
+                self.types,
+                [
+                    FramedOpening(
+                        item.opening_id,
+                        item.start_station,
+                        item.start_station + item.width,
+                        item.bottom,
+                        item.bottom + item.height,
+                    )
+                    for item in self.openings.values()
+                    if item.host_id == host_id
+                ],
+            ).resolve(element_id)
+        if kind == "penetration":
+            return Penetrations(self.construction).resolve(element_id, element)
         if kind == "panel" and (
             "top" in element
             or any(opening.host_id == element_id for opening in self.openings.values())
@@ -267,6 +363,10 @@ class ModelResolver:
                 "typeId": element.get("type"),
                 "thickness": thickness,
                 "faceIds": face_id_values,
+                "planes": [
+                    {"id": face_id, "boundary": [list(point) for point in boundary]}
+                    for face_id, boundary in zip(face_ids, boundaries)
+                ],
                 "layers": LayerAssembly.metadata(component_type),
                 "form": (
                     geometry.get("form")

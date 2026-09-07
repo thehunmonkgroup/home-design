@@ -75,9 +75,28 @@ def test_specs_solar_drawings_and_material_layers_survive_complete_build(
     ModelLoader.write(construction_model, source)
     result = BuildService().build(source, tmp_path / "build", tmp_path / "web")
     ifc = ifcopenshell.open(result.ifc_model)
-    assert len(ifc.by_type("IfcBeam")) == 11
+    assert (
+        len(
+            [
+                item
+                for item in ifc.by_type("IfcBeam")
+                if ifcopenshell.util.element.get_predefined_type(item) == "BEAM"
+            ]
+        )
+        == 11
+    )
     assert len(ifc.by_type("IfcColumn")) == 23
-    assert len(ifc.by_type("IfcMember")) == 33
+    assert (
+        len(ifc.by_type("IfcMember"))
+        + len(
+            [
+                item
+                for item in ifc.by_type("IfcBeam")
+                if ifcopenshell.util.element.get_predefined_type(item) == "JOIST"
+            ]
+        )
+        == 33
+    )
     assert any(layer.LayerThickness == 140 for layer in ifc.by_type("IfcMaterialLayer"))
     assert any(
         properties.Name == "Pset_HomeDesignComposition"

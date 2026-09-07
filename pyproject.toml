@@ -12,8 +12,9 @@ dependencies = [
   "ifcopenshell>=0.8.3,<0.9",
   "jsonschema>=4.23,<5",
   "numpy>=2.1,<3",
-  "shapely>=2.0,<3",
+  "shapely>=2.1,<3",
   "trimesh>=4.5,<5",
+  "manifold3d>=3.5.2,<4",
 ]
 
 [project.optional-dependencies]

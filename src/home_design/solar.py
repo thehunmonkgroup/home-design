@@ -130,7 +130,17 @@ class SolarAnalysis:
         self.model: ResolvedModel = model
         triangles: list[tuple[Vec3, Vec3, Vec3]] = []
         for element in model.elements:
-            if element.kind in {"space", "opening", "window", "door", "load", "detail"}:
+            if element.kind in {
+                "space",
+                "opening",
+                "penetration",
+                "clearanceZone",
+                "barrierCheck",
+                "window",
+                "door",
+                "load",
+                "detail",
+            }:
                 continue
             for mesh in element.meshes:
                 material = model.materials.get(mesh.material_id or "", {})

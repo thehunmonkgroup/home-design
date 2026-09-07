@@ -11,6 +11,7 @@ from home_design.construction import Authoring, ConstructionGeometry
 from home_design.geometry import number, vector2
 from home_design.json_types import JsonObject, JsonValue
 from home_design.layers import LayerAssembly
+from home_design.member_assemblies import MemberAssemblies
 from home_design.resolved import MeshData, ResolvedElement, ResolvedModel
 
 
@@ -58,9 +59,27 @@ class ModelReports:
             data = element.data
             volume = (
                 0.0
-                if element.kind in {"terrain", "space", "opening"}
+                if element.kind
+                in {
+                    "terrain",
+                    "space",
+                    "opening",
+                    "penetration",
+                    "clearanceZone",
+                    "barrierCheck",
+                }
                 else sum(self.mesh_volume(mesh) for mesh in element.meshes)
             )
+            if element.kind == "fastenerGroup":
+                scheduled_volume = number(
+                    data.get("scheduledVolumeMm3", 0), "scheduled fastener volume"
+                )
+                volume += scheduled_volume
+                if scheduled_volume:
+                    material_id = Authoring.text(data["materialId"])
+                    material_volumes[material_id] = (
+                        material_volumes.get(material_id, 0) + scheduled_volume
+                    )
             row: JsonObject = {
                 "id": element.element_id,
                 "name": element.name,
@@ -95,7 +114,14 @@ class ModelReports:
                         material_volumes[layer.material] = (
                             material_volumes.get(layer.material, 0) + layer_volume
                         )
-            elif element.kind not in {"terrain", "space", "opening"}:
+            elif element.kind not in {
+                "terrain",
+                "space",
+                "opening",
+                "penetration",
+                "clearanceZone",
+                "barrierCheck",
+            }:
                 for mesh in element.meshes:
                     if mesh.material_id is not None:
                         material_volumes[mesh.material_id] = material_volumes.get(
@@ -112,8 +138,29 @@ class ModelReports:
         categories: JsonObject = {}
         for name, kinds in {
             "openings": {"door", "window"},
-            "framing": {"member", "framing"},
+            "penetrations": {"penetration"},
+            "framing": {
+                "member",
+                "framing",
+                "wallFraming",
+                "planarFraming",
+                "memberAssembly",
+                "curvedMember",
+            },
             "foundations": {"footing"},
+            "hardware": {"hardware"},
+            "masonry": {"masonryPart"},
+            "accessories": {"accessory"},
+            "envelopeParts": {"envelopePart"},
+            "coordinationVolumes": {"clearanceZone", "barrierCheck"},
+            "serviceDevices": {"serviceDevice"},
+            "serviceRoutes": {"serviceRoute"},
+            "serviceFittings": {"serviceFitting"},
+            "serviceInsulation": {"serviceInsulation"},
+            "serviceSystems": {"serviceSystem"},
+            "serviceCircuits": {"serviceCircuit"},
+            "reinforcement": {"reinforcingBar", "reinforcingMesh"},
+            "fasteners": {"fastenerGroup"},
             "stairsAndGuards": {"stair", "railing", "panel"},
             "drainage": {"sweep"},
             "loads": {"load"},
@@ -130,9 +177,25 @@ class ModelReports:
             "units": {"length": "mm", "area": "m2", "volume": "m3", "force": "N"},
             "components": rows,
             "materials": materials,
+            "cavities": [
+                {"elementId": element.element_id, **Authoring.object(cavity)}
+                for element in self.model.elements
+                for cavity in Authoring.array(element.data.get("cavities", []))
+            ],
+            "generatedMembers": [
+                {"assemblyId": element.element_id, **Authoring.object(member)}
+                for element in self.model.elements
+                if element.kind in MemberAssemblies.KINDS
+                for member in Authoring.array(element.data["members"])
+            ],
             **categories,
+            "circuitSchedules": [
+                element.data["circuitSchedule"]
+                for element in self.model.elements
+                if "circuitSchedule" in element.data
+            ],
             "requirements": list(self.model.requirements),
-            "quantityBasis": "Modeled net geometry; no waste factors, fasteners or engineering capacity inferred",
+            "quantityBasis": "Modeled net geometry plus explicitly scheduled fastener type volumes; no waste factors, fasteners or engineering capacity inferred",
         }
 
     def envelope(self) -> JsonObject:
@@ -175,6 +238,8 @@ class ModelReports:
                     ],
                 )
                 area = polygon.area
+            if isinstance(data.get("netExteriorAreaMm2"), (int, float)):
+                area = number(data["netExteriorAreaMm2"], "net exterior area")
             specification = Authoring.object(data.get("specifications", {}))
             surfaces.append(
                 {
@@ -196,7 +261,16 @@ class ModelReports:
                 "meshes": [mesh.to_dict() for mesh in element.meshes],
             }
             for element in self.model.elements
-            if element.kind not in {"space", "opening", "load", "detail"}
+            if element.kind
+            not in {
+                "space",
+                "opening",
+                "penetration",
+                "load",
+                "detail",
+                "clearanceZone",
+                "barrierCheck",
+            }
         ]
         return {
             "format": "home-design-envelope-0.1",

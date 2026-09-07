@@ -10,6 +10,25 @@ The editable source is an IFC-aligned JSON graph. Three.js meshes and IFC entiti
 
 - Canonical components for levels, anchors, materials, reusable types, walls, slabs, decks, roofs, openings, doors, windows, spaces, and assemblies.
 - Parametric stairs, stringers, guards, handrails, screen panels, structural members, repeated framing, footings, terrain, profile sweeps, loads, and interface details.
+- Host-relative face/layer coordinates and owned penetrations, recesses, notches and bearing seats with actual cut solids and net material quantities.
+- Wall framing recipes for plates, opening packages, roof-fitted studs, corner packs, blocking and backing, with stable member references and explicit cavity quantities.
+- Floor, deck and roof-face framing layouts that fit polygonal boundaries and holes, with individual perimeter boards, blocking and adjacent-roof miters.
+- Authored trusses and member networks with named joints, explicit trimming, beveled end cuts, and circular structural members with controlled tessellation.
+- Reusable fabricated connection hardware and scheduled or individually placed fastener groups, with material quantities and native IFC connection participants.
+- Analytic route/fitting stations for hangers and other placed parts, retaining exact bend positions and section orientation through service edits.
+- Reinforcing bars, rounded ties, wire meshes, masonry units, grout and mortar, with explicit foundation/cavity material ownership and native IFC parts.
+- Hosted ledges, niches, access panels and envelope interfaces, with extruded/revolved fabrication shapes, physical mounting fit and native IFC parts/coverings.
+- Authored access volumes and local barrier continuity probes, with obstruction/gap diagnostics and nonmaterial coordination geometry.
+- Generic fabricated service devices with oriented mating ports, connected systems/circuits, port-based placements and native IFC network relationships.
+- Electrical and communications device roles with typed ratings, power/signal/grounding/containment interfaces and concrete native IFC device types.
+- Typed cable/conduit stock and power/communications circuit schedules with panel identities, authored rating checks and declared protection-path validation.
+- Typed pipe stock, authored operating-condition checks and directional gravity-fall validation, with rigid/flexible native IFC pipe classifications.
+- Plumbing device roles for valves, manifolds, fixture connections, cleanouts, heaters, pumps, tanks and meters, plus rounded trap passages and native IFC equipment types.
+- Separate physical pipe/duct insulation following routes and fittings, with cavity ownership, local cuts, material quantities and native IFC coverings.
+- Circular/rectangular pipe, duct, cable and conduit routes with tangent bends, hollow passages, construction clearances and route-shaped owned host cuts.
+- Typed duct stock and signed pressure/temperature checks, with authored airflow inputs and native rigid/flexible IFC classifications.
+- Typed mechanical equipment, including dampers, air terminals, fans, heat recovery and coils, with separate air/fluid/power interfaces and native IFC products.
+- Reusable service elbows, branched fittings, size/shape transitions and physical caps, with connected passages, generated ports and native IFC fitting families.
 - Bearing-referenced roofs, independent edge overhangs, dependent roof elevations, true normal-thickness undersides, and explicit clearance checks.
 - Separate finish layers and concurrent framing/insulation cavities, detailed sliding/swing doors, typed product performance, and checked design requirements.
 - Explicit `voids`, `fills`, `joins`, `supports`, `attaches`, `drainsTo`, `bounds`, and `aggregates` relationships.
@@ -53,6 +72,13 @@ project-specific engineering before construction.
 The viewer guide includes a
 [cutaway walkthrough](docs/guides/viewer-guide.md#cutaway-views-of-hillside-deck-house)
 for its two-storey shell.
+
+[Complete Shell Coordination House](examples/complete-shell-coordination-house.json)
+combines explicit wall, floor, roof and irregular deck framing with foundation
+supports, connected electrical and plumbing branches, an insulated air branch,
+an interior ledge and a sleeved, sealed service penetration. Its interior
+partition controls the mounted circuits, water supply, recess and interface parts.
+Use the framing and services views to inspect the concealed components.
 
 ## The conversational workflow
 
@@ -125,7 +151,7 @@ Every build artifact is a reproducible representation of the canonical home JSON
 | `render-manifest.json` | Stable element-to-scene-node mapping and inspector data |
 | `diagnostics.json` | Machine-readable validation result |
 | `build-metadata.json` | Source revision, SHA-256, and artifact inventory |
-| `schedules.json` | Components, openings, framing, foundations, materials, loads, and interface details |
+| `schedules.json` | Components, cavities, framing, hardware, reinforcement, service systems/circuits, materials, loads and interface details |
 | `envelope.json` | Areas, orientations, performance, boundary assignments, shading meshes, and solar results |
 | `drawings.svg` | Orthographic elevations and section cuts with dimensions |
 

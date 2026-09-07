@@ -47,14 +47,24 @@ class GltfExporter:
                     "kind": element.kind,
                     "role": mesh_data.role,
                 }
-                scene.add_geometry(mesh, node_name=node_name, geom_name=node_name)
+                transform = np.eye(4, dtype=np.float64)
+                origin = np.asarray(mesh.bounds, dtype=np.float64).mean(axis=0)
+                mesh.apply_translation(-origin)
+                transform[:3, 3] = origin
+                scene.add_geometry(
+                    mesh,
+                    node_name=node_name,
+                    geom_name=node_name,
+                    transform=transform,
+                )
                 node_names.append(node_name)
             element_entries[element.element_id] = {
                 "kind": element.kind,
                 "name": element.name,
                 "storeyId": element.storey_id,
                 "nodes": node_names,
-                "defaultVisible": element.kind != "space",
+                "defaultVisible": element.kind
+                not in {"space", "clearanceZone", "barrierCheck"},
                 "data": element.data,
             }
         manifest: JsonObject = {
@@ -107,7 +117,15 @@ class GltfExporter:
             vertices=vertices, faces=faces, process=False, validate=False
         )
         material = materials.get(mesh_data.material_id or "")
-        if mesh_data.role == "space":
+        if mesh_data.role == "coordination":
+            material = PBRMaterial(
+                name="Coordination volume",
+                baseColorFactor=[155, 95, 230, 45],
+                roughnessFactor=1.0,
+                alphaMode="BLEND",
+                doubleSided=True,
+            )
+        elif mesh_data.role == "space":
             material = PBRMaterial(
                 name="Space", baseColorFactor=[90, 170, 210, 35], roughnessFactor=1.0
             )

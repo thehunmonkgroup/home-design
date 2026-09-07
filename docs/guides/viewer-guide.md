@@ -67,6 +67,12 @@ and drainage. Select a component in the model or in the list to inspect its
 human-readable name, canonical ID, resolved dimensions and design properties in
 the Details panel, including any component-specific requirements.
 
+Service parts with authored coordination checks expose `serviceCoordination`
+in their details. Review each obstructing component/member ID, measured overlap
+volume and clearance-exclusion reason alongside the physical installation.
+Sleeves, protective plates and seals with service-interface declarations appear
+in the services review discipline and retain their construction and service IDs.
+
 Use **Filter by name or ID** below the Components heading to find components with
 case-insensitive partial matches. Sections remain visible when they contain a
 match, with counts showing the matching rows. Clear the filter to restore the
@@ -90,6 +96,21 @@ the chosen component or group. Turn it off to hide or show individual members
 while keeping the isolated view. Changing the checkbox does not change visibility,
 and **Show all** does not change the checkbox. Components with multiple rendered
 parts retain all their parts when isolated.
+
+The **Envelope**, **Framing** and **Services** buttons isolate construction groups.
+Use **Framing** to expose individually modeled members behind wall and floor
+finishes, and **Services** to inspect routed components. A button is unavailable
+when the model has no visible geometry in that group. **Show all** restores the
+complete model; per-component eye controls remain available after a preset.
+The envelope view also includes accessories. Site geometry and space volumes are
+excluded from these presets. A framing view shows only framing that is physically
+modeled; aggregate cavity percentages do not generate members.
+
+Access volumes and barrier probes start hidden and appear as translucent purple
+geometry when enabled in the component tree. Their properties show access
+obstructions or local barrier gaps and connectivity. They do not contribute
+material or solar shading. Hosted accessories appear with the envelope review
+group; inspect their mounting range and net volume after a recess or cavity edit.
 
 ### Cutaway views of Hillside Deck House
 

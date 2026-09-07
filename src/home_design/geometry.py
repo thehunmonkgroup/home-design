@@ -6,10 +6,10 @@ import math
 from collections.abc import Sequence
 from dataclasses import dataclass
 
-from shapely import BufferJoinStyle
+from shapely import BufferJoinStyle, constrained_delaunay_triangles
 from shapely.geometry import LineString, Polygon
 from shapely.geometry.polygon import orient
-from shapely.ops import split, triangulate
+from shapely.ops import split
 
 from home_design.constants import GEOMETRY_TOLERANCE_MM
 from home_design.errors import ResolutionError
@@ -130,6 +130,12 @@ def primary_material(component_type: JsonObject) -> str | None:
     return selected if isinstance(selected, str) else None
 
 
+def triangulate_polygon(polygon: Polygon) -> tuple[Polygon, ...]:
+    """Triangulate inside polygon boundaries while preserving every boundary edge."""
+    triangles = constrained_delaunay_triangles(polygon)
+    return tuple(part for part in triangles.geoms if isinstance(part, Polygon))
+
+
 def extrude_polygon(
     polygon: Polygon, bottom_z: float, top_z: float, material_id: str | None, role: str
 ) -> MeshData:
@@ -161,10 +167,7 @@ def extrude_polygon(
             vertices.append(point)
         return index_by_vertex[key]
 
-    for triangle in triangulate(polygon):
-        representative = triangle.representative_point()
-        if not polygon.covers(representative):
-            continue
+    for triangle in triangulate_polygon(polygon):
         coordinates = _counterclockwise_exterior(triangle)
         bottom = tuple(add_vertex((x, y, bottom_z)) for x, y in coordinates)
         top = tuple(add_vertex((x, y, top_z)) for x, y in coordinates)
@@ -198,7 +201,7 @@ def extrude_planar_face(
     """
     if len(boundary) < 3:
         raise ResolutionError("A planar face requires at least three vertices")
-    normal = _polygon_normal(boundary)
+    normal = polygon_normal(boundary)
     if normal[2] < 0:
         boundary = tuple(reversed(boundary))
         normal = tuple(-coordinate for coordinate in normal)
@@ -213,7 +216,7 @@ def extrude_planar_face(
     vertices = tuple(boundary) + lower
     count = len(boundary)
     faces: list[Face] = []
-    for triangle in _triangulate_planar(boundary):
+    for triangle in triangulate_planar(boundary):
         faces.append(triangle)
         faces.append(tuple(reversed(tuple(index + count for index in triangle))))
     for index in range(count):
@@ -328,7 +331,7 @@ def extrude_wall_profile(
             vertices.append(point)
         return index_by_vertex[key]
 
-    for triangle in triangulate(profile):
+    for triangle in triangulate_polygon(profile):
         if not profile.covers(triangle.representative_point()):
             continue
         coordinates = _counterclockwise_exterior(triangle)
@@ -515,7 +518,8 @@ def _hip_boundaries(surface: RoofSurface) -> tuple[tuple[Vec3, ...], ...]:
     return tuple(boundaries)
 
 
-def _polygon_normal(boundary: Sequence[Vec3]) -> Vec3:
+def polygon_normal(boundary: Sequence[Vec3]) -> Vec3:
+    """Return the unit Newell normal of a planar polygon boundary."""
     nx = ny = nz = 0.0
     for current, following in zip(boundary, (*boundary[1:], boundary[0])):
         nx += (current[1] - following[1]) * (current[2] + following[2])
@@ -527,8 +531,9 @@ def _polygon_normal(boundary: Sequence[Vec3]) -> Vec3:
     return nx / magnitude, ny / magnitude, nz / magnitude
 
 
-def _triangulate_planar(boundary: Sequence[Vec3]) -> tuple[Face, ...]:
-    normal = _polygon_normal(boundary)
+def triangulate_planar(boundary: Sequence[Vec3]) -> tuple[Face, ...]:
+    """Triangulate a planar boundary while preserving its outward winding."""
+    normal = polygon_normal(boundary)
     omitted_axis = max(range(3), key=lambda axis: abs(normal[axis]))
     retained_axes = [axis for axis in range(3) if axis != omitted_axis]
     projected: list[Vec2] = [
@@ -536,7 +541,7 @@ def _triangulate_planar(boundary: Sequence[Vec3]) -> tuple[Face, ...]:
     ]
     polygon = polygon_from_loops(projected)
     faces: list[Face] = []
-    for triangle in triangulate(polygon):
+    for triangle in triangulate_polygon(polygon):
         if not polygon.covers(triangle.representative_point()):
             continue
         face: list[int] = []
