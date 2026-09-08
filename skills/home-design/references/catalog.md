@@ -71,6 +71,9 @@ rafter ridge. Each gutter/downspout junction has separately owned inlet and bore
 cuts. The entrance uses plumb stringer tops against its landing. Guard corners
 use adjoining framed panels with touching end posts; the screens sit inside the
 landing perimeter with their corner frame allowances authored explicitly.
+The door-bearing south screen uses a reversed, landing-hosted baseline so its
+left normal faces outside and an inward door swing stays over the landing. A slab
+edge's traversal direction does not automatically supply that door convention.
 
 Open service ports are declared boundaries. Remove their `open` states only when
 authoring a compatible mate and revising system membership. The wet wall exposes

@@ -8,7 +8,6 @@ from dataclasses import dataclass, replace
 
 from shapely.affinity import translate
 from shapely.geometry import LineString, MultiPoint, MultiPolygon, Point, Polygon
-from shapely.ops import polygonize
 
 from home_design.errors import ResolutionError
 from home_design.capabilities import ComponentRegistry
@@ -61,6 +60,7 @@ from home_design.service_routes import ServiceRoutes
 from home_design.service_fittings import ServiceFittings
 from home_design.service_insulation import ServiceInsulation
 from home_design.service_ports import ServicePorts
+from home_design.space_geometry import SpaceGeometry, SpaceWallPlan
 
 
 @dataclass(frozen=True, slots=True)
@@ -821,6 +821,11 @@ class ModelResolver:
                 "typeId": element.get("type"),
                 "height": height,
                 "area": polygon.area,
+                "areaBasis": (
+                    "explicit"
+                    if geometry.get("kind") == "explicit"
+                    else geometry.get("boundaryMode", "axis")
+                ),
                 "footprint": {
                     "outer": [list(point) for point in outer],
                     "holes": [[list(point) for point in loop] for loop in holes],
@@ -1239,24 +1244,29 @@ class ModelResolver:
             for _, relationship in self.index.relationships("bounds")
             if relationship.get("space") == space_id
         ]
-        lines = []
+        walls: list[SpaceWallPlan] = []
+        boundary_mode = str(geometry.get("boundaryMode", "axis"))
         for element_id in boundary_ids:
             element = (
                 self.elements.get(element_id) if isinstance(element_id, str) else None
             )
             if element is not None and element.get("kind") == "wall":
-                lines.append(LineString(self.locators.path2(element.get("path"))))
-        candidates = list(polygonize(lines))
+                thickness = (
+                    layer_thickness(self._type_for(element))
+                    if boundary_mode == "interior"
+                    else 0.0
+                )
+                walls.append(
+                    SpaceWallPlan(
+                        self.locators.path2(element.get("path")),
+                        thickness,
+                        self._wall_center_offset(
+                            str(element.get("locationLine")), thickness
+                        ),
+                    )
+                )
         seed = vector2(geometry.get("seedPoint"), "space seed point")
-        seed_point = Point(seed)
-        matches = [
-            candidate for candidate in candidates if candidate.covers(seed_point)
-        ]
-        if len(matches) != 1:
-            raise ResolutionError(
-                f"Space {space_id} seed must resolve inside exactly one closed wall boundary"
-            )
-        return matches[0]
+        return SpaceGeometry.derive(space_id, walls, seed, boundary_mode)
 
     @staticmethod
     def _window_meshes(

@@ -23,6 +23,12 @@ rise, run, tread layout and following rail paths.
 
 Model landings as slabs with the landing role. For turns or intermediate landings, compose flights and landing slabs into a `stairSystem` assembly. Each flight updates when its datums change; check run and landing alignment after elevation changes. Stair clear width measures the usable flight, with side stringers outside that width.
 
+Top/bottom datums constrain elevations, not plan connections to a landing. An
+automatic riser-count change can shorten the run while validation remains valid.
+For fixed landing positions, preserve an appropriate explicit `riserCount` or
+coordinate the origin/run; compare the resolved upper endpoint with the landing
+edge. A sampled landing elevation alone does not establish that connection.
+
 `railingType` specifies height, post spacing/section, rail section, material and optional baluster infill (`balusterSection`, `maxInfillGap`). `railing.role` distinguishes structural guards from graspable handrails. Use a circular `railSection` for a round handrail. These are geometric/specification controls, not jurisdictional certification.
 
 Railings and `panel` screens accept a 3D `path` or `follow`. A follow references a stair side (`left`/`right`) or slab outer boundary `edge` ID, plus optional outward offset. Stair-following rails account for section width so their inside face preserves stair clear width. Access `openings` are non-overlapping `start`/`end` station intervals measured along the 3D path. A `panelType` defines frame dimensions/material and a separate infill material; use its material opacity to represent screening. Screens never become structural guards implicitly.

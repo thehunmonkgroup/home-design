@@ -74,4 +74,12 @@ has a real host cutout, operation, swing envelope and opening schedule entry.
 
 ## Spaces
 
-An explicit space stores its footprint. A derived space stores a seed point and uses its `bounds` wall relationships to select one closed wall loop. The viewer hides space volumes by default; use **Show spaces** to inspect them.
+An explicit space stores its footprint. A derived space stores a seed point and uses its `bounds` wall relationships to select one closed wall-axis region. In model version `0.2`, set `geometry.boundaryMode` to `"axis"` (the default) or `"interior"`. Axis mode measures the wall-axis region. Interior mode removes the full plan thickness of the declared bounding walls to measure the clear room footprint:
+
+```json
+{"kind": "derived", "seedPoint": [5000, 4000], "boundaryMode": "interior"}
+```
+
+Interior geometry follows each wall's layered type thickness, directed path and `locationLine`; the seed selects the room-facing region. `bounds.elementSide` remains relationship metadata and does not choose the area basis. Openings and other wall cuts do not enlarge the room footprint. The resolved `areaBasis` is `"axis"`, `"interior"` or `"explicit"`; `area` is in square millimetres.
+
+Derived spaces support closed line/polyline wall networks, unequal thicknesses, concave regions and holes. Wall axes must already form closed polygonizable loops; this operation does not bridge gaps or infer missing joins. Interior mode follows square-ended wall segment stock, including at concave corners, and does not invent miter extensions or finished-face layers. It removes every declared bounding wall's gross plan projection regardless of wall height; it is not a section cut or an occupancy/regulatory area standard. Use explicit footprints when those distinctions matter. A seed outside the selected clear interior, an empty result or multiple disconnected regions fails resolution. The viewer hides space volumes by default; use **Show spaces** to inspect them.

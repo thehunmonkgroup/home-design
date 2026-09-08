@@ -14,6 +14,7 @@ from home_design.adapters.ifc import IfcExporter
 from home_design.build import BuildService
 from home_design.fabrication import FabricationGeometry
 from home_design.construction import Authoring
+from home_design.geometry import number
 from home_design.json_types import JsonObject
 from home_design.reports import ModelReports
 from home_design.resolver import ModelResolver
@@ -450,6 +451,10 @@ def test_access_obstructions_have_explicit_exceptions_and_severity(
     elements["accessory.obstruction"] = obstruction
     report = validator.validate(reference_model)
     assert [item.code for item in report.errors] == ["access.obstructed"]
+    assert report.errors[0].path == "/elements/zone.access"
+    assert report.errors[0].details["obstructions"] == [
+        {"element": "accessory.obstruction", "volumeMm3": pytest.approx(2_500_000)}
+    ]
     resolved = ModelResolver(reference_model).resolve()
     assert resolved.element("zone.access").data["obstructions"] == [
         {"element": "accessory.obstruction", "volumeMm3": pytest.approx(2_500_000)}
@@ -485,6 +490,7 @@ def test_barrier_seam_detects_missing_material_and_duplicate_ownership(
     MountedFixture.mount(right)["station"] = 1105
     report = validator.validate(reference_model)
     assert [item.code for item in report.errors] == ["barrier.discontinuous"]
+    assert number(report.errors[0].details["gapVolumeMm3"], "gap") > 0
     gap = ModelResolver(reference_model).resolve().element("check.seam")
     assert gap.data["gapVolumeMm3"] == pytest.approx(500)
     assert gap.data["connectedRegions"] == 2

@@ -84,7 +84,16 @@ class CavityComposition:
                 ]
             elements[part.element_id] = replace(part, meshes=fitted, data=data)
         for key, region in sorted(regions.items()):
-            cls._infill(elements, region, occupied[key])
+            try:
+                cls._infill(elements, region, occupied[key])
+            except ResolutionError as error:
+                error.subject_id = error.subject_id or region.host
+                host_key = region.host.replace("~", "~0").replace("/", "~1")
+                error.path = error.path or f"/elements/{host_key}"
+                error.details.setdefault("layer", region.index)
+                if region.layer_id is not None:
+                    error.details.setdefault("layerId", region.layer_id)
+                raise
         return regions
 
     @classmethod

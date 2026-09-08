@@ -88,6 +88,11 @@ from the role or geometry alone.
 
 ## Access spaces and barrier continuity
 
+Failed access diagnostics include the obstructing component IDs and intersected
+volumes in `details.obstructions`. Barrier failures include gap volume, coverage,
+connected regions and missing participants. Use those measurements to locate the
+construction needing correction before editing the probe or its allowances.
+
 `clearanceZone` defines an authored nonmaterial space for `access`, `maintenance`,
 `operation`, `ventilation`, `installation` or `other`. It requires a physical
 `owner`, `placement`, `purpose` and local-extrusion `geometry`. Use a component

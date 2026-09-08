@@ -14,6 +14,8 @@ import trimesh
 
 from home_design.build import BuildService
 from home_design.construction import Authoring
+from home_design.cavities import CavityComposition
+from home_design.errors import ResolutionError
 from home_design.geometry import number
 from home_design.json_types import JsonObject
 from home_design.loader import ModelLoader
@@ -69,6 +71,25 @@ class CavityFixture:
             )
             for row in rows
         }
+
+
+def test_cavity_infill_failures_identify_the_host_and_layer(
+    reference_model: JsonObject, validator: ModelValidator, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """An adapter-neutral Boolean failure still points an author at the affected cavity."""
+    CavityFixture.configure(reference_model)
+
+    def fail_infill(*_args: object) -> None:
+        raise ResolutionError("Cannot serialize cavity material")
+
+    monkeypatch.setattr(CavityComposition, "_infill", fail_infill)
+    report = validator.validate(reference_model)
+    assert len(report.errors) == 1
+    error = report.errors[0]
+    assert error.subject_id is not None
+    assert error.path == f"/elements/{error.subject_id}"
+    assert error.details["layer"] == 2
+    assert error.details["stage"] == "cavities"
 
 
 def test_explicit_framing_displaces_infill_without_double_counting(

@@ -85,6 +85,11 @@ cavities because their positions are unspecified. Detailed groups support
 explicit cavity ownership. Scheduled quantities support up to 1,000,000 units;
 detailed groups support up to 10,000 instances.
 
+Detailed instances remain bodies of one canonical group, rather than separate IFC
+products. Named instances survive in GLB mesh roles such as `fastener:left.back`;
+indexed scene-node names can change when instances are inserted. Use the group ID
+and named role when comparing individual fasteners across edits.
+
 ```json
 {
   "kind": "fastenerGroup", "name": "Hanger screws",

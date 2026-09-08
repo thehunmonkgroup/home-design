@@ -10,6 +10,7 @@ import ifcopenshell.geom
 import ifcopenshell.util.shape
 import ifcopenshell.validate
 import pytest
+import trimesh
 from ifcopenshell.ifcopenshell_wrapper import TriangulationElement
 
 from home_design.adapters.ifc import IfcExporter
@@ -246,6 +247,58 @@ def test_opposing_roof_rims_preserve_cavity_material_through_serialization(
     shape = ifcopenshell.geom.create_shape(
         ifcopenshell.geom.settings(),
         native.by_guid(IfcExporter.stable_guid("roof.main")),
+    )
+    assert isinstance(shape, TriangulationElement)
+    assert ifcopenshell.util.shape.get_volume(shape.geometry) == pytest.approx(
+        sum(SolidOperations.volume(mesh) for mesh in host.meshes) / 1e9, rel=1e-7
+    )
+
+
+@pytest.mark.parametrize("pitch", [30, 35])
+def test_mitered_roof_pitch_edits_preserve_infill_in_native_ifc(
+    pitch: int, validator: ModelValidator, tmp_path: Path
+) -> None:
+    """Collapsed contact loops cannot prevent an ordinary pitch edit or change insulation volume."""
+    source = ModelLoader().load(
+        Path(__file__).resolve().parents[2] / "examples/assemblies.json"
+    )
+    prefix = "assembly.insulated-roof."
+    source["elements"] = {
+        key: value
+        for key, value in Authoring.object(source["elements"]).items()
+        if key.startswith(prefix)
+        and Authoring.object(value)["kind"] in {"roof", "planarFraming"}
+    }
+    source["anchors"] = {
+        key: value
+        for key, value in Authoring.object(source["anchors"]).items()
+        if key.startswith(prefix)
+    }
+    source["relationships"], source["requirements"], source["solarStudies"] = {}, [], []
+    roof_id = prefix + "roof"
+    roof = Authoring.object(Authoring.object(source["elements"])[roof_id])
+    Authoring.object(roof["geometry"])["pitch"] = pitch
+    evaluation = validator.evaluate(source)
+    assert evaluation.report.is_valid, evaluation.report.to_dict()
+    assert evaluation.resolved is not None
+    resolved = evaluation.resolved
+    host = resolved.element(roof_id)
+    cavity = Authoring.object(Authoring.array(host.data["cavities"])[0])
+    assert number(cavity["grossVolumeMm3"], "gross") == pytest.approx(
+        number(cavity["occupiedVolumeMm3"], "occupied")
+        + number(cavity["infillVolumeMm3"], "infill"), rel=1e-9
+    )
+    for mesh in host.meshes:
+        surface = trimesh.Trimesh(vertices=mesh.vertices, faces=mesh.faces, process=False)
+        assert surface.is_watertight and surface.is_winding_consistent
+        assert surface.volume == pytest.approx(
+            SolidOperations.volume(mesh), rel=1e-9, abs=1e-6
+        )
+    output = tmp_path / "pitched-roof.ifc"
+    IfcExporter().export(resolved, output)
+    native = ifcopenshell.open(output)
+    shape = ifcopenshell.geom.create_shape(
+        ifcopenshell.geom.settings(), native.by_guid(IfcExporter.stable_guid(roof_id))
     )
     assert isinstance(shape, TriangulationElement)
     assert ifcopenshell.util.shape.get_volume(shape.geometry) == pytest.approx(

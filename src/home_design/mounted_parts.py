@@ -338,7 +338,16 @@ class CoordinationVolumes:
                     else "barrier.discontinuous"
                 ),
                 f"{element.name}: {element.data['status']}",
+                path=f"/elements/{element.element_id.replace('~', '~0').replace('/', '~1')}",
                 subject_id=element.element_id,
+                details={
+                    key: element.data[key]
+                    for key in (
+                        "obstructions", "gapVolumeMm3", "coverageFraction",
+                        "connectedRegions", "missingParticipants",
+                    )
+                    if key in element.data
+                },
             )
             for element in model.elements
             if element.kind in CoordinationVolumes.KINDS

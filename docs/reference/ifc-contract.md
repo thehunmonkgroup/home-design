@@ -16,6 +16,14 @@ do not create an editable extrusion or Boolean feature history in a CAD importer
 The IFC geometry-kernel regression checks compare converted material volumes and
 world-space extents with the resolved model, including trimmed and rotated stock.
 
+Native `IfcDoor` and `IfcWindow` `OverallWidth`/`OverallHeight` retain their hosted
+rough-opening dimensions in project millimetres. Nominal stock, rough-opening
+clearance and estimated clear passage remain separate resolved properties. This
+follows the opening-size definitions in the IFC4
+[door](https://standards.buildingsmart.org/IFC/RELEASE/IFC4/FINAL/HTML/schema/ifcsharedbldgelements/lexical/ifcdoor.htm)
+and [window](https://standards.buildingsmart.org/IFC/RELEASE/IFC4/FINAL/HTML/schema/ifcsharedbldgelements/lexical/ifcwindow.htm)
+contracts; a swung leaf's world bounding box is not used as its opening size.
+
 Host-relative construction points retain their source coordinates in
 `Pset_HomeDesignData.hostPlacements`. Penetrations export as `IfcOpeningElement`
 objects with native void relationships to their explicit hosts. Their bodies
@@ -272,4 +280,3 @@ when a CAD application's property panel omits them.
 
 Apply design changes to the canonical JSON and rebuild the IFC. Edits made in
 FreeCAD are independent of the canonical model.
-

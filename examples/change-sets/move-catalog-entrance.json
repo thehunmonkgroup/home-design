@@ -2,7 +2,7 @@
   "changeVersion": "0.1",
   "id": "change.adapt.assembly.screened-entrance",
   "description": "Adapt assembly.screened-entrance using recipe.screened-entrance; preserve independent occurrence edits",
-  "baseRevision": 7,
+  "baseRevision": 8,
   "preconditions": [
     {
       "path": "/anchors/assembly.screened-entrance.anchor.origin",
@@ -24,7 +24,7 @@
         "assemblyType": "stairSystem",
         "recipeInstance": {
           "recipeId": "recipe.screened-entrance",
-          "recipeDigest": "8ffd963f58abedc9999719250aa7dcd4a08f3eb145d191c65cc74e0195da7952",
+          "recipeDigest": "595c9813f11bab2b04b131ceda9dd2e80b28f330321baffcef424ab4dcfc9842",
           "parameters": {
             "origin": [
               7000,
@@ -175,7 +175,7 @@
         "assemblyType": "stairSystem",
         "recipeInstance": {
           "recipeId": "recipe.screened-entrance",
-          "recipeDigest": "8ffd963f58abedc9999719250aa7dcd4a08f3eb145d191c65cc74e0195da7952",
+          "recipeDigest": "595c9813f11bab2b04b131ceda9dd2e80b28f330321baffcef424ab4dcfc9842",
           "parameters": {
             "origin": [
               7350,

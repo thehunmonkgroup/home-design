@@ -14,6 +14,29 @@ Generated member arrays are omitted from default resolved data and replaced by
 a `generatedParts` count and discovery hint. Use `--parts --limit 20` or `--part KEY`
 for their detailed records. Complete resolved JSON remains available in build outputs.
 
+When querying saved JSON, distinguish these document shapes:
+
+| Output | Component lookup | Measurements |
+| --- | --- | --- |
+| `inspect --object ID --view resolved` | One selected object at the root | `.data` (no `.resolved` wrapper) |
+| `resolved-model.json` | `.elements[]`, selected by `.id` | Selected record's `.data`; meshes are large |
+| `render-manifest.json` | `.elements[ID]` mapping | Viewer properties and scene-node identities |
+
+For example, `jq '.elements[] | select(.id == "wall.north") | .data'
+resolved-model.json` selects one component's measurements. Use paths returned by
+build/transaction receipts and the published catalog; asset directories include a
+model key and content version, so guessing their layout is unnecessary.
+
+In `schedules.json`, component-family rows (including `drainage` and
+`penetrations`) use `id` and put measurements in `dimensionsAndSpecifications`.
+Specialized `cavities` rows use `elementId`; `generatedMembers` use `assemblyId`
+plus `key`; material totals use `materialId`. `circuitSchedules` use `id` with
+their schedule fields directly. Inspect one row's keys before projecting a new
+report family, and retain its explicit `Mm3`/`M3` units when comparing volumes.
+Repeated `framing` groups expose individual children through `inspect --parts`
+and aggregate quantities in `schedules.framing`; their children are not rows in
+`schedules.generatedMembers`, which covers the other framing assembly families.
+
 Start with `--limit 20` and focused fields or roles; do not request depth 64 or
 1000 records simply to discover participants. Save a larger report and select
 its relevant IDs/paths when a complete audit is needed. `--query` searches names,

@@ -24,7 +24,7 @@ Choose the smallest public model that demonstrates the requested integration. Ke
 ## Complete changeset examples
 
 [Move the catalog entrance](../../../examples/change-sets/move-catalog-entrance.json)
-applies to revision 7 of [Assemblies](../../../examples/assemblies.json). It moves
+applies to revision 8 of [Assemblies](../../../examples/assemblies.json). It moves
 the landing, stair, rails, screens, door, supports and connections 350 mm east and
 225 mm north, preserving neighboring packages and updating recipe provenance.
 

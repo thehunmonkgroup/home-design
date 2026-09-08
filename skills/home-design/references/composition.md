@@ -7,6 +7,14 @@ supported host coordinate modes, direct host targets, cavity participation,
 generated-member support and native IFC default. These are integration capabilities;
 read the domain reference for required fields and geometry constraints.
 
+`hostModes` lists coordinate frames this family **provides to other components**.
+For example, a wall provides a `wall` frame and a service device provides a
+`component` frame. It does not list where that device can be mounted.
+`hostTargets` restricts a family's direct `host` field (such as a framing group's
+wall host); an empty list does not prohibit hosted placement. For an accessory or
+device's `placement.host`, select a frame supplied by its target and follow
+[hosted placement](layers-cuts.md).
+
 - [Coordinate and identity rules](#coordinate-and-identity-rules)
 - [Registries](#registries)
 - [Assemblies](#assemblies)

@@ -13,6 +13,7 @@ from home_design.assembly_updates import AssemblyUpdates
 from home_design.changes import ChangeEngine
 from home_design.construction import Authoring
 from home_design.graph import ModelIndex
+from home_design.geometry import vector2, vector3
 from home_design.json_types import JsonObject
 from home_design.loader import ModelLoader
 from home_design.recipes import AssemblyRecipe
@@ -157,6 +158,29 @@ def test_catalog_contains_distinct_complete_packages(
         ]
         == "clear"
     )
+
+
+def test_catalog_entrance_inward_swing_stays_over_the_landing(
+    catalog: tuple[JsonObject, ResolvedModel],
+) -> None:
+    """The closed door's full opening envelope points into the enclosure, clear of the stair."""
+    resolved = catalog[1]
+    prefix = "assembly.screened-entrance."
+    screen = resolved.element(prefix + "screen.south")
+    path = [vector3(point, "screen point") for point in Authoring.array(screen.data["path"])]
+    assert path[0][0] > path[1][0]
+    door = resolved.element(prefix + "door")
+    assert door.data["swingDirection"] == "inward"
+    envelope = [vector3(point, "swing point") for point in Authoring.array(door.data["swingEnvelope"])]
+    assert envelope
+    slab = resolved.element(prefix + "slab.deck")
+    footprint = Authoring.object(slab.data["footprint"])
+    vertices = [vector2(point, "landing point") for point in Authoring.array(footprint["outer"])]
+    for axis in (0, 1):
+        assert min(point[axis] for point in envelope) >= min(p[axis] for p in vertices)
+        assert max(point[axis] for point in envelope) <= max(p[axis] for p in vertices)
+    assert min(point[1] for point in envelope) == pytest.approx(path[0][1])
+    assert max(point[1] for point in envelope) > path[0][1] + 800
 
 
 @pytest.mark.parametrize("key", PACKAGES)

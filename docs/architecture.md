@@ -59,6 +59,7 @@ host materials after cavity ownership. Route passage checks run after those cuts
 | `fitting_geometry.py`, `service_fittings.py` | Type-local elbows, branched passages, eccentric shape transitions and caps with generated mating interfaces and shared construction masks |
 | `geometry.py` | Polygon, wall-profile, box, and roof-plane geometry primitives |
 | `resolver.py` | Element and relationship integration into absolute shared geometry |
+| `space_geometry.py` | Derived wall-axis and full-wall-thickness interior room footprints, including holes and area-basis semantics |
 | `components.py`, `construction.py` | Typed construction resolution, oriented members, shared-miter sweeps, repeated framing, stairs, guards and screens |
 | `roof_controls.py`, `layers.py`, `doors.py`, `screens.py` | Bearing/overhang roof controls, physical material layers, framed doors and profiled screen enclosures |
 | `roof_joints.py`, `sweep_volumes.py` | Shared roof-layer/framing bisectors and nonmaterial drainage sweep envelopes/bores for owned junction cuts |
@@ -346,7 +347,8 @@ When native triangle serialization remains unstable, a final candidate rebuilds
 planar boundaries within each connected shell. It cancels overlapping faces with
 opposite orientations, retains holes and splits edges at shared boundary points.
 Planar grouping uses 1e-6 mm tolerance and 1e-7 mm projected coordinates; original
-vertices remain preferred. The candidate passes only when both triangle integration
+vertices remain preferred. Boundary loops collapsed below three distinct vertices
+at that tolerance are omitted before triangulation. The candidate passes only when both triangle integration
 and native reimport preserve the original material volume under the same 1e-6 mm³
 absolute / 1e-9 relative tolerance. Independent shells are not welded together.
 Unstable or materially changed candidates fail resolution. Insulation
@@ -509,6 +511,11 @@ IFC header timestamps may vary between builds, so conformance tests compare the 
    contract is in `docs/reference/ifc-contract.md`.
 
 ## Test strategy
+
+The [representative AI editing evaluations](reference/ai-editing-evaluations.md)
+record fresh-context authoring trials, component/workflow coverage and the fixes
+they verify. These assess discovery and coordinated editing separately from
+automated regression coverage and downstream CAD import.
 
 Design-specific regression coverage belongs only to public reference JSON models
 in `examples/`. These tests preserve the reference models' intended geometry and

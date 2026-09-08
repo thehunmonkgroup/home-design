@@ -1,6 +1,14 @@
 # Electrical and communications
 
-Read [identity and composition](composition.md) for shared authoring rules. Read [service interfaces](services.md) for ports/system membership and [routes](routes.md) for cable/conduit geometry. Recessed boxes also require [layers and cuts](layers-cuts.md) and review of [framing](framing.md).
+Use [identity and composition](composition.md) for shared authoring rules.
+Load [service interfaces](services.md) when changing ports/system membership,
+[routes](routes.md) for cable/conduit geometry, and the relevant sections of
+[layers and cuts](layers-cuts.md) or [framing](framing.md) when changing a recess
+or its surrounding construction.
+
+For an additional outlet on an existing branch, start with the focused
+[branch extension workflow](electrical-edits.md). It identifies the coordinated
+objects and routes to field details only when needed.
 
 - [Electrical and communications devices](#electrical-and-communications-devices)
 - [Circuit schedules](#circuit-schedules)

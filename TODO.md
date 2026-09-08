@@ -15,5 +15,7 @@ Proposed work is listed here separately from supported capabilities.
 
 ## Geometry authoring
 
+- [ ] Add explicit stair-to-landing plan-connection constraints so elevation edits
+  can diagnose automatic-run changes that separate a flight from its landing.
 - [ ] Evaluate additional parametric recipes or explicitly identified imported
   geometry for complex and organic components.

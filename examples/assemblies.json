@@ -1,7 +1,7 @@
 {
   "$schema": "../schema/home-model-0.2.schema.json",
   "modelVersion": "0.2",
-  "revision": 7,
+  "revision": 8,
   "project": {
     "id": "project.assemblies",
     "name": "Assemblies",
@@ -8336,7 +8336,7 @@
       "assemblyType": "stairSystem",
       "recipeInstance": {
         "recipeId": "recipe.screened-entrance",
-        "recipeDigest": "8ffd963f58abedc9999719250aa7dcd4a08f3eb145d191c65cc74e0195da7952",
+        "recipeDigest": "595c9813f11bab2b04b131ceda9dd2e80b28f330321baffcef424ab4dcfc9842",
         "parameters": {
           "origin": [
             7000,
@@ -9358,11 +9358,36 @@
       "kind": "panel",
       "name": "Landing south screen",
       "type": "assembly.screened-entrance.type.screen",
-      "follow": {
-        "element": "assembly.screened-entrance.slab.deck",
-        "edge": "south",
-        "offset": 100
-      },
+      "path": [
+        {
+          "host": {
+            "kind": "surface",
+            "element": "assembly.screened-entrance.slab.deck",
+            "surface": "top",
+            "point": {
+              "anchor": "assembly.screened-entrance.anchor.origin",
+              "offset": [
+                3000,
+                100
+              ]
+            }
+          }
+        },
+        {
+          "host": {
+            "kind": "surface",
+            "element": "assembly.screened-entrance.slab.deck",
+            "surface": "top",
+            "point": {
+              "anchor": "assembly.screened-entrance.anchor.origin",
+              "offset": [
+                0,
+                100
+              ]
+            }
+          }
+        }
+      ],
       "specifications": {
         "thermalBoundary": false
       },

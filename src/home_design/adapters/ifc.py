@@ -24,7 +24,7 @@ from ifcopenshell.entity_instance import entity_instance
 from home_design.constants import GUID_NAMESPACE, IFC_SCHEMA
 from home_design.capabilities import ComponentRegistry
 from home_design.errors import ExportError
-from home_design.geometry import vector2, vector3
+from home_design.geometry import number, vector2, vector3
 from home_design.json_types import JsonObject
 from home_design.resolved import ResolvedElement, ResolvedModel
 from home_design.adapters.ifc_properties import IfcProperties
@@ -436,6 +436,10 @@ class IfcExporter:
                 product.ObjectType = str(element.data["role"])
             if element.kind in {"hardware", "fastenerGroup"}:
                 IfcHardware.predefined(product, element.data)
+            if element.kind in {"door", "window"}:
+                opening = model.element(Authoring.text(element.data["openingId"]))
+                product.OverallWidth = number(opening.data["width"], "opening width")
+                product.OverallHeight = number(opening.data["height"], "opening height")
             body = self._body_representation(ifc, body_context, element)
             self._style_body(ifc, body, element, model.materials)
             axis = self._axis_representation(ifc, axis_context, element)

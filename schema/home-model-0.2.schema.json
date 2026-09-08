@@ -7039,6 +7039,14 @@
             },
             "seedPoint": {
               "$ref": "#/$defs/Vec2"
+            },
+            "boundaryMode": {
+              "enum": [
+                "axis",
+                "interior"
+              ],
+              "default": "axis",
+              "description": "Axis loop area, or its interior after excluding full bounding wall plan thickness."
             }
           }
         }

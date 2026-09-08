@@ -111,6 +111,10 @@ class HomeDesignCli:
                         {
                             "valid": not issues,
                             "issues": issues,
+                            "fieldSemantics": {
+                                "hostModes": "Coordinate frames this family provides to hosted components, not its own mounting destinations.",
+                                "hostTargets": "Allowed kinds for a direct host field; empty does not prohibit placement.host mounting.",
+                            },
                             "components": [item.to_dict() for item in items],
                         },
                         indent=2,

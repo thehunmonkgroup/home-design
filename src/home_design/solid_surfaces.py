@@ -177,10 +177,15 @@ class SolidSurfaces:
         world = np.asarray(vertices.vertices, dtype=np.float64)
         faces: list[Face] = []
         for plane, sign, rings in regions:
-            boundaries = [
-                plane.project(world[cls.boundary(ring, world)]).tolist()
-                for ring in rings
-            ]
+            refined = [cls.boundary(ring, world) for ring in rings]
+            if len(set(refined[0])) < 3:
+                continue
+            boundaries = [plane.project(world[refined[0]]).tolist()]
+            boundaries.extend(
+                plane.project(world[ring]).tolist()
+                for ring in refined[1:]
+                if len(set(ring)) >= 3
+            )
             polygon = Polygon(boundaries[0], boundaries[1:])
             for triangle in triangulate_polygon(polygon):
                 indices = [

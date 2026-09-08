@@ -1200,32 +1200,13 @@
       },
       "screen.south": {
         "kind": "panel",
-      "name": "Landing south screen",
-      "type": "type.screen",
-      "path": [
-        {
-          "host": {
-            "kind": "surface",
-            "element": "slab.deck",
-            "surface": "top",
-            "point": {
-              "anchor": "anchor.origin",
-              "offset": [3000, 100]
-            }
-          }
+        "name": "Landing south screen",
+        "type": "type.screen",
+        "follow": {
+          "element": "slab.deck",
+          "edge": "south",
+          "offset": 100
         },
-        {
-          "host": {
-            "kind": "surface",
-            "element": "slab.deck",
-            "surface": "top",
-            "point": {
-              "anchor": "anchor.origin",
-              "offset": [0, 100]
-            }
-          }
-        }
-      ],
         "specifications": {
           "thermalBoundary": false
         },

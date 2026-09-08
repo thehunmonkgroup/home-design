@@ -38,12 +38,12 @@ only the relevant section. Moving a shared anchor without changing hosted stock
 usually needs editing, inspection and placement semantics; inspect the actual
 dependents and preview before loading electrical, plumbing or framing field manuals.
 
-For a simple occurrence-only dimension/type edit, editing, inspection and the
-local-type section of changesets are usually sufficient, together with
+For a narrow occurrence parameter edit, inspect its source field and actual
+dependents; use a guarded `set` or matching domain operation. A local shared-type
+edit additionally needs the local-type section of changesets and
 [shared-type semantics](references/composition.md#shared-types-and-local-changes).
-Read only the opening/window section of architectural guidance if fill behavior
-is unclear. Delivery guidance is needed when changing publication or sharing,
-rather than for the standard transaction build below.
+Read only the affected domain section. Recipe discovery is needed for package
+operations; delivery guidance is needed when changing publication or sharing.
 
 | Task | Reference |
 | --- | --- |
@@ -56,6 +56,7 @@ rather than for the standard transaction build below.
 | Studs, joists, rafters, trusses and member overrides | [Framing](references/framing.md) |
 | Connectors, fasteners, reinforcement and masonry | [Hardware](references/hardware.md) |
 | Ledges, niches, access spaces, sleeves, seals and membranes | [Envelope and accessories](references/envelope.md) |
+| Add an outlet to an existing electrical branch | [Branch extension workflow](references/electrical-edits.md) |
 | Service ports, systems, circuits and connectedness | [Service interfaces](references/services.md) |
 | Pipe/duct/cable paths, fittings, insulation and passage masks | [Routes](references/routes.md) |
 | Receptacles, boxes, panels, cable stock and circuit schedules | [Electrical](references/electrical.md) |
@@ -74,7 +75,7 @@ Use `home-design capabilities --kind KIND` when choosing compatible component fa
 
 1. Validate the source with `home-design validate MODEL --json`.
 2. Discover IDs with `home-design inspect MODEL`, then inspect affected objects
-   with `--object ID --references --dependents --relationships`. Use `--type-users`
+   with `--object ID --references --dependents --relationships --limit 20`. Use `--type-users`
    before changing a reusable type. Follow pagination and depth limits; see
    [inspection](references/inspection.md).
 3. Write a focused changeset using the inspected revision and preconditions for

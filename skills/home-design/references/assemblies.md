@@ -112,6 +112,13 @@ home-design prepare home.json adapt --object assembly.office \
 
 Keep previous recipe versions available. A digest mismatch prevents guessing a
 baseline. Canonical models still validate and build without those recipe files.
+Distributed prior templates are retained under `recipes/history/`, outside the
+active recipe list. For example, the
+[screened-entrance baseline](../../../recipes/history/screened-entrance-8ffd963f.json)
+matches digest `8ffd963f58abedc9999719250aa7dcd4a08f3eb145d191c65cc74e0195da7952`.
+Pass that exact file with `--previous-recipe` when updating an instance with that
+digest to the current entrance recipe. `home-design resources` locates the same
+history directory in an installed package.
 
 ## Controlled overrides and stock
 

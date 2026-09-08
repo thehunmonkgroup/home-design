@@ -61,6 +61,18 @@ def test_build_produces_complete_cross_adapter_contract(
     assert len(ifc.by_type("IfcRelFillsElement")) == 2
     assert len(ifc.by_type("IfcRelSpaceBoundary")) == 4
     assert len(ifc.by_type("IfcRelConnectsPathElements")) == 4
+    records = {
+        element["id"]: element
+        for element in json.loads(result.resolved_model.read_text())["elements"]
+    }
+    for element in records.values():
+        if element["kind"] not in {"door", "window"}:
+            continue
+        opening = records[element["data"]["openingId"]]["data"]
+        product = ifc.by_guid(IfcExporter.stable_guid(element["id"]))
+        assert product.OverallWidth == pytest.approx(opening["width"])
+        assert product.OverallHeight == pytest.approx(opening["height"])
+        assert product.OverallWidth > element["data"]["nominalWidth"]
     logger = ifcopenshell.validate.json_logger()
     ifcopenshell.validate.validate(ifc, logger)
     assert logger.statements == []
