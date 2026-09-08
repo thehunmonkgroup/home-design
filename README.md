@@ -50,47 +50,35 @@ pyenv activate home-design
 python -m pip install -e '.[dev]'
 
 home-design validate 'examples/*.json'
-home-design build 'examples/*.json' \
-  --output build \
-  --web-assets web/public/model
+home-design build 'examples/*.json'
 
 cd web
 npm install
 npm run dev
 ```
 
-Open the local URL printed by the web command. Choose a home in the top-bar model selector.
+This publishes the three public examples to the local viewer.
+
+Open the local URL printed by the web command. Choose a model in the top-bar model selector.
 Select a component in the left index or directly in the model; its resolved measurements appear in the inspector.
 See the [Browser viewer guide](docs/guides/viewer-guide.md) for navigation, filtering,
 visibility, isolation, requirements and sun-study controls.
-The two-storey construction example is
-[Hillside Deck House](examples/hillside-deck-house.json).
-It demonstrates coordinated terrain, foundations, framing, stairs, screen/guard
-separation, a dependent porch roof, drainage, product specifications, and solar
-studies. Its dimensions and specifications are illustrative and require
-project-specific engineering before construction.
-The viewer guide includes a
-[cutaway walkthrough](docs/guides/viewer-guide.md#cutaway-views-of-hillside-deck-house)
-for its two-storey shell.
+The public collection contains three complementary examples:
 
-[Complete Shell Coordination House](examples/complete-shell-coordination-house.json)
-combines explicit wall, floor, roof and irregular deck framing with foundation
-supports, connected electrical and plumbing branches, an insulated air branch,
-an interior ledge and a sleeved, sealed service penetration. Its interior
-partition controls the mounted circuits, water supply, recess and interface parts.
-Use the framing and services views to inspect the concealed components.
+| Example | What it demonstrates |
+| --- | --- |
+| [Assemblies](examples/assemblies.json) | Nine separate construction packages with layers, framing, services and connections. The [catalog guide](docs/guides/assembly-catalog.md) explains inspection and reuse. |
+| [Hillside Deck House](examples/hillside-deck-house.json) | A two-storey home with terrain, foundations, deck, stairs, guards/screens, drainage and solar studies. Follow its [cutaway walkthrough](docs/guides/viewer-guide.md#cutaway-views-of-hillside-deck-house). |
+| [Master Suite Gable House](examples/master-suite-gable-house.json) | A detailed framed shell, bedroom and ensuite, electrical circuits and plumbing. Its [twelve-view tour](docs/guides/master-suite-gable-house.md) includes interiors, plan, framing and services. |
 
-[Integrated Authoring House](examples/integrated-authoring-house.json) adds named
-named construction identities, two windows sharing stock and reusable
-partition/deck assemblies. Its [worked edits](skills/home-design/references/examples.md#complete-changeset-examples)
-demonstrate coordinated movement, local stock changes, layer insertion/reordering
-and assembly duplication/adaptation.
-
-[Assemblies](examples/assemblies.json) is a collection of nine distinct construction
-packages, including complete layered walls, roof, floor/deck, wet-wall services,
-ventilation, reinforced masonry foundations, a screened entrance and a king-post
-truss. The [catalog guide](docs/guides/assembly-catalog.md) explains how to inspect
-and reuse them.
+Select a **Saved view** in the viewer, or discover prepared views with
+`home-design views MODEL` and capture one with
+`home-design render MODEL --named-view ID --output DIRECTORY`.
+The [worked edits](skills/home-design/references/examples.md#complete-changeset-examples)
+cover window placement, shared stock, named layers, serviced-wall rotation and
+package duplication/adaptation using these same models. Dimensions and product
+specifications illustrate authoring capabilities and require project-specific
+engineering before construction.
 
 ## The conversational workflow
 
@@ -190,6 +178,7 @@ The canonical home JSON and intentional change-set JSON form the authoring histo
 - [Home-design skill and technical authoring references](skills/home-design/SKILL.md)
 - [IFC representation contract](docs/reference/ifc-contract.md)
 - [Browser viewer guide](docs/guides/viewer-guide.md)
+- [Images for AI design review](docs/guides/visual-inspection.md)
 - [IFC export and website sharing](docs/guides/export-and-sharing.md)
 - [Website export and deployment](docs/guides/website-deployment.md)
 - [Architecture and developer guide](docs/architecture.md)

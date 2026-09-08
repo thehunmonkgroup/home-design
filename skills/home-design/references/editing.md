@@ -25,25 +25,25 @@ home-design inspect design/home.json --object door.south-entry --references --ty
 home-design inspect design/home.json --object opening.door.south --references --relationships
 ```
 
-The AI then creates a change file with the current `baseRevision` and value preconditions. A minimal example is [move-window.json](../../../examples/change-sets/move-window.json):
+The AI then creates a change file with the current `baseRevision` and value preconditions. For an unchanged Master Suite copy at revision 9, a minimal example is [move-window.json](../../../examples/change-sets/move-window.json):
 
 ```json
 {
   "changeVersion": "0.1",
   "id": "change.move-north-window",
-  "description": "Move the north window 500 mm east.",
-  "baseRevision": 1,
+  "description": "Move the north window 500 mm west.",
+  "baseRevision": 9,
   "preconditions": [
     {
       "path": "/elements/opening.window.north/placement/station",
-      "equals": 4000
+      "equals": 7200
     }
   ],
   "operations": [
     {
       "op": "moveOpening",
       "openingId": "opening.window.north",
-      "station": 4500
+      "station": 6700
     }
   ]
 }

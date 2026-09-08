@@ -57,8 +57,8 @@ def test_validate_inspect_apply_build_workflow(
 
     change_path = (
         Path(__file__).resolve().parents[2]
-        / "examples"
-        / "change-sets"
+        / "tests"
+        / "fixtures"
         / "move-window.json"
     )
     source_revision = json.loads(model_file.read_text(encoding="utf-8"))["revision"]

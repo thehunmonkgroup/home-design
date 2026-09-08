@@ -15,6 +15,11 @@ properties alongside native classes, types and relationships; these properties
 do not create an editable extrusion or Boolean feature history in a CAD importer.
 The IFC geometry-kernel regression checks compare converted material volumes and
 world-space extents with the resolved model, including trimmed and rotated stock.
+Before writing a cable face set with coincident vertices, the adapter
+regularizes its surface folds and verifies each connected shell's volume.
+This preserves closed cable bodies through native import at compound bends;
+independent shells retain their topology. Canonical model geometry and quantities
+remain the reference for the export comparison.
 
 Native `IfcDoor` and `IfcWindow` `OverallWidth`/`OverallHeight` retain their hosted
 rough-opening dimensions in project millimetres. Nominal stock, rough-opening

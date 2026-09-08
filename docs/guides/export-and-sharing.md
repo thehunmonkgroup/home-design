@@ -9,9 +9,7 @@ website packaging, previewing and hosting.
 ## Build a revision
 
 ```bash
-home-design build design/home.json \
-  --output build \
-  --web-assets web/public/model
+home-design build design/home.json
 ```
 
 The build produces IFC, browser assets, drawings and reports in
@@ -21,14 +19,26 @@ therefore produces `build/home/`.
 Rebuilding replaces that generated model directory. Other model directories and
 files outside the replaced directory are preserved.
 
+When `--web-assets` is omitted, the command searches the working directory and
+its parents for the nearest Home Design viewer, either in that directory or its
+`web/` child, and publishes to the viewer's `public/model/` directory. From this
+checkout, this selects `web/public/model`. Without a viewer workspace, the build
+only writes artifacts. Use `--web-assets PATH` to choose another collection or
+`--no-web-assets` to skip viewer publication. Relative paths, including the default
+`build` root, are relative to the working directory.
+
 ### Build a collection
 
 ```bash
 home-design validate 'examples/*.json' --json
 home-design build 'examples/*.json' \
   --output build \
-  --web-assets web/public/model
+  --web-assets web/public/model --web-assets-mode replace
 ```
+
+This publishes exactly Assemblies, Hillside Deck House and Master Suite Gable
+House, replacing the viewer's managed collection. Omit `--web-assets-mode replace`
+when adding examples alongside other published models.
 
 Both commands accept multiple filenames and glob patterns. Quote patterns for CLI
 expansion; unquoted shell-expanded filenames also work. Recursive `**` patterns

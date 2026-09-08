@@ -1,0 +1,25 @@
+{
+  "changeVersion": "0.1",
+  "id": "change.rotate-electrical-wall",
+  "description": "Rotate electrical wall.",
+  "baseRevision": 8,
+  "preconditions": [
+    {
+      "path": "/elements/assembly.exterior-wall.wall.exterior/path/end/offset",
+      "equals": [
+        4000,
+        0
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "op": "set",
+      "path": "/elements/assembly.exterior-wall.wall.exterior/path/end/offset",
+      "value": [
+        0,
+        4000
+      ]
+    }
+  ]
+}

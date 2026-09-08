@@ -1,4 +1,4 @@
-"""Public complete-shell coordination across framing, mounted services and sealed interfaces."""
+"""Public assembly coordination across framing, mounted services and sealed interfaces."""
 
 from __future__ import annotations
 
@@ -27,9 +27,7 @@ class ShellFixture:
     def load() -> JsonObject:
         """Read the public canonical model independently for each regression."""
         return ModelLoader().load(
-            Path(__file__).resolve().parents[2]
-            / "examples"
-            / "complete-shell-coordination-house.json"
+            Path(__file__).resolve().parents[2] / "examples" / "assemblies.json"
         )
 
 
@@ -43,17 +41,17 @@ def test_public_shell_has_physical_framing_services_and_deterministic_scene(
     first, second = ModelResolver(model).resolve(), ModelResolver(model).resolve()
     assert first.to_dict() == second.to_dict()
     for identity in (
-        "framing.wall.north",
-        "framing.partition",
-        "framing.floor",
-        "framing.deck",
-        "framing.roof.1",
-        "framing.roof.2",
+        "assembly.exterior-wall.framing.wall",
+        "assembly.interior-wet-wall.framing.partition",
+        "assembly.insulated-floor.framing.joists",
+        "assembly.complete-deck.framing.joists",
+        "assembly.insulated-roof.rafters.south",
+        "assembly.insulated-roof.rafters.north",
     ):
         assert first.element(identity).data["memberCount"]
     schedules = ModelReports(first).schedules()
-    assert len(Authoring.array(schedules["foundations"])) == 8
-    assert len(Authoring.array(schedules["circuitSchedules"])) == 2
+    assert len(Authoring.array(schedules["foundations"])) == 13
+    assert len(Authoring.array(schedules["circuitSchedules"])) == 1
     assert {
         "serviceDevices",
         "serviceRoutes",
@@ -88,23 +86,15 @@ def test_public_shell_has_physical_framing_services_and_deterministic_scene(
 def test_partition_rotation_coordinates_branches_cuts_and_native_identity(
     tmp_path: Path, loader: ModelLoader, validator: ModelValidator
 ) -> None:
-    """A host rotation carries electrical/water branches, sleeve seals and a ledge while preserving quantities and identities."""
+    """A wet-wall rotation carries plumbing, sleeve seals and a ledge while preserving quantities and identities."""
     model = ShellFixture.load()
-    changed = ChangeEngine(loader, validator).apply(
+    engine = ChangeEngine(loader, validator)
+    changed = engine.apply(
         model,
-        {
-            "changeVersion": "0.1",
-            "id": "change.public-shell.partition",
-            "description": "Rotate the coordinated service partition",
-            "baseRevision": model["revision"],
-            "operations": [
-                {
-                    "op": "moveAnchor",
-                    "anchorId": "electrical.anchor.wall.end",
-                    "position": [1500, 6500],
-                },
-            ],
-        },
+        engine.load_change(
+            Path(__file__).resolve().parents[2]
+            / "examples/change-sets/rotate-service-partition.json"
+        ),
     )
     before, after = ModelResolver(model).resolve(), ModelResolver(changed).resolve()
     identities = {element.element_id for element in before.elements}
@@ -120,12 +110,12 @@ def test_partition_rotation_coordinates_branches_cuts_and_native_identity(
                 abs=1e-5,
             ), identity
     assert (
-        before.element("plumbing.pipe.supply").data["path"]
-        != after.element("plumbing.pipe.supply").data["path"]
+        before.element("assembly.interior-wet-wall.plumbing.pipe.supply").data["path"]
+        != after.element("assembly.interior-wet-wall.plumbing.pipe.supply").data["path"]
     )
     assert (
-        before.element("mechanical.device.ahu").meshes
-        == after.element("mechanical.device.ahu").meshes
+        before.element("assembly.ventilation-branch.mechanical.device.ahu").meshes
+        == after.element("assembly.ventilation-branch.mechanical.device.ahu").meshes
     )
     old_schedules, new_schedules = (
         ModelReports(before).schedules(),
@@ -160,20 +150,22 @@ def test_public_shell_reports_specific_coordination_failures(
     model = ShellFixture.load()
     elements = Authoring.object(model["elements"])
     if failure == "limit":
-        cut = Authoring.object(elements["interface.cut.partition"])
+        cut = Authoring.object(
+            elements["assembly.interior-wet-wall.interface.cut.partition"]
+        )
         limit = Authoring.object(Authoring.object(cut["limits"])["authoredOpening"])
         Authoring.object(limit["maximumExtent"])["x"] = 30
     else:
         elements["member.obstruction"] = {
             "kind": "member",
             "name": "New service obstruction",
-            "type": "memberType.shell.stud",
+            "type": "assembly.interior-wet-wall.memberType.shell.stud",
             "role": "brace",
             "axis": [
                 {
                     "host": {
                         "kind": "route",
-                        "element": "plumbing.pipe.supply",
+                        "element": "assembly.interior-wet-wall.plumbing.pipe.supply",
                         "station": station,
                     }
                 }

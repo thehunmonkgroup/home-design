@@ -95,6 +95,15 @@ route with declared cavity ownership. Cuts measure only material actually
 removed after cavity composition, including where bends occur inside hosts.
 General service clash analysis is separate from this cavity passage check.
 
+When a run passes through a stud, plate or other cavity occupant, omit `occupies`
+on that run and use an `envelope` penetration on each intersected wall/floor/roof
+and framing host. Cavity ownership is checked before penetrations: declaring the
+run and uncut timber as occupants would claim the same volume and fail. The
+explicit cuts remove both infill and timber from the passage while the service
+retains its own material quantity. Enable `coordinationChecks` to verify the
+resulting physical clearances. Add cuts only to hosts actually intersected by
+the run; empty cuts fail validation.
+
 
 ## Service insulation
 

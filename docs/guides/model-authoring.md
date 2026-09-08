@@ -61,16 +61,17 @@ The [assembly catalog](assembly-catalog.md) provides nine separate construction
 examples in one model. Use it to explore what goes into a wall, roof, floor,
 deck, service partition, ventilation branch, foundation, entrance or truss.
 
-[Complete Shell Coordination House](../../examples/complete-shell-coordination-house.json)
-is a public example with wall, floor, roof and deck framing, concealed services,
-an interior ledge and a sealed service penetration. The dimensions and
-specifications illustrate authoring capabilities.
+[Master Suite Gable House](master-suite-gable-house.md) provides a complete framed
+shell with bedroom and ensuite partitions, electrical circuits and plumbing.
+Its **Saved view** tour exposes twelve prepared perspectives of the rooms,
+framing and services.
 
-[Integrated Authoring House](../../examples/integrated-authoring-house.json) also
-provides two windows sharing a product definition and separate reusable wall/deck
-packages. Ask the AI to change one window, add a lining layer or copy and resize
-a package; the [worked examples](../../skills/home-design/references/examples.md)
-describe the expected results.
+[Hillside Deck House](../../examples/hillside-deck-house.json) demonstrates terrain,
+multiple storeys, deck supports, stairs, guards and drainage. Its upper and lower
+view windows share a product definition. Ask the AI to resize just one window,
+add a lining to an assembly wall, or copy and resize the catalog deck. The
+[worked examples](../../skills/home-design/references/examples.md) specify source
+models, starting revisions and expected results.
 
 Use the viewer's **Framing** and **Services** views to expose concealed components.
 Select parts, inspect sections, and compare the dimensions and quantities with

@@ -19,13 +19,20 @@ from home_design.json_types import JsonObject, JsonValue
 from home_design.resolved import MeshData, ResolvedElement, ResolvedModel
 from home_design.view_navigation import ViewLink, ViewNavigation
 from home_design.view_properties import ViewProperties
+from home_design.render_sections import RenderSections
+from home_design.named_views import NamedViews
 
 
 class GltfExporter:
     """Export resolved meshes with stable, selectable node names."""
 
     def export(
-        self, model: ResolvedModel, glb_path: Path, manifest_path: Path
+        self,
+        model: ResolvedModel,
+        glb_path: Path,
+        manifest_path: Path,
+        inspection_sections: tuple[tuple[int, float, bool], ...] = (),
+        named_views: list[JsonObject] | None = None,
     ) -> JsonObject:
         """Write a binary glTF scene and its element manifest.
 
@@ -38,6 +45,7 @@ class GltfExporter:
         scene = trimesh.Scene(base_frame="home-design-root")
         materials = self._materials(model.materials)
         element_entries: dict[str, JsonValue] = {}
+        mesh_entries: dict[str, JsonValue] = {}
         links = list(ViewNavigation(model).build())
         for element in model.elements:
             node_names: list[JsonValue] = []
@@ -79,8 +87,41 @@ class GltfExporter:
                     transform=transform,
                 )
                 node_names.append(node_name)
+                mesh_entries[node_name] = self._mesh_entry(element, child, mesh_data)
                 if child is not None:
                     child_nodes[child.element_id].append(node_name)
+                for cap_index, section in enumerate(inspection_sections):
+                    caps = RenderSections.caps(mesh_data, (section,))
+                    if not caps:
+                        continue
+                    cap = caps[0]
+                    cap_name = f"{node_name}_section_{cap_index}"
+                    cap_mesh = self._mesh(cap, materials)
+                    cap_origin = np.asarray(cap_mesh.bounds, dtype=np.float64).mean(
+                        axis=0
+                    )
+                    cap_mesh.apply_translation(-cap_origin)
+                    cap_transform = np.eye(4, dtype=np.float64)
+                    cap_transform[:3, 3] = cap_origin
+                    scene.add_geometry(
+                        cap_mesh,
+                        node_name=cap_name,
+                        geom_name=cap_name,
+                        transform=cap_transform,
+                    )
+                    node_names.append(cap_name)
+                    mesh_entries[cap_name] = {
+                        **self._mesh_entry(element, child, cap),
+                        "inspectionCap": True,
+                        "capOf": node_name,
+                        "section": {
+                            "axis": "xyz"[section[0]],
+                            "position": section[1],
+                            "keep": "below" if section[2] else "above",
+                        },
+                    }
+                    if child is not None:
+                        child_nodes[child.element_id].append(cap_name)
             entry = self._entry(element, node_names)
             entry["children"] = [child.element_id for child in children]
             element_entries[element.element_id] = entry
@@ -117,6 +158,7 @@ class GltfExporter:
                 "mapping": ["x/1000", "z/1000", "-y/1000"],
             },
             "elements": element_entries,
+            "meshes": mesh_entries,
             "navigation": {
                 "format": "home-design-navigation-0.1",
                 "links": [link.to_dict() for link in links],
@@ -132,6 +174,9 @@ class GltfExporter:
                 "drawings": "drawings.svg",
             },
         }
+        if named_views:
+            NamedViews.check_references(named_views, manifest)
+            manifest["namedViews"] = [dict(entry) for entry in named_views]
         try:
             glb_path.parent.mkdir(parents=True, exist_ok=True)
             manifest_path.parent.mkdir(parents=True, exist_ok=True)
@@ -145,6 +190,25 @@ class GltfExporter:
         except (OSError, ValueError) as error:
             raise ExportError(f"Cannot export GLB scene: {error}") from error
         return manifest
+
+    @staticmethod
+    def _mesh_entry(
+        element: ResolvedElement, child: ResolvedElement | None, mesh: MeshData
+    ) -> JsonObject:
+        """Map render nodes to semantic stock identities without parsing node names."""
+        result: JsonObject = {
+            "elementId": child.element_id if child is not None else element.element_id,
+            "role": mesh.role,
+            "materialId": mesh.material_id,
+        }
+        match = re.search(r"(?:^|:)layer:(\d+)(?:$|:)", mesh.role)
+        layers = element.data.get("layers")
+        if match and isinstance(layers, list):
+            index = int(match.group(1))
+            layer = layers[index] if index < len(layers) else None
+            if isinstance(layer, dict):
+                result["layerId"] = layer.get("id", index)
+        return result
 
     @staticmethod
     def _entry(element: ResolvedElement, nodes: list[JsonValue]) -> JsonObject:

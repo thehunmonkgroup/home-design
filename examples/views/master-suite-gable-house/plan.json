@@ -1,0 +1,15 @@
+{
+  "width": 1600,
+  "height": 1200,
+  "labels": false,
+  "camera": {
+    "preset": "top",
+    "projection": "orthographic"
+  },
+  "sections": [
+    {
+      "axis": "z",
+      "position": 1200
+    }
+  ]
+}

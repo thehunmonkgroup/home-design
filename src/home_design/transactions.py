@@ -15,6 +15,7 @@ from home_design.errors import HomeDesignError
 from home_design.json_types import JsonObject
 from home_design.loader import ModelLoader
 from home_design.source_state import SourceState
+from home_design.named_views import NamedViews
 
 
 @dataclass(slots=True)
@@ -95,6 +96,7 @@ class DesignTransaction:
         change = self.engine.load_change(change_path)
         candidate = self.engine.candidate(source.model, change)
         prepared = self.build_service.prepare(candidate)
+        named_views = NamedViews(destination)
         if dry_run:
             return self._result(candidate, None, False, None)
         if destination == change_path.resolve():
@@ -117,11 +119,12 @@ class DesignTransaction:
             prefix="home-design-transaction-", dir=build_directory.parent
         ) as temporary:
             staged = self.build_service.export_prepared(
-                prepared, Path(temporary) / "model"
+                prepared, Path(temporary) / "model", named_views
             )
             with SourceState.lock(destination):
                 source.assert_unchanged()
                 previous.assert_unchanged()
+                named_views.assert_unchanged()
                 journal_path = journal_directory / f"{uuid4().hex}.json"
                 journal: JsonObject = {
                     "format": self.FORMAT,

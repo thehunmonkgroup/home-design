@@ -2,9 +2,9 @@
 
 Use this workflow to add an outlet to an existing serviced wall. Read
 [editing](editing.md) for transaction mechanics; use [electrical](electrical.md)
-for stock and schedule fields. Integrated Authoring House provides an existing
-protected two-circuit wall network; Assemblies provides a smaller exterior-wall
-circuit within the construction catalog.
+for stock and schedule fields. Master Suite Gable House provides a house
+distribution network with seven electrical circuits; Assemblies provides a smaller
+exterior-wall circuit within the construction catalog.
 
 ## Inspect the connection and physical space
 

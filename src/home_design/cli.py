@@ -31,6 +31,8 @@ from home_design.constants import resource_root
 from home_design.capabilities import ComponentRegistry
 from home_design.migrations import ModelMigration
 from home_design.recipe_commands import RecipeCommands
+from home_design.visual_render import RenderRuntime, VisualRenderer
+from home_design.named_views import NamedViews
 
 LOGGER = logging.getLogger("home_design")
 
@@ -146,6 +148,31 @@ class HomeDesignCli:
                 )
                 print(json.dumps(result, indent=2))
                 return 0
+            if args.command == "render-setup":
+                print(json.dumps(RenderRuntime.setup(args.web_project), indent=2))
+                return 0
+            if args.command == "render":
+                result = VisualRenderer(BuildService(loader, validator)).render(
+                    args.model,
+                    args.view,
+                    args.output,
+                    args.web_project,
+                    args.named_view,
+                )
+                print(json.dumps(result, indent=2))
+                return 0
+            if args.command == "views":
+                loader.load(args.model)
+                print(
+                    json.dumps(
+                        {
+                            "model": str(args.model),
+                            "views": NamedViews(args.model).entries,
+                        },
+                        indent=2,
+                    )
+                )
+                return 0
             self.parser.error("A command is required")
         except (HomeDesignError, OSError, ValueError, KeyError) as error:
             LOGGER.debug("Command failure", exc_info=True)
@@ -183,6 +210,44 @@ class HomeDesignCli:
             "--debug", action="store_true", help="Show debug logging and tracebacks"
         )
         subparsers = parser.add_subparsers(dest="command", required=True)
+        render = subparsers.add_parser(
+            "render",
+            help="Render a validated model image with camera, visibility and section controls",
+        )
+        render.add_argument(
+            "model", type=Path, help="Canonical model to inspect without editing"
+        )
+        view_choice = render.add_mutually_exclusive_group()
+        view_choice.add_argument(
+            "--named-view", help="Named view ID; discover with home-design views MODEL"
+        )
+        view_choice.add_argument(
+            "--view",
+            type=Path,
+            help="Visual inspection view JSON; defaults to an angled overview",
+        )
+        render.add_argument(
+            "--output",
+            type=Path,
+            required=True,
+            help="Dedicated generated image/report directory",
+        )
+        render.add_argument(
+            "--web-project", type=Path, help="Override bundled capture source directory"
+        )
+        setup = subparsers.add_parser(
+            "render-setup",
+            help="Install Chromium and prepare the optional visual inspection runtime",
+        )
+        setup.add_argument(
+            "--web-project", type=Path, help="Override bundled capture source directory"
+        )
+        views = subparsers.add_parser(
+            "views", help="List a model's named views in tour order"
+        )
+        views.add_argument(
+            "model", type=Path, help="Canonical model with companion views"
+        )
         subparsers.add_parser(
             "resources",
             help="Locate installed schemas, progressive skill, examples and documentation",
@@ -463,12 +528,18 @@ class HomeDesignCli:
             "models", nargs="+", help="Canonical model JSON files or glob patterns"
         )
         build_parser.add_argument(
-            "--output", type=Path, default=Path("build"), help="Artifact directory"
+            "--output", type=Path, default=Path("build"),
+            help="Artifact root; each model uses <root>/<filename-stem>/ (default: %(default)s)",
         )
-        build_parser.add_argument(
+        web_destination = build_parser.add_mutually_exclusive_group()
+        web_destination.add_argument(
             "--web-assets",
             type=Path,
-            help="Also publish GLB and manifest for the web viewer",
+            help="Viewer asset root (default: discover the nearest Home Design viewer from the working directory)",
+        )
+        web_destination.add_argument(
+            "--no-web-assets", action="store_true",
+            help="Build artifacts without publishing to a viewer",
         )
         build_parser.add_argument(
             "--web-assets-mode",
@@ -817,12 +888,38 @@ class HomeDesignCli:
         return 0
 
     @staticmethod
+    def discover_web_assets() -> Path | None:
+        """Find the nearest workspace viewer without using installed resources.
+
+        :returns: The viewer's public model directory, or None outside a viewer workspace.
+        """
+        working_directory = Path.cwd().resolve()
+        for parent in (working_directory, *working_directory.parents):
+            for candidate in (parent, parent / "web"):
+                package = candidate / "package.json"
+                if not package.is_file() or not (candidate / "index.html").is_file():
+                    continue
+                try:
+                    metadata = json.loads(package.read_text(encoding="utf-8"))
+                except (OSError, ValueError):
+                    continue
+                if isinstance(metadata, dict) and metadata.get("name") == "home-design-viewer":
+                    destination = candidate / "public" / "model"
+                    LOGGER.debug("Discovered viewer assets at %s", destination)
+                    return destination
+        LOGGER.debug("No Home Design viewer found from %s", working_directory)
+        return None
+
+    @staticmethod
     def _build(
         args: argparse.Namespace, loader: ModelLoader, validator: ModelValidator
     ) -> int:
         paths = ModelBatch.expand(args.models)
+        web_assets = None if args.no_web_assets else args.web_assets
+        if web_assets is None and not args.no_web_assets:
+            web_assets = HomeDesignCli.discover_web_assets()
         batch = BuildService(loader, validator).build_many(
-            paths, args.output, args.web_assets, args.web_assets_mode
+            paths, args.output, web_assets, args.web_assets_mode
         )
         print(
             json.dumps(

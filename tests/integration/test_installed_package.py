@@ -38,11 +38,18 @@ def test_sdist_wheel_resources_and_guarded_cli_outside_checkout(tmp_path: Path) 
     repository = Path(__file__).resolve().parents[2]
     source = tmp_path / "source"
     source.mkdir()
-    for name in ("src", "schema", "examples", "docs", "skills", "recipes"):
+    for name in ("src", "schema", "examples", "docs", "skills", "recipes", "web"):
         shutil.copytree(
             repository / name,
             source / name,
-            ignore=shutil.ignore_patterns("__pycache__", "*.egg-info", "_resources"),
+            ignore=shutil.ignore_patterns(
+                "__pycache__",
+                "*.egg-info",
+                "_resources",
+                "node_modules",
+                "public",
+                "dist",
+            ),
         )
     for name in ("pyproject.toml", "MANIFEST.in", "README.md", "TODO.md"):
         shutil.copyfile(repository / name, source / name)
@@ -77,17 +84,40 @@ def test_sdist_wheel_resources_and_guarded_cli_outside_checkout(tmp_path: Path) 
         skill.read_bytes() == (repository / "skills/home-design/SKILL.md").read_bytes()
     )
     assert (skill.parent / "references/editing.md").is_file()
+    resources = Path(str(locations["root"]))
+    for relative in (
+        "web/capture.html",
+        "web/capture.config.ts",
+        "web/app/capture.ts",
+        "web/app/lib/visual-view.ts",
+        "schema/render-view.schema.json",
+    ):
+        assert (resources / relative).read_bytes() == (
+            repository / relative
+        ).read_bytes()
     examples = Path(str(locations["examples"]))
-    assert (examples / "integrated-authoring-house.json").is_file()
+    assert {path.name for path in examples.glob("*.json")} == {
+        "assemblies.json",
+        "hillside-deck-house.json",
+        "master-suite-gable-house.json",
+    }
     assert (examples / "assemblies.json").is_file()
+    assert (examples / "master-suite-gable-house.json").is_file()
+    tour = cli.run("views", str(examples / "master-suite-gable-house.json"))
+    assert isinstance(tour["views"], list) and len(tour["views"]) == 12
+    for entry in tour["views"]:
+        assert isinstance(entry, dict)
+        assert (
+            examples / "views/master-suite-gable-house" / str(entry["file"])
+        ).is_file()
     assert (skill.parent / "references/catalog.md").is_file()
     assert (Path(str(locations["recipes"])) / "exterior-wall.json").is_file()
     assert (examples / "change-sets/adapt-copied-deck.json").is_file()
     model = workspace / "home.json"
-    shutil.copyfile(examples / "single-story-gable-house.json", model)
+    shutil.copyfile(examples / "hillside-deck-house.json", model)
     assert cli.run("validate", str(model), "--json")["valid"] is True
     assert cli.run("convert-length", "8 ft 6 1/2 in")["millimetres"] == "2603.5"
-    change = examples / "change-sets/move-window.json"
+    change = examples / "change-sets/local-shared-window.json"
     dry = cli.run("transact", str(model), str(change), "--dry-run")
     assert dry["written"] is False
     committed = cli.run("transact", str(model), str(change))
@@ -100,16 +130,24 @@ def test_sdist_wheel_resources_and_guarded_cli_outside_checkout(tmp_path: Path) 
     catalog = cli.run("recipes")["recipes"]
     assert isinstance(catalog, list)
     assert {recipe["id"] for recipe in catalog} == {
-        f"recipe.{name}" for name in (
-            "serviced-partition", "coordinated-deck", "exterior-wall",
-            "insulated-roof", "complete-deck", "insulated-floor",
-            "interior-wet-wall", "ventilation-branch", "reinforced-foundation",
-            "screened-entrance", "king-post-truss",
+        f"recipe.{name}"
+        for name in (
+            "serviced-partition",
+            "coordinated-deck",
+            "exterior-wall",
+            "insulated-roof",
+            "complete-deck",
+            "insulated-floor",
+            "interior-wet-wall",
+            "ventilation-branch",
+            "reinforced-foundation",
+            "screened-entrance",
+            "king-post-truss",
         )
     }
     migration = workspace / "migration.json"
     cli.run("migrate", str(model), "--output", str(migration))
-    cli.run("transact", str(model), str(migration))
+    assert cli.run("transact", str(model), str(migration))["published"] is True
     assembly_change = workspace / "assembly.json"
     cli.run(
         "prepare",
@@ -119,8 +157,10 @@ def test_sdist_wheel_resources_and_guarded_cli_outside_checkout(tmp_path: Path) 
         "assembly.packaged",
         "--recipe",
         "serviced-partition",
+        "--param",
+        "origin=[20000,0]",
         "--bind",
-        "binding.storey=level.ground",
+        "binding.storey=level.lower",
         "--output",
         str(assembly_change),
     )

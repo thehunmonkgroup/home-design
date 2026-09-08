@@ -6,6 +6,7 @@ import html
 import math
 from pathlib import Path
 
+from shapely import union_all
 from shapely.geometry import LineString, MultiPolygon, Polygon
 from shapely.ops import polygonize, unary_union
 
@@ -109,7 +110,7 @@ class DrawingExporter:
                 polygons = (
                     self.section_polygons(mesh, axis, position)
                     if view.get("kind") == "section"
-                    else self._project(mesh, axis)
+                    else self.project_polygons(mesh, axis)
                 )
                 if not polygons:
                     continue
@@ -207,17 +208,19 @@ class DrawingExporter:
         return vertex[0], vertex[1]
 
     @classmethod
-    def _project(cls, mesh: MeshData, axis: int) -> list[Polygon]:
+    def project_polygons(cls, mesh: MeshData, axis: int) -> list[Polygon]:
+        """Union projected facets on a sub-micron grid to stabilize coincident edges."""
         polygons = [
             Polygon([cls._point(mesh.vertices[index], axis) for index in face])
             for face in mesh.faces
         ]
-        union = unary_union(
+        union = union_all(
             [
                 polygon
                 for polygon in polygons
                 if polygon.area > 0.001 and polygon.is_valid
-            ]
+            ],
+            grid_size=0.000001,
         )
         return (
             list(union.geoms)

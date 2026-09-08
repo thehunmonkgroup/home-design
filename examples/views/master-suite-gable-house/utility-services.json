@@ -1,0 +1,29 @@
+{
+  "width": 1600,
+  "height": 1200,
+  "labels": false,
+  "isolate": {
+    "ids": [
+      "electric.panel",
+      "equipment.water-heater",
+      "outlet.water-heater",
+      "cable.water-heater",
+      "water.cold.equipment.water-heater",
+      "water.hot.header-feed"
+    ],
+    "contents": true
+  },
+  "camera": {
+    "position": [
+      8800,
+      -500,
+      2000
+    ],
+    "target": [
+      9350,
+      1000,
+      1100
+    ],
+    "fov": 70
+  }
+}

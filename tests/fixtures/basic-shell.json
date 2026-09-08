@@ -1,11 +1,11 @@
 {
-  "$schema": "../schema/home-model-0.1.schema.json",
+  "$schema": "../../schema/home-model-0.1.schema.json",
   "modelVersion": "0.1",
   "revision": 1,
   "project": {
     "id": "project.reference-home",
-    "name": "Single-Story Gable House",
-    "description": "A simple single-story home with a gable roof, an attached south deck, and a living space enclosed by exterior walls with door and window openings. An introductory architectural example, not a construction-ready design.",
+    "name": "Synthetic shell fixture",
+    "description": "Small synthetic shell for general geometry, validation and transaction tests.",
     "site": {
       "id": "site.reference",
       "name": "Reference site"

@@ -1,0 +1,18 @@
+{
+  "width": 1600,
+  "height": 1200,
+  "labels": false,
+  "camera": {
+    "position": [
+      3500,
+      2400,
+      1650
+    ],
+    "target": [
+      1750,
+      900,
+      1050
+    ],
+    "fov": 78
+  }
+}

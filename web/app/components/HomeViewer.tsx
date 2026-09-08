@@ -10,6 +10,9 @@ import {
   Group,
   HemisphereLight,
   Mesh,
+  NeutralToneMapping,
+  NoToneMapping,
+  OrthographicCamera,
   PCFSoftShadowMap,
   PerspectiveCamera,
   Raycaster,
@@ -26,6 +29,7 @@ import {
   defaultHiddenElementIds,
   elementIdForObject,
   filterElementGroups,
+  generatedElementIds,
   isolateElements,
   nodeElementIndex,
   reviewElementIds,
@@ -33,7 +37,7 @@ import {
   type RenderManifest,
   type ReviewPreset,
 } from '../lib/model';
-import { canonicalSectionPlane, configureDirectionalShadow, configureOrbitControls, disposeSceneResources, frameBounds, frameModel, modelNorthRotation } from '../lib/scene';
+import { canonicalSectionPlane, configureDirectionalShadow, configureOrbitControls, disposeSceneResources, frameBounds, frameModel, isObjectVisible, modelNorthRotation } from '../lib/scene';
 import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, type CatalogModel } from '../lib/catalog';
 import ViewOrientation from './ViewOrientation';
 import DesignRequirements from './DesignRequirements';
@@ -46,14 +50,19 @@ import { PickGesture } from '../lib/pick-gesture';
 import { contextElementIds, navigationGroups, reinforcementElementIds, selectionNodes, type ContextAction, type NavigationGrouping } from '../lib/navigation';
 import type { DisplayUnits } from '../lib/properties';
 import { readPanelVisibility, savePanelVisibility, type PanelVisibility, type ReviewPanel } from '../lib/panels';
+import { NamedViewPresentation } from '../lib/named-views';
+import { activeCapNodes, type VisualView } from '../lib/visual-view';
 
 interface SceneHandle {
   controls: OrbitControls;
-  camera: PerspectiveCamera;
+  camera: PerspectiveCamera | OrthographicCamera;
   model: Group;
   renderer: WebGLRenderer;
   scene: Scene;
   sun: DirectionalLight;
+  presentation: NamedViewPresentation;
+  setCamera: (camera: PerspectiveCamera | OrthographicCamera, target: Vector3) => void;
+  setInspectionLighting: (enabled: boolean) => void;
 }
 
 export default function HomeViewer() {
@@ -109,6 +118,10 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const highlight = useRef<Box3Helper | null>(null);
   const manifestRef = useRef<RenderManifest | null>(null);
   const hiddenIdsRef = useRef<ReadonlySet<string>>(new Set());
+  const nodeMask = useRef<Set<string> | null>(null);
+  const activeView = useRef<VisualView>({});
+  const [namedViewId, setNamedViewId] = useState('');
+  const [viewMessage, setViewMessage] = useState('');
   const [manifest, setManifest] = useState<RenderManifest | null>(null);
   const [hiddenIds, setHiddenIds] = useState<ReadonlySet<string>>(new Set());
   const [history, dispatchSelection] = useReducer(selectionHistoryReducer, emptySelectionHistory);
@@ -134,6 +147,10 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const filteredGroups = useMemo(() => filterElementGroups(groups, componentQuery), [groups, componentQuery]);
   const matchCount = new Set(filteredGroups.flatMap((group) => group.elements.map(([id]) => id))).size;
   const selected = selectedId && manifest ? manifest.elements[selectedId] : null;
+  const selectedVisibilityIds = manifest && selected && selectedId
+    ? [...generatedElementIds(manifest, selected.nodes.length ? [selectedId] : contextElementIds(manifest, selectedId))]
+        .filter((id) => canToggleVisibility(manifest.elements[id]))
+    : [];
   const spaceIds = useMemo(() => manifest
     ? Object.entries(manifest.elements)
         .filter(([, element]) => element.kind === 'space' && canToggleVisibility(element))
@@ -165,6 +182,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     for (const object of objects) bounds.expandByObject(object);
     const helper = new Box3Helper(bounds, new Color('#eaa340'));
     helper.name = 'selection-outline';
+    helper.visible = objects.some(isObjectVisible);
     handle.scene.add(helper);
     highlight.current = helper;
   }, [selectedId, manifest]);
@@ -187,6 +205,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     const handle = sceneHandle.current;
     const study = manifestRef.current?.solarStudies?.find((entry) => entry.id === studyId);
     if (!handle) return;
+    handle.setInspectionLighting(false);
     const direction = study ? new Vector3(study.sunDirection[0], study.sunDirection[2], -study.sunDirection[1]) : undefined;
     handle.sun.intensity = study && study.altitudeDegrees <= 0 ? 0 : 3.2;
     configureDirectionalShadow(handle.sun, new Box3().setFromObject(handle.model), direction);
@@ -196,8 +215,63 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     setSectionAxis(axis);
     setSectionOffset(offset);
     const handle = sceneHandle.current;
-    if (handle) handle.renderer.clippingPlanes = axis === 'none' ? [] : [canonicalSectionPlane(axis, offset)];
+    if (handle) {
+      handle.renderer.clippingPlanes = axis === 'none' ? [] : [canonicalSectionPlane(axis, offset)];
+      activeView.current = { ...activeView.current, sections: axis === 'none' ? [] : [{ axis, position: offset }] };
+      const currentManifest = manifestRef.current;
+      if (currentManifest) {
+        const visible = new Set<string>();
+        handle.model.traverse((object) => { if (object instanceof Mesh && object.visible) visible.add(object.name); });
+        const next = activeCapNodes(currentManifest, visible, activeView.current);
+        handle.model.traverse((object) => { if (object instanceof Mesh) object.visible = next.has(object.name); });
+      }
+      setNamedViewId('');
+      setViewMessage('Custom section. Select a named view to restore its settings.');
+    }
   }, []);
+
+  const applyNamedView = (id: string) => {
+    const handle = sceneHandle.current;
+    const host = canvasHost.current;
+    if (!manifest || !handle || !host) return;
+    const entry = manifest.namedViews?.find((item) => item.id === id);
+    if (!entry) return;
+    try {
+      const result = handle.presentation.apply(handle.model, manifest, entry.view, Math.max(host.clientWidth, 1), Math.max(host.clientHeight, 1));
+      handle.renderer.clippingPlanes = result.planes;
+      handle.setCamera(result.camera, result.target);
+      handle.setInspectionLighting(true);
+      setSolarStudyId('');
+      nodeMask.current = result.visible;
+      activeView.current = entry.view;
+      hiddenIdsRef.current = result.hidden;
+      setHiddenIds(result.hidden);
+      const section = entry.view.sections?.[0];
+      setSectionAxis(section?.axis ?? 'none');
+      setSectionOffset(section?.position ?? 0);
+      selectElement(null);
+      setNamedViewId(id);
+      setViewMessage(entry.description);
+    } catch (error) {
+      setViewMessage(`View unavailable: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
+  const resetPresentation = () => {
+    const handle = sceneHandle.current;
+    if (!handle || !manifest) return;
+    handle.presentation.clear();
+    handle.setInspectionLighting(false);
+    activeView.current = {};
+    nodeMask.current = null;
+    handle.renderer.clippingPlanes = [];
+    setSectionAxis('none'); setSectionOffset(0);
+    setNamedViewId(''); setViewMessage('Default presentation restored.');
+    const camera = new PerspectiveCamera(42, Math.max(handle.renderer.domElement.clientWidth, 1) / Math.max(handle.renderer.domElement.clientHeight, 1), 0.02, 500);
+    handle.setCamera(camera, new Vector3());
+    setHiddenIds(defaultHiddenElementIds(manifest));
+    frameModel(camera, handle.controls, handle.model);
+  };
 
   useEffect(() => {
     const host = canvasHost.current;
@@ -205,21 +279,22 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     const controller = new AbortController();
     const scene = new Scene();
     scene.background = new Color('#d9ddd8');
-    const camera = new PerspectiveCamera(42, 1, 0.02, 500);
-    const renderer = new WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    let camera: PerspectiveCamera | OrthographicCamera = new PerspectiveCamera(42, 1, 0.02, 500);
+    const renderer = new WebGLRenderer({ antialias: true, powerPreference: 'high-performance', logarithmicDepthBuffer: true });
     renderer.outputColorSpace = SRGBColorSpace;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
     host.appendChild(renderer.domElement);
 
-    const controls = new OrbitControls(camera, renderer.domElement);
+    let controls = new OrbitControls(camera, renderer.domElement);
     configureOrbitControls(controls);
     const updateOrientation = () => setNorthRotation(modelNorthRotation(camera));
     controls.addEventListener('change', updateOrientation);
     updateOrientation();
 
-    scene.add(new HemisphereLight('#f3f5ef', '#77766d', 2.1));
+    const ambient = new HemisphereLight('#f3f5ef', '#77766d', 2.1);
+    scene.add(ambient);
     const sun = new DirectionalLight('#fff3da', 3.2);
     sun.position.set(-7, 12, 5);
     sun.castShadow = true;
@@ -232,12 +307,43 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     const pointer = new Vector2();
     let model = new Group();
     scene.add(model);
-    sceneHandle.current = { camera, controls, model, renderer, scene, sun };
+    const presentation = new NamedViewPresentation();
+    const setInspectionLighting = (enabled: boolean) => {
+      grid.visible = !enabled;
+      renderer.shadowMap.enabled = !enabled;
+      renderer.toneMapping = enabled ? NeutralToneMapping : NoToneMapping;
+      scene.background = new Color(enabled ? '#edf0f2' : '#d9ddd8');
+      ambient.color.set(enabled ? '#ffffff' : '#f3f5ef');
+      ambient.groundColor.set(enabled ? '#a7a3a0' : '#77766d');
+      ambient.intensity = enabled ? 2.6 : 2.1;
+      sun.color.set(enabled ? '#ffffff' : '#fff3da');
+      sun.intensity = enabled ? 2.5 : 3.2;
+      if (enabled) { sun.position.copy(camera.position); sun.target.position.copy(controls.target); }
+      else configureDirectionalShadow(sun, new Box3().setFromObject(model));
+    };
+    const setCamera = (next: PerspectiveCamera | OrthographicCamera, target: Vector3) => {
+      controls.removeEventListener('change', updateOrientation);
+      controls.dispose();
+      camera = next;
+      controls = new OrbitControls(camera, renderer.domElement);
+      configureOrbitControls(controls);
+      controls.target.copy(target);
+      controls.update();
+      controls.addEventListener('change', updateOrientation);
+      updateOrientation();
+      if (sceneHandle.current) { sceneHandle.current.camera = camera; sceneHandle.current.controls = controls; }
+    };
+    sceneHandle.current = { camera, controls, model, renderer, scene, sun, presentation, setCamera, setInspectionLighting };
 
     const resize = () => {
       const width = host.clientWidth;
       const height = host.clientHeight;
-      camera.aspect = Math.max(width, 1) / Math.max(height, 1);
+      const aspect = Math.max(width, 1) / Math.max(height, 1);
+      if (camera instanceof PerspectiveCamera) camera.aspect = aspect;
+      else {
+        const half = (camera.top - camera.bottom) / 2;
+        camera.left = -half * aspect; camera.right = half * aspect;
+      }
       camera.updateProjectionMatrix();
       renderer.setSize(width, height, false);
     };
@@ -270,11 +376,14 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
         });
         scene.add(model);
         configureDirectionalShadow(sun, new Box3().setFromObject(model));
-        sceneHandle.current = { camera, controls, model, renderer, scene, sun };
+        sceneHandle.current = { camera, controls, model, renderer, scene, sun, presentation, setCamera, setInspectionLighting };
         for (const [elementId, element] of Object.entries(loadedManifest.elements)) {
           applyElementVisibility(scene, element, element.defaultVisible);
           const object = scene.getObjectByName(element.nodes[0] ?? '');
           if (object) object.userData.homeDesignId = elementId;
+        }
+        for (const [node, mesh] of Object.entries(loadedManifest.meshes ?? {})) {
+          if (mesh.inspectionCap) { const object = model.getObjectByName(node); if (object) object.visible = false; }
         }
         const initiallyHidden = defaultHiddenElementIds(loadedManifest);
         hiddenIdsRef.current = initiallyHidden;
@@ -310,7 +419,8 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
         .intersectObject(sceneHandle.current.model, true)
         .find((intersection) => {
           const elementId = elementIdForObject(intersection.object, index);
-          return elementId && !hiddenIdsRef.current.has(elementId);
+          return elementId && isObjectVisible(intersection.object) && !hiddenIdsRef.current.has(elementId)
+            && renderer.clippingPlanes.every((plane) => plane.distanceToPoint(intersection.point) >= 0);
         });
       selectElement(hit ? elementIdForObject(hit.object, index) : null);
     };
@@ -331,6 +441,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
       controls.dispose();
       controls.removeEventListener('change', updateOrientation);
+      presentation.clear();
       disposeSceneResources(scene);
       sun.shadow.dispose();
       renderer.dispose();
@@ -348,11 +459,25 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     for (const [elementId, element] of Object.entries(manifest.elements).sort(([, left], [, right]) => Number(Boolean(left.parentId)) - Number(Boolean(right.parentId)))) {
       applyElementVisibility(sceneHandle.current.scene, element, !hiddenIds.has(elementId));
     }
-  }, [hiddenIds, manifest]);
+    const visible = new Set<string>();
+    sceneHandle.current.model.traverse((object) => {
+      if (object instanceof Mesh && object.visible && (!nodeMask.current || nodeMask.current.has(object.name))) visible.add(object.name);
+    });
+    const nodes = activeCapNodes(manifest, visible, activeView.current);
+    sceneHandle.current.model.traverse((object) => { if (object instanceof Mesh) object.visible = nodes.has(object.name); });
+    if (highlight.current && selectedId) {
+      highlight.current.visible = selectionNodes(manifest, selectedId).some((name) => {
+        const object = sceneHandle.current!.model.getObjectByName(name);
+        return object !== undefined && isObjectVisible(object);
+      });
+    }
+  }, [hiddenIds, manifest, selectedId]);
 
   const clickVisibility = (elementIds: string[]) => {
     if (!manifest) return;
     const visible = elementIds.every((id) => !hiddenIdsRef.current.has(id));
+    if (isolateOnClick) nodeMask.current = null;
+    else if (!visible && nodeMask.current) for (const id of elementIds) for (const node of selectionNodes(manifest, id)) nodeMask.current.add(node);
     const next = isolateOnClick
       ? isolateElements(manifest, elementIds)
       : withElementVisibility(manifest, hiddenIdsRef.current, elementIds, !visible);
@@ -363,6 +488,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
 
   const setSpacesVisible = useCallback((visible: boolean) => {
     if (!manifest) return;
+    if (visible && nodeMask.current) for (const id of spaceIds) for (const node of selectionNodes(manifest, id)) nodeMask.current.add(node);
     if (!visible && selectedId && spaceIds.includes(selectedId)) {
       selectElement(null);
     }
@@ -374,6 +500,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   }, [manifest, selectElement, selectedId, spaceIds]);
 
   const showAll = useCallback(() => {
+    nodeMask.current = null;
     const next = new Set<string>();
     hiddenIdsRef.current = next;
     setHiddenIds(next);
@@ -381,6 +508,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
 
   const showDiscipline = (preset: ReviewPreset) => {
     if (!manifest) return;
+    nodeMask.current = null;
     const next = isolateElements(manifest, reviewElementIds(manifest, preset));
     if (selectedId && next.has(selectedId)) selectElement(null);
     hiddenIdsRef.current = next;
@@ -389,6 +517,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
 
   const isolateContext = (scope: ContextAction) => {
     if (!manifest || !selectedId) return;
+    nodeMask.current = null;
     const ids = scope === 'reinforcement' ? reinforcementElementIds(manifest, selectedId)
       : contextElementIds(manifest, selectedId, scope === 'reveal' ? 'contents' : scope)
         .filter((id) => scope !== 'reveal' || id !== selectedId);
@@ -420,6 +549,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     const handle = sceneHandle.current;
     if (!manifest || !selectedId || !handle) return;
     const ids = manifest.elements[selectedId].nodes.length ? [selectedId] : contextElementIds(manifest, selectedId);
+    if (nodeMask.current) for (const id of ids) for (const node of selectionNodes(manifest, id)) nodeMask.current.add(node);
     const next = withElementVisibility(manifest, hiddenIdsRef.current, ids, true);
     hiddenIdsRef.current = next;
     setHiddenIds(next);
@@ -429,6 +559,14 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
       if (object) bounds.expandByObject(object);
     }
     frameBounds(handle.camera, handle.controls, bounds);
+  };
+
+  const hideSelection = () => {
+    if (!manifest || !selectedId) return;
+    const ids = manifest.elements[selectedId].nodes.length ? [selectedId] : contextElementIds(manifest, selectedId);
+    const next = withElementVisibility(manifest, hiddenIdsRef.current, ids, false);
+    hiddenIdsRef.current = next;
+    setHiddenIds(next);
   };
 
   return (
@@ -525,8 +663,17 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
         </nav>
       </aside>
 
-      <section className="viewport" aria-label="Interactive three-dimensional home model">
+      <section className={`viewport ${manifest?.namedViews?.length ? 'has-named-views' : ''}`} aria-label="Interactive three-dimensional home model">
         <div ref={canvasHost} className="canvas-host" />
+        {!!manifest?.namedViews?.length && <div className="named-view-tools">
+          <label>Saved view <select aria-label="Saved view" value={namedViewId} onChange={(event) => applyNamedView(event.target.value)}>
+            <option value="" disabled>Choose a view…</option>
+            {manifest.namedViews.map((view) => <option key={view.id} value={view.id}>{view.title}</option>)}
+          </select></label>
+          <button type="button" onClick={() => applyNamedView(namedViewId)} disabled={!namedViewId}>Restore view</button>
+          <button type="button" onClick={resetPresentation}>Reset presentation</button>
+          <p role="status">{viewMessage || 'Choose a prepared view, then orbit, pan or inspect components.'}</p>
+        </div>}
         {status === 'loading' && <div className="loading-card"><span /><p>Resolving the building view</p></div>}
         {status === 'error' && <div className="error-card" role="alert"><strong>Preview unavailable</strong><p>{message}</p>
           {entry && <button onClick={() => { setStatus('loading'); setMessage('Loading model…'); setLoadAttempt((attempt) => attempt + 1); }}>Retry model</button>}
@@ -590,8 +737,8 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
             <ElementDetails key={selectedId} elementId={selectedId} manifest={manifest} units={displayUnits} onUnits={setDisplayUnits} onSelect={selectElement} onIsolate={isolateContext}
               view={detailsViews[selectedId] ?? initialDetailsView}
               onView={(changes) => setDetailsViews((views) => ({ ...views, [selectedId]: { ...(views[selectedId] ?? initialDetailsView), ...changes } }))}
-              onFind={findSelection} onShow={showSelection} hasGeometry={selectionNodes(manifest, selectedId).length > 0}
-              hidden={canToggleVisibility(selected) && hiddenIds.has(selectedId)} />
+              onFind={findSelection} onShow={showSelection} onHide={hideSelection} hasGeometry={selectionNodes(manifest, selectedId).length > 0}
+              hidden={selectedVisibilityIds.length > 0 && selectedVisibilityIds.every((id) => hiddenIds.has(id))} />
             {manifest?.solarStudies?.filter((study) => study.id === solarStudyId).map((study) => {
               const opening = study.openings.find((entry) => entry.elementId === selectedId);
               return opening ? <p className="solar-result" key={study.id}>{study.name}: {Math.round(opening.unshadedFraction * 100)}% of sampled opening receives direct sun. {study.at}</p> : null;

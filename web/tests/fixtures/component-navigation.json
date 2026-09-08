@@ -1,10 +1,10 @@
 {
   "format": "home-design-render-manifest-0.1",
-  "modelVersion": "0.1",
-  "sourceRevision": 1,
+  "modelVersion": "0.2",
+  "sourceRevision": 8,
   "project": {
-    "id": "project.complete-shell",
-    "name": "Complete Shell Coordination House"
+    "id": "project.assemblies",
+    "name": "Assemblies"
   },
   "coordinateTransform": {
     "source": "right-handed Z-up millimetres",
@@ -16,85 +16,1171 @@
     ]
   },
   "elements": {
-    "assembly.roof-system": {
+    "assembly.exterior-wall": {
       "kind": "assembly",
       "kindLabel": "Component assembly",
-      "name": "Main roof system",
+      "name": "Exterior wall with window and electrical circuit",
       "storeyId": null,
       "nodes": [],
       "defaultVisible": true,
       "properties": [],
-      "data": {},
-      "children": []
+      "children": [],
+      "data": {}
     },
-    "electrical.cut.flushBox": {
-      "kind": "penetration",
-      "kindLabel": "Hole or recess",
-      "name": "Owned box recess",
-      "storeyId": null,
-      "nodes": [],
+    "assembly.exterior-wall.wall.exterior": {
+      "kind": "wall",
+      "kindLabel": "Wall",
+      "name": "Complete exterior wall",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_wall_exterior_7d9d644b_part1",
+        "hd_assembly_exterior-wall_wall_exterior_7d9d644b_part2",
+        "hd_assembly_exterior-wall_wall_exterior_7d9d644b_part3",
+        "hd_assembly_exterior-wall_wall_exterior_7d9d644b_part4",
+        "hd_assembly_exterior-wall_wall_exterior_7d9d644b_part5",
+        "hd_assembly_exterior-wall_wall_exterior_7d9d644b_part6"
+      ],
       "defaultVisible": true,
       "properties": [
         {
-          "id": "/depth",
-          "label": "Depth",
-          "value": 40.0,
+          "id": "/length",
+          "label": "Length",
+          "value": 4000.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/thickness",
+          "label": "Thickness",
+          "value": 187.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/baseElevation",
+          "label": "Base elevation",
+          "value": 0.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netArea",
+          "label": "Net area",
+          "value": 9262400.0,
+          "unit": "mm2",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/grossArea",
+          "label": "Gross area",
+          "value": 10800000.0,
+          "unit": "mm2",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 1491891593.3617125,
+          "unit": "mm3",
+          "group": "Dimensions"
+        }
+      ],
+      "children": [],
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall": {
+      "kind": "wallFraming",
+      "kindLabel": "Wall framing",
+      "name": "Studs, double top plate, bottom plate and window framing",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_bottom_0_start_end_5c0d5dd5",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_end_end_0_e3b00460",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_end_start_0_1723a31f",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_0_full_9f3f0832",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_1_full_374b8d30",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_3_assembly_exterior-wall_opening_window_above_b048b133",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_3_assembly_exterior-wall_opening_window_below_4fd53532",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_4_assembly_exterior-wall_opening_window_above_e93d07e6",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_4_assembly_exterior-wall_opening_window_below_16bc7938",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_5_full_9db40713",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_header_31760891",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_left_jackStud_0_f20c4e11",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_left_kingStud_0_e50406c8",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_right_jackStud_0_785448f1",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_right_kingStud_0_f38fc75d",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_sill_5e347822",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_top_0_height_top_c261e3ae",
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_top_1_height_top_3409cc4a"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 237664000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/memberCount",
+          "label": "Members",
+          "value": 18,
+          "unit": "count",
+          "group": "Dimensions"
+        }
+      ],
+      "children": [
+        "assembly.exterior-wall.framing.wall/member/segment/main/bottom/0/start/end",
+        "assembly.exterior-wall.framing.wall/member/segment/main/end/end/0",
+        "assembly.exterior-wall.framing.wall/member/segment/main/end/start/0",
+        "assembly.exterior-wall.framing.wall/member/segment/main/grid/0/full",
+        "assembly.exterior-wall.framing.wall/member/segment/main/grid/1/full",
+        "assembly.exterior-wall.framing.wall/member/segment/main/grid/3/assembly.exterior-wall.opening.window/above",
+        "assembly.exterior-wall.framing.wall/member/segment/main/grid/3/assembly.exterior-wall.opening.window/below",
+        "assembly.exterior-wall.framing.wall/member/segment/main/grid/4/assembly.exterior-wall.opening.window/above",
+        "assembly.exterior-wall.framing.wall/member/segment/main/grid/4/assembly.exterior-wall.opening.window/below",
+        "assembly.exterior-wall.framing.wall/member/segment/main/grid/5/full",
+        "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/header",
+        "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/left/jackStud/0",
+        "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/left/kingStud/0",
+        "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/right/jackStud/0",
+        "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/right/kingStud/0",
+        "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/sill",
+        "assembly.exterior-wall.framing.wall/member/segment/main/top/0/height.top",
+        "assembly.exterior-wall.framing.wall/member/segment/main/top/1/height.top"
+      ],
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/bottom/0/start/end": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Bottom plate",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_bottom_0_start_end_5c0d5dd5"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 4000.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 4000.0,
           "unit": "mm",
           "group": "Dimensions"
         },
         {
           "id": "/section/width",
           "label": "Stock width",
-          "value": 50,
+          "value": 140,
           "unit": "mm",
           "group": "Dimensions"
         },
         {
           "id": "/section/depth",
           "label": "Stock depth",
-          "value": 50,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/cutVolumeMm3",
-          "label": "Cut volume",
-          "value": 78963.99999999985,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/purpose",
-          "label": "Purpose",
-          "value": "Recess",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "children": []
-    },
-    "electrical.device.flushBox": {
-      "kind": "serviceDevice",
-      "kindLabel": "Service device",
-      "name": "Flush box",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_electrical_device_flushBox_30e5c79d"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/projection",
-          "label": "Mounting offset",
-          "value": -40.0,
+          "value": 40,
           "unit": "mm",
           "group": "Dimensions"
         },
         {
           "id": "/netVolumeMm3",
           "label": "Net material volume",
-          "value": 28367.99999999994,
+          "value": 22400000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Bottom plate",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/end/end/0": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "End stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_end_end_0_e3b00460"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 14448000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "End stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/end/start/0": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "End stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_end_start_0_1723a31f"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 14448000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "End stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/grid/0/full": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_0_full_9f3f0832"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 14448000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/grid/1/full": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_1_full_374b8d30"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 14448000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/grid/3/assembly.exterior-wall.opening.window/above": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Cripple stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_3_assembly_exterior-wall_opening_window_above_b048b133"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 340.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 340.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 1904000.0000000054,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Cripple stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/grid/3/assembly.exterior-wall.opening.window/below": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Cripple stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_3_assembly_exterior-wall_opening_window_below_4fd53532"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 820.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 820.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 4591999.99999999,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Cripple stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/grid/4/assembly.exterior-wall.opening.window/above": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Cripple stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_4_assembly_exterior-wall_opening_window_above_e93d07e6"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 340.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 340.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 1904000.0000000054,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Cripple stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/grid/4/assembly.exterior-wall.opening.window/below": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Cripple stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_4_assembly_exterior-wall_opening_window_below_16bc7938"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 820.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 820.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 4591999.99999999,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Cripple stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/grid/5/full": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_grid_5_full_9db40713"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 14448000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/header": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Header",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_header_31760891"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 1320.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 1320.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 25872000.000000004,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Header",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/left/jackStud/0": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Jack stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_left_jackStud_0_f20c4e11"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 2100.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 2100.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 11760000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Jack stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/left/kingStud/0": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "King stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_left_kingStud_0_e50406c8"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 14448000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "King stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/right/jackStud/0": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Jack stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_right_jackStud_0_785448f1"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 2100.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 2100.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 11760000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Jack stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/right/kingStud/0": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "King stud",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_right_kingStud_0_f38fc75d"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 2580.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 14448000.0,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "King stud",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/sill": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Sill",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_opening_assembly_exterior-wall_opening_window_sill_5e347822"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 1240.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 1240.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 6943999.999999997,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Sill",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/top/0/height.top": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Top plate",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_top_0_height_top_c261e3ae"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 4000.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 4000.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 22400000.00000003,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Top plate",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.framing.wall/member/segment/main/top/1/height.top": {
+      "kind": "member",
+      "kindLabel": "Structural member",
+      "name": "Top plate",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_framing_wall_member_segment_main_top_1_height_top_3409cc4a"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/lengthMm",
+          "label": "Length",
+          "value": 4000.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/stockLengthMm",
+          "label": "Stock length",
+          "value": 4000.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 140,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 40,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 22399999.99999997,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/constructionRole",
+          "label": "Member purpose",
+          "value": "Top plate",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "parentId": "assembly.exterior-wall.framing.wall",
+      "data": {}
+    },
+    "assembly.exterior-wall.box.outlet": {
+      "kind": "serviceDevice",
+      "kindLabel": "Service device",
+      "name": "Recessed outlet box",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_assembly_exterior-wall_box_outlet_4dbf39c4"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/projection",
+          "label": "Mounting offset",
+          "value": -65.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netVolumeMm3",
+          "label": "Net material volume",
+          "value": 69429.25276302111,
           "unit": "mm3",
           "group": "Dimensions"
         },
@@ -106,13 +1192,60 @@
           "group": "Construction"
         }
       ],
-      "data": {},
-      "children": []
+      "children": [],
+      "data": {}
     },
-    "electrical.system.test": {
+    "assembly.exterior-wall.cut.outlet": {
+      "kind": "penetration",
+      "kindLabel": "Hole or recess",
+      "name": "Owned outlet recess",
+      "storeyId": null,
+      "nodes": [],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/depth",
+          "label": "Depth",
+          "value": 65.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/width",
+          "label": "Stock width",
+          "value": 60,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/section/depth",
+          "label": "Stock depth",
+          "value": 90,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/cutVolumeMm3",
+          "label": "Cut volume",
+          "value": 206567.93581520216,
+          "unit": "mm3",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/purpose",
+          "label": "Purpose",
+          "value": "Recess",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "children": [],
+      "data": {}
+    },
+    "assembly.exterior-wall.system.power": {
       "kind": "serviceSystem",
       "kindLabel": "Service system",
-      "name": "Circuit system",
+      "name": "Receptacle supply",
       "storeyId": null,
       "nodes": [],
       "defaultVisible": true,
@@ -120,7 +1253,7 @@
         {
           "id": "/portCount",
           "label": "Service ports",
-          "value": 12,
+          "value": 6,
           "unit": "count",
           "group": "Dimensions"
         },
@@ -139,759 +1272,52 @@
           "group": "Construction"
         }
       ],
-      "data": {},
-      "children": []
+      "children": [],
+      "data": {}
     },
-    "electrical.wall.host": {
-      "kind": "wall",
-      "kindLabel": "Wall",
-      "name": "Interior service partition",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_electrical_wall_host_8649cc00_part1",
-        "hd_electrical_wall_host_8649cc00_part2",
-        "hd_electrical_wall_host_8649cc00_part3"
-      ],
+    "assembly.insulated-roof": {
+      "kind": "assembly",
+      "kindLabel": "Component assembly",
+      "name": "Insulated gable roof",
+      "storeyId": null,
+      "nodes": [],
       "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/length",
-          "label": "Length",
-          "value": 4000.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/thickness",
-          "label": "Thickness",
-          "value": 166.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/baseElevation",
-          "label": "Base elevation",
-          "value": 0.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netArea",
-          "label": "Net area",
-          "value": 10800000.0,
-          "unit": "mm2",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/grossArea",
-          "label": "Gross area",
-          "value": 10800000.0,
-          "unit": "mm2",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 1608853600.0000007,
-          "unit": "mm3",
-          "group": "Dimensions"
-        }
-      ],
-      "data": {},
-      "children": []
+      "properties": [],
+      "children": [],
+      "data": {}
     },
-    "framing.partition": {
-      "kind": "wallFraming",
-      "kindLabel": "Wall framing",
-      "name": "Interior partition framing",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_bottom_0_start_end_26a3e655",
-        "hd_framing_partition_member_end_end_0_f275aa7a",
-        "hd_framing_partition_member_end_start_0_5923f3e6",
-        "hd_framing_partition_member_grid_0_full_76dff4f5",
-        "hd_framing_partition_member_grid_1_full_fcb03bf9",
-        "hd_framing_partition_member_grid_2_full_27114149",
-        "hd_framing_partition_member_grid_3_full_5cec5b1f",
-        "hd_framing_partition_member_grid_4_full_18c1aae9",
-        "hd_framing_partition_member_grid_5_full_da9b90f9",
-        "hd_framing_partition_member_top_0_0_44c9376c",
-        "hd_framing_partition_member_top_1_0_2701140e"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 182783999.99999994,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/memberCount",
-          "label": "Members",
-          "value": 11,
-          "unit": "count",
-          "group": "Dimensions"
-        }
-      ],
-      "data": {},
-      "children": [
-        "framing.partition/member/bottom/0/start/end",
-        "framing.partition/member/end/end/0",
-        "framing.partition/member/end/start/0",
-        "framing.partition/member/grid/0/full",
-        "framing.partition/member/grid/1/full",
-        "framing.partition/member/grid/2/full",
-        "framing.partition/member/grid/3/full",
-        "framing.partition/member/grid/4/full",
-        "framing.partition/member/grid/5/full",
-        "framing.partition/member/top/0/0",
-        "framing.partition/member/top/1/0"
-      ]
-    },
-    "framing.partition/member/bottom/0/start/end": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "Bottom plate",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_bottom_0_start_end_26a3e655"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 4000.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 4000.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 22399999.99999999,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "Bottom plate",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "framing.partition/member/end/end/0": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "End stud",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_end_end_0_f275aa7a"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 14448000.0,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "End stud",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "framing.partition/member/end/start/0": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "End stud",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_end_start_0_5923f3e6"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 14448000.0,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "End stud",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "framing.partition/member/grid/0/full": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "Stud",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_grid_0_full_76dff4f5"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 14448000.0,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "Stud",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "framing.partition/member/grid/1/full": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "Stud",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_grid_1_full_fcb03bf9"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 14448000.0,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "Stud",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "framing.partition/member/grid/2/full": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "Stud",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_grid_2_full_27114149"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 14448000.0,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "Stud",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "framing.partition/member/grid/3/full": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "Stud",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_grid_3_full_5cec5b1f"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 14448000.0,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "Stud",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "framing.partition/member/grid/4/full": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "Stud",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_grid_4_full_18c1aae9"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 14448000.0,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "Stud",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "framing.partition/member/grid/5/full": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "Stud",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_grid_5_full_da9b90f9"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 2580.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 14448000.0,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "Stud",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "framing.partition/member/top/0/0": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "Top plate",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_top_0_0_44c9376c"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 4000.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 4000.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 22400000.000000022,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "Top plate",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "framing.partition/member/top/1/0": {
-      "kind": "member",
-      "kindLabel": "Structural member",
-      "name": "Top plate",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_framing_partition_member_top_1_0_2701140e"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/lengthMm",
-          "label": "Length",
-          "value": 4000.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/stockLengthMm",
-          "label": "Stock length",
-          "value": 4000.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/width",
-          "label": "Stock width",
-          "value": 140,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/section/depth",
-          "label": "Stock depth",
-          "value": 40,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 22399999.999999933,
-          "unit": "mm3",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/constructionRole",
-          "label": "Member purpose",
-          "value": "Top plate",
-          "unit": null,
-          "group": "Construction"
-        }
-      ],
-      "data": {},
-      "parentId": "framing.partition"
-    },
-    "roof.main": {
+    "assembly.insulated-roof.roof": {
       "kind": "roof",
       "kindLabel": "Roof",
-      "name": "Main gable roof",
+      "name": "Layered gable roof",
       "storeyId": "level.ground",
       "nodes": [
-        "hd_roof_main_46845482_part1",
-        "hd_roof_main_46845482_part2",
-        "hd_roof_main_46845482_part3",
-        "hd_roof_main_46845482_part4",
-        "hd_roof_main_46845482_part5",
-        "hd_roof_main_46845482_part6"
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part1",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part2",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part3",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part4",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part5",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part6",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part7",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part8",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part9",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part10",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part11",
+        "hd_assembly_insulated-roof_roof_1f8bafc2_part12"
       ],
       "defaultVisible": true,
       "properties": [
         {
           "id": "/thickness",
           "label": "Thickness",
-          "value": 250.0,
+          "value": 266.0,
           "unit": "mm",
           "group": "Dimensions"
         },
         {
           "id": "/netVolumeMm3",
           "label": "Net material volume",
-          "value": 27213548196.33336,
+          "value": 4057290728.5958996,
           "unit": "mm3",
           "group": "Dimensions"
         },
@@ -903,247 +1329,240 @@
           "group": "Construction"
         }
       ],
-      "data": {},
-      "children": []
-    },
-    "space.living": {
-      "kind": "space",
-      "kindLabel": "Room or space",
-      "name": "Living space",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_space_living_69e75d15"
-      ],
-      "defaultVisible": false,
-      "properties": [
-        {
-          "id": "/height",
-          "label": "Height",
-          "value": 2600.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/area",
-          "label": "Area",
-          "value": 76704225.0,
-          "unit": "mm2",
-          "group": "Dimensions"
-        }
-      ],
-      "data": {},
-      "children": []
-    },
-    "wall.north": {
-      "kind": "wall",
-      "kindLabel": "Wall",
-      "name": "North exterior wall",
-      "storeyId": "level.ground",
-      "nodes": [
-        "hd_wall_north_2a9a3d00_part1",
-        "hd_wall_north_2a9a3d00_part2",
-        "hd_wall_north_2a9a3d00_part3",
-        "hd_wall_north_2a9a3d00_part4"
-      ],
-      "defaultVisible": true,
-      "properties": [
-        {
-          "id": "/length",
-          "label": "Length",
-          "value": 10000.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/thickness",
-          "label": "Thickness",
-          "value": 185.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/baseElevation",
-          "label": "Base elevation",
-          "value": 0.0,
-          "unit": "mm",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netArea",
-          "label": "Net area",
-          "value": 25667750.26918963,
-          "unit": "mm2",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/grossArea",
-          "label": "Gross area",
-          "value": 27577350.26918963,
-          "unit": "mm2",
-          "group": "Dimensions"
-        },
-        {
-          "id": "/netVolumeMm3",
-          "label": "Net material volume",
-          "value": 4251886792.935905,
-          "unit": "mm3",
-          "group": "Dimensions"
-        }
-      ],
-      "data": {},
-      "children": []
+      "children": [],
+      "data": {}
     }
   },
   "navigation": {
     "format": "home-design-navigation-0.1",
     "links": [
       {
-        "sourceId": "electrical.cut.flushBox",
-        "targetId": "electrical.device.flushBox",
-        "kind": "ownership",
-        "sourceLabel": "Owned by",
-        "targetLabel": "Owned component",
-        "path": "/elements/electrical.cut.flushBox/owner"
-      },
-      {
-        "sourceId": "electrical.cut.flushBox",
-        "targetId": "electrical.wall.host",
-        "kind": "host",
-        "sourceLabel": "Host",
-        "targetLabel": "Hosted component",
-        "path": "/elements/electrical.cut.flushBox/host"
-      },
-      {
-        "sourceId": "electrical.device.flushBox",
-        "targetId": "electrical.wall.host",
-        "kind": "host",
-        "sourceLabel": "Host",
-        "targetLabel": "Hosted component",
-        "path": "/elements/electrical.device.flushBox/placement/origin/host/element"
-      },
-      {
-        "sourceId": "electrical.device.flushBox",
-        "targetId": "electrical.wall.host",
-        "kind": "ownership",
-        "sourceLabel": "Owned by",
-        "targetLabel": "Owned component",
-        "path": "/elements/electrical.device.flushBox/occupies/regions/0/host"
-      },
-      {
-        "sourceId": "framing.partition",
-        "targetId": "electrical.wall.host",
-        "kind": "host",
-        "sourceLabel": "Host",
-        "targetLabel": "Hosted component",
-        "path": "/elements/framing.partition/host"
-      },
-      {
-        "sourceId": "roof.main",
-        "targetId": "assembly.roof-system",
+        "sourceId": "assembly.exterior-wall.box.outlet",
+        "targetId": "assembly.exterior-wall",
         "kind": "assembly",
         "sourceLabel": "Assembly",
         "targetLabel": "Assembly part",
-        "path": "/relationships/rel.aggregates.roof"
+        "path": "/relationships/assembly.exterior-wall.relationship.parts"
       },
       {
-        "sourceId": "wall.north",
-        "targetId": "roof.main",
-        "kind": "placement",
-        "sourceLabel": "Position follows",
-        "targetLabel": "Position drives",
-        "path": "/elements/wall.north/top/element"
+        "sourceId": "assembly.exterior-wall.box.outlet",
+        "targetId": "assembly.exterior-wall.wall.exterior",
+        "kind": "host",
+        "sourceLabel": "Host",
+        "targetLabel": "Hosted component",
+        "path": "/elements/assembly.exterior-wall.box.outlet/placement/origin/host/element"
       },
       {
-        "sourceId": "wall.north",
-        "targetId": "space.living",
-        "kind": "room",
-        "sourceLabel": "Room",
-        "targetLabel": "Room boundary",
-        "path": "/relationships/rel.bounds.living-north"
+        "sourceId": "assembly.exterior-wall.box.outlet",
+        "targetId": "assembly.exterior-wall.wall.exterior",
+        "kind": "ownership",
+        "sourceLabel": "Owned by",
+        "targetLabel": "Owned component",
+        "path": "/elements/assembly.exterior-wall.box.outlet/occupies/regions/0/host"
       },
       {
-        "sourceId": "framing.partition/member/bottom/0/start/end",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.cut.outlet",
+        "targetId": "assembly.exterior-wall",
+        "kind": "assembly",
+        "sourceLabel": "Assembly",
+        "targetLabel": "Assembly part",
+        "path": "/relationships/assembly.exterior-wall.relationship.parts"
+      },
+      {
+        "sourceId": "assembly.exterior-wall.cut.outlet",
+        "targetId": "assembly.exterior-wall.box.outlet",
+        "kind": "ownership",
+        "sourceLabel": "Owned by",
+        "targetLabel": "Owned component",
+        "path": "/elements/assembly.exterior-wall.cut.outlet/owner"
+      },
+      {
+        "sourceId": "assembly.exterior-wall.cut.outlet",
+        "targetId": "assembly.exterior-wall.wall.exterior",
+        "kind": "host",
+        "sourceLabel": "Host",
+        "targetLabel": "Hosted component",
+        "path": "/elements/assembly.exterior-wall.cut.outlet/host"
+      },
+      {
+        "sourceId": "assembly.exterior-wall.framing.wall",
+        "targetId": "assembly.exterior-wall",
+        "kind": "assembly",
+        "sourceLabel": "Assembly",
+        "targetLabel": "Assembly part",
+        "path": "/relationships/assembly.exterior-wall.relationship.parts"
+      },
+      {
+        "sourceId": "assembly.exterior-wall.framing.wall",
+        "targetId": "assembly.exterior-wall.wall.exterior",
+        "kind": "host",
+        "sourceLabel": "Host",
+        "targetLabel": "Hosted component",
+        "path": "/elements/assembly.exterior-wall.framing.wall/host"
+      },
+      {
+        "sourceId": "assembly.exterior-wall.system.power",
+        "targetId": "assembly.exterior-wall",
+        "kind": "assembly",
+        "sourceLabel": "Assembly",
+        "targetLabel": "Assembly part",
+        "path": "/relationships/assembly.exterior-wall.relationship.parts"
+      },
+      {
+        "sourceId": "assembly.exterior-wall.wall.exterior",
+        "targetId": "assembly.exterior-wall",
+        "kind": "assembly",
+        "sourceLabel": "Assembly",
+        "targetLabel": "Assembly part",
+        "path": "/relationships/assembly.exterior-wall.relationship.parts"
+      },
+      {
+        "sourceId": "assembly.insulated-roof.roof",
+        "targetId": "assembly.insulated-roof",
+        "kind": "assembly",
+        "sourceLabel": "Assembly",
+        "targetLabel": "Assembly part",
+        "path": "/relationships/assembly.insulated-roof.relationship.parts"
+      },
+      {
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/bottom/0/start/end",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
         "path": ""
       },
       {
-        "sourceId": "framing.partition/member/end/end/0",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/end/end/0",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
         "path": ""
       },
       {
-        "sourceId": "framing.partition/member/end/start/0",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/end/start/0",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
         "path": ""
       },
       {
-        "sourceId": "framing.partition/member/grid/0/full",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/grid/0/full",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
         "path": ""
       },
       {
-        "sourceId": "framing.partition/member/grid/1/full",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/grid/1/full",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
         "path": ""
       },
       {
-        "sourceId": "framing.partition/member/grid/2/full",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/grid/3/assembly.exterior-wall.opening.window/above",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
         "path": ""
       },
       {
-        "sourceId": "framing.partition/member/grid/3/full",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/grid/3/assembly.exterior-wall.opening.window/below",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
         "path": ""
       },
       {
-        "sourceId": "framing.partition/member/grid/4/full",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/grid/4/assembly.exterior-wall.opening.window/above",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
         "path": ""
       },
       {
-        "sourceId": "framing.partition/member/grid/5/full",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/grid/4/assembly.exterior-wall.opening.window/below",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
         "path": ""
       },
       {
-        "sourceId": "framing.partition/member/top/0/0",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/grid/5/full",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
         "path": ""
       },
       {
-        "sourceId": "framing.partition/member/top/1/0",
-        "targetId": "framing.partition",
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/header",
+        "targetId": "assembly.exterior-wall.framing.wall",
+        "kind": "generated",
+        "sourceLabel": "Generated by",
+        "targetLabel": "Generated member",
+        "path": ""
+      },
+      {
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/left/jackStud/0",
+        "targetId": "assembly.exterior-wall.framing.wall",
+        "kind": "generated",
+        "sourceLabel": "Generated by",
+        "targetLabel": "Generated member",
+        "path": ""
+      },
+      {
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/left/kingStud/0",
+        "targetId": "assembly.exterior-wall.framing.wall",
+        "kind": "generated",
+        "sourceLabel": "Generated by",
+        "targetLabel": "Generated member",
+        "path": ""
+      },
+      {
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/right/jackStud/0",
+        "targetId": "assembly.exterior-wall.framing.wall",
+        "kind": "generated",
+        "sourceLabel": "Generated by",
+        "targetLabel": "Generated member",
+        "path": ""
+      },
+      {
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/right/kingStud/0",
+        "targetId": "assembly.exterior-wall.framing.wall",
+        "kind": "generated",
+        "sourceLabel": "Generated by",
+        "targetLabel": "Generated member",
+        "path": ""
+      },
+      {
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/opening/assembly.exterior-wall.opening.window/sill",
+        "targetId": "assembly.exterior-wall.framing.wall",
+        "kind": "generated",
+        "sourceLabel": "Generated by",
+        "targetLabel": "Generated member",
+        "path": ""
+      },
+      {
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/top/0/height.top",
+        "targetId": "assembly.exterior-wall.framing.wall",
+        "kind": "generated",
+        "sourceLabel": "Generated by",
+        "targetLabel": "Generated member",
+        "path": ""
+      },
+      {
+        "sourceId": "assembly.exterior-wall.framing.wall/member/segment/main/top/1/height.top",
+        "targetId": "assembly.exterior-wall.framing.wall",
         "kind": "generated",
         "sourceLabel": "Generated by",
         "targetLabel": "Generated member",
@@ -1155,14 +1574,9 @@
   "storeys": {
     "level.ground": {
       "kind": "storey",
-      "name": "Ground floor",
+      "name": "Catalog datum",
       "elevation": 0
-    },
-    "level.eave": {
-      "kind": "reference",
-      "name": "Roof eave",
-      "elevation": 2700
     }
   },
-  "fixtureSource": "examples/complete-shell-coordination-house.json"
+  "fixtureSource": "examples/assemblies.json"
 }

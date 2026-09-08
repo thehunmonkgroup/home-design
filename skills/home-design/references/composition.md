@@ -53,7 +53,7 @@ The root object contains:
 | `elements` | Placed components, service systems/circuits and coordination checks |
 | `relationships` | Durable semantic connections between elements |
 
-The complete field contract is [home-model-0.2.schema.json](../../../schema/home-model-0.2.schema.json). [Single-Story Gable House](../../../examples/single-story-gable-house.json) demonstrates core architectural components. [Hillside Deck House](../../../examples/hillside-deck-house.json) demonstrates a two-storey shell with site, construction and envelope coordination. Example dimensions and member sizes are illustrative and require project-specific engineering before construction.
+The complete field contract is [home-model-0.2.schema.json](../../../schema/home-model-0.2.schema.json). [Master Suite Gable House](../../../examples/master-suite-gable-house.json) demonstrates a framed architectural shell with electrical and plumbing systems. [Hillside Deck House](../../../examples/hillside-deck-house.json) demonstrates a two-storey shell with site, construction and envelope coordination. Example dimensions and member sizes are illustrative and require project-specific engineering before construction.
 
 Author models with `modelVersion: "0.2"`; this field identifies the JSON schema, not the design's `revision`. Read [scoped identities](identities.md) for required layer, boundary and segment names. Optional root `solarStudies` and `drawings` arrays store reproducible analysis/view requests. Use canonical element IDs for integrations; generated mesh counts and node names depend on resolved geometry.
 

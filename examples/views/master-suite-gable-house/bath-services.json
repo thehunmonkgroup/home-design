@@ -1,0 +1,38 @@
+{
+  "width": 1600,
+  "height": 1200,
+  "labels": false,
+  "isolate": {
+    "ids": [
+      "fixture.vanity",
+      "fixture.wc",
+      "fixture.shower",
+      "trap.vanity",
+      "trap.wc",
+      "trap.shower",
+      "water.cold.fixture.vanity",
+      "water.hot.fixture.vanity",
+      "water.cold.fixture.wc",
+      "water.cold.fixture.shower",
+      "water.hot.fixture.shower",
+      "waste.branch.vanity",
+      "waste.branch.wc",
+      "waste.branch.shower",
+      "waste.collector",
+      "vent.roof"
+    ]
+  },
+  "sections": [
+    {
+      "axis": "x",
+      "position": 4200
+    },
+    {
+      "axis": "z",
+      "position": 2300
+    }
+  ],
+  "camera": {
+    "preset": "se"
+  }
+}

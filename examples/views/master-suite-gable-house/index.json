@@ -1,0 +1,16 @@
+{
+  "views": [
+    {"id": "overview", "title": "Exterior overview", "description": "The gable shell, south deck, supports and roof vent.", "file": "overview.json"},
+    {"id": "plan", "title": "Floor plan", "description": "A north-up section at 1.2 m showing the master suite, living area and utility room.", "file": "plan.json"},
+    {"id": "interior", "title": "Interior from southeast", "description": "An angled cutaway showing room connections and the deck entrance.", "file": "interior.json"},
+    {"id": "interior-nw", "title": "Interior from northwest", "description": "The opposite cutaway exposes the bathroom and utility partitions.", "file": "interior-nw.json"},
+    {"id": "bedroom", "title": "Inside the bedroom", "description": "An eye-level view of the bedroom window and wall outlets.", "file": "bedroom.json"},
+    {"id": "bathroom", "title": "Inside the bathroom", "description": "An eye-level view of the shower, WC and bathroom window.", "file": "bathroom.json"},
+    {"id": "wall-framing", "title": "Wall and floor framing", "description": "Studs, opening framing, floor joists and deck supports with roof framing hidden.", "file": "wall-framing.json"},
+    {"id": "roof-framing", "title": "Roof framing", "description": "The two fitted rafter assemblies and ridge stock, isolated from the shell.", "file": "roof-framing.json"},
+    {"id": "services", "title": "All services", "description": "Electrical circuits and water, waste and vent routes without the enclosing construction.", "file": "services.json"},
+    {"id": "bath-services", "title": "Bathroom plumbing", "description": "Fixtures, traps, supply branches, waste collection and vent routing.", "file": "bath-services.json"},
+    {"id": "utility-services", "title": "Utility services", "description": "The distribution panel, water heater and their local connections.", "file": "utility-services.json"},
+    {"id": "bedroom-wall-contents", "title": "Bedroom wall contents", "description": "The north wall's studs and routed wiring, with two bedroom outlets highlighted.", "file": "bedroom-wall-contents.json"}
+  ]
+}

@@ -137,6 +137,10 @@ def test_service_material_intersections_are_not_hidden_by_clearance_allowances(
         diagnostic.subject_id == "route.run" and "member.obstacle" in diagnostic.message
     )
     assert diagnostic.path == "/elements/route.run/coordinationChecks/interference"
+    assert diagnostic.details["element"] == "member.obstacle"
+    bounds = Authoring.object(diagnostic.details["bounds"])
+    assert Authoring.array(bounds["minimum"])[2] == pytest.approx(50)
+    assert Authoring.array(bounds["maximum"])[2] == pytest.approx(350)
     result = Authoring.object(
         ModelResolver(reference_model)
         .resolve()
@@ -384,8 +388,16 @@ def test_warning_check_exports_exact_collision_context_without_diagnostic_materi
     manifest = json.loads(result.render_manifest.read_text(encoding="utf-8"))
     data = manifest["elements"]["route.run"]["data"]["serviceCoordination"]
     assert data["interference"]["collisions"] == [
-        {"element": "member.obstacle", "volumeMm3": pytest.approx(2400)}
+        {
+            "element": "member.obstacle",
+            "volumeMm3": pytest.approx(2400),
+            "bounds": {"minimum": [18, -2, 50], "maximum": [20, 2, 350]},
+        }
     ]
+    assert (
+        diagnostics["diagnostics"][0]["details"]
+        == data["interference"]["collisions"][0]
+    )
     assert len(manifest["elements"]) == 3
     schedules = json.loads(result.schedules.read_text(encoding="utf-8"))
     assert (

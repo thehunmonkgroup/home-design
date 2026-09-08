@@ -13,7 +13,7 @@ export interface DetailsView {
 
 export const initialDetailsView: DetailsView = { limit: 20, memberQuery: '', memberLimit: 30, scrollTop: 0, technicalOpen: false };
 
-export default function ElementDetails({ elementId, manifest, units, onUnits, onSelect, onIsolate, view, onView, onFind, onShow, hasGeometry, hidden }: {
+export default function ElementDetails({ elementId, manifest, units, onUnits, onSelect, onIsolate, view, onView, onFind, onShow, onHide, hasGeometry, hidden }: {
   elementId: string;
   manifest: RenderManifest;
   units: DisplayUnits;
@@ -24,6 +24,7 @@ export default function ElementDetails({ elementId, manifest, units, onUnits, on
   onView: (changes: Partial<DetailsView>) => void;
   onFind: () => void;
   onShow: () => void;
+  onHide: () => void;
   hasGeometry: boolean;
   hidden: boolean;
 }) {
@@ -64,13 +65,16 @@ export default function ElementDetails({ elementId, manifest, units, onUnits, on
         <option value="metric">Metric</option><option value="imperial">Feet and inches</option>
       </select>
     </label>
-    {manifest.navigation && <div className="context-actions">
-      <button onClick={() => onIsolate('contents')}>Isolate with contents</button>
+    <div className="context-actions">
+      {manifest.navigation && <button onClick={() => onIsolate('contents')}>Isolate with contents</button>}
+      <button onClick={onHide} disabled={!hasGeometry || hidden} title="Hide this component or assembly without changing the camera or selection">Hide</button>
+      {manifest.navigation && <>
       {element.kind === 'wall' && <button onClick={() => onIsolate('reveal')}>Reveal wall contents</button>}
       {reinforcementElementIds(manifest, elementId).length > 0 && <button onClick={() => onIsolate('reinforcement')}>Reveal reinforcement</button>}
       {hasSystem && <button onClick={() => onIsolate('system')}>Isolate system</button>}
       {relations.some((entry) => entry.kind === 'connection') && <button onClick={() => onIsolate('connected')}>Isolate connected parts</button>}
-    </div>}
+      </>}
+    </div>
     <dl>
       <div><dt>Component</dt><dd>{element.kindLabel ?? element.kind}</dd></div>
       <div><dt>Storey</dt><dd>{element.storeyId ? manifest.storeys?.[element.storeyId]?.name ?? element.storeyId : 'Follows its host'}</dd></div>

@@ -109,6 +109,11 @@ class SolidOperations:
         )
 
     @classmethod
+    def regularize(cls, mesh: MeshData) -> MeshData:
+        """Cancel coincident surface folds while checking each connected shell's volume."""
+        return cls._surface_mesh(cls.solid(mesh), mesh.material_id, mesh.role)
+
+    @classmethod
     def _surface_mesh(
         cls, solid: manifold3d.Manifold, material: str | None, role: str
     ) -> MeshData:

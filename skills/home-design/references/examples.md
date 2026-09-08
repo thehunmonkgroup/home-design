@@ -1,87 +1,74 @@
 # Public examples and worked edits
 
-Choose the smallest public model that demonstrates the requested integration. Keep custom copies and their outputs outside repository regression fixtures.
+Choose the public model that demonstrates the requested integration. Copy it to a
+separate design workspace before editing. Keep custom copies and outputs outside
+repository regression fixtures.
 
 ## Select a starting model
 
-- [Assemblies](../../../examples/assemblies.json): nine separate construction
-  packages with complete authored layers, framing, connections and service
-  interfaces. Use the [catalog reference](catalog.md) to select a recipe and
-  discover its parameters, connection points and component coverage.
+| Model | Purpose |
+| --- | --- |
+| [Assemblies](../../../examples/assemblies.json) | Nine inspectable construction packages: exterior wall, roof, deck, floor, wet wall, ventilation, foundation, entrance and truss. Use the [catalog](catalog.md) for recipe interfaces and parameters. |
+| [Hillside Deck House](../../../examples/hillside-deck-house.json) | Terrain, multiple storeys, foundations, deck, stair/guard/screen, drainage and solar coordination. Its two view windows share stock. |
+| [Master Suite Gable House](../../../examples/master-suite-gable-house.json) | A detailed framed and layered house with bedroom, ensuite, electrical circuits and water/waste/vent plumbing. Its [twelve-view tour](../../../docs/guides/master-suite-gable-house.md) exposes interiors and concealed construction. |
 
-- [Single-Story Gable House](../../../examples/single-story-gable-house.json):
-  architectural walls, slab, roof, openings and shared datums.
-- [Hillside Deck House](../../../examples/hillside-deck-house.json): site, stepped
-  foundations, deck, stair/guard/screen and drainage coordination.
-- [Complete Shell Coordination House](../../../examples/complete-shell-coordination-house.json):
-  explicit framing, connected services, hosted equipment and owned cuts.
-- [Integrated Authoring House](../../../examples/integrated-authoring-house.json):
-  named layers and boundaries, two windows sharing stock, the complete
-  service partition, and instantiated partition/deck recipes. Use this model for
-  combined editing tasks. When starting from a model with positional selectors,
-  [convert its input format](identities.md#explicit-migration) before using named selectors or recipes.
+These models complement each other; none demonstrates every engine option.
+Master Suite's services are electrical and plumbing; Assemblies supplies the
+ventilation example. Assemblies has open service interfaces for connection into
+larger designs, rather than a complete house-wide network.
+
+Use `home-design inspect` to discover source IDs and `home-design views MODEL`
+to discover prepared visual reviews. For a small new design, select or instantiate
+the relevant assembly instead of copying unrelated house construction. When a
+source uses positional selectors, [convert its input format](identities.md#explicit-migration)
+before using named selectors or recipes.
 
 ## Complete changeset examples
 
-[Move the catalog entrance](../../../examples/change-sets/move-catalog-entrance.json)
-applies to revision 8 of [Assemblies](../../../examples/assemblies.json). It moves
-the landing, stair, rails, screens, door, supports and connections 350 mm east and
-225 mm north, preserving neighboring packages and updating recipe provenance.
+Each independent example starts from an unchanged copy of the indicated source.
+The revision is a design revision, not an engine version. Sequential edits use the
+preceding result. For custom models, inspect their actual revision, IDs and values;
+adapt intent and guards instead of applying these files unchanged.
 
-Unless a preceding edit is listed, these files apply to revision 1 of their named public model. For an existing
-custom design, inspect its actual IDs, type values and revision first; adapt the
-intent and preconditions instead of applying a reference change unchanged.
-
-| Source model | Changeset | Verify |
+| Source and starting revision | Changeset | Verify |
 | --- | --- | --- |
-| Single-Story Gable House | [Move a window](../../../examples/change-sets/move-window.json) | Opening follows its new station; sill, dimensions, fill and host cut remain coherent |
-| Single-Story Gable House | [Narrow one window](../../../examples/change-sets/narrow-one-window.json) | New type assigned only to the selected window; original type and opening preserved |
-| Complete Shell Coordination House | [Rotate a serviced partition](../../../examples/change-sets/rotate-service-partition.json) | Framing, electrical/water branches, ledge and owned interfaces follow; independent air branch and quantities preserved |
-| Integrated Authoring House | [Rotate a serviced partition](../../../examples/change-sets/rotate-service-partition.json) | The coordinated edit preserves named selectors |
-| Integrated Authoring House | [Local shared window](../../../examples/change-sets/local-shared-window.json) | North window becomes 1400 mm wide; east window retains the original shared type and geometry |
-| Integrated Authoring House | [Insert a named layer](../../../examples/change-sets/insert-named-layer.json) | Add 6 mm gypsum lining to the recipe partition; its named cavity, framing and box retain their references |
-| Integrated Authoring House, after inserting the layer (revision 2) | [Reorder named layers](../../../examples/change-sets/reorder-named-layers.json) | Exchange the two gypsum lining leaves; physical order changes while the cavity remains selected by ID |
-| Integrated Authoring House | [Duplicate the deck](../../../examples/change-sets/duplicate-deck.json) | Independent copy at `[25000, -5000]`, width 4800 mm; original stock, geometry and provenance preserved |
-| Integrated Authoring House, after duplicating the deck (revision 2) | [Adapt the copied deck](../../../examples/change-sets/adapt-copied-deck.json) | Copy length becomes 4800 mm and height 2400 mm; its posts, beams and slab stay coordinated |
+| Master Suite, 9 | [Move a window](../../../examples/change-sets/move-window.json) | North opening moves from station 7200 to 6700 mm; window, host cut and opening framing follow; sill and other windows stay fixed |
+| Master Suite, 9 | [Narrow one window](../../../examples/change-sets/narrow-one-window.json) | North window receives its own 1400 mm stock; original type and rough opening remain unchanged |
+| Hillside, 5 | [Local shared window](../../../examples/change-sets/local-shared-window.json) | Upper view window becomes 800 mm wide; lower view window retains the shared 900 mm stock and geometry |
+| Assemblies, 8 | [Rotate a serviced partition](../../../examples/change-sets/rotate-service-partition.json) | Wet wall turns 90 degrees about its start; framing, water branches, ledge, sleeve and seals follow; ventilation and quantities remain unchanged |
+| Assemblies, 8 | [Rotate an electrical wall](../../../examples/change-sets/rotate-electrical-wall.json) | Exterior wall turns 90 degrees; opening framing, boxes, recesses, receptacle and cable follow; neighboring packages remain unchanged |
+| Assemblies, 8 | [Insert a named layer](../../../examples/change-sets/insert-named-layer.json) | Add 6 mm back gypsum; extend the sleeve, cut and rear seal through the thicker wall while preserving the named cavity and framing references |
+| Assemblies, after insertion, 9 | [Reorder named layers](../../../examples/change-sets/reorder-named-layers.json) | Exchange the two back lining leaves; cavity selection remains `layer.legacy.1` despite its changed array position |
+| Assemblies, 8 | [Duplicate the deck](../../../examples/change-sets/duplicate-deck.json) | Independent complete deck at `[21000, 0]`, width 4800 mm; original geometry, stock and provenance remain unchanged |
+| Assemblies, after duplication, 9 | [Adapt the copied deck](../../../examples/change-sets/adapt-copied-deck.json) | Copy length becomes 4800 mm and height 2400 mm; boards, framing, guards, posts, beams, connectors and pads remain coordinated |
+| Assemblies, 8 | [Move the catalog entrance](../../../examples/change-sets/move-catalog-entrance.json) | Landing, stair, rails, screens, door and supports move 350 mm east and 225 mm north; recipe origin and neighboring packages stay coherent |
 
-Copy the chosen source to a separate design workspace before applying an example.
-Use `home-design transact MODEL CHANGE --dry-run`, then apply with explicit
-`--build-directory` and `--web-assets` destinations outside the source directory.
-The transaction writes the next revision to that copy. Apply sequential examples
-in the stated order; independent examples start from a fresh revision 1 copy.
-See [editing](editing.md) for the complete command protocol.
+Use `home-design preview MODEL CHANGE`, then
+`home-design transact MODEL CHANGE --dry-run`. Complete the transaction with an
+explicit `--build-directory` and optional `--web-assets` destination outside the
+public source directory. A dry run does not test exporters. See [editing](editing.md)
+for source guarding, publication and recovery. Preserve the Master Suite companion
+`views/master-suite-gable-house/` directory when copying its named tour.
 
-The narrow-window example uses the small one-window model. The local-shared-window
-example verifies the same operation with two stock users. Always inspect type users
-before deciding whether a stock edit should affect one occurrence or all of them.
+## Prepare equivalent edits
 
-The two recipe packages in Integrated Authoring House sit outside the main building
-for separate review. They demonstrate composition and editing, rather than an
-approved building arrangement. See [assemblies](assemblies.md) to prepare new
-parameterized changesets instead of editing their expanded object lists by hand.
+Use [local type preparation](changesets.md) for occurrence stock and
+[assembly preparation](assemblies.md) for duplication and adaptation. The deck
+examples use `complete-deck`, instance `assembly.complete-deck`, and new instance
+`assembly.deck.copy`. Prepare against the current source to obtain current value
+and absence preconditions; do not hand-edit the expanded package object list.
 
-- [Complete shell coordination example](#complete-shell-coordination-example)
+The two rotation examples change the host wall's end offset from `[4000, 0]` to
+`[0, 4000]`, retaining its start anchor. They are intentional local geometry edits:
+aggregate membership alone does not rotate an assembly. The recipes expose origin
+but no rotation parameter; future recipe adaptations preserve independent local
+edits and reject overlapping changes. Use the recipe's origin parameter for a
+whole-package translation, as the entrance example demonstrates.
 
-## Complete shell coordination example
-
-[Complete Shell Coordination House](../../../examples/complete-shell-coordination-house.json)
-combines explicit insulated wall, floor and roof cavities, framed openings, an
-irregular deck, bearing plates, piers/posts and pad footings. Its service partition
-contains a recessed box and carries two scheduled electrical circuits, earthing
-parts and an interior ledge. A connected cold-water branch crosses that partition
-through an owned sleeve opening with seal rings and a protective plate. An
-independently placed mechanical branch includes a damper, two terminals,
-insulation, a support and an equipment-access volume.
-
-Use `electrical.anchor.wall.start` and `electrical.anchor.wall.end` to move or
-rotate the service partition through a guarded transaction. Its framing, mounted
-circuits, water branches, ledge, recess and penetration interfaces follow their
-host references. `mechanical.anchor.mechanical` controls the separate air branch.
-The opening limit on `interface.cut.partition` and the coordination checks on
-`plumbing.pipe.supply` provide explicit examples of dimensional and interference
-diagnostics. Inspect the generated member, cavity, circuit and service schedules
-after edits, and use the framing/services views to see concealed components.
-
-Dimensions, ratings, spans and seal geometry are illustrative authoring inputs.
-The example demonstrates coordination and physical quantities without supplying
-structural sizing, hydraulic/airflow calculations or approved seal assemblies.
+The wet wall's `interface.cut.partition` contains authored opening limits, and its
+`plumbing.pipe.supply` requests interference diagnostics (both prefixed
+`assembly.interior-wet-wall.`). Inspect these objects when investigating dimensional
+or collision failures. Compare schedules, generated identities, owned cut volumes
+and unrelated objects after edits; use wall-content and framing/services views to
+inspect concealed results. Dimensions and ratings remain illustrative authoring
+inputs, not structural or service-sizing calculations.

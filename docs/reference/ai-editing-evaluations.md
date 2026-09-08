@@ -29,8 +29,12 @@ Proposed development and downstream CAD work remain in [TODO.md](../../TODO.md).
 
 ## Verified baseline
 
-The prior independent trials use copies of Integrated Authoring House. Saved
-evaluation reports and generated measurements establish the following results.
+The baseline independent trial records concern a coordinated authoring fixture.
+Their saved measurements below describe those trial inputs, not the current public
+models. The maintained [worked edits](../../skills/home-design/references/examples.md)
+and `tests/integration/test_authoring_examples.py` exercise the same teaching topics
+on Assemblies, Hillside and Master Suite. Automated migration checks do not imply
+new independent AI trials.
 
 | Editing task | Verified outcome |
 | --- | --- |

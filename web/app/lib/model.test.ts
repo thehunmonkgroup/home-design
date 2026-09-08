@@ -68,6 +68,15 @@ describe('render manifest helpers', () => {
     expect(isRenderManifest(manifest)).toBe(true);
   });
 
+  it('validates capture mesh ownership and layer identities', () => {
+    const mesh = { elementId: 'wall.north', role: 'layer:0', materialId: 'timber', layerId: 'cavity' };
+    expect(isRenderManifest({ ...manifest, meshes: { 'wall.north': mesh } })).toBe(true);
+    expect(isRenderManifest({ ...manifest, meshes: { missing: mesh } })).toBe(false);
+    expect(isRenderManifest({ ...manifest, meshes: { 'wall.north': { ...mesh, elementId: 'missing' } } })).toBe(false);
+    expect(isRenderManifest({ ...manifest, meshes: { 'wall.north': { ...mesh, layerId: -1 } } })).toBe(false);
+    expect(isRenderManifest({ ...manifest, meshes: null })).toBe(false);
+  });
+
   it('groups components in architectural display order', () => {
     expect(groupElements(manifest).map((group) => group.kind)).toEqual(['wall', 'roof', 'space']);
   });

@@ -1,0 +1,24 @@
+{
+  "width": 1600,
+  "height": 1200,
+  "labels": false,
+  "reveal": {
+    "id": "wall.north",
+    "mode": "contents"
+  },
+  "sections": [
+    {
+      "axis": "x",
+      "position": 3900
+    }
+  ],
+  "camera": {
+    "preset": "south"
+  },
+  "highlight": {
+    "ids": [
+      "outlet.master.north1",
+      "outlet.master.north2"
+    ]
+  }
+}

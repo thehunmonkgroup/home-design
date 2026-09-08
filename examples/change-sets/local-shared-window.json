@@ -1,35 +1,35 @@
 {
   "changeVersion": "0.1",
-  "id": "change.local-type.window.north",
-  "description": "Give window.north its own reusable type windowType.north-1400x1200; preserve other type users.",
-  "baseRevision": 1,
+  "id": "change.local-type.window.view",
+  "description": "Give window.view its own reusable type type.window.upper-800; preserve other type users.",
+  "baseRevision": 5,
   "preconditions": [
     {
-      "path": "/types/windowType.north-1400x1200",
+      "path": "/types/type.window.upper-800",
       "exists": false
     },
     {
-      "path": "/types/windowType.casement-1500x1200",
+      "path": "/types/type.window",
       "equals": {
         "kind": "windowType",
-        "name": "Casement window 1500 x 1200",
-        "nominalWidth": 1500,
-        "nominalHeight": 1200,
-        "operation": "casement",
-        "frameDepth": 185,
-        "material": "material.timber"
+        "name": "Fixed view window",
+        "nominalWidth": 900,
+        "nominalHeight": 1500,
+        "operation": "fixed",
+        "frameDepth": 140,
+        "material": "mat.white",
+        "performance": {
+          "uFactorWm2K": 1.4,
+          "shgc": 0.4
+        }
       }
     },
     {
-      "path": "/elements/window.north",
+      "path": "/elements/window.view",
       "equals": {
         "kind": "window",
-        "name": "North living-room window",
-        "tags": [
-          "living-room",
-          "north"
-        ],
-        "type": "windowType.casement-1500x1200"
+        "name": "Upper \u2014 uncovered south view window",
+        "type": "type.window"
       }
     }
   ],
@@ -37,21 +37,25 @@
     {
       "op": "putObject",
       "registry": "types",
-      "objectId": "windowType.north-1400x1200",
+      "objectId": "type.window.upper-800",
       "value": {
         "kind": "windowType",
-        "name": "North casement 1400 x 1200",
-        "nominalWidth": 1400,
-        "nominalHeight": 1200,
-        "operation": "casement",
-        "frameDepth": 185,
-        "material": "material.timber"
+        "name": "Upper view window 800 x 1500",
+        "nominalWidth": 800,
+        "nominalHeight": 1500,
+        "operation": "fixed",
+        "frameDepth": 140,
+        "material": "mat.white",
+        "performance": {
+          "uFactorWm2K": 1.4,
+          "shgc": 0.4
+        }
       }
     },
     {
       "op": "set",
-      "path": "/elements/window.north/type",
-      "value": "windowType.north-1400x1200"
+      "path": "/elements/window.view/type",
+      "value": "type.window.upper-800"
     }
   ]
 }

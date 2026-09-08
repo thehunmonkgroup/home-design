@@ -62,7 +62,7 @@ An opening owns host-relative station, vertical, and depth placement. Its geomet
 
 The wall body is derived with the cut already applied. IFC also retains the `IfcOpeningElement`, `IfcRelVoidsElement`, and `IfcRelFillsElement`, so downstream BIM tools receive the semantics as well as the visible result.
 
-Door types accept `frameWidth`, `panelCount`, `glazingFraction` and an optional manufacturer `clearOpeningWidth`. Sliding doors generate separate glazed panels and tracks. Single-swing doors accept `handing: "left" | "right"` and `swingDirection: "inward" | "outward"`, plus `swingAngle` in degrees. The resolved data includes a 90-degree swing envelope, nominal dimensions and clear-opening estimates; a manufacturer's clear width takes precedence over the geometric estimate. Nominal door width is not clear passage width.
+Door types accept `frameWidth`, `panelCount`, `glazingFraction` and an optional manufacturer `clearOpeningWidth`. Sliding doors generate separate glazed panels and tracks. Put `handing: "left" | "right"`, `swingDirection: "inward" | "outward"` and `swingAngle` in degrees on the single-swing **door occurrence**, not its type. The resolved data includes a 90-degree swing envelope, nominal dimensions and clear-opening estimates; a manufacturer's clear width takes precedence over the geometric estimate. Nominal door width is not clear passage width. Window types do not accept the door-specific `frameWidth` field.
 
 For a screen door, set `infillMaterial` to the screen material and `infillFraction`
 to the desired framed-panel infill fraction (greater than zero and at most one).

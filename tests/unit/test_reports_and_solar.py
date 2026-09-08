@@ -13,6 +13,7 @@ from home_design.geometry import extrude_polygon
 from home_design.json_types import JsonObject
 from home_design.reports import ModelReports
 from home_design.resolver import ModelResolver
+from home_design.resolved import MeshData
 from home_design.solar import RayOccluder, SolarPosition
 from home_design.validation import ModelValidator
 
@@ -56,6 +57,29 @@ def test_section_retains_openings_instead_of_filling_nested_cut_loops() -> None:
     sections = DrawingExporter.section_polygons(solid, 2, 100)
     assert sum(section.area for section in sections) == pytest.approx(11_000_000)
     assert sum(len(section.interiors) for section in sections) == 1
+
+
+@pytest.mark.parametrize("offset", [0.0, 1000000.0])
+def test_drawing_projection_unions_near_coincident_facets_without_losing_holes(
+    offset: float,
+) -> None:
+    """Opposite shell facets tolerate rounding noise at small and survey-scale origins."""
+    profile = Polygon(
+        [(offset, 0), (offset + 100, 0), (offset + 100, 100), (offset, 100)],
+        [[(offset + 20, 20), (offset + 80, 20), (offset + 80, 80), (offset + 20, 80)]],
+    )
+    solid = extrude_polygon(profile, 0, 200, None, "hollow-stock")
+    noisy = MeshData(
+        tuple((x + (1e-10 if z > 0 else 0), y, z) for x, y, z in solid.vertices),
+        solid.faces,
+        solid.material_id,
+        solid.role,
+    )
+    projected = DrawingExporter.project_polygons(noisy, 2)
+    assert len(projected) == 1
+    assert projected[0].is_valid
+    assert projected[0].area == pytest.approx(6400, abs=0.001)
+    assert len(projected[0].interiors) == 1
 
 
 def test_concurrent_cavity_materials_do_not_double_count_wall_thickness(

@@ -17,6 +17,7 @@ from home_design.construction import Authoring
 from home_design.geometry import number
 from home_design.json_types import JsonObject
 from home_design.loader import ModelLoader
+from home_design.migrations import ModelMigration
 from home_design.reports import ModelReports
 from home_design.resolver import ModelResolver
 from home_design.solids import SolidOperations
@@ -207,6 +208,48 @@ class InterfaceFixture:
                 ),
             }
         model["elements"] = elements
+
+
+def test_interface_migration_retains_cavity_ownership_limits_and_native_identity(
+    reference_model: JsonObject, loader: ModelLoader, tmp_path: Path
+) -> None:
+    """Positional service ownership and opening limits become named without material changes."""
+    InterfaceFixture.configure(reference_model, explicit=True)
+    before = ModelResolver(reference_model).resolve()
+    candidate = ChangeEngine(loader).apply(
+        reference_model, ModelMigration(loader).prepare(reference_model)
+    )
+    elements = Authoring.object(candidate["elements"])
+    route = Authoring.object(elements["route.run"])
+    regions = Authoring.array(Authoring.object(route["occupies"])["regions"])
+    assert Authoring.object(regions[0])["layer"] == "layer.legacy.0"
+    cut = Authoring.object(elements["cut.host"])
+    limit = Authoring.object(Authoring.object(cut["limits"])["hostHole"])
+    assert Authoring.object(limit["host"])["layer"] == "layer.legacy.0"
+    assert cut["owner"] == "part.sleeve"
+    after = ModelResolver(candidate).resolve()
+    for element in before.elements:
+        assert sum(
+            SolidOperations.volume(mesh) for mesh in element.meshes
+        ) == pytest.approx(
+            sum(
+                SolidOperations.volume(mesh)
+                for mesh in after.element(element.element_id).meshes
+            ),
+            rel=1e-7,
+            abs=0.01,
+        )
+    identities: list[set[str]] = []
+    for name, resolved in (("before", before), ("after", after)):
+        path = tmp_path / f"{name}.ifc"
+        IfcExporter().export(resolved, path)
+        identities.append(
+            {
+                str(entity.GlobalId)
+                for entity in ifcopenshell.open(path).by_type("IfcRoot")
+            }
+        )
+    assert identities[0] == identities[1]
 
 
 @pytest.mark.parametrize("explicit", [False, True])

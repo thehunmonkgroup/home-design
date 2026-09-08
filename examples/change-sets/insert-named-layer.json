@@ -1,72 +1,117 @@
 {
   "changeVersion": "0.1",
   "id": "change.insert-named-layer",
-  "description": "Edit gypsum lining leaves while retaining the named explicit cavity and its participants.",
-  "baseRevision": 1,
+  "description": "Add 6 mm back lining while preserving the named cavity and extending its sleeve, owned cut and back seal through the thicker wall.",
+  "baseRevision": 8,
   "preconditions": [
     {
-      "path": "/types/assembly.partition.demo.type.partition/layers",
+      "path": "/types/assembly.interior-wet-wall.wallType.service.partition/layers",
       "equals": [
         {
-          "id": "finish.exterior",
-          "name": "First gypsum face",
-          "thickness": 12,
-          "material": "assembly.partition.demo.material.gypsum",
-          "function": "finish"
+          "name": "Back gypsum",
+          "material": "assembly.interior-wet-wall.material.gypsum",
+          "thickness": 13,
+          "function": "finish",
+          "id": "layer.legacy.0"
         },
         {
-          "id": "cavity",
-          "name": "Explicit framing and insulation",
+          "name": "Framed service cavity",
+          "material": "assembly.interior-wet-wall.material.insulation",
           "thickness": 140,
-          "material": "assembly.partition.demo.material.insulation",
           "function": "structure",
-          "representation": "explicit"
+          "representation": "explicit",
+          "id": "layer.legacy.1"
         },
         {
-          "id": "finish.interior",
-          "name": "Second gypsum face",
-          "thickness": 12,
-          "material": "assembly.partition.demo.material.gypsum",
-          "function": "finish"
+          "name": "Front gypsum",
+          "material": "assembly.interior-wet-wall.material.gypsum",
+          "thickness": 13,
+          "function": "finish",
+          "id": "layer.legacy.2"
         }
       ]
+    },
+    {
+      "path": "/types/assembly.interior-wet-wall.interface.type.sleeve/solids/body/depth",
+      "equals": 166
+    },
+    {
+      "path": "/types/assembly.interior-wet-wall.interface.type.sleeve/cuts/passage/depth",
+      "equals": 166
+    },
+    {
+      "path": "/elements/assembly.interior-wet-wall.interface.cut.partition/depth",
+      "equals": 166
+    },
+    {
+      "path": "/elements/assembly.interior-wet-wall.interface.cut.partition/limits/authoredOpening/maximumExtent/z",
+      "equals": 166
+    },
+    {
+      "path": "/elements/assembly.interior-wet-wall.interface.acousticSeal/placement/origin/host/station",
+      "equals": 456
     }
   ],
   "operations": [
     {
       "op": "set",
-      "path": "/types/assembly.partition.demo.type.partition/layers",
+      "path": "/types/assembly.interior-wet-wall.wallType.service.partition/layers",
       "value": [
         {
           "id": "finish.additional",
           "name": "Additional gypsum lining",
           "thickness": 6,
-          "material": "assembly.partition.demo.material.gypsum",
+          "material": "assembly.interior-wet-wall.material.gypsum",
           "function": "finish"
         },
         {
-          "id": "finish.exterior",
-          "name": "First gypsum face",
-          "thickness": 12,
-          "material": "assembly.partition.demo.material.gypsum",
-          "function": "finish"
+          "name": "Back gypsum",
+          "material": "assembly.interior-wet-wall.material.gypsum",
+          "thickness": 13,
+          "function": "finish",
+          "id": "layer.legacy.0"
         },
         {
-          "id": "cavity",
-          "name": "Explicit framing and insulation",
+          "name": "Framed service cavity",
+          "material": "assembly.interior-wet-wall.material.insulation",
           "thickness": 140,
-          "material": "assembly.partition.demo.material.insulation",
           "function": "structure",
-          "representation": "explicit"
+          "representation": "explicit",
+          "id": "layer.legacy.1"
         },
         {
-          "id": "finish.interior",
-          "name": "Second gypsum face",
-          "thickness": 12,
-          "material": "assembly.partition.demo.material.gypsum",
-          "function": "finish"
+          "name": "Front gypsum",
+          "material": "assembly.interior-wet-wall.material.gypsum",
+          "thickness": 13,
+          "function": "finish",
+          "id": "layer.legacy.2"
         }
       ]
+    },
+    {
+      "op": "set",
+      "path": "/types/assembly.interior-wet-wall.interface.type.sleeve/solids/body/depth",
+      "value": 172
+    },
+    {
+      "op": "set",
+      "path": "/types/assembly.interior-wet-wall.interface.type.sleeve/cuts/passage/depth",
+      "value": 172
+    },
+    {
+      "op": "set",
+      "path": "/elements/assembly.interior-wet-wall.interface.cut.partition/depth",
+      "value": 172
+    },
+    {
+      "op": "set",
+      "path": "/elements/assembly.interior-wet-wall.interface.cut.partition/limits/authoredOpening/maximumExtent/z",
+      "value": 172
+    },
+    {
+      "op": "set",
+      "path": "/elements/assembly.interior-wet-wall.interface.acousticSeal/placement/origin/host/station",
+      "value": 462
     }
   ]
 }

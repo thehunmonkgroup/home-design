@@ -21,6 +21,7 @@ from home_design.reports import ModelReports
 from home_design.adapters.drawings import DrawingExporter
 from home_design.publication import ModelPublisher
 from home_design.source_state import SourceState
+from home_design.named_views import NamedViews
 
 
 @dataclass(frozen=True, slots=True)
@@ -148,6 +149,20 @@ class BuildService:
             raise ValueError(f"Unsupported web assets mode: {web_assets_mode}")
         self.check_destinations(model_paths, output_directory, web_assets)
         prepared, sources = self._prepare_sources(model_paths)
+        libraries = [NamedViews(path) for path in model_paths]
+        for library in libraries:
+            sources.extend(library.sources)
+        for snapshot in sources:
+            if any(
+                snapshot.path.is_relative_to((output_directory / path.stem).resolve())
+                for path in model_paths
+            ) or (
+                web_assets is not None
+                and snapshot.path.is_relative_to(web_assets.resolve())
+            ):
+                raise ValueError(
+                    "Model and named-view sources must be outside generated destinations"
+                )
         output_directory = output_directory.resolve()
         output_directory.parent.mkdir(parents=True, exist_ok=True)
         with tempfile.TemporaryDirectory(
@@ -156,7 +171,9 @@ class BuildService:
             staging = Path(temporary)
             winners: dict[str, Path] = {}
             for position, (path, item) in enumerate(zip(model_paths, prepared)):
-                result = self.export_prepared(item, staging / str(position))
+                result = self.export_prepared(
+                    item, staging / str(position), libraries[position]
+                )
                 winners[path.stem] = result.output_directory
             return self.install(
                 winners, output_directory, web_assets, web_assets_mode, tuple(sources)
@@ -297,7 +314,10 @@ class BuildService:
             )
 
     def export_prepared(
-        self, prepared: PreparedBuild, output_directory: Path
+        self,
+        prepared: PreparedBuild,
+        output_directory: Path,
+        named_views: NamedViews | None = None,
     ) -> BuildResult:
         """Export every adapter from one retained, validated source snapshot.
 
@@ -325,9 +345,20 @@ class BuildService:
                 encoding="utf-8",
             )
             self.ifc_exporter.export(resolved, staging / "model.ifc")
-            self.gltf_exporter.export(
-                resolved, staging / "model.glb", staging / "render-manifest.json"
-            )
+            if named_views and named_views.entries:
+                self.gltf_exporter.export(
+                    resolved,
+                    staging / "model.glb",
+                    staging / "render-manifest.json",
+                    named_views.sections(),
+                    named_views.entries,
+                )
+            else:
+                self.gltf_exporter.export(
+                    resolved,
+                    staging / "model.glb",
+                    staging / "render-manifest.json",
+                )
             reports = ModelReports(resolved)
             reports.write(staging / "schedules.json", reports.schedules())
             reports.write(staging / "envelope.json", reports.envelope())
@@ -343,6 +374,12 @@ class BuildService:
                 "sourceSha256": hashlib.sha256(source_bytes).hexdigest(),
                 "artifacts": list(self._ARTIFACTS[:-1]),
             }
+            if named_views and named_views.entries:
+                metadata["namedViewSources"] = [
+                    {"file": source.path.name, "sha256": source.sha256}
+                    for source in named_views.sources
+                ]
+                named_views.assert_unchanged()
             (staging / "build-metadata.json").write_text(
                 json.dumps(metadata, indent=2) + "\n",
                 encoding="utf-8",

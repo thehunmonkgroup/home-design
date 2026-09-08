@@ -12,7 +12,7 @@ from home_design.loader import ModelLoader
 from home_design.validation import ModelValidator
 
 ROOT = Path(__file__).resolve().parents[1]
-REFERENCE_MODEL = ROOT / "examples" / "single-story-gable-house.json"
+REFERENCE_MODEL = ROOT / "tests" / "fixtures" / "basic-shell.json"
 CONSTRUCTION_MODEL = ROOT / "examples" / "hillside-deck-house.json"
 
 

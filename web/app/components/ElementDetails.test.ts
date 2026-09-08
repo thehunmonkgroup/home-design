@@ -17,7 +17,7 @@ const manifest: RenderManifest = {
 };
 
 describe('component inspector', () => {
-  const navigation = { view: initialDetailsView, onView: () => {}, onFind: () => {}, onShow: () => {}, hasGeometry: true, hidden: false };
+  const navigation = { view: initialDetailsView, onView: () => {}, onFind: () => {}, onShow: () => {}, onHide: () => {}, hasGeometry: true, hidden: false };
   it('shows friendly units and navigable wall contents while keeping technical values expandable', () => {
     const html = renderToStaticMarkup(createElement(ElementDetails, { ...navigation, manifest, elementId: 'wall', units: 'imperial', onUnits: () => {}, onSelect: () => {}, onIsolate: () => {} }));
     expect(html).toContain('Ground floor');

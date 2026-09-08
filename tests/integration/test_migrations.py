@@ -26,16 +26,15 @@ from home_design.validation import ModelValidator
 @pytest.mark.parametrize(
     "filename",
     [
-        "single-story-gable-house.json",
-        "hillside-deck-house.json",
-        "complete-shell-coordination-house.json",
+        "tests/fixtures/basic-shell.json",
+        "examples/hillside-deck-house.json",
     ],
 )
 def test_public_migration_preserves_geometry_and_ifc_identity(
     filename: str, loader: ModelLoader, validator: ModelValidator, tmp_path: Path
 ) -> None:
     """A guarded version transition retains every physical member and native IFC root GUID."""
-    source = loader.load(Path(__file__).resolve().parents[2] / "examples" / filename)
+    source = loader.load(Path(__file__).resolve().parents[2] / filename)
     original = deepcopy(source)
     migration = ModelMigration(loader)
     change = migration.prepare(source)

@@ -1,26 +1,26 @@
 {
   "changeVersion": "0.1",
   "id": "change.adapt.assembly.deck.copy",
-  "description": "Adapt assembly.deck.copy using recipe.coordinated-deck; preserve independent occurrence edits",
-  "baseRevision": 2,
+  "description": "Adapt assembly.deck.copy using recipe.complete-deck; preserve independent occurrence edits",
+  "baseRevision": 9,
   "preconditions": [
     {
       "path": "/elements/assembly.deck.copy",
       "equals": {
         "kind": "assembly",
-        "name": "Coordinated raised deck",
+        "name": "Raised deck with guards and connectors",
         "assemblyType": "deckSystem",
         "recipeInstance": {
-          "recipeId": "recipe.coordinated-deck",
-          "recipeDigest": "1acfc5daab6a8094e25110a743bffab9a5e306235035f0d2b194b6c1cdfcec2c",
+          "recipeId": "recipe.complete-deck",
+          "recipeDigest": "7f19087b81b05580e36731467e6135640e0b7b502195726364feac59ea66be0d",
           "parameters": {
             "origin": [
-              25000,
-              -5000
+              21000,
+              0
             ],
             "width": 4800,
-            "length": 4000,
-            "height": 2000
+            "length": 3000,
+            "height": 1200
           },
           "bindings": {
             "binding.storey": "level.ground"
@@ -32,7 +32,9 @@
             },
             "materials": {
               "material.timber": "assembly.deck.copy.material.timber",
-              "material.concrete": "assembly.deck.copy.material.concrete"
+              "material.concrete": "assembly.deck.copy.material.concrete",
+              "mat.black": "assembly.deck.copy.mat.black",
+              "material.steel": "assembly.deck.copy.material.steel"
             },
             "types": {
               "type.deck": "assembly.deck.copy.type.deck",
@@ -40,7 +42,13 @@
               "stock.beam": "assembly.deck.copy.stock.beam",
               "stock.post": "assembly.deck.copy.stock.post",
               "type.joists": "assembly.deck.copy.type.joists",
-              "type.pad": "assembly.deck.copy.type.pad"
+              "type.pad": "assembly.deck.copy.type.pad",
+              "type.guard": "assembly.deck.copy.type.guard",
+              "stock.board": "assembly.deck.copy.stock.board",
+              "type.boards": "assembly.deck.copy.type.boards",
+              "type.postCap": "assembly.deck.copy.type.postCap",
+              "type.postBase": "assembly.deck.copy.type.postBase",
+              "type.screw": "assembly.deck.copy.type.screw"
             },
             "elements": {
               "assembly.root": "assembly.deck.copy",
@@ -55,7 +63,28 @@
               "post.north.west": "assembly.deck.copy.post.north.west",
               "pad.north.west": "assembly.deck.copy.pad.north.west",
               "post.north.east": "assembly.deck.copy.post.north.east",
-              "pad.north.east": "assembly.deck.copy.pad.north.east"
+              "pad.north.east": "assembly.deck.copy.pad.north.east",
+              "decking": "assembly.deck.copy.decking",
+              "guard.south": "assembly.deck.copy.guard.south",
+              "guard.east": "assembly.deck.copy.guard.east",
+              "guard.north": "assembly.deck.copy.guard.north",
+              "guard.west": "assembly.deck.copy.guard.west",
+              "hardware.postBase.south.west": "assembly.deck.copy.hardware.postBase.south.west",
+              "screws.postBase.south.west": "assembly.deck.copy.screws.postBase.south.west",
+              "hardware.postCap.south.west": "assembly.deck.copy.hardware.postCap.south.west",
+              "screws.postCap.south.west": "assembly.deck.copy.screws.postCap.south.west",
+              "hardware.postBase.south.east": "assembly.deck.copy.hardware.postBase.south.east",
+              "screws.postBase.south.east": "assembly.deck.copy.screws.postBase.south.east",
+              "hardware.postCap.south.east": "assembly.deck.copy.hardware.postCap.south.east",
+              "screws.postCap.south.east": "assembly.deck.copy.screws.postCap.south.east",
+              "hardware.postBase.north.west": "assembly.deck.copy.hardware.postBase.north.west",
+              "screws.postBase.north.west": "assembly.deck.copy.screws.postBase.north.west",
+              "hardware.postCap.north.west": "assembly.deck.copy.hardware.postCap.north.west",
+              "screws.postCap.north.west": "assembly.deck.copy.screws.postCap.north.west",
+              "hardware.postBase.north.east": "assembly.deck.copy.hardware.postBase.north.east",
+              "screws.postBase.north.east": "assembly.deck.copy.screws.postBase.north.east",
+              "hardware.postCap.north.east": "assembly.deck.copy.hardware.postCap.north.east",
+              "screws.postCap.north.east": "assembly.deck.copy.screws.postCap.north.east"
             },
             "relationships": {
               "supports.south.joists": "assembly.deck.copy.supports.south.joists",
@@ -80,7 +109,7 @@
             },
             "surface": {
               "element": "assembly.deck.copy.slab.deck",
-              "description": "Deck host for guards, stairs and accessories"
+              "description": "Finished platform surface for adjoining construction"
             }
           }
         }
@@ -99,16 +128,16 @@
             "anchor": "assembly.deck.copy.anchor.origin",
             "offset": [
               75,
-              3925.0,
-              1680.0
+              2925.0,
+              880.0
             ]
           },
           {
             "anchor": "assembly.deck.copy.anchor.origin",
             "offset": [
               4725.0,
-              3925.0,
-              1680.0
+              2925.0,
+              880.0
             ]
           }
         ]
@@ -128,7 +157,7 @@
             "offset": [
               75,
               75,
-              1680.0
+              880.0
             ]
           },
           {
@@ -136,8 +165,160 @@
             "offset": [
               4725.0,
               75,
-              1680.0
+              880.0
             ]
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.guard.east",
+      "equals": {
+        "kind": "railing",
+        "name": "East deck guard",
+        "type": "assembly.deck.copy.type.guard",
+        "role": "guard",
+        "follow": {
+          "element": "assembly.deck.copy.slab.deck",
+          "edge": "east",
+          "offset": 0
+        },
+        "openings": [
+          {
+            "start": 0,
+            "end": 40
+          },
+          {
+            "start": 2960.0,
+            "end": 3000
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.guard.west",
+      "equals": {
+        "kind": "railing",
+        "name": "West deck guard",
+        "type": "assembly.deck.copy.type.guard",
+        "role": "guard",
+        "follow": {
+          "element": "assembly.deck.copy.slab.deck",
+          "edge": "west",
+          "offset": 0
+        },
+        "openings": [
+          {
+            "start": 0,
+            "end": 40
+          },
+          {
+            "start": 2960.0,
+            "end": 3000
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.hardware.postCap.north.east",
+      "equals": {
+        "kind": "hardware",
+        "name": "north.east postCap",
+        "type": "assembly.deck.copy.type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "assembly.deck.copy.post.north.east",
+              "surface": "end",
+              "station": 772.0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "assembly.deck.copy.post.north.east"
+          },
+          {
+            "element": "assembly.deck.copy.beam.north"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.hardware.postCap.north.west",
+      "equals": {
+        "kind": "hardware",
+        "name": "north.west postCap",
+        "type": "assembly.deck.copy.type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "assembly.deck.copy.post.north.west",
+              "surface": "end",
+              "station": 772.0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "assembly.deck.copy.post.north.west"
+          },
+          {
+            "element": "assembly.deck.copy.beam.north"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.hardware.postCap.south.east",
+      "equals": {
+        "kind": "hardware",
+        "name": "south.east postCap",
+        "type": "assembly.deck.copy.type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "assembly.deck.copy.post.south.east",
+              "surface": "end",
+              "station": 772.0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "assembly.deck.copy.post.south.east"
+          },
+          {
+            "element": "assembly.deck.copy.beam.south"
+          }
+        ]
+      }
+    },
+    {
+      "path": "/elements/assembly.deck.copy.hardware.postCap.south.west",
+      "equals": {
+        "kind": "hardware",
+        "name": "south.west postCap",
+        "type": "assembly.deck.copy.type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "assembly.deck.copy.post.south.west",
+              "surface": "end",
+              "station": 772.0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "assembly.deck.copy.post.south.west"
+          },
+          {
+            "element": "assembly.deck.copy.beam.south"
           }
         ]
       }
@@ -161,28 +342,28 @@
               "anchor": "assembly.deck.copy.anchor.origin",
               "offset": [
                 4525.0,
-                3725.0
+                2725.0
               ]
             },
             {
               "anchor": "assembly.deck.copy.anchor.origin",
               "offset": [
                 4925.0,
-                3725.0
+                2725.0
               ]
             },
             {
               "anchor": "assembly.deck.copy.anchor.origin",
               "offset": [
                 4925.0,
-                4125.0
+                3125.0
               ]
             },
             {
               "anchor": "assembly.deck.copy.anchor.origin",
               "offset": [
                 4525.0,
-                4125.0
+                3125.0
               ]
             }
           ],
@@ -216,28 +397,28 @@
               "anchor": "assembly.deck.copy.anchor.origin",
               "offset": [
                 -125,
-                3725.0
+                2725.0
               ]
             },
             {
               "anchor": "assembly.deck.copy.anchor.origin",
               "offset": [
                 275,
-                3725.0
+                2725.0
               ]
             },
             {
               "anchor": "assembly.deck.copy.anchor.origin",
               "offset": [
                 275,
-                4125.0
+                3125.0
               ]
             },
             {
               "anchor": "assembly.deck.copy.anchor.origin",
               "offset": [
                 -125,
-                4125.0
+                3125.0
               ]
             }
           ],
@@ -265,16 +446,16 @@
             "anchor": "assembly.deck.copy.anchor.origin",
             "offset": [
               4725.0,
-              3925.0,
-              0
+              2925.0,
+              4
             ]
           },
           {
             "anchor": "assembly.deck.copy.anchor.origin",
             "offset": [
               4725.0,
-              3925.0,
-              1580.0
+              2925.0,
+              776.0
             ]
           }
         ]
@@ -293,16 +474,16 @@
             "anchor": "assembly.deck.copy.anchor.origin",
             "offset": [
               75,
-              3925.0,
-              0
+              2925.0,
+              4
             ]
           },
           {
             "anchor": "assembly.deck.copy.anchor.origin",
             "offset": [
               75,
-              3925.0,
-              1580.0
+              2925.0,
+              776.0
             ]
           }
         ]
@@ -322,7 +503,7 @@
             "offset": [
               4725.0,
               75,
-              0
+              4
             ]
           },
           {
@@ -330,7 +511,7 @@
             "offset": [
               4725.0,
               75,
-              1580.0
+              776.0
             ]
           }
         ]
@@ -350,7 +531,7 @@
             "offset": [
               75,
               75,
-              0
+              4
             ]
           },
           {
@@ -358,7 +539,7 @@
             "offset": [
               75,
               75,
-              1580.0
+              776.0
             ]
           }
         ]
@@ -392,14 +573,14 @@
               "anchor": "assembly.deck.copy.anchor.origin",
               "offset": [
                 4800,
-                4000
+                3000
               ]
             },
             {
               "anchor": "assembly.deck.copy.anchor.origin",
               "offset": [
                 0,
-                4000
+                3000
               ]
             }
           ],
@@ -415,7 +596,7 @@
         "datum": {
           "kind": "level",
           "level": "level.ground",
-          "offset": 2000
+          "offset": 1200
         },
         "extrusionDirection": "down"
       }
@@ -424,7 +605,7 @@
       "path": "/levels/level.ground",
       "equals": {
         "kind": "storey",
-        "name": "Ground floor",
+        "name": "Catalog datum",
         "elevation": 0
       }
     }
@@ -436,15 +617,15 @@
       "objectId": "assembly.deck.copy",
       "value": {
         "kind": "assembly",
-        "name": "Coordinated raised deck",
+        "name": "Raised deck with guards and connectors",
         "assemblyType": "deckSystem",
         "recipeInstance": {
-          "recipeId": "recipe.coordinated-deck",
-          "recipeDigest": "1acfc5daab6a8094e25110a743bffab9a5e306235035f0d2b194b6c1cdfcec2c",
+          "recipeId": "recipe.complete-deck",
+          "recipeDigest": "7f19087b81b05580e36731467e6135640e0b7b502195726364feac59ea66be0d",
           "parameters": {
             "origin": [
-              25000,
-              -5000
+              21000,
+              0
             ],
             "width": 4800,
             "length": 4800,
@@ -460,7 +641,9 @@
             },
             "materials": {
               "material.timber": "assembly.deck.copy.material.timber",
-              "material.concrete": "assembly.deck.copy.material.concrete"
+              "material.concrete": "assembly.deck.copy.material.concrete",
+              "mat.black": "assembly.deck.copy.mat.black",
+              "material.steel": "assembly.deck.copy.material.steel"
             },
             "types": {
               "type.deck": "assembly.deck.copy.type.deck",
@@ -468,7 +651,13 @@
               "stock.beam": "assembly.deck.copy.stock.beam",
               "stock.post": "assembly.deck.copy.stock.post",
               "type.joists": "assembly.deck.copy.type.joists",
-              "type.pad": "assembly.deck.copy.type.pad"
+              "type.pad": "assembly.deck.copy.type.pad",
+              "type.guard": "assembly.deck.copy.type.guard",
+              "stock.board": "assembly.deck.copy.stock.board",
+              "type.boards": "assembly.deck.copy.type.boards",
+              "type.postCap": "assembly.deck.copy.type.postCap",
+              "type.postBase": "assembly.deck.copy.type.postBase",
+              "type.screw": "assembly.deck.copy.type.screw"
             },
             "elements": {
               "assembly.root": "assembly.deck.copy",
@@ -483,7 +672,28 @@
               "post.north.west": "assembly.deck.copy.post.north.west",
               "pad.north.west": "assembly.deck.copy.pad.north.west",
               "post.north.east": "assembly.deck.copy.post.north.east",
-              "pad.north.east": "assembly.deck.copy.pad.north.east"
+              "pad.north.east": "assembly.deck.copy.pad.north.east",
+              "decking": "assembly.deck.copy.decking",
+              "guard.south": "assembly.deck.copy.guard.south",
+              "guard.east": "assembly.deck.copy.guard.east",
+              "guard.north": "assembly.deck.copy.guard.north",
+              "guard.west": "assembly.deck.copy.guard.west",
+              "hardware.postBase.south.west": "assembly.deck.copy.hardware.postBase.south.west",
+              "screws.postBase.south.west": "assembly.deck.copy.screws.postBase.south.west",
+              "hardware.postCap.south.west": "assembly.deck.copy.hardware.postCap.south.west",
+              "screws.postCap.south.west": "assembly.deck.copy.screws.postCap.south.west",
+              "hardware.postBase.south.east": "assembly.deck.copy.hardware.postBase.south.east",
+              "screws.postBase.south.east": "assembly.deck.copy.screws.postBase.south.east",
+              "hardware.postCap.south.east": "assembly.deck.copy.hardware.postCap.south.east",
+              "screws.postCap.south.east": "assembly.deck.copy.screws.postCap.south.east",
+              "hardware.postBase.north.west": "assembly.deck.copy.hardware.postBase.north.west",
+              "screws.postBase.north.west": "assembly.deck.copy.screws.postBase.north.west",
+              "hardware.postCap.north.west": "assembly.deck.copy.hardware.postCap.north.west",
+              "screws.postCap.north.west": "assembly.deck.copy.screws.postCap.north.west",
+              "hardware.postBase.north.east": "assembly.deck.copy.hardware.postBase.north.east",
+              "screws.postBase.north.east": "assembly.deck.copy.screws.postBase.north.east",
+              "hardware.postCap.north.east": "assembly.deck.copy.hardware.postCap.north.east",
+              "screws.postCap.north.east": "assembly.deck.copy.screws.postCap.north.east"
             },
             "relationships": {
               "supports.south.joists": "assembly.deck.copy.supports.south.joists",
@@ -508,7 +718,7 @@
             },
             "surface": {
               "element": "assembly.deck.copy.slab.deck",
-              "description": "Deck host for guards, stairs and accessories"
+              "description": "Finished platform surface for adjoining construction"
             }
           }
         }
@@ -570,6 +780,170 @@
               75,
               2080.0
             ]
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.guard.east",
+      "value": {
+        "kind": "railing",
+        "name": "East deck guard",
+        "type": "assembly.deck.copy.type.guard",
+        "role": "guard",
+        "follow": {
+          "element": "assembly.deck.copy.slab.deck",
+          "edge": "east",
+          "offset": 0
+        },
+        "openings": [
+          {
+            "start": 0,
+            "end": 40
+          },
+          {
+            "start": 4760.0,
+            "end": 4800
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.guard.west",
+      "value": {
+        "kind": "railing",
+        "name": "West deck guard",
+        "type": "assembly.deck.copy.type.guard",
+        "role": "guard",
+        "follow": {
+          "element": "assembly.deck.copy.slab.deck",
+          "edge": "west",
+          "offset": 0
+        },
+        "openings": [
+          {
+            "start": 0,
+            "end": 40
+          },
+          {
+            "start": 4760.0,
+            "end": 4800
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.hardware.postCap.north.east",
+      "value": {
+        "kind": "hardware",
+        "name": "north.east postCap",
+        "type": "assembly.deck.copy.type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "assembly.deck.copy.post.north.east",
+              "surface": "end",
+              "station": 1972.0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "assembly.deck.copy.post.north.east"
+          },
+          {
+            "element": "assembly.deck.copy.beam.north"
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.hardware.postCap.north.west",
+      "value": {
+        "kind": "hardware",
+        "name": "north.west postCap",
+        "type": "assembly.deck.copy.type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "assembly.deck.copy.post.north.west",
+              "surface": "end",
+              "station": 1972.0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "assembly.deck.copy.post.north.west"
+          },
+          {
+            "element": "assembly.deck.copy.beam.north"
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.hardware.postCap.south.east",
+      "value": {
+        "kind": "hardware",
+        "name": "south.east postCap",
+        "type": "assembly.deck.copy.type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "assembly.deck.copy.post.south.east",
+              "surface": "end",
+              "station": 1972.0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "assembly.deck.copy.post.south.east"
+          },
+          {
+            "element": "assembly.deck.copy.beam.south"
+          }
+        ]
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.deck.copy.hardware.postCap.south.west",
+      "value": {
+        "kind": "hardware",
+        "name": "south.west postCap",
+        "type": "assembly.deck.copy.type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "assembly.deck.copy.post.south.west",
+              "surface": "end",
+              "station": 1972.0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "assembly.deck.copy.post.south.west"
+          },
+          {
+            "element": "assembly.deck.copy.beam.south"
           }
         ]
       }
@@ -704,7 +1078,7 @@
             "offset": [
               4725.0,
               4725.0,
-              0
+              4
             ]
           },
           {
@@ -712,7 +1086,7 @@
             "offset": [
               4725.0,
               4725.0,
-              1980.0
+              1976.0
             ]
           }
         ]
@@ -734,7 +1108,7 @@
             "offset": [
               75,
               4725.0,
-              0
+              4
             ]
           },
           {
@@ -742,7 +1116,7 @@
             "offset": [
               75,
               4725.0,
-              1980.0
+              1976.0
             ]
           }
         ]
@@ -764,7 +1138,7 @@
             "offset": [
               4725.0,
               75,
-              0
+              4
             ]
           },
           {
@@ -772,7 +1146,7 @@
             "offset": [
               4725.0,
               75,
-              1980.0
+              1976.0
             ]
           }
         ]
@@ -794,7 +1168,7 @@
             "offset": [
               75,
               75,
-              0
+              4
             ]
           },
           {
@@ -802,7 +1176,7 @@
             "offset": [
               75,
               75,
-              1980.0
+              1976.0
             ]
           }
         ]

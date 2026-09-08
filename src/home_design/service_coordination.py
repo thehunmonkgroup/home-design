@@ -36,9 +36,19 @@ class ServiceCoordination:
             if part.meshes
         )
 
-    @staticmethod
-    def overlap(first: tuple[MeshData, ...], second: tuple[MeshData, ...]) -> float:
+    @classmethod
+    def overlap(
+        cls, first: tuple[MeshData, ...], second: tuple[MeshData, ...]
+    ) -> float:
         """Measure unioned stock intersection without serializing diagnostic-only geometry."""
+        intersection = cls.intersection(first, second)
+        return intersection.volume() if intersection is not None else 0.0
+
+    @staticmethod
+    def intersection(
+        first: tuple[MeshData, ...], second: tuple[MeshData, ...]
+    ) -> manifold3d.Manifold | None:
+        """Retain an exact intersection for both volume and spatial diagnostic evidence."""
         pieces: list[manifold3d.Manifold] = []
         for a in first:
             for b in second:
@@ -56,13 +66,23 @@ class ServiceCoordination:
                 if overlap.volume() > SolidOperations.OUTPUT_VOLUME_TOLERANCE_MM3:
                     pieces.append(overlap)
         if not pieces:
-            return 0.0
+            return None
         combined = pieces[0]
         for piece in pieces[1:]:
             combined = combined + piece
         if combined.status() != manifold3d.Error.NoError:
             raise ResolutionError("Service coordination intersection union failed")
-        return combined.volume()
+        return combined
+
+    @staticmethod
+    def evidence(identity: str, intersection: manifold3d.Manifold) -> JsonObject:
+        """Locate the intersection in canonical millimetres for targeted visual review."""
+        bounds = intersection.bounding_box()
+        return {
+            "element": identity,
+            "volumeMm3": intersection.volume(),
+            "bounds": {"minimum": list(bounds[:3]), "maximum": list(bounds[3:])},
+        }
 
     @classmethod
     def exclusions(
@@ -134,20 +154,18 @@ class ServiceCoordination:
             for candidate in parts:
                 if candidate.element_id == service.element_id:
                     continue
-                volume = cls.overlap(service.meshes, candidate.meshes)
-                if volume > SolidOperations.OUTPUT_VOLUME_TOLERANCE_MM3:
-                    collisions.append(
-                        {"element": candidate.element_id, "volumeMm3": volume}
-                    )
+                intersection = cls.intersection(service.meshes, candidate.meshes)
+                if intersection is not None:
+                    collisions.append(cls.evidence(candidate.element_id, intersection))
                     continue
                 if not clearance or candidate.element_id in excluded:
                     continue
-                volume = cls.overlap(
+                intersection = cls.intersection(
                     (service.construction_volumes["clearance"],), candidate.meshes
                 )
-                if volume > SolidOperations.OUTPUT_VOLUME_TOLERANCE_MM3:
+                if intersection is not None:
                     obstructions.append(
-                        {"element": candidate.element_id, "volumeMm3": volume}
+                        cls.evidence(candidate.element_id, intersection)
                     )
             results: JsonObject = {
                 "interference": {
@@ -196,6 +214,7 @@ class ServiceCoordination:
                             f"{service.element_id} {check} intersects {obstacle['element']} ({obstacle['volumeMm3']} mm3)",
                             path=f"/elements/{service.element_id}/coordinationChecks/{check}",
                             subject_id=service.element_id,
+                            details=obstacle,
                         )
                     )
         return diagnostics

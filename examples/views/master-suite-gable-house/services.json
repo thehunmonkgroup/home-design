@@ -1,0 +1,9 @@
+{
+  "width": 1600,
+  "height": 1200,
+  "labels": false,
+  "discipline": "services",
+  "camera": {
+    "preset": "se"
+  }
+}

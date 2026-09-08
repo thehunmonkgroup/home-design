@@ -24,7 +24,7 @@ def test_preview_reports_actual_opening_host_and_fill_propagation(
 ) -> None:
     """One authored station edit changes the opening, cut wall and filled window."""
     engine = ChangeEngine(loader)
-    change = engine.load_change(Path("examples/change-sets/move-window.json"))
+    change = engine.load_change(Path("tests/fixtures/move-window.json"))
     original = deepcopy(reference_model)
     calls = 0
     resolve = ModelResolver.resolve
@@ -66,7 +66,7 @@ def test_preview_retains_invalid_candidate_and_structured_diagnostics(
 ) -> None:
     """An invalid opening proposal stays reviewable while apply remains guarded."""
     engine = ChangeEngine(loader)
-    change = engine.load_change(Path("examples/change-sets/move-window.json"))
+    change = engine.load_change(Path("tests/fixtures/move-window.json"))
     Authoring.object(Authoring.array(change["operations"])[0])["station"] = 20000
     preview = ChangePreview(engine).evaluate(reference_model, change)
     assert preview.report["valid"] is False

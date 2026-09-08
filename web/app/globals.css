@@ -239,3 +239,37 @@ button { color: inherit; }
 .tour-actions .tour-next { background: var(--green); color: white; border-color: var(--green); }
 .tour-card button:disabled { opacity: .4; cursor: default; }
 .tour-card button:focus-visible, .quick-start-button:focus-visible, .visibility-toggle:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+.named-view-tools {
+  position: absolute;
+  z-index: 3;
+  top: 1rem;
+  left: 1rem;
+  max-width: min(38rem, calc(100% - 2rem));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  padding: .75rem;
+  background: #ffffffed;
+  border: 1px solid #c5cdc6;
+  border-radius: .75rem;
+  box-shadow: 0 3px 12px #20302618;
+  font-size: .8rem;
+}
+.named-view-tools label { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.named-view-tools select { max-width: 100%; padding: .35rem; }
+.named-view-tools button { padding: .35rem .6rem; border: 1px solid #bac4bd; border-radius: .3rem; background: white; }
+.named-view-tools button:disabled { opacity: .45; }
+.named-view-tools p { flex-basis: 100%; margin: 0; color: #48594d; }
+.viewport.has-named-views { display: flex; flex-direction: column; }
+.has-named-views .named-view-tools {
+  position: relative;
+  top: auto;
+  left: auto;
+  order: 1;
+  flex-shrink: 0;
+  margin: 1rem 1rem 0;
+  max-width: min(38rem, calc(100% - 8rem));
+}
+.has-named-views .canvas-host { position: relative; inset: auto; order: 2; flex: 1; min-height: 0; }
+.has-named-views .viewport-tools { position: relative; order: 3; left: auto; bottom: auto; flex-shrink: 0; margin: 0 1rem 1rem; }

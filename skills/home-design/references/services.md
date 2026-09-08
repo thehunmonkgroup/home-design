@@ -152,7 +152,11 @@ explicit allowance according to the intended installation.
 
 `service.interference` and `service.clearance-obstructed` identify the checked
 service, the individual obstructing component/member and measured intersection
-volume. For each checked service, a material collision is reported once per obstacle rather than also
+volume. Diagnostic `details.bounds.minimum` and `details.bounds.maximum` locate
+that intersection in canonical XYZ millimetres. Use these bounds to position a
+close visual review around the crossing; the bounding-box center is a useful
+camera target, though a disconnected intersection need not occupy that center.
+For each checked service, a material collision is reported once per obstacle rather than also
 as a clearance obstruction. Generated-member assemblies do not duplicate their
 children's reports. The resolved `serviceCoordination` field records results and
 clearance-exclusion reasons in scene metadata, schedules and IFC properties.

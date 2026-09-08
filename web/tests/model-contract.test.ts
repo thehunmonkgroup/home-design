@@ -10,11 +10,11 @@ describe('Python to TypeScript render contract', () => {
     const manifest: unknown = JSON.parse(await readFile(resolve(process.cwd(), 'tests/fixtures/component-navigation.json'), 'utf8'));
     expect(isRenderManifest(manifest)).toBe(true);
     if (!isRenderManifest(manifest)) return;
-    const wall = 'electrical.wall.host';
-    const frame = 'framing.partition';
+    const wall = 'assembly.exterior-wall.wall.exterior';
+    const frame = 'assembly.exterior-wall.framing.wall';
     const children = manifest.elements[frame].children!;
     expect(children.length).toBeGreaterThan(10);
-    expect(contextElementIds(manifest, wall)).toEqual(expect.arrayContaining([frame, ...children, 'electrical.device.flushBox', 'electrical.cut.flushBox']));
+    expect(contextElementIds(manifest, wall)).toEqual(expect.arrayContaining([frame, ...children, 'assembly.exterior-wall.box.outlet', 'assembly.exterior-wall.cut.outlet']));
     const child = manifest.elements[children[0]];
     expect(nodeElementIndex(manifest).get(child.nodes[0])).toBe(children[0]);
     expect(child.parentId).toBe(frame);
@@ -22,10 +22,10 @@ describe('Python to TypeScript render contract', () => {
     const length = child.properties!.find((property) => property.id === '/lengthMm')!;
     expect(formatDisplayProperty(length, 'imperial')).toContain(' ft ');
     expect(navigationGroups(manifest, 'host').some((group) => group.id === wall)).toBe(true);
-    expect(navigationGroups(manifest, 'assembly').some((group) => group.id === 'assembly.roof-system')).toBe(true);
+    expect(navigationGroups(manifest, 'assembly').some((group) => group.id === 'assembly.insulated-roof')).toBe(true);
   });
   it('loads the generated reference manifest with unique stable scene nodes', async () => {
-    const path = resolve(process.cwd(), 'tests/fixtures/single-story-gable-house-render-manifest.json');
+    const path = resolve(process.cwd(), 'tests/fixtures/basic-shell-render-manifest.json');
     const manifest: unknown = JSON.parse(await readFile(path, 'utf8'));
     expect(isRenderManifest(manifest)).toBe(true);
     if (!isRenderManifest(manifest)) return;

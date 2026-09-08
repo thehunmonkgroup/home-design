@@ -1,0 +1,1806 @@
+{
+  "format": "home-design-render-manifest-0.1",
+  "modelVersion": "0.1",
+  "sourceRevision": 1,
+  "project": {
+    "id": "project.reference-home",
+    "name": "Synthetic shell fixture"
+  },
+  "coordinateTransform": {
+    "source": "right-handed Z-up millimetres",
+    "target": "right-handed Y-up metres",
+    "mapping": [
+      "x/1000",
+      "z/1000",
+      "-y/1000"
+    ]
+  },
+  "elements": {
+    "slab.ground": {
+      "kind": "slab",
+      "kindLabel": "Floor or deck slab",
+      "name": "Ground floor slab",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_slab_ground_eaf3e9ea"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/thickness",
+          "label": "Thickness",
+          "value": 200.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/topElevation",
+          "label": "Top elevation",
+          "value": 0.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/bottomElevation",
+          "label": "Bottom elevation",
+          "value": -200.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/role",
+          "label": "Purpose",
+          "value": "Foundation",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "data": {
+        "typeId": "slabType.concrete-200",
+        "role": "foundation",
+        "thickness": 200.0,
+        "layers": [
+          {
+            "name": "Concrete structure",
+            "material": "material.concrete",
+            "thickness": 200,
+            "function": "structure"
+          }
+        ],
+        "topElevation": 0.0,
+        "bottomElevation": -200.0,
+        "footprint": {
+          "outer": [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              10000.0,
+              0.0
+            ],
+            [
+              10000.0,
+              8000.0
+            ],
+            [
+              0.0,
+              8000.0
+            ]
+          ],
+          "holes": [],
+          "boundaryIds": {
+            "outer": [
+              "boundary.legacy.0.0",
+              "boundary.legacy.0.1",
+              "boundary.legacy.0.2",
+              "boundary.legacy.0.3"
+            ],
+            "holes": []
+          }
+        },
+        "discipline": "envelope",
+        "tags": [
+          "ground-floor",
+          "foundation"
+        ]
+      },
+      "children": []
+    },
+    "wall.north": {
+      "kind": "wall",
+      "kindLabel": "Wall",
+      "name": "North exterior wall",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_wall_north_2a9a3d00_part1",
+        "hd_wall_north_2a9a3d00_part2",
+        "hd_wall_north_2a9a3d00_part3",
+        "hd_wall_north_2a9a3d00_part4"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/length",
+          "label": "Length",
+          "value": 10000.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/thickness",
+          "label": "Thickness",
+          "value": 185.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/baseElevation",
+          "label": "Base elevation",
+          "value": 0.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netArea",
+          "label": "Net area",
+          "value": 25667750.26918963,
+          "unit": "mm2",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/grossArea",
+          "label": "Gross area",
+          "value": 27577350.26918963,
+          "unit": "mm2",
+          "group": "Dimensions"
+        }
+      ],
+      "data": {
+        "typeId": "wallType.exterior.wood-185",
+        "axis": [
+          [
+            0.0,
+            8000.0
+          ],
+          [
+            10000.0,
+            8000.0
+          ]
+        ],
+        "length": 10000.0,
+        "segmentIds": [
+          "segment.legacy.0"
+        ],
+        "topProfile": [
+          [
+            0.0,
+            8000.0,
+            2757.735026918963
+          ],
+          [
+            10000.0,
+            8000.0,
+            2757.735026918963
+          ]
+        ],
+        "topProfileIds": [
+          "roof.main.face-2"
+        ],
+        "baseElevation": 0.0,
+        "topElevationRange": [
+          2757.735026918963,
+          2757.735026918963
+        ],
+        "thickness": 185.0,
+        "locationLine": "center",
+        "netArea": 25667750.26918963,
+        "grossArea": 27577350.26918963,
+        "layers": [
+          {
+            "name": "Siding",
+            "material": "material.siding",
+            "thickness": 20,
+            "function": "finish"
+          },
+          {
+            "name": "Sheathing",
+            "material": "material.sheathing",
+            "thickness": 12,
+            "function": "substrate"
+          },
+          {
+            "name": "Framed structure",
+            "material": "material.timber",
+            "thickness": 140,
+            "function": "structure"
+          },
+          {
+            "name": "Interior gypsum",
+            "material": "material.gypsum",
+            "thickness": 13,
+            "function": "finish"
+          }
+        ],
+        "discipline": "envelope",
+        "tags": [
+          "exterior",
+          "north"
+        ]
+      },
+      "children": []
+    },
+    "wall.east": {
+      "kind": "wall",
+      "kindLabel": "Wall",
+      "name": "East exterior wall",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_wall_east_556c915a_part1",
+        "hd_wall_east_556c915a_part2",
+        "hd_wall_east_556c915a_part3",
+        "hd_wall_east_556c915a_part4",
+        "hd_wall_east_556c915a_part5",
+        "hd_wall_east_556c915a_part6",
+        "hd_wall_east_556c915a_part7",
+        "hd_wall_east_556c915a_part8"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/length",
+          "label": "Length",
+          "value": 8000.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/thickness",
+          "label": "Thickness",
+          "value": 185.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/baseElevation",
+          "label": "Base elevation",
+          "value": 0.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netArea",
+          "label": "Net area",
+          "value": 31299484.522385713,
+          "unit": "mm2",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/grossArea",
+          "label": "Gross area",
+          "value": 31299484.522385713,
+          "unit": "mm2",
+          "group": "Dimensions"
+        }
+      ],
+      "data": {
+        "typeId": "wallType.exterior.wood-185",
+        "axis": [
+          [
+            10000.0,
+            8000.0
+          ],
+          [
+            10000.0,
+            0.0
+          ]
+        ],
+        "length": 8000.0,
+        "segmentIds": [
+          "segment.legacy.0"
+        ],
+        "topProfile": [
+          [
+            10000.0,
+            8000.0,
+            2757.735026918963
+          ],
+          [
+            10000.0,
+            4000.0,
+            5067.136103677465
+          ],
+          [
+            10000.0,
+            0.0,
+            2757.735026918963
+          ]
+        ],
+        "topProfileIds": [
+          "roof.main.face-2",
+          "roof.main.face-1"
+        ],
+        "baseElevation": 0.0,
+        "topElevationRange": [
+          2757.735026918963,
+          5067.136103677465
+        ],
+        "thickness": 185.0,
+        "locationLine": "center",
+        "netArea": 31299484.522385713,
+        "grossArea": 31299484.522385713,
+        "layers": [
+          {
+            "name": "Siding",
+            "material": "material.siding",
+            "thickness": 20,
+            "function": "finish"
+          },
+          {
+            "name": "Sheathing",
+            "material": "material.sheathing",
+            "thickness": 12,
+            "function": "substrate"
+          },
+          {
+            "name": "Framed structure",
+            "material": "material.timber",
+            "thickness": 140,
+            "function": "structure"
+          },
+          {
+            "name": "Interior gypsum",
+            "material": "material.gypsum",
+            "thickness": 13,
+            "function": "finish"
+          }
+        ],
+        "discipline": "envelope",
+        "tags": [
+          "exterior",
+          "east"
+        ]
+      },
+      "children": []
+    },
+    "wall.south": {
+      "kind": "wall",
+      "kindLabel": "Wall",
+      "name": "South exterior wall facing the deck",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_wall_south_ca6b8ed1_part1",
+        "hd_wall_south_ca6b8ed1_part2",
+        "hd_wall_south_ca6b8ed1_part3",
+        "hd_wall_south_ca6b8ed1_part4"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/length",
+          "label": "Length",
+          "value": 10000.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/thickness",
+          "label": "Thickness",
+          "value": 185.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/baseElevation",
+          "label": "Base elevation",
+          "value": 0.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netArea",
+          "label": "Net area",
+          "value": 25565750.26918963,
+          "unit": "mm2",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/grossArea",
+          "label": "Gross area",
+          "value": 27577350.26918963,
+          "unit": "mm2",
+          "group": "Dimensions"
+        }
+      ],
+      "data": {
+        "typeId": "wallType.exterior.wood-185",
+        "axis": [
+          [
+            10000.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0
+          ]
+        ],
+        "length": 10000.0,
+        "segmentIds": [
+          "segment.legacy.0"
+        ],
+        "topProfile": [
+          [
+            10000.0,
+            0.0,
+            2757.735026918963
+          ],
+          [
+            0.0,
+            0.0,
+            2757.735026918963
+          ]
+        ],
+        "topProfileIds": [
+          "roof.main.face-1"
+        ],
+        "baseElevation": 0.0,
+        "topElevationRange": [
+          2757.735026918963,
+          2757.735026918963
+        ],
+        "thickness": 185.0,
+        "locationLine": "center",
+        "netArea": 25565750.26918963,
+        "grossArea": 27577350.26918963,
+        "layers": [
+          {
+            "name": "Siding",
+            "material": "material.siding",
+            "thickness": 20,
+            "function": "finish"
+          },
+          {
+            "name": "Sheathing",
+            "material": "material.sheathing",
+            "thickness": 12,
+            "function": "substrate"
+          },
+          {
+            "name": "Framed structure",
+            "material": "material.timber",
+            "thickness": 140,
+            "function": "structure"
+          },
+          {
+            "name": "Interior gypsum",
+            "material": "material.gypsum",
+            "thickness": 13,
+            "function": "finish"
+          }
+        ],
+        "discipline": "envelope",
+        "tags": [
+          "exterior",
+          "south",
+          "deck-connection"
+        ]
+      },
+      "children": []
+    },
+    "wall.west": {
+      "kind": "wall",
+      "kindLabel": "Wall",
+      "name": "West exterior wall",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_wall_west_8fa730d7_part1",
+        "hd_wall_west_8fa730d7_part2",
+        "hd_wall_west_8fa730d7_part3",
+        "hd_wall_west_8fa730d7_part4",
+        "hd_wall_west_8fa730d7_part5",
+        "hd_wall_west_8fa730d7_part6",
+        "hd_wall_west_8fa730d7_part7",
+        "hd_wall_west_8fa730d7_part8"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/length",
+          "label": "Length",
+          "value": 8000.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/thickness",
+          "label": "Thickness",
+          "value": 185.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/baseElevation",
+          "label": "Base elevation",
+          "value": 0.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/netArea",
+          "label": "Net area",
+          "value": 31299484.522385713,
+          "unit": "mm2",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/grossArea",
+          "label": "Gross area",
+          "value": 31299484.522385713,
+          "unit": "mm2",
+          "group": "Dimensions"
+        }
+      ],
+      "data": {
+        "typeId": "wallType.exterior.wood-185",
+        "axis": [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            8000.0
+          ]
+        ],
+        "length": 8000.0,
+        "segmentIds": [
+          "segment.legacy.0"
+        ],
+        "topProfile": [
+          [
+            0.0,
+            0.0,
+            2757.735026918963
+          ],
+          [
+            0.0,
+            4000.0,
+            5067.136103677465
+          ],
+          [
+            0.0,
+            8000.0,
+            2757.735026918963
+          ]
+        ],
+        "topProfileIds": [
+          "roof.main.face-1",
+          "roof.main.face-2"
+        ],
+        "baseElevation": 0.0,
+        "topElevationRange": [
+          2757.735026918963,
+          5067.136103677465
+        ],
+        "thickness": 185.0,
+        "locationLine": "center",
+        "netArea": 31299484.522385713,
+        "grossArea": 31299484.522385713,
+        "layers": [
+          {
+            "name": "Siding",
+            "material": "material.siding",
+            "thickness": 20,
+            "function": "finish"
+          },
+          {
+            "name": "Sheathing",
+            "material": "material.sheathing",
+            "thickness": 12,
+            "function": "substrate"
+          },
+          {
+            "name": "Framed structure",
+            "material": "material.timber",
+            "thickness": 140,
+            "function": "structure"
+          },
+          {
+            "name": "Interior gypsum",
+            "material": "material.gypsum",
+            "thickness": 13,
+            "function": "finish"
+          }
+        ],
+        "discipline": "envelope",
+        "tags": [
+          "exterior",
+          "west"
+        ]
+      },
+      "children": []
+    },
+    "roof.main": {
+      "kind": "roof",
+      "kindLabel": "Roof",
+      "name": "Main gable roof",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_roof_main_46845482_part1",
+        "hd_roof_main_46845482_part2",
+        "hd_roof_main_46845482_part3",
+        "hd_roof_main_46845482_part4",
+        "hd_roof_main_46845482_part5",
+        "hd_roof_main_46845482_part6"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/thickness",
+          "label": "Thickness",
+          "value": 250.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/form",
+          "label": "Form",
+          "value": "Gable",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "data": {
+        "typeId": "roofType.shingle-250",
+        "thickness": 250.0,
+        "faceIds": [
+          "roof.main.face-1",
+          "roof.main.face-2"
+        ],
+        "faceIdentities": {
+          "face.gable.boundary.legacy.0.0": "roof.main.face-1",
+          "face.gable.boundary.legacy.0.2": "roof.main.face-2"
+        },
+        "planes": [
+          {
+            "id": "roof.main.face-1",
+            "boundary": [
+              [
+                -600.0,
+                -600.0,
+                2700.0
+              ],
+              [
+                -600.0,
+                4000.0,
+                5355.811238272278
+              ],
+              [
+                10600.0,
+                4000.0,
+                5355.811238272278
+              ],
+              [
+                10600.0,
+                -600.0,
+                2700.0
+              ]
+            ],
+            "boundaryIds": {
+              "outer": [
+                "boundary.legacy.0.3",
+                "shared.join.ec6063eabdcd9b01b24e",
+                "boundary.legacy.0.1",
+                "boundary.legacy.0.0"
+              ],
+              "holes": []
+            }
+          },
+          {
+            "id": "roof.main.face-2",
+            "boundary": [
+              [
+                -600.0,
+                4000.0,
+                5355.811238272278
+              ],
+              [
+                -600.0,
+                8600.0,
+                2700.0
+              ],
+              [
+                10600.0,
+                8600.0,
+                2700.0
+              ],
+              [
+                10600.0,
+                4000.0,
+                5355.811238272278
+              ]
+            ],
+            "boundaryIds": {
+              "outer": [
+                "boundary.legacy.0.3",
+                "boundary.legacy.0.2",
+                "boundary.legacy.0.1",
+                "shared.join.ec6063eabdcd9b01b24e"
+              ],
+              "holes": []
+            }
+          }
+        ],
+        "layers": [
+          {
+            "name": "Asphalt shingles",
+            "material": "material.roofing",
+            "thickness": 10,
+            "function": "finish"
+          },
+          {
+            "name": "Sheathing",
+            "material": "material.sheathing",
+            "thickness": 20,
+            "function": "substrate"
+          },
+          {
+            "name": "Rafter and insulation zone",
+            "material": "material.timber",
+            "thickness": 220,
+            "function": "structure"
+          }
+        ],
+        "form": "gable",
+        "discipline": "envelope",
+        "tags": [
+          "main-roof",
+          "gable"
+        ]
+      },
+      "children": []
+    },
+    "opening.window.north": {
+      "kind": "opening",
+      "kindLabel": "Rough opening",
+      "name": "North living-room window rough opening",
+      "storeyId": "level.ground",
+      "nodes": [],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/width",
+          "label": "Width",
+          "value": 1540.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/height",
+          "label": "Height",
+          "value": 1240.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/depth",
+          "label": "Depth",
+          "value": 300.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        }
+      ],
+      "data": {
+        "hostId": "wall.north",
+        "origin": [
+          4000.0,
+          8000.0,
+          900.0
+        ],
+        "tangent": [
+          1.0,
+          0.0
+        ],
+        "width": 1540.0,
+        "height": 1240.0,
+        "depth": 300.0,
+        "discipline": "envelope",
+        "tags": [
+          "window-opening",
+          "north"
+        ]
+      },
+      "children": []
+    },
+    "window.north": {
+      "kind": "window",
+      "kindLabel": "Window",
+      "name": "North living-room window",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_window_north_4176e612_part1",
+        "hd_window_north_4176e612_part2",
+        "hd_window_north_4176e612_part3",
+        "hd_window_north_4176e612_part4",
+        "hd_window_north_4176e612_part5"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/nominalWidth",
+          "label": "Nominal width",
+          "value": 1500.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/nominalHeight",
+          "label": "Nominal height",
+          "value": 1200.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/operation",
+          "label": "Operation",
+          "value": "Casement",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "data": {
+        "typeId": "windowType.casement-1500x1200",
+        "openingId": "opening.window.north",
+        "roughOpeningClearance": [
+          40.0,
+          40.0
+        ],
+        "origin": [
+          4000.0,
+          8000.0,
+          920.0
+        ],
+        "tangent": [
+          1.0,
+          0.0
+        ],
+        "operation": "casement",
+        "nominalWidth": 1500.0,
+        "nominalHeight": 1200.0,
+        "discipline": "envelope",
+        "tags": [
+          "living-room",
+          "north"
+        ]
+      },
+      "children": []
+    },
+    "opening.door.south": {
+      "kind": "opening",
+      "kindLabel": "Rough opening",
+      "name": "South entry door rough opening",
+      "storeyId": "level.ground",
+      "nodes": [],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/width",
+          "label": "Width",
+          "value": 940.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/height",
+          "label": "Height",
+          "value": 2140.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/depth",
+          "label": "Depth",
+          "value": 300.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        }
+      ],
+      "data": {
+        "hostId": "wall.south",
+        "origin": [
+          5000.0,
+          0.0,
+          0.0
+        ],
+        "tangent": [
+          -1.0,
+          0.0
+        ],
+        "width": 940.0,
+        "height": 2140.0,
+        "depth": 300.0,
+        "discipline": "envelope",
+        "tags": [
+          "door-opening",
+          "south"
+        ]
+      },
+      "children": []
+    },
+    "door.south-entry": {
+      "kind": "door",
+      "kindLabel": "Door",
+      "name": "South entry door",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_door_south-entry_a200a655_part1",
+        "hd_door_south-entry_a200a655_part2",
+        "hd_door_south-entry_a200a655_part3",
+        "hd_door_south-entry_a200a655_part4"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/nominalWidth",
+          "label": "Nominal width",
+          "value": 900.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/nominalHeight",
+          "label": "Nominal height",
+          "value": 2100.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/clearOpeningWidth",
+          "label": "Clear opening width",
+          "value": 800.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/clearOpeningHeight",
+          "label": "Clear opening height",
+          "value": 2050.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/glazedArea",
+          "label": "Glazed area",
+          "value": 0.0,
+          "unit": "mm2",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/swingAngle",
+          "label": "Door swing angle",
+          "value": 0,
+          "unit": "deg",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/operation",
+          "label": "Operation",
+          "value": "Single swing",
+          "unit": null,
+          "group": "Construction"
+        },
+        {
+          "id": "/handing",
+          "label": "Hinge side",
+          "value": "Right",
+          "unit": null,
+          "group": "Construction"
+        },
+        {
+          "id": "/swingDirection",
+          "label": "Swing direction",
+          "value": "Inward",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "data": {
+        "typeId": "doorType.entry-900x2100",
+        "openingId": "opening.door.south",
+        "roughOpeningClearance": [
+          40.0,
+          40.0
+        ],
+        "origin": [
+          5000.0,
+          0.0,
+          20.0
+        ],
+        "tangent": [
+          -1.0,
+          0.0
+        ],
+        "operation": "singleSwing",
+        "handing": "right",
+        "swingDirection": "inward",
+        "swingAngle": 0,
+        "nominalWidth": 900.0,
+        "nominalHeight": 2100.0,
+        "clearOpeningWidth": 800.0,
+        "clearOpeningHeight": 2050.0,
+        "glazingFraction": 0.0,
+        "glazedArea": 0.0,
+        "swingEnvelope": [
+          [
+            4600.0,
+            0.0,
+            20.0
+          ],
+          [
+            5400.0,
+            0.0,
+            20.0
+          ],
+          [
+            5396.955758473397,
+            69.72459419812654,
+            20.0
+          ],
+          [
+            5387.846202409766,
+            138.91854213354426,
+            20.0
+          ],
+          [
+            5372.740661031255,
+            207.0552360820166,
+            20.0
+          ],
+          [
+            5351.754096628727,
+            273.61611466053495,
+            20.0
+          ],
+          [
+            5325.04622962932,
+            338.09460939255956,
+            20.0
+          ],
+          [
+            5292.820323027551,
+            399.99999999999994,
+            20.0
+          ],
+          [
+            5255.3216354311935,
+            458.86114908083687,
+            20.0
+          ],
+          [
+            5212.835554495183,
+            514.2300877492314,
+            20.0
+          ],
+          [
+            5165.685424949238,
+            565.6854249492379,
+            20.0
+          ],
+          [
+            5114.230087749232,
+            612.8355544951825,
+            20.0
+          ],
+          [
+            5058.861149080837,
+            655.3216354311934,
+            20.0
+          ],
+          [
+            5000.0,
+            692.8203230275509,
+            20.0
+          ],
+          [
+            4938.0946093925595,
+            725.0462296293199,
+            20.0
+          ],
+          [
+            4873.6161146605355,
+            751.7540966287266,
+            20.0
+          ],
+          [
+            4807.055236082017,
+            772.7406610312546,
+            20.0
+          ],
+          [
+            4738.918542133544,
+            787.8462024097664,
+            20.0
+          ],
+          [
+            4669.724594198126,
+            796.9557584733965,
+            20.0
+          ],
+          [
+            4600.0,
+            800.0,
+            20.0
+          ]
+        ],
+        "clearOpeningBasis": "geometricEstimate",
+        "discipline": "envelope",
+        "tags": [
+          "entry",
+          "south"
+        ],
+        "requirements": [
+          {
+            "id": "requirement.entry-clearance",
+            "statement": "Maintain clear access between the south entry door and the attached deck.",
+            "severity": "warning",
+            "appliesTo": [
+              "door.south-entry",
+              "slab.deck.south"
+            ]
+          }
+        ]
+      },
+      "children": []
+    },
+    "space.living": {
+      "kind": "space",
+      "kindLabel": "Room or space",
+      "name": "Living space",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_space_living_69e75d15"
+      ],
+      "defaultVisible": false,
+      "properties": [
+        {
+          "id": "/height",
+          "label": "Height",
+          "value": 2600.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/area",
+          "label": "Area",
+          "value": 76704225.0,
+          "unit": "mm2",
+          "group": "Dimensions"
+        }
+      ],
+      "data": {
+        "typeId": "spaceType.living",
+        "height": 2600.0,
+        "area": 76704225.0,
+        "areaBasis": "explicit",
+        "footprint": {
+          "outer": [
+            [
+              92.5,
+              92.5
+            ],
+            [
+              9907.5,
+              92.5
+            ],
+            [
+              9907.5,
+              7907.5
+            ],
+            [
+              92.5,
+              7907.5
+            ]
+          ],
+          "holes": []
+        },
+        "discipline": "envelope",
+        "tags": [
+          "conditioned",
+          "living"
+        ]
+      },
+      "children": []
+    },
+    "slab.deck.south": {
+      "kind": "slab",
+      "kindLabel": "Floor or deck slab",
+      "name": "Attached south deck",
+      "storeyId": "level.ground",
+      "nodes": [
+        "hd_slab_deck_south_638dc4a9"
+      ],
+      "defaultVisible": true,
+      "properties": [
+        {
+          "id": "/thickness",
+          "label": "Thickness",
+          "value": 150.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/topElevation",
+          "label": "Top elevation",
+          "value": -25.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/bottomElevation",
+          "label": "Bottom elevation",
+          "value": -175.0,
+          "unit": "mm",
+          "group": "Dimensions"
+        },
+        {
+          "id": "/role",
+          "label": "Purpose",
+          "value": "Deck",
+          "unit": null,
+          "group": "Construction"
+        }
+      ],
+      "data": {
+        "typeId": "slabType.deck-150",
+        "role": "deck",
+        "thickness": 150.0,
+        "layers": [
+          {
+            "name": "Timber deck assembly",
+            "material": "material.timber",
+            "thickness": 150,
+            "function": "structure"
+          }
+        ],
+        "topElevation": -25.0,
+        "bottomElevation": -175.0,
+        "footprint": {
+          "outer": [
+            [
+              3000.0,
+              0.0
+            ],
+            [
+              7000.0,
+              0.0
+            ],
+            [
+              7000.0,
+              -3000.0
+            ],
+            [
+              3000.0,
+              -3000.0
+            ]
+          ],
+          "holes": [],
+          "boundaryIds": {
+            "outer": [
+              "boundary.legacy.0.0",
+              "boundary.legacy.0.1",
+              "boundary.legacy.0.2",
+              "boundary.legacy.0.3"
+            ],
+            "holes": []
+          }
+        },
+        "discipline": "envelope",
+        "tags": [
+          "exterior",
+          "deck",
+          "attached"
+        ],
+        "requirements": [
+          {
+            "id": "requirement.entry-clearance",
+            "statement": "Maintain clear access between the south entry door and the attached deck.",
+            "severity": "warning",
+            "appliesTo": [
+              "door.south-entry",
+              "slab.deck.south"
+            ]
+          }
+        ]
+      },
+      "children": []
+    },
+    "assembly.roof-system": {
+      "kind": "assembly",
+      "kindLabel": "Component assembly",
+      "name": "Main roof system",
+      "storeyId": null,
+      "nodes": [],
+      "defaultVisible": true,
+      "properties": [],
+      "data": {
+        "assemblyType": "roofSystem",
+        "discipline": "envelope",
+        "tags": [
+          "roof",
+          "assembly"
+        ]
+      },
+      "children": []
+    }
+  },
+  "meshes": {
+    "hd_slab_ground_eaf3e9ea": {
+      "elementId": "slab.ground",
+      "role": "layer:0",
+      "materialId": "material.concrete",
+      "layerId": 0
+    },
+    "hd_wall_north_2a9a3d00_part1": {
+      "elementId": "wall.north",
+      "role": "body:1:1:layer:0",
+      "materialId": "material.siding",
+      "layerId": 0
+    },
+    "hd_wall_north_2a9a3d00_part2": {
+      "elementId": "wall.north",
+      "role": "body:1:1:layer:1",
+      "materialId": "material.sheathing",
+      "layerId": 1
+    },
+    "hd_wall_north_2a9a3d00_part3": {
+      "elementId": "wall.north",
+      "role": "body:1:1:layer:2",
+      "materialId": "material.timber",
+      "layerId": 2
+    },
+    "hd_wall_north_2a9a3d00_part4": {
+      "elementId": "wall.north",
+      "role": "body:1:1:layer:3",
+      "materialId": "material.gypsum",
+      "layerId": 3
+    },
+    "hd_wall_east_556c915a_part1": {
+      "elementId": "wall.east",
+      "role": "body:1:1:layer:0",
+      "materialId": "material.siding",
+      "layerId": 0
+    },
+    "hd_wall_east_556c915a_part2": {
+      "elementId": "wall.east",
+      "role": "body:1:1:layer:1",
+      "materialId": "material.sheathing",
+      "layerId": 1
+    },
+    "hd_wall_east_556c915a_part3": {
+      "elementId": "wall.east",
+      "role": "body:1:1:layer:2",
+      "materialId": "material.timber",
+      "layerId": 2
+    },
+    "hd_wall_east_556c915a_part4": {
+      "elementId": "wall.east",
+      "role": "body:1:1:layer:3",
+      "materialId": "material.gypsum",
+      "layerId": 3
+    },
+    "hd_wall_east_556c915a_part5": {
+      "elementId": "wall.east",
+      "role": "body:2:1:layer:0",
+      "materialId": "material.siding",
+      "layerId": 0
+    },
+    "hd_wall_east_556c915a_part6": {
+      "elementId": "wall.east",
+      "role": "body:2:1:layer:1",
+      "materialId": "material.sheathing",
+      "layerId": 1
+    },
+    "hd_wall_east_556c915a_part7": {
+      "elementId": "wall.east",
+      "role": "body:2:1:layer:2",
+      "materialId": "material.timber",
+      "layerId": 2
+    },
+    "hd_wall_east_556c915a_part8": {
+      "elementId": "wall.east",
+      "role": "body:2:1:layer:3",
+      "materialId": "material.gypsum",
+      "layerId": 3
+    },
+    "hd_wall_south_ca6b8ed1_part1": {
+      "elementId": "wall.south",
+      "role": "body:1:1:layer:0",
+      "materialId": "material.siding",
+      "layerId": 0
+    },
+    "hd_wall_south_ca6b8ed1_part2": {
+      "elementId": "wall.south",
+      "role": "body:1:1:layer:1",
+      "materialId": "material.sheathing",
+      "layerId": 1
+    },
+    "hd_wall_south_ca6b8ed1_part3": {
+      "elementId": "wall.south",
+      "role": "body:1:1:layer:2",
+      "materialId": "material.timber",
+      "layerId": 2
+    },
+    "hd_wall_south_ca6b8ed1_part4": {
+      "elementId": "wall.south",
+      "role": "body:1:1:layer:3",
+      "materialId": "material.gypsum",
+      "layerId": 3
+    },
+    "hd_wall_west_8fa730d7_part1": {
+      "elementId": "wall.west",
+      "role": "body:1:1:layer:0",
+      "materialId": "material.siding",
+      "layerId": 0
+    },
+    "hd_wall_west_8fa730d7_part2": {
+      "elementId": "wall.west",
+      "role": "body:1:1:layer:1",
+      "materialId": "material.sheathing",
+      "layerId": 1
+    },
+    "hd_wall_west_8fa730d7_part3": {
+      "elementId": "wall.west",
+      "role": "body:1:1:layer:2",
+      "materialId": "material.timber",
+      "layerId": 2
+    },
+    "hd_wall_west_8fa730d7_part4": {
+      "elementId": "wall.west",
+      "role": "body:1:1:layer:3",
+      "materialId": "material.gypsum",
+      "layerId": 3
+    },
+    "hd_wall_west_8fa730d7_part5": {
+      "elementId": "wall.west",
+      "role": "body:2:1:layer:0",
+      "materialId": "material.siding",
+      "layerId": 0
+    },
+    "hd_wall_west_8fa730d7_part6": {
+      "elementId": "wall.west",
+      "role": "body:2:1:layer:1",
+      "materialId": "material.sheathing",
+      "layerId": 1
+    },
+    "hd_wall_west_8fa730d7_part7": {
+      "elementId": "wall.west",
+      "role": "body:2:1:layer:2",
+      "materialId": "material.timber",
+      "layerId": 2
+    },
+    "hd_wall_west_8fa730d7_part8": {
+      "elementId": "wall.west",
+      "role": "body:2:1:layer:3",
+      "materialId": "material.gypsum",
+      "layerId": 3
+    },
+    "hd_roof_main_46845482_part1": {
+      "elementId": "roof.main",
+      "role": "roof-face:roof.main.face-1:layer:0",
+      "materialId": "material.roofing",
+      "layerId": 0
+    },
+    "hd_roof_main_46845482_part2": {
+      "elementId": "roof.main",
+      "role": "roof-face:roof.main.face-1:layer:1",
+      "materialId": "material.sheathing",
+      "layerId": 1
+    },
+    "hd_roof_main_46845482_part3": {
+      "elementId": "roof.main",
+      "role": "roof-face:roof.main.face-1:layer:2",
+      "materialId": "material.timber",
+      "layerId": 2
+    },
+    "hd_roof_main_46845482_part4": {
+      "elementId": "roof.main",
+      "role": "roof-face:roof.main.face-2:layer:0",
+      "materialId": "material.roofing",
+      "layerId": 0
+    },
+    "hd_roof_main_46845482_part5": {
+      "elementId": "roof.main",
+      "role": "roof-face:roof.main.face-2:layer:1",
+      "materialId": "material.sheathing",
+      "layerId": 1
+    },
+    "hd_roof_main_46845482_part6": {
+      "elementId": "roof.main",
+      "role": "roof-face:roof.main.face-2:layer:2",
+      "materialId": "material.timber",
+      "layerId": 2
+    },
+    "hd_window_north_4176e612_part1": {
+      "elementId": "window.north",
+      "role": "window-frame",
+      "materialId": "material.timber"
+    },
+    "hd_window_north_4176e612_part2": {
+      "elementId": "window.north",
+      "role": "window-frame",
+      "materialId": "material.timber"
+    },
+    "hd_window_north_4176e612_part3": {
+      "elementId": "window.north",
+      "role": "window-frame",
+      "materialId": "material.timber"
+    },
+    "hd_window_north_4176e612_part4": {
+      "elementId": "window.north",
+      "role": "window-frame",
+      "materialId": "material.timber"
+    },
+    "hd_window_north_4176e612_part5": {
+      "elementId": "window.north",
+      "role": "window-glass",
+      "materialId": null
+    },
+    "hd_door_south-entry_a200a655_part1": {
+      "elementId": "door.south-entry",
+      "role": "door-frame",
+      "materialId": "material.timber"
+    },
+    "hd_door_south-entry_a200a655_part2": {
+      "elementId": "door.south-entry",
+      "role": "door-frame",
+      "materialId": "material.timber"
+    },
+    "hd_door_south-entry_a200a655_part3": {
+      "elementId": "door.south-entry",
+      "role": "door-frame",
+      "materialId": "material.timber"
+    },
+    "hd_door_south-entry_a200a655_part4": {
+      "elementId": "door.south-entry",
+      "role": "door-panel",
+      "materialId": "material.timber"
+    },
+    "hd_space_living_69e75d15": {
+      "elementId": "space.living",
+      "role": "space",
+      "materialId": null
+    },
+    "hd_slab_deck_south_638dc4a9": {
+      "elementId": "slab.deck.south",
+      "role": "layer:0",
+      "materialId": "material.timber",
+      "layerId": 0
+    }
+  },
+  "navigation": {
+    "format": "home-design-navigation-0.1",
+    "links": [
+      {
+        "sourceId": "door.south-entry",
+        "targetId": "opening.door.south",
+        "kind": "host",
+        "sourceLabel": "Opening",
+        "targetLabel": "Door or window",
+        "path": "/relationships/rel.fills.south-door"
+      },
+      {
+        "sourceId": "opening.door.south",
+        "targetId": "wall.south",
+        "kind": "host",
+        "sourceLabel": "Host",
+        "targetLabel": "Opening",
+        "path": "/relationships/rel.voids.south-door"
+      },
+      {
+        "sourceId": "opening.window.north",
+        "targetId": "wall.north",
+        "kind": "host",
+        "sourceLabel": "Host",
+        "targetLabel": "Opening",
+        "path": "/relationships/rel.voids.north-window"
+      },
+      {
+        "sourceId": "roof.main",
+        "targetId": "assembly.roof-system",
+        "kind": "assembly",
+        "sourceLabel": "Assembly",
+        "targetLabel": "Assembly part",
+        "path": "/relationships/rel.aggregates.roof"
+      },
+      {
+        "sourceId": "slab.deck.south",
+        "targetId": "wall.south",
+        "kind": "connection",
+        "sourceLabel": "Attached to",
+        "targetLabel": "Attachment",
+        "path": "/relationships/rel.attaches.deck-south-wall"
+      },
+      {
+        "sourceId": "wall.east",
+        "targetId": "roof.main",
+        "kind": "placement",
+        "sourceLabel": "Position follows",
+        "targetLabel": "Position drives",
+        "path": "/elements/wall.east/top/element"
+      },
+      {
+        "sourceId": "wall.east",
+        "targetId": "slab.ground",
+        "kind": "placement",
+        "sourceLabel": "Position follows",
+        "targetLabel": "Position drives",
+        "path": "/elements/wall.east/base/element"
+      },
+      {
+        "sourceId": "wall.east",
+        "targetId": "space.living",
+        "kind": "room",
+        "sourceLabel": "Room",
+        "targetLabel": "Room boundary",
+        "path": "/relationships/rel.bounds.living-east"
+      },
+      {
+        "sourceId": "wall.east",
+        "targetId": "wall.south",
+        "kind": "connection",
+        "sourceLabel": "Connected to",
+        "targetLabel": "Connected to",
+        "path": "/relationships/rel.joins.east-south"
+      },
+      {
+        "sourceId": "wall.north",
+        "targetId": "roof.main",
+        "kind": "placement",
+        "sourceLabel": "Position follows",
+        "targetLabel": "Position drives",
+        "path": "/elements/wall.north/top/element"
+      },
+      {
+        "sourceId": "wall.north",
+        "targetId": "slab.ground",
+        "kind": "placement",
+        "sourceLabel": "Position follows",
+        "targetLabel": "Position drives",
+        "path": "/elements/wall.north/base/element"
+      },
+      {
+        "sourceId": "wall.north",
+        "targetId": "slab.ground",
+        "kind": "support",
+        "sourceLabel": "Supported by",
+        "targetLabel": "Supports",
+        "path": "/relationships/rel.supports.slab-north-wall"
+      },
+      {
+        "sourceId": "wall.north",
+        "targetId": "space.living",
+        "kind": "room",
+        "sourceLabel": "Room",
+        "targetLabel": "Room boundary",
+        "path": "/relationships/rel.bounds.living-north"
+      },
+      {
+        "sourceId": "wall.north",
+        "targetId": "wall.east",
+        "kind": "connection",
+        "sourceLabel": "Connected to",
+        "targetLabel": "Connected to",
+        "path": "/relationships/rel.joins.north-east"
+      },
+      {
+        "sourceId": "wall.south",
+        "targetId": "roof.main",
+        "kind": "placement",
+        "sourceLabel": "Position follows",
+        "targetLabel": "Position drives",
+        "path": "/elements/wall.south/top/element"
+      },
+      {
+        "sourceId": "wall.south",
+        "targetId": "slab.ground",
+        "kind": "placement",
+        "sourceLabel": "Position follows",
+        "targetLabel": "Position drives",
+        "path": "/elements/wall.south/base/element"
+      },
+      {
+        "sourceId": "wall.south",
+        "targetId": "space.living",
+        "kind": "room",
+        "sourceLabel": "Room",
+        "targetLabel": "Room boundary",
+        "path": "/relationships/rel.bounds.living-south"
+      },
+      {
+        "sourceId": "wall.south",
+        "targetId": "wall.west",
+        "kind": "connection",
+        "sourceLabel": "Connected to",
+        "targetLabel": "Connected to",
+        "path": "/relationships/rel.joins.south-west"
+      },
+      {
+        "sourceId": "wall.west",
+        "targetId": "roof.main",
+        "kind": "placement",
+        "sourceLabel": "Position follows",
+        "targetLabel": "Position drives",
+        "path": "/elements/wall.west/top/element"
+      },
+      {
+        "sourceId": "wall.west",
+        "targetId": "slab.ground",
+        "kind": "placement",
+        "sourceLabel": "Position follows",
+        "targetLabel": "Position drives",
+        "path": "/elements/wall.west/base/element"
+      },
+      {
+        "sourceId": "wall.west",
+        "targetId": "space.living",
+        "kind": "room",
+        "sourceLabel": "Room",
+        "targetLabel": "Room boundary",
+        "path": "/relationships/rel.bounds.living-west"
+      },
+      {
+        "sourceId": "wall.west",
+        "targetId": "wall.north",
+        "kind": "connection",
+        "sourceLabel": "Connected to",
+        "targetLabel": "Connected to",
+        "path": "/relationships/rel.joins.west-north"
+      },
+      {
+        "sourceId": "window.north",
+        "targetId": "opening.window.north",
+        "kind": "host",
+        "sourceLabel": "Opening",
+        "targetLabel": "Door or window",
+        "path": "/relationships/rel.fills.north-window"
+      }
+    ]
+  },
+  "propertyFormat": "home-design-view-properties-0.1",
+  "storeys": {
+    "level.ground": {
+      "kind": "storey",
+      "name": "Ground floor",
+      "elevation": 0
+    },
+    "level.eave": {
+      "kind": "reference",
+      "name": "Roof eave",
+      "elevation": 2700
+    }
+  },
+  "requirements": [
+    {
+      "id": "requirement.entry-clearance",
+      "statement": "Maintain clear access between the south entry door and the attached deck.",
+      "severity": "warning",
+      "appliesTo": [
+        "door.south-entry",
+        "slab.deck.south"
+      ]
+    }
+  ],
+  "requirementResults": [
+    {
+      "id": "requirement.entry-clearance",
+      "status": "notChecked",
+      "checks": []
+    }
+  ],
+  "solarStudies": [],
+  "reports": {
+    "schedules": "schedules.json",
+    "envelope": "envelope.json",
+    "drawings": "drawings.svg"
+  }
+}

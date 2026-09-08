@@ -83,6 +83,8 @@ export interface RenderManifest {
     mapping: [string, string, string];
   };
   elements: Record<string, ManifestElement>;
+  meshes?: Record<string, { elementId: string; role: string; materialId: string | null; layerId?: string | number; inspectionCap?: boolean; capOf?: string; section?: { axis: 'x' | 'y' | 'z'; position: number; keep: 'below' | 'above' } }>;
+  namedViews?: Array<{ id: string; title: string; description: string; file: string; view: import('./visual-view').VisualView }>;
   requirements?: DesignRequirement[];
   requirementResults?: RequirementResult[];
   solarStudies?: SolarStudy[];
@@ -237,6 +239,19 @@ export function isRenderManifest(value: unknown): value is RenderManifest {
     Object.entries(candidate.elements).every(([id, element]) =>
       (!element.parentId || Boolean(candidate.elements?.[element.parentId])) &&
       (element.children ?? []).every((child) => candidate.elements?.[child]?.parentId === id)) &&
+    (candidate.meshes === undefined || Boolean(candidate.meshes) && typeof candidate.meshes === 'object' && !Array.isArray(candidate.meshes) &&
+      Object.entries(candidate.meshes).every(([node, mesh]) => mesh &&
+        typeof mesh.elementId === 'string' && Boolean(candidate.elements?.[mesh.elementId]?.nodes.includes(node)) &&
+        typeof mesh.role === 'string' && (mesh.materialId === null || typeof mesh.materialId === 'string') &&
+        (mesh.layerId === undefined || typeof mesh.layerId === 'string' || Number.isInteger(mesh.layerId) && Number(mesh.layerId) >= 0) &&
+        (mesh.inspectionCap === undefined || mesh.inspectionCap === true && typeof mesh.capOf === 'string' && Boolean(candidate.meshes?.[mesh.capOf]) && Boolean(mesh.section) &&
+          ['x', 'y', 'z'].includes(mesh.section!.axis) && Number.isFinite(mesh.section!.position) && ['below', 'above'].includes(mesh.section!.keep)))) &&
+    (candidate.namedViews === undefined || Array.isArray(candidate.namedViews) &&
+      new Set(candidate.namedViews.map((view) => view?.id)).size === candidate.namedViews.length &&
+      candidate.namedViews.every((entry) => entry && typeof entry.id === 'string' && /^[a-z][a-z0-9-]*$/.test(entry.id) &&
+        typeof entry.title === 'string' && Boolean(entry.title) && typeof entry.description === 'string' &&
+        typeof entry.file === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9_-]*\.json$/.test(entry.file) &&
+        entry.view && typeof entry.view === 'object' && !Array.isArray(entry.view))) &&
     (candidate.navigation === undefined || validNavigation(candidate.navigation, candidate.elements)) &&
     (candidate.propertyFormat === undefined || candidate.propertyFormat === 'home-design-view-properties-0.1')
   );

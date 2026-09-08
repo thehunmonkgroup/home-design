@@ -23,33 +23,37 @@ def test_view_navigation_retains_direct_hosts_rooms_assemblies_and_systems(
     loader: ModelLoader,
 ) -> None:
     """Viewer links preserve explicit construction meanings without inferring geometric adjacency."""
-    path = (
-        Path(__file__).resolve().parents[2]
-        / "examples/complete-shell-coordination-house.json"
-    )
+    path = Path(__file__).resolve().parents[2] / "examples/assemblies.json"
     model = ModelResolver(loader.load(path)).resolve()
     links = ViewNavigation(model).build()
     assert any(
-        link.source_id == "electrical.device.flushBox"
-        and link.target_id == "electrical.wall.host"
+        link.source_id == "assembly.exterior-wall.box.outlet"
+        and link.target_id == "assembly.exterior-wall.wall.exterior"
         and link.kind == "host"
         for link in links
     )
     assert any(
-        link.source_id == "electrical.cut.flushBox"
-        and link.target_id == "electrical.device.flushBox"
+        link.source_id == "assembly.exterior-wall.cut.outlet"
+        and link.target_id == "assembly.exterior-wall.box.outlet"
         and link.kind == "ownership"
         for link in links
     )
     assert any(
-        link.source_id == "roof.main"
-        and link.target_id == "assembly.roof-system"
+        link.source_id == "assembly.insulated-roof.roof"
+        and link.target_id == "assembly.insulated-roof"
         and link.kind == "assembly"
         for link in links
     )
-    assert any(link.source_id == "wall.north" and link.kind == "room" for link in links)
+    house = ModelResolver(
+        loader.load(path.with_name("master-suite-gable-house.json"))
+    ).resolve()
     assert any(
-        link.target_id == "electrical.system.test" and link.kind == "system"
+        link.source_id == "wall.north" and link.kind == "room"
+        for link in ViewNavigation(house).build()
+    )
+    assert any(
+        link.target_id == "assembly.exterior-wall.system.power"
+        and link.kind == "system"
         for link in links
     )
     assert any(link.kind == "connection" for link in links)
@@ -57,18 +61,40 @@ def test_view_navigation_retains_direct_hosts_rooms_assemblies_and_systems(
         links
     )
     assert model.to_dict()["componentReferences"]
-    assert model.element("electrical.wall.host").data["length"] == 4000
-    child = MemberAssemblies.children(model.element("framing.partition"))[0]
+    assert model.element("assembly.exterior-wall.wall.exterior").data["length"] == 4000
+    passages = ViewNavigation(
+        replace(model, component_references=(), relationships={})
+    ).build()
+    assert {
+        (link.source_id, link.target_id, link.kind, link.target_label)
+        for link in passages
+    } >= {
+        (
+            "assembly.exterior-wall.box.outlet",
+            "assembly.exterior-wall.wall.exterior",
+            "host",
+            "Penetrating component",
+        ),
+        (
+            "assembly.interior-wet-wall.interface.sleeve",
+            "assembly.interior-wet-wall.electrical.wall.host",
+            "host",
+            "Penetrating component",
+        ),
+    }
+    child = MemberAssemblies.children(
+        model.element("assembly.exterior-wall.framing.wall")
+    )[0]
     scoped = {
-        "ownerId": "electrical.device.flushBox",
-        "targetId": "framing.partition",
-        "path": "/elements/electrical.device.flushBox/placement/origin/host/element",
+        "ownerId": "assembly.exterior-wall.box.outlet",
+        "targetId": "assembly.exterior-wall.framing.wall",
+        "path": "/elements/assembly.exterior-wall.box.outlet/placement/origin/host/element",
         "role": "placement",
         "scope": {"part": child.data["key"]},
     }
     scoped_model = replace(model, component_references=(scoped,))
     assert any(
-        link.source_id == "electrical.device.flushBox"
+        link.source_id == "assembly.exterior-wall.box.outlet"
         and link.target_id == child.element_id
         and link.kind == "host"
         for link in ViewNavigation(scoped_model).build()
@@ -79,10 +105,7 @@ def test_generated_members_share_ifc_ids_and_scene_geometry_with_their_parent(
     loader: ModelLoader, tmp_path: Path
 ) -> None:
     """Generated selection adds metadata and precise nodes without duplicating material meshes."""
-    path = (
-        Path(__file__).resolve().parents[2]
-        / "examples/complete-shell-coordination-house.json"
-    )
+    path = Path(__file__).resolve().parents[2] / "examples/assemblies.json"
     model = ModelResolver(loader.load(path)).resolve()
     glb = tmp_path / "model.glb"
     manifest = GltfExporter().export(model, glb, tmp_path / "manifest.json")
@@ -123,6 +146,25 @@ def test_generated_members_share_ifc_ids_and_scene_geometry_with_their_parent(
         assert {key: value for key, value in actual.items() if key != "data"} == {
             key: value for key, value in expected.items() if key != "data"
         }
+    capped = GltfExporter().export(
+        model,
+        tmp_path / "section.glb",
+        tmp_path / "section-manifest.json",
+        inspection_sections=((2, 1200.0, True),),
+    )
+    capped_entries = Authoring.object(capped["elements"])
+    caps = [
+        (node, Authoring.object(value))
+        for node, value in Authoring.object(capped["meshes"]).items()
+        if Authoring.object(value).get("inspectionCap")
+        and "/member/" in str(Authoring.object(value)["elementId"])
+    ]
+    assert caps
+    for node, metadata in caps:
+        child_entry = Authoring.object(capped_entries[str(metadata["elementId"])])
+        parent_entry = Authoring.object(capped_entries[str(child_entry["parentId"])])
+        assert node in Authoring.array(child_entry["nodes"])
+        assert node in Authoring.array(parent_entry["nodes"])
 
 
 def test_repeated_members_expose_individual_axes_and_quantities(

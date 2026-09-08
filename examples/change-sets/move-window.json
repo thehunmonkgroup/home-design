@@ -1,20 +1,19 @@
 {
-  "$schema": "../../schema/change-set-0.1.schema.json",
   "changeVersion": "0.1",
   "id": "change.move-north-window",
-  "description": "Move the north window 500 mm east along its host wall.",
-  "baseRevision": 1,
+  "description": "Move the north living-room window 500 mm west, carrying its framed opening and preserving the kitchen outlets.",
+  "baseRevision": 9,
   "preconditions": [
     {
       "path": "/elements/opening.window.north/placement/station",
-      "equals": 4000
+      "equals": 7200
     }
   ],
   "operations": [
     {
       "op": "moveOpening",
       "openingId": "opening.window.north",
-      "station": 4500
+      "station": 6700
     }
   ]
 }

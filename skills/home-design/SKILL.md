@@ -48,6 +48,7 @@ operations; delivery guidance is needed when changing publication or sharing.
 | Task | Reference |
 | --- | --- |
 | Compact source/measurement queries and dependency discovery | [Inspection](references/inspection.md) |
+| See edited geometry, interiors, layers and concealed construction | [Visual feedback](references/visual-review.md) |
 | Local type edits, rehosting, removal and propagation review | [Changesets](references/changesets.md) |
 | Named layers/boundaries, generated-part identity and input-format conversion | [Scoped identities](references/identities.md) |
 | Instantiate, duplicate, adapt and combine reusable packages | [Assemblies](references/assemblies.md) |
@@ -86,7 +87,10 @@ Use `home-design capabilities --kind KIND` when choosing compatible component fa
    `home-design transact MODEL CHANGE --dry-run`.
 5. Apply with
    `home-design transact MODEL CHANGE --web-assets web/public/model`.
-6. Verify the completed build, reinspect measurements with `--view resolved`, and review relevant
+6. For spatial edits, discover prepared views with `home-design views MODEL`,
+   then render and read an overview and relevant detail using
+   [visual feedback](references/visual-review.md). Verify the completed build,
+   reinspect measurements with `--view resolved`, and review relevant
    quantities, diagnostics and viewer views. Report the saved revision, design
    effects, validation result and artifact paths. A dry run does not test exporters.
 

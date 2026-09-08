@@ -24,6 +24,20 @@ class ResourceBuild(build_py):
                 if path.is_file()
                 and path.suffix in {".json", ".md", ".py", ".yaml", ".csv"}
             )
+        files.extend(
+            Path("web") / name
+            for name in (
+                "package.json",
+                "package-lock.json",
+                "capture.html",
+                "capture.config.ts",
+            )
+        )
+        files.extend(
+            path
+            for path in Path("web/app").rglob("*.ts")
+            if not path.name.endswith(".test.ts")
+        )
         return sorted(files)
 
     def resource_mapping(self) -> dict[str, str]:
@@ -37,7 +51,12 @@ class ResourceBuild(build_py):
         super().run()
         if self.editable_mode:
             return
-        for destination, source in self.resource_mapping().items():
+        mapping = self.resource_mapping()
+        target = Path(self.build_lib) / "home_design" / "_resources"
+        for path in target.rglob("*"):
+            if path.is_file() and str(path) not in mapping:
+                path.unlink()
+        for destination, source in mapping.items():
             Path(destination).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, destination)
 

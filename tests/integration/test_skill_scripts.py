@@ -14,7 +14,7 @@ TRANSACTION_SCRIPT = (
     ROOT / "skills" / "home-design" / "scripts" / "design_transaction.py"
 )
 CONVERSION_SCRIPT = ROOT / "skills" / "home-design" / "scripts" / "convert_length.py"
-CHANGE_EXAMPLE = ROOT / "examples" / "change-sets" / "move-window.json"
+CHANGE_EXAMPLE = ROOT / "tests" / "fixtures" / "move-window.json"
 
 
 def run_script(script: Path, *arguments: str) -> subprocess.CompletedProcess[str]:

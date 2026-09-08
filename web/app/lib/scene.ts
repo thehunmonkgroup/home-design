@@ -1,4 +1,4 @@
-import { Box3, BufferGeometry, DirectionalLight, Material, Object3D, PerspectiveCamera, Plane, Sphere, Texture, Vector3 } from 'three';
+import { Box3, BufferGeometry, DirectionalLight, Material, Object3D, OrthographicCamera, PerspectiveCamera, Plane, Sphere, Texture, Vector3 } from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
 export function configureOrbitControls(controls: OrbitControls): void {
@@ -7,6 +7,13 @@ export function configureOrbitControls(controls: OrbitControls): void {
   controls.screenSpacePanning = true;
   controls.minPolarAngle = 0;
   controls.maxPolarAngle = Math.PI;
+}
+
+export function isObjectVisible(object: Object3D): boolean {
+  for (let current: Object3D | null = object; current; current = current.parent) {
+    if (!current.visible) return false;
+  }
+  return true;
 }
 
 export function disposeSceneResources(root: Object3D): void {
@@ -28,7 +35,7 @@ export function disposeSceneResources(root: Object3D): void {
   for (const geometry of geometries) geometry.dispose();
 }
 
-export function modelNorthRotation(camera: PerspectiveCamera): number {
+export function modelNorthRotation(camera: PerspectiveCamera | OrthographicCamera): number {
   const right = new Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
   return Math.atan2(-right.z, right.x) * 180 / Math.PI;
 }
@@ -50,13 +57,27 @@ const SHADOW_FRUSTUM_MARGIN = 1.25;
 const SHADOW_MAP_SIZE = 2048;
 const SHADOW_NORMAL_BIAS_RADIUS_MULTIPLIER = 0.0025;
 
-export function frameModel(camera: PerspectiveCamera, controls: OrbitControls, model: Object3D): void {
+export function frameModel(camera: PerspectiveCamera | OrthographicCamera, controls: OrbitControls, model: Object3D): void {
   const bounds = new Box3().setFromObject(model);
   frameBounds(camera, controls, bounds);
 }
 
-export function frameBounds(camera: PerspectiveCamera, controls: OrbitControls, bounds: Box3): void {
-  if (bounds.isEmpty() || camera.aspect <= 0) return;
+export function frameBounds(camera: PerspectiveCamera | OrthographicCamera, controls: OrbitControls, bounds: Box3): void {
+  if (bounds.isEmpty()) return;
+  if (camera instanceof OrthographicCamera) {
+    const aspect = (camera.right - camera.left) / (camera.top - camera.bottom);
+    const center = bounds.getCenter(new Vector3());
+    const span = Math.max(bounds.getSize(new Vector3()).length(), 0.01) * FRAME_MARGIN;
+    camera.zoom = 1;
+    camera.left = -span * aspect / 2; camera.right = span * aspect / 2;
+    camera.top = span / 2; camera.bottom = -span / 2;
+    camera.position.copy(center).add(new Vector3(1.15, 0.85, 1.25).normalize().multiplyScalar(span));
+    camera.up.set(0, 1, 0); camera.lookAt(center);
+    configureCameraDepth(camera, bounds);
+    controls.target.copy(center); controls.update();
+    return;
+  }
+  if (camera.aspect <= 0) return;
 
   const damping = controls.enableDamping;
   controls.enableDamping = false;
@@ -121,7 +142,7 @@ export function configureDirectionalShadow(light: DirectionalLight, bounds: Box3
   shadowCamera.updateProjectionMatrix();
 }
 
-export function configureCameraDepth(camera: PerspectiveCamera, bounds: Box3): void {
+export function configureCameraDepth(camera: PerspectiveCamera | OrthographicCamera, bounds: Box3): void {
   if (bounds.isEmpty()) return;
 
   const size = bounds.getSize(new Vector3());

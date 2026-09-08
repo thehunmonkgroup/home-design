@@ -19,7 +19,7 @@ from home_design.source_state import SourceState
 from home_design.transactions import DesignTransaction
 from home_design.validation.validator import ModelEvaluation
 
-CHANGE = Path(__file__).resolve().parents[2] / "examples/change-sets/move-window.json"
+CHANGE = Path(__file__).resolve().parents[2] / "tests/fixtures/move-window.json"
 
 
 def test_export_failure_preserves_source_and_existing_artifacts(

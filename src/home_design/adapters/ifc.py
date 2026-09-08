@@ -42,6 +42,7 @@ from home_design.mounted_parts import MountedParts
 from home_design.member_assemblies import MemberAssemblies
 from home_design.construction import Authoring
 from home_design.layers import LayerAssembly
+from home_design.solids import SolidOperations
 
 
 class IfcExporter:
@@ -552,6 +553,12 @@ class IfcExporter:
             return None
         items = []
         for mesh in element.meshes:
+            if (
+                element.kind == "serviceRoute"
+                and element.data.get("family") == "cable"
+                and len(set(mesh.vertices)) < len(mesh.vertices)
+            ):
+                mesh = SolidOperations.regularize(mesh)
             coordinates = ifc.create_entity(
                 "IfcCartesianPointList3D", CoordList=mesh.vertices
             )

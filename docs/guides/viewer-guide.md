@@ -6,6 +6,21 @@ the saved design or its IFC export.
 
 ## Open the viewer
 
+Models with a prepared tour show a **Saved view** selector above the model.
+Choose a view to restore its camera, visible layers and components, highlights
+and cuts. The description explains what the view reveals. Orbit, zoom, pan and
+select normally after choosing a view; **Restore view** reapplies that stop's
+settings. **Reset presentation** clears cuts and highlights, restores default
+component visibility and frames the model with a perspective camera.
+
+The [Master Suite Gable House tour](master-suite-gable-house.md) includes twelve
+views, from a north-up floor plan and eye-level interiors to framing and services.
+Named section cuts have filled material faces. Changing **Cut** replaces the
+saved cut planes; a custom cut has filled faces when it matches an included
+named-view plane. Other custom planes use the ordinary unfilled section display.
+**Show all** changes component visibility while retaining the current cuts.
+
+
 Open a shared review site's URL, or start the local viewer after the
 [quick-start setup](../../README.md#quick-start):
 
@@ -96,6 +111,13 @@ Below the selected component's name:
   geometry can still conceal the selection; use isolation or a section cut to
   look inside. This action is unavailable for components without geometry or
   rendered contents. It leaves the current section cut in place.
+- **Hide**, beside **Isolate with contents**, hides the selected component,
+  including its generated members, using the Components eye button's visibility
+  rules. For an assembly without its own geometry, it hides the assembly's
+  contents. The camera and Details selection stay in place; **Show in model**
+  restores the selection's geometry. Hide always hides, even when **Isolate on
+  eye click** is enabled. It is unavailable when the selection is already hidden
+  or has no rendered geometry or contents.
 - Labeled upward links lead to the generating component, host, assembly or room
   when those relationships exist. These describe where the part belongs; **Back**
   follows your actual browsing history. A component can belong to several groups.

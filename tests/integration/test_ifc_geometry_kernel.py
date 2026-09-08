@@ -41,6 +41,46 @@ class KernelFixture(IfcExporter):
         }
     )
 
+    @staticmethod
+    def compound_cable(model: JsonObject) -> None:
+        """Create a thin cable with successive bends in different planes."""
+        Authoring.object(model["types"])["type.cable"] = {
+            "kind": "serviceRouteType",
+            "name": "Test cable",
+            "family": "cable",
+            "medium": "electrical",
+            "connectionType": "power",
+            "material": "material.timber",
+            "section": {"kind": "circle", "diameter": 10},
+        }
+        model["relationships"], model["requirements"] = {}, []
+        elements: JsonObject = {
+            "cable.test": {
+                "kind": "serviceRoute",
+                "name": "Compound bent cable",
+                "type": "type.cable",
+                "path": [
+                    {"point": [0, 0, 2690]},
+                    {"point": [0, 0, 0]},
+                    {"point": [-6500, 4773, 0]},
+                    {"point": [-6500, 4773, 240]},
+                    {"point": [-6500, 4498, 240]},
+                ],
+                "bendRadius": 25,
+                "chordTolerance": 0.2,
+                "portStates": {"start": "open", "end": "open"},
+            },
+            "system.cable": {
+                "kind": "serviceSystem",
+                "name": "Cable system",
+                "systemType": "electrical",
+                "members": [
+                    {"element": "cable.test", "port": port} for port in ("start", "end")
+                ],
+            },
+        }
+        model["elements"] = elements
+
     @classmethod
     def physical_elements(cls, model: ResolvedModel) -> tuple[ResolvedElement, ...]:
         """Expose physical export inputs to compare each generated child without assembly duplication."""
@@ -147,12 +187,11 @@ class KernelFixture(IfcExporter):
 @pytest.mark.parametrize(
     "case",
     [
-        "single-story-gable-house",
         "hillside-deck-house",
-        "complete-shell-coordination-house",
-        "integrated-authoring-house",
+        "master-suite-gable-house",
         "assemblies",
         "trimmed-member",
+        "compound-cable",
     ],
 )
 def test_kernel_preserves_material_volume_and_world_extents(
@@ -162,6 +201,9 @@ def test_kernel_preserves_material_volume_and_world_extents(
     if case == "trimmed-member":
         source = reference_model
         KernelFixture.cut_member(source)
+    elif case == "compound-cable":
+        source = reference_model
+        KernelFixture.compound_cable(source)
     else:
         source = ModelLoader().load(
             Path(__file__).resolve().parents[2] / "examples" / f"{case}.json"
@@ -187,6 +229,12 @@ def test_kernel_preserves_material_volume_and_world_extents(
         expected = sum(SolidOperations.volume(mesh) for mesh in element.meshes) / 1e9
         assert volume == pytest.approx(expected, rel=1e-7, abs=1e-9), element.element_id
         actual_vertices = ifcopenshell.util.shape.get_vertices(shape.geometry)
+        if case == "compound-cable":
+            assert trimesh.Trimesh(
+                vertices=actual_vertices,
+                faces=ifcopenshell.util.shape.get_faces(shape.geometry),
+                process=False,
+            ).is_watertight
         expected_vertices = (
             np.asarray([vertex for mesh in element.meshes for vertex in mesh.vertices])
             / 1000
@@ -203,6 +251,8 @@ def test_kernel_preserves_material_volume_and_world_extents(
     KernelFixture.scene_and_schedule(resolved, owner_volumes, tmp_path)
     if case == "trimmed-member":
         assert checked == {"member.cut"}
+    elif case == "compound-cable":
+        assert checked == {"cable.test"}
     elif case == "assemblies":
         assert {
             "assembly.exterior-wall.wall.exterior",

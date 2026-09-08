@@ -88,6 +88,7 @@ host materials after cavity ownership. Route passage checks run after those cuts
 | `adapters/ifc_services.py` | Native distribution groups, nested oriented ports and stable external mating relationships |
 | `adapters/drawings.py` | Orthographic SVG projections, mesh-plane sections with holes and explicit dimensions |
 | `adapters/gltf.py` | Three.js coordinate conversion, materials, GLB, node manifest |
+| `visual_render.py`, `render_sections.py` | Validated source snapshots, packaged capture runtime, image provenance and temporary material-filled section surfaces |
 | `batch.py` | Ordered input expansion, deduplication and per-model validation reports |
 | `build.py` | Evaluated source snapshots, adapter staging, per-model directory replacement and publication rollback |
 | `source_state.py`, `transactions.py` | Exact-byte source guards, cooperative writer locks, prepared commits and journal-based publication recovery |
@@ -110,6 +111,15 @@ retain world placement without sacrificing thin-part precision to the building's
 coordinate offset.
 
 ## Batch builds and browser catalog
+
+The build CLI defaults its artifact root to `build` under the working directory.
+Without an explicit `--web-assets` or `--no-web-assets`, it searches the working
+directory and ancestors for a viewer in that directory or its `web` child. A
+candidate has `index.html` and a `package.json` named `home-design-viewer`; the
+first match supplies `public/model`. Malformed or unrelated package metadata is
+skipped. Discovery does not use model-source paths or installed package resources.
+No match means artifact-only output. `BuildService` and guarded transactions retain
+their explicit publication destinations; discovery belongs to the build CLI.
 
 `BuildService.build_many` validates all inputs and stages all adapter outputs before
 replacing any generated model directory. Inputs are processed in order, with the
@@ -530,6 +540,11 @@ active custom model and viewer assets.
 
 General software tests cover reusable behavior and may use public examples or
 minimal synthetic fixtures; they are not restricted to complete example homes.
+`tests/fixtures/basic-shell.json` and its guarded `move-window.json` provide a small
+synthetic input for general geometry, CLI and transaction tests. They are test
+resources, excluded from the public model catalog and installed authoring examples.
+Public worked-edit regressions use Assemblies for package/layer/service edits,
+Hillside for shared-window stock, and Master Suite for framed window edits.
 Engine feature development and defect fixes require separate authorization from
 custom design authoring. When a custom design exposes an engine limitation,
 explain the limitation and obtain authorization before changing code or tests.

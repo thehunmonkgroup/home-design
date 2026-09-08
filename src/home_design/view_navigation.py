@@ -184,4 +184,16 @@ class ViewNavigation:
         """Return a stable review graph independent of JSON object order."""
         self.references()
         self.relationships()
+        for element in self.model.elements:
+            if element.kind == "penetration" and isinstance(
+                element.data.get("owner"), str
+            ):
+                self.add(
+                    str(element.data["owner"]),
+                    Authoring.text(element.data["host"]),
+                    "host",
+                    "Passage host",
+                    "Penetrating component",
+                    f"/elements/{element.element_id}/owner",
+                )
         return tuple(self.links[key] for key in sorted(self.links))
