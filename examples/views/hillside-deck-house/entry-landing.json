@@ -2,18 +2,18 @@
   "width": 1600,
   "height": 1200,
   "labels": false,
+  "navigation": "look",
   "camera": {
     "position": [
-      2200,
-      2450,
-      1650
+      11200,
+      2100,
+      4650
     ],
     "target": [
-      2050,
-      900,
-      1050
+      10700,
+      1200,
+      4300
     ],
-    "fov": 78
-  },
-  "navigation": "look"
+    "fov": 75
+  }
 }

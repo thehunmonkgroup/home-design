@@ -10,7 +10,7 @@ through a guarded transaction. Repeat the same view after the correction.
 
 Discover prepared views with `home-design views MODEL`. If the model has a suitable
 view, use `home-design render MODEL --named-view ID --output DIRECTORY`. The master
-suite example includes twelve views, such as `plan`, `bedroom`, `wall-framing` and
+suite example includes fifteen views, such as `plan`, `bedroom`, `wall-framing` and
 `bedroom-wall-contents`. `--named-view` and `--view` are mutually exclusive.
 The viewer exposes the same definitions through **Saved view**.
 
@@ -61,6 +61,22 @@ directions describe where the camera stands looking toward the fitted geometry.
 `top` puts north at the top of the image. Cameras fit the retained geometry after
 visibility and section cuts; specify `position` and `target` together for an
 interior eye-level view. Add `up` when looking vertically with explicit positions.
+
+For a reusable interior view, set `"navigation": "look"` at the view root,
+and provide a perspective camera with explicit `position` and `target`.
+Position is where the viewer stands; target establishes the initial direction.
+Look around rotates in place, so moving target alone does not move the viewer.
+Use a comfortably inset position inside the resolved footprint, outside holes,
+walls and equipment. Eye height is floor elevation plus about 1650 mm; give
+upper-storey views their absolute Z elevation. Aim toward useful features and
+render the result before publishing. Keep canonical up [0, 0, 1] (the default).
+Orbit is the default for exterior, framing and orthographic plan views.
+The capture CLI uses the same camera pose; navigation affects browser gestures,
+not the still image. Room presets in the viewer change presentation only.
+
+The Master Suite tour includes `living`, `utility` and `deck`; Hillside has
+`lower-room`, `upper-room`, `lower-deck`, `upper-deck`, `spa-deck` and
+`entry-landing`, plus floor plans. Use `home-design views MODEL` for the index.
 
 For a room layout, save this view JSON, adjusting the absolute cut height to the
 storey's elevation plus the desired height:

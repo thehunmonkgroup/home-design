@@ -4,16 +4,16 @@
   "labels": false,
   "camera": {
     "position": [
-      2200,
-      2450,
+      6600,
+      4000,
       1650
     ],
     "target": [
-      2050,
-      900,
-      1050
+      8500,
+      6500,
+      1650
     ],
-    "fov": 78
+    "fov": 75
   },
   "navigation": "look"
 }

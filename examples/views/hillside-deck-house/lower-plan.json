@@ -2,14 +2,15 @@
   "width": 1600,
   "height": 1200,
   "labels": false,
+  "navigation": "orbit",
   "camera": {
-    "preset": "se"
+    "preset": "top",
+    "projection": "orthographic"
   },
   "sections": [
     {
       "axis": "z",
-      "position": 2200
+      "position": 1200
     }
-  ],
-  "navigation": "orbit"
+  ]
 }

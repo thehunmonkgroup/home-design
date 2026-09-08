@@ -16,6 +16,9 @@ import {
   PCFSoftShadowMap,
   PerspectiveCamera,
   Raycaster,
+  Plane,
+  SphereGeometry,
+  MeshBasicMaterial,
   Scene,
   SRGBColorSpace,
   Vector2,
@@ -51,9 +54,14 @@ import { contextElementIds, navigationGroups, reinforcementElementIds, selection
 import type { DisplayUnits } from '../lib/properties';
 import { readPanelVisibility, savePanelVisibility, type PanelVisibility, type ReviewPanel } from '../lib/panels';
 import { NamedViewPresentation } from '../lib/named-views';
-import { activeCapNodes, type VisualView } from '../lib/visual-view';
+import { activeCapNodes, inspectionCamera, toCanonical, type VisualView } from '../lib/visual-view';
+
+import CameraTools from './CameraTools';
+import { CameraNavigation, roomRegion, roomPose, regionContains, viewpointHeight, type CameraPose, type NavigationMode, type RoomRegion, type ViewpointTool } from '../lib/camera-navigation';
 
 interface SceneHandle {
+  navigation: CameraNavigation;
+  inspectionLighting: boolean;
   controls: OrbitControls;
   camera: PerspectiveCamera | OrthographicCamera;
   model: Group;
@@ -121,6 +129,62 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const nodeMask = useRef<Set<string> | null>(null);
   const activeView = useRef<VisualView>({});
   const [namedViewId, setNamedViewId] = useState('');
+  const [orthographic, setOrthographic] = useState(false);
+  const [navigationMode, setNavigationMode] = useState<NavigationMode>('orbit');
+  const [viewpointTool, setViewpointTool] = useState<ViewpointTool>(null);
+  const [cameraMessage, setCameraMessage] = useState('');
+  const [roomId, setRoomId] = useState('');
+  const roomIdRef = useRef('');
+  const [eyeHeight, setEyeHeight] = useState(1650);
+  const eyeHeightRef = useRef(1650);
+  const [cameraHistorySize, setCameraHistorySize] = useState(0);
+  const cameraHistory = useRef<Array<{ pose: CameraPose; lighting: boolean; view: VisualView; hidden: ReadonlySet<string>; mask: Set<string> | null }>>([]);
+  const rememberCamera = useCallback(() => {
+    const handle = sceneHandle.current;
+    if (!handle) return;
+    cameraHistory.current.push({ pose: handle.navigation.pose(), lighting: handle.inspectionLighting, view: structuredClone(activeView.current), hidden: new Set(hiddenIdsRef.current), mask: nodeMask.current ? new Set(nodeMask.current) : null });
+    if (cameraHistory.current.length > 50) cameraHistory.current.shift();
+    setCameraHistorySize(cameraHistory.current.length);
+  }, []);
+  const changeMode = useCallback((mode: NavigationMode) => {
+    const handle = sceneHandle.current;
+    if (!handle) return;
+    handle.navigation.tool = null;
+    setViewpointTool(null);
+    handle.navigation.setMode(mode);
+    setNavigationMode(handle.navigation.mode);
+    setCameraMessage('');
+  }, []);
+  const chooseTool = useCallback((tool: ViewpointTool) => {
+    const handle = sceneHandle.current;
+    if (!handle) return;
+    handle.navigation.tool = tool;
+    handle.navigation.sync();
+    setViewpointTool(tool);
+    setCameraMessage(tool === 'pivot' ? 'Click a visible surface to orbit around it. Escape cancels.' : tool === 'position' ? 'Click a floor or plan position inside the chosen room or deck. Eye height is measured above its floor. Escape cancels.' : '');
+  }, []);
+  const getRegion = useCallback((id: string): RoomRegion | null => {
+    const handle = sceneHandle.current, currentManifest = manifestRef.current;
+    if (!handle || !currentManifest?.elements[id]) return null;
+    const element = currentManifest.elements[id];
+    if (element.kind !== 'space' && !(element.kind === 'slab' && ['deck', 'landing'].includes(String(element.data.role)))) return null;
+    const bounds = new Box3();
+    for (const name of currentManifest.elements[id].nodes) {
+      const node = handle.model.getObjectByName(name);
+      if (node) bounds.expandByObject(node);
+    }
+    return roomRegion(currentManifest.elements[id], bounds);
+  }, []);
+  const relocate = useCallback((position: Vector3, target: Vector3) => {
+    const handle = sceneHandle.current;
+    if (!handle) return;
+    const camera = inspectionCamera({
+      width: Math.max(handle.renderer.domElement.clientWidth, 1), height: Math.max(handle.renderer.domElement.clientHeight, 1),
+      camera: { position: toCanonical(position), target: toCanonical(target), fov: 75 },
+    }, new Box3().setFromObject(handle.model));
+    handle.setCamera(camera, target);
+    changeMode('look');
+  }, [changeMode]);
   const [viewMessage, setViewMessage] = useState('');
   const [manifest, setManifest] = useState<RenderManifest | null>(null);
   const [hiddenIds, setHiddenIds] = useState<ReadonlySet<string>>(new Set());
@@ -159,6 +223,10 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const spacesVisible = spaceIds.length > 0 && spaceIds.every((id) => !hiddenIds.has(id));
 
   const selectElement = useCallback((elementId: string | null) => {
+    const element = elementId ? manifestRef.current?.elements[elementId] : undefined;
+    if (elementId && element && (element.kind === 'space' || (element.kind === 'slab' && ['deck', 'landing'].includes(String(element.data.role))))) {
+      roomIdRef.current = elementId; setRoomId(elementId);
+    }
     dispatchSelection({ type: 'visit', id: elementId });
   }, []);
 
@@ -197,8 +265,8 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
 
   const resetView = useCallback(() => {
     const handle = sceneHandle.current;
-    if (handle) frameModel(handle.camera, handle.controls, handle.model);
-  }, []);
+    if (handle) { rememberCamera(); changeMode('orbit'); frameModel(handle.camera, handle.controls, handle.model); }
+  }, [rememberCamera, changeMode]);
 
   const applySolarStudy = useCallback((studyId: string) => {
     setSolarStudyId(studyId);
@@ -237,9 +305,19 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     const entry = manifest.namedViews?.find((item) => item.id === id);
     if (!entry) return;
     try {
+      rememberCamera();
       const result = handle.presentation.apply(handle.model, manifest, entry.view, Math.max(host.clientWidth, 1), Math.max(host.clientHeight, 1));
       handle.renderer.clippingPlanes = result.planes;
       handle.setCamera(result.camera, result.target);
+      changeMode(entry.view.navigation ?? 'orbit');
+      if (entry.view.navigation === 'look' && entry.view.camera?.position) {
+        const [x, y, z] = entry.view.camera.position;
+        const destination = Object.keys(manifest.elements).find((id) => {
+          const region = getRegion(id);
+          return region && z > region.floor && z < region.floor + region.height && regionContains(region, new Vector2(x, y));
+        });
+        if (destination) { setRoomId(destination); roomIdRef.current = destination; }
+      }
       handle.setInspectionLighting(true);
       setSolarStudyId('');
       nodeMask.current = result.visible;
@@ -260,6 +338,8 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const resetPresentation = () => {
     const handle = sceneHandle.current;
     if (!handle || !manifest) return;
+    rememberCamera();
+    changeMode('orbit');
     handle.presentation.clear();
     handle.setInspectionLighting(false);
     activeView.current = {};
@@ -292,6 +372,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     const updateOrientation = () => setNorthRotation(modelNorthRotation(camera));
     controls.addEventListener('change', updateOrientation);
     updateOrientation();
+    let navigation = new CameraNavigation(camera, controls, renderer.domElement, updateOrientation);
 
     const ambient = new HemisphereLight('#f3f5ef', '#77766d', 2.1);
     scene.add(ambient);
@@ -309,6 +390,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     scene.add(model);
     const presentation = new NamedViewPresentation();
     const setInspectionLighting = (enabled: boolean) => {
+      if (sceneHandle.current) sceneHandle.current.inspectionLighting = enabled;
       grid.visible = !enabled;
       renderer.shadowMap.enabled = !enabled;
       renderer.toneMapping = enabled ? NeutralToneMapping : NoToneMapping;
@@ -322,18 +404,21 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
       else configureDirectionalShadow(sun, new Box3().setFromObject(model));
     };
     const setCamera = (next: PerspectiveCamera | OrthographicCamera, target: Vector3) => {
+      navigation.dispose();
       controls.removeEventListener('change', updateOrientation);
       controls.dispose();
       camera = next;
+      setOrthographic(camera instanceof OrthographicCamera);
       controls = new OrbitControls(camera, renderer.domElement);
       configureOrbitControls(controls);
       controls.target.copy(target);
       controls.update();
       controls.addEventListener('change', updateOrientation);
       updateOrientation();
-      if (sceneHandle.current) { sceneHandle.current.camera = camera; sceneHandle.current.controls = controls; }
+      navigation = new CameraNavigation(camera, controls, renderer.domElement, updateOrientation);
+      if (sceneHandle.current) { sceneHandle.current.camera = camera; sceneHandle.current.controls = controls; sceneHandle.current.navigation = navigation; }
     };
-    sceneHandle.current = { camera, controls, model, renderer, scene, sun, presentation, setCamera, setInspectionLighting };
+    sceneHandle.current = { camera, controls, navigation, inspectionLighting: false, model, renderer, scene, sun, presentation, setCamera, setInspectionLighting };
 
     const resize = () => {
       const width = host.clientWidth;
@@ -351,9 +436,14 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     observer.observe(host);
     resize();
 
+    const pivotMarker = new Mesh(new SphereGeometry(1, 16, 8), new MeshBasicMaterial({ color: '#ffbb33', depthTest: false, transparent: true, opacity: 0.9 }));
+    pivotMarker.renderOrder = 1000; pivotMarker.visible = false; scene.add(pivotMarker);
+    let markerUntil = 0;
     let frame = 0;
     const animate = () => {
-      controls.update();
+      if (navigation.mode === 'orbit' && !navigation.tool) controls.update();
+      pivotMarker.visible = performance.now() < markerUntil;
+      pivotMarker.scale.setScalar(camera instanceof PerspectiveCamera ? camera.position.distanceTo(pivotMarker.position) * 0.008 : (camera.top - camera.bottom) / camera.zoom * 0.008);
       renderer.render(scene, camera);
       frame = requestAnimationFrame(animate);
     };
@@ -376,7 +466,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
         });
         scene.add(model);
         configureDirectionalShadow(sun, new Box3().setFromObject(model));
-        sceneHandle.current = { camera, controls, model, renderer, scene, sun, presentation, setCamera, setInspectionLighting };
+        sceneHandle.current = { camera, controls, navigation, inspectionLighting: false, model, renderer, scene, sun, presentation, setCamera, setInspectionLighting };
         for (const [elementId, element] of Object.entries(loadedManifest.elements)) {
           applyElementVisibility(scene, element, element.defaultVisible);
           const object = scene.getObjectByName(element.nodes[0] ?? '');
@@ -422,8 +512,34 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           return elementId && isObjectVisible(intersection.object) && !hiddenIdsRef.current.has(elementId)
             && renderer.clippingPlanes.every((plane) => plane.distanceToPoint(intersection.point) >= 0);
         });
+      if (navigation.tool === 'pivot') {
+        if (!hit || hit.point.distanceTo(camera.position) < 0.05) { setCameraMessage('Choose a visible surface away from the viewpoint.'); return; }
+        rememberCamera();
+        changeMode('orbit');
+        controls.target.copy(hit.point); controls.update();
+        pivotMarker.position.copy(hit.point); markerUntil = performance.now() + 1800;
+        setCameraMessage('Orbit center set. Drag to orbit around the marker.');
+        return;
+      }
+      if (navigation.tool === 'position') {
+        const region = getRegion(roomIdRef.current);
+        if (!region) { setCameraMessage('Choose a room or deck with a resolved footprint.'); return; }
+        const point = raycaster.ray.intersectPlane(new Plane(new Vector3(0, 1, 0), -region.floor / 1000), new Vector3());
+        if (!point || !regionContains(region, new Vector2(point.x * 1000, -point.z * 1000))) {
+          setCameraMessage('Click inside the chosen footprint. A plan or downward view makes placement easier.'); return;
+        }
+        rememberCamera();
+        const forward = camera.getWorldDirection(new Vector3()); forward.y = 0;
+        if (forward.lengthSq() < 0.001) forward.set(0, 0, -1);
+        point.y += viewpointHeight(region, eyeHeightRef.current) / 1000;
+        relocate(point, point.clone().add(forward.normalize()));
+        setCameraMessage('Viewpoint placed. Drag to look around.');
+        return;
+      }
       selectElement(hit ? elementIdForObject(hit.object, index) : null);
     };
+    const cancelTool = (event: KeyboardEvent) => { if (event.key === 'Escape') chooseTool(null); };
+    window.addEventListener('keydown', cancelTool);
     renderer.domElement.addEventListener('pointerdown', onPointerDown);
     renderer.domElement.addEventListener('pointermove', onPointerMove);
     renderer.domElement.addEventListener('pointercancel', onPointerCancel);
@@ -439,6 +555,8 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
       renderer.domElement.removeEventListener('pointercancel', onPointerCancel);
       renderer.domElement.removeEventListener('lostpointercapture', onPointerCancel);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('keydown', cancelTool);
+      navigation.dispose();
       controls.dispose();
       controls.removeEventListener('change', updateOrientation);
       presentation.clear();
@@ -451,7 +569,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
       manifestRef.current = null;
       highlight.current = null;
     };
-  }, [entry, loadAttempt, selectElement]);
+  }, [entry, loadAttempt, selectElement, rememberCamera, changeMode, chooseTool, getRegion, relocate]);
 
   useEffect(() => {
     if (!manifest || !sceneHandle.current) return;
@@ -517,6 +635,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
 
   const isolateContext = (scope: ContextAction) => {
     if (!manifest || !selectedId) return;
+    rememberCamera(); changeMode('orbit');
     nodeMask.current = null;
     const ids = scope === 'reinforcement' ? reinforcementElementIds(manifest, selectedId)
       : contextElementIds(manifest, selectedId, scope === 'reveal' ? 'contents' : scope)
@@ -548,6 +667,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const showSelection = () => {
     const handle = sceneHandle.current;
     if (!manifest || !selectedId || !handle) return;
+    rememberCamera(); changeMode('orbit');
     const ids = manifest.elements[selectedId].nodes.length ? [selectedId] : contextElementIds(manifest, selectedId);
     if (nodeMask.current) for (const id of ids) for (const node of selectionNodes(manifest, id)) nodeMask.current.add(node);
     const next = withElementVisibility(manifest, hiddenIdsRef.current, ids, true);
@@ -567,6 +687,43 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     const next = withElementVisibility(manifest, hiddenIdsRef.current, ids, false);
     hiddenIdsRef.current = next;
     setHiddenIds(next);
+  };
+
+  const rooms = manifest ? Object.entries(manifest.elements).filter(([, e]) => e.kind === 'space' || (e.kind === 'slab' && ['deck', 'landing'].includes(String(e.data.role)))).map(([id, e]) => ({ id, name: e.name })) : [];
+  const roomPreset = (preset: 'center' | 'corner' | 'overview') => {
+    const region = getRegion(roomId);
+    const handle = sceneHandle.current;
+    if (!region || !handle) { setCameraMessage('This space has no usable footprint.'); return; }
+    try {
+      rememberCamera();
+      if (preset === 'overview') {
+        const bounds = new Box3();
+        region.outer.forEach((point) => { bounds.expandByPoint(new Vector3(point.x / 1000, region.floor / 1000, -point.y / 1000)); bounds.expandByPoint(new Vector3(point.x / 1000, (region.floor + region.height) / 1000, -point.y / 1000)); });
+        changeMode('orbit'); frameBounds(handle.camera, handle.controls, bounds);
+      } else {
+        const pose = roomPose(region, preset, eyeHeight);
+        relocate(pose.position, pose.target);
+      }
+      setCameraMessage('Viewpoint set. Visibility and section cuts are unchanged.');
+    } catch (error) { setCameraMessage(String(error)); }
+  };
+  const previousCamera = () => {
+    const handle = sceneHandle.current;
+    const saved = cameraHistory.current.pop();
+    if (!handle || !saved || !manifest) return;
+    const restored = handle.presentation.apply(handle.model, manifest, saved.view, Math.max(handle.renderer.domElement.clientWidth, 1), Math.max(handle.renderer.domElement.clientHeight, 1));
+    handle.renderer.clippingPlanes = restored.planes;
+    activeView.current = saved.view; nodeMask.current = saved.mask;
+    hiddenIdsRef.current = saved.hidden; setHiddenIds(saved.hidden);
+    const section = saved.view.sections?.[0]; setSectionAxis(section?.axis ?? 'none'); setSectionOffset(section?.position ?? 0);
+    const aspect = Math.max(handle.renderer.domElement.clientWidth, 1) / Math.max(handle.renderer.domElement.clientHeight, 1);
+    if (saved.pose.camera instanceof PerspectiveCamera) saved.pose.camera.aspect = aspect;
+    else { const half = (saved.pose.camera.top - saved.pose.camera.bottom) / 2; saved.pose.camera.left = -half * aspect; saved.pose.camera.right = half * aspect; }
+    saved.pose.camera.updateProjectionMatrix();
+    handle.setCamera(saved.pose.camera, saved.pose.target); changeMode(saved.pose.mode);
+    handle.setInspectionLighting(saved.lighting);
+    setNamedViewId(''); setViewMessage('Previous view restored.');
+    setCameraHistorySize(cameraHistory.current.length);
   };
 
   return (
@@ -663,7 +820,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
         </nav>
       </aside>
 
-      <section className={`viewport ${manifest?.namedViews?.length ? 'has-named-views' : ''}`} aria-label="Interactive three-dimensional home model">
+      <section className="viewport has-named-views" aria-label="Interactive three-dimensional home model">
         <div ref={canvasHost} className="canvas-host" />
         {!!manifest?.namedViews?.length && <div className="named-view-tools">
           <label>Saved view <select aria-label="Saved view" value={namedViewId} onChange={(event) => applyNamedView(event.target.value)}>
@@ -674,6 +831,11 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           <button type="button" onClick={resetPresentation}>Reset presentation</button>
           <p role="status">{viewMessage || 'Choose a prepared view, then orbit, pan or inspect components.'}</p>
         </div>}
+        <CameraTools ready={status === 'ready'} mode={navigationMode} orthographic={orthographic}
+          tool={viewpointTool} onMode={(mode) => { rememberCamera(); changeMode(mode); }} onTool={chooseTool}
+          canGoBack={cameraHistorySize > 0} onBack={previousCamera} rooms={rooms} roomId={roomId}
+          onRoom={(id) => { setRoomId(id); roomIdRef.current = id; chooseTool(null); }} onPreset={roomPreset}
+          height={eyeHeight} onHeight={(height) => { setEyeHeight(height); eyeHeightRef.current = height; }} message={cameraMessage} />
         {status === 'loading' && <div className="loading-card"><span /><p>Resolving the building view</p></div>}
         {status === 'error' && <div className="error-card" role="alert"><strong>Preview unavailable</strong><p>{message}</p>
           {entry && <button onClick={() => { setStatus('loading'); setMessage('Loading model…'); setLoadAttempt((attempt) => attempt + 1); }}>Retry model</button>}
@@ -723,7 +885,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           </label>
           {sectionAxis !== 'none' && <label><span>mm</span><input aria-label="Section position in millimetres" type="number" step="100" value={sectionOffset} onChange={(event) => applySection(sectionAxis, Number(event.target.value))} /></label>}
         </div>
-        <ViewOrientation northRotation={northRotation} />
+        <ViewOrientation northRotation={northRotation} mode={navigationMode} />
       </section>
 
       <aside id="details-panel" className="inspector" hidden={!displayedPanels.details} aria-label="Element details">

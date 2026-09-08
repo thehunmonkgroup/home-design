@@ -49,7 +49,7 @@ index entries, changed-source guards, stale component references, immutable
 publication and cap ownership. Viewer checks exercise switching projections,
 restoring visibility/materials, matching cap planes and preserving a current view
 when a requested view fails. The master-suite companion index is the authoritative
-list of its twelve tour stops.
+list of its fifteen tour stops.
 
 - Real Chromium captures check PNG dimensions, nonempty component pixels, layer
   selection, filled sections and preservation of source/previous output on failure.

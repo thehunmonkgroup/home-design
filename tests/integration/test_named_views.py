@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import cast
 import shutil
 
 import ifcopenshell
@@ -140,7 +141,7 @@ def test_public_master_suite_tour_is_complete() -> None:
     root = Path(__file__).resolve().parents[2]
     source = root / "examples/master-suite-gable-house.json"
     library = NamedViews(source)
-    assert len(library.entries) == 12
+    assert len(library.entries) == 15
     assert {str(entry["id"]) for entry in library.entries} == {
         "overview",
         "plan",
@@ -154,6 +155,9 @@ def test_public_master_suite_tour_is_complete() -> None:
         "bath-services",
         "utility-services",
         "bedroom-wall-contents",
+        "living",
+        "utility",
+        "deck",
     }
     assert json.loads(source.read_text())["revision"] == 9
 
@@ -180,7 +184,7 @@ def test_master_suite_exports_preserve_coordinated_construction(tmp_path: Path) 
         for element in services
     )
     manifest = json.loads(result.render_manifest.read_text())
-    assert len(manifest["namedViews"]) == 12
+    assert len(manifest["namedViews"]) == 15
     model = ifcopenshell.open(result.ifc_model)
     logger = ifcopenshell.validate.json_logger()
     ifcopenshell.validate.validate(model, logger)
@@ -204,3 +208,78 @@ def test_master_suite_exports_preserve_coordinated_construction(tmp_path: Path) 
             shape = ifcopenshell.geom.create_shape(settings, product)
             assert isinstance(shape, TriangulationElement)
             assert len(shape.geometry.verts) >= 9, product.Name
+
+
+@pytest.mark.parametrize("stem,room_views", [
+    ("master-suite-gable-house", {
+        "space.master": "bedroom", "space.ensuite": "bathroom",
+        "space.living": "living", "space.utility": "utility",
+        "slab.deck.south": "deck",
+    }),
+    ("hillside-deck-house", {
+        "space.lower": "lower-room", "space.upper": "upper-room",
+        "slab.lower": "lower-deck", "slab.upper": "upper-deck",
+        "slab.spa": "spa-deck", "slab.entry": "entry-landing",
+    }),
+])
+def test_public_room_viewpoints_cover_every_space(
+    stem: str, room_views: dict[str, str]
+) -> None:
+    """Every public room/deck has a nondegenerate interior look viewpoint."""
+    from shapely.geometry import Point, Polygon
+    from home_design.resolver import ModelResolver
+
+    source = Path(__file__).resolve().parents[2] / "examples" / f"{stem}.json"
+    model = json.loads(source.read_text())
+    resolved = ModelResolver(model).resolve()
+    library = NamedViews(source)
+    expected = {
+        element.element_id for element in resolved.elements
+        if element.kind == "space" or (
+            element.kind == "slab"
+            and element.data.get("role") in {"deck", "landing"}
+        )
+    }
+    assert set(room_views) == expected
+    for element in resolved.elements:
+        if element.element_id not in room_views:
+            continue
+        view = library.get(room_views[element.element_id])
+        assert view["navigation"] == "look"
+        camera = view["camera"]
+        assert isinstance(camera, dict)
+        position, target = camera["position"], camera["target"]
+        assert isinstance(position, list) and isinstance(target, list)
+        assert position != target
+        footprint = element.data["footprint"]
+        assert isinstance(footprint, dict)
+        polygon = Polygon(
+            cast(list[list[float]], footprint["outer"]),
+            cast(list[list[list[float]]], footprint.get("holes", [])),
+        )
+        coordinates = cast(list[float], position)
+        assert polygon.contains(Point(coordinates[:2]))
+        assert polygon.boundary.distance(Point(coordinates[:2])) >= 250
+        heights = [point[2] for mesh in element.meshes for point in mesh.vertices]
+        floor = (min(heights) if element.kind == "space"
+                 else cast(float, element.data["topElevation"]))
+        assert 1400 <= coordinates[2] - floor <= 1800
+        assert view.get("sections", []) == []
+
+
+@pytest.mark.parametrize("view", [
+    {"navigation": "fly"},
+    {"navigation": "look", "camera": {"preset": "top"}},
+    {"navigation": "look", "camera": {
+        "projection": "orthographic", "position": [0, 0, 1600],
+        "target": [1000, 0, 1600],
+    }},
+])
+def test_invalid_navigation_view_rejected(tmp_path: Path, view: dict[str, object]) -> None:
+    """Saved look navigation requires an explicit perspective pose."""
+    from home_design.visual_render import VisualRenderer
+
+    path = tmp_path / "view.json"
+    path.write_text(json.dumps(view))
+    with pytest.raises(HomeDesignError):
+        VisualRenderer.view(path)

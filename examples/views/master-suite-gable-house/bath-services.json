@@ -34,5 +34,6 @@
   ],
   "camera": {
     "preset": "se"
-  }
+  },
+  "navigation": "orbit"
 }

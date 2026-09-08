@@ -104,11 +104,19 @@ def test_sdist_wheel_resources_and_guarded_cli_outside_checkout(tmp_path: Path) 
     assert (examples / "assemblies.json").is_file()
     assert (examples / "master-suite-gable-house.json").is_file()
     tour = cli.run("views", str(examples / "master-suite-gable-house.json"))
-    assert isinstance(tour["views"], list) and len(tour["views"]) == 12
+    assert isinstance(tour["views"], list) and len(tour["views"]) == 15
     for entry in tour["views"]:
         assert isinstance(entry, dict)
         assert (
             examples / "views/master-suite-gable-house" / str(entry["file"])
+        ).is_file()
+    hillside_tour = cli.run("views", str(examples / "hillside-deck-house.json"))
+    assert isinstance(hillside_tour["views"], list)
+    assert len(hillside_tour["views"]) == 9
+    for entry in hillside_tour["views"]:
+        assert isinstance(entry, dict)
+        assert (
+            examples / "views/hillside-deck-house" / str(entry["file"])
         ).is_file()
     assert (skill.parent / "references/catalog.md").is_file()
     assert (Path(str(locations["recipes"])) / "exterior-wall.json").is_file()

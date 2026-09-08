@@ -9,8 +9,8 @@ repository regression fixtures.
 | Model | Purpose |
 | --- | --- |
 | [Assemblies](../../../examples/assemblies.json) | Nine inspectable construction packages: exterior wall, roof, deck, floor, wet wall, ventilation, foundation, entrance and truss. Use the [catalog](catalog.md) for recipe interfaces and parameters. |
-| [Hillside Deck House](../../../examples/hillside-deck-house.json) | Terrain, multiple storeys, foundations, deck, stair/guard/screen, drainage and solar coordination. Its two view windows share stock. |
-| [Master Suite Gable House](../../../examples/master-suite-gable-house.json) | A detailed framed and layered house with bedroom, ensuite, electrical circuits and water/waste/vent plumbing. Its [twelve-view tour](../../../docs/guides/master-suite-gable-house.md) exposes interiors and concealed construction. |
+| [Hillside Deck House](../../../examples/hillside-deck-house.json) | Terrain, multiple storeys, foundations, deck, stair/guard/screen, drainage and solar coordination. Its two view windows share stock. Saved views cover both rooms, all decks and the entry landing. |
+| [Master Suite Gable House](../../../examples/master-suite-gable-house.json) | A detailed framed and layered house with bedroom, ensuite, electrical circuits and water/waste/vent plumbing. Its [fifteen-view tour](../../../docs/guides/master-suite-gable-house.md) exposes interiors and concealed construction. |
 
 These models complement each other; none demonstrates every engine option.
 Master Suite's services are electrical and plumbing; Assemblies supplies the

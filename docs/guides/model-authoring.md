@@ -63,7 +63,7 @@ deck, service partition, ventilation branch, foundation, entrance or truss.
 
 [Master Suite Gable House](master-suite-gable-house.md) provides a complete framed
 shell with bedroom and ensuite partitions, electrical circuits and plumbing.
-Its **Saved view** tour exposes twelve prepared perspectives of the rooms,
+Its **Saved view** tour exposes fifteen prepared perspectives of the rooms,
 framing and services.
 
 [Hillside Deck House](../../examples/hillside-deck-house.json) demonstrates terrain,

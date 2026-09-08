@@ -273,3 +273,17 @@ button { color: inherit; }
 }
 .has-named-views .canvas-host { position: relative; inset: auto; order: 2; flex: 1; min-height: 0; }
 .has-named-views .viewport-tools { position: relative; order: 3; left: auto; bottom: auto; flex-shrink: 0; margin: 0 1rem 1rem; }
+
+.camera-tools { order: 1; flex-shrink: 0; margin: .4rem 8rem .4rem 1rem; padding: .45rem .6rem; border: 1px solid #bac4bd; border-radius: .3rem; background: #f6f8f5; font-size: 12px; max-height: 34vh; overflow: auto; }
+.camera-tools summary { cursor: pointer; font-weight: 600; }
+.camera-actions { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem; margin-top: .45rem; }
+.camera-actions button, .camera-actions select, .camera-actions input { padding: .35rem .45rem; border: 1px solid #bac4bd; border-radius: .25rem; background: white; font-size: 12px; max-width: 100%; }
+.camera-actions button[aria-pressed=true] { background: #d5e7d8; border-color: #4a7858; }
+.camera-actions button:disabled { opacity: .45; }
+.camera-actions label { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem; max-width: 100%; }
+.camera-actions input { width: 76px; }
+.camera-tools p { margin: .4rem 0 0; color: #48594d; }
+@media (max-width: 600px) {
+  .camera-tools { margin-right: 6rem; max-height: 28vh; }
+  .has-named-views .named-view-tools { max-width: calc(100% - 8rem); }
+}

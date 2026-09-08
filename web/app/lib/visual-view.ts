@@ -23,6 +23,7 @@ export function highlightedMaterial(material: Material | Material[]): Material |
   return Array.isArray(material) ? replacements : replacements[0];
 }
 export interface VisualView {
+  navigation?: 'orbit' | 'look';
   name?: string;
   width?: number;
   height?: number;
@@ -155,7 +156,7 @@ export function clippedBounds(model: Object3D, visible: Set<string>, planes: Pla
 export function fromCanonical(point: [number, number, number]): Vector3 {
   return new Vector3(point[0] / 1000, point[2] / 1000, -point[1] / 1000);
 }
-export function toCanonical(point: Vector3): number[] {
+export function toCanonical(point: Vector3): [number, number, number] {
   return [point.x * 1000, -point.z * 1000, point.y * 1000];
 }
 

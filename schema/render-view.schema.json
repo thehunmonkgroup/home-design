@@ -179,6 +179,13 @@
     },
     "edges": {
       "type": "boolean"
+    },
+    "navigation": {
+      "enum": [
+        "orbit",
+        "look"
+      ],
+      "description": "Interactive navigation mode. Look rotates in place and requires a perspective camera."
     }
   },
   "$defs": {
@@ -261,5 +268,44 @@
         }
       }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "navigation": {
+            "const": "look"
+          }
+        },
+        "required": [
+          "navigation"
+        ]
+      },
+      "then": {
+        "required": [
+          "camera"
+        ],
+        "properties": {
+          "camera": {
+            "required": [
+              "position",
+              "target"
+            ],
+            "properties": {
+              "projection": {
+                "const": "perspective"
+              },
+              "up": {
+                "const": [
+                  0,
+                  0,
+                  1
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

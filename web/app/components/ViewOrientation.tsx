@@ -8,7 +8,7 @@ const GESTURES = [
   { word: 'Zoom', help: 'Mouse: scroll wheel. Touchpad: two-finger scroll. Touchscreen: pinch with two fingers.' },
 ];
 
-export default function ViewOrientation({ northRotation }: { northRotation: number }) {
+export default function ViewOrientation({ northRotation, mode = 'orbit' }: { northRotation: number; mode?: 'orbit' | 'look' }) {
   const [activeHint, setActiveHint] = useState<string | null>(null);
   useEffect(() => {
     if (!activeHint) return;
@@ -18,6 +18,11 @@ export default function ViewOrientation({ northRotation }: { northRotation: numb
     window.addEventListener('keydown', dismiss);
     return () => window.removeEventListener('keydown', dismiss);
   }, [activeHint]);
+  const gestures = mode === 'look' ? [
+    { word: 'Look', help: 'Drag with one finger or the primary mouse button to look around without moving your viewpoint.' },
+    GESTURES[1],
+    { word: 'Move', help: 'Scroll to move forward or back. On a touchscreen, pinch to move and drag with two fingers to pan.' },
+  ] : GESTURES;
   const radians = northRotation * Math.PI / 180;
   return (
     <div className="axis-key">
@@ -32,7 +37,7 @@ export default function ViewOrientation({ northRotation }: { northRotation: numb
       </svg>
       <span className="orientation-caption">Model north</span>
       <div className="gesture-hints" aria-label="View navigation help" onMouseLeave={() => setActiveHint(null)}>
-        {GESTURES.map(({ word, help }) => (
+        {gestures.map(({ word, help }) => (
           <span className="gesture-hint" key={word}>
             <button
               type="button"

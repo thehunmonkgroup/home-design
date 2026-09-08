@@ -20,5 +20,6 @@
       "outlet.master.north1",
       "outlet.master.north2"
     ]
-  }
+  },
+  "navigation": "orbit"
 }

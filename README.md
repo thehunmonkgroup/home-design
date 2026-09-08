@@ -68,8 +68,8 @@ The public collection contains three complementary examples:
 | Example | What it demonstrates |
 | --- | --- |
 | [Assemblies](examples/assemblies.json) | Nine separate construction packages with layers, framing, services and connections. The [catalog guide](docs/guides/assembly-catalog.md) explains inspection and reuse. |
-| [Hillside Deck House](examples/hillside-deck-house.json) | A two-storey home with terrain, foundations, deck, stairs, guards/screens, drainage and solar studies. Follow its [cutaway walkthrough](docs/guides/viewer-guide.md#cutaway-views-of-hillside-deck-house). |
-| [Master Suite Gable House](examples/master-suite-gable-house.json) | A detailed framed shell, bedroom and ensuite, electrical circuits and plumbing. Its [twelve-view tour](docs/guides/master-suite-gable-house.md) includes interiors, plan, framing and services. |
+| [Hillside Deck House](examples/hillside-deck-house.json) | A two-storey home with terrain, foundations, deck, stairs, guards/screens, drainage and solar studies. Its saved views cover both rooms, three decks and the entry landing. Follow its [cutaway walkthrough](docs/guides/viewer-guide.md#cutaway-views-of-hillside-deck-house). |
+| [Master Suite Gable House](examples/master-suite-gable-house.json) | A detailed framed shell, bedroom and ensuite, electrical circuits and plumbing. Its [fifteen-view tour](docs/guides/master-suite-gable-house.md) includes interiors, plan, framing and services. |
 
 Select a **Saved view** in the viewer, or discover prepared views with
 `home-design views MODEL` and capture one with

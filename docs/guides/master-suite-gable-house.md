@@ -3,7 +3,7 @@
 The [Master Suite Gable House](../../examples/master-suite-gable-house.json)
 demonstrates a layered shell with wall, floor, ceiling and roof framing, a
 supported south deck, a master bedroom and ensuite, and coordinated electrical
-and plumbing systems. Its twelve prepared views provide a tour from the finished
+and plumbing systems. Its fifteen prepared views provide a tour from the finished
 exterior into the rooms and concealed construction.
 
 ## Explore the house
@@ -23,6 +23,9 @@ perspective camera and an uncut view.
 | Interior from northwest | The bathroom and utility partitions from the opposite direction |
 | Inside the bedroom | Window placement and outlets from inside the finished room |
 | Inside the bathroom | Shower, WC and bathroom window |
+| Inside the living, dining and kitchen area | Kitchen sink, windows and connections across the open room |
+| Inside the utility room | Panel and water heater from inside the room |
+| On the south deck | Deck surface and house entrance |
 | Wall and floor framing | Studs, opening framing, joists and supports |
 | Roof framing | Rafters and ridge stock with enclosing surfaces hidden |
 | All services | Electrical circuits and water, waste and vent routes |
@@ -31,7 +34,9 @@ perspective camera and an uncut view.
 | Bedroom wall contents | North-wall studs and wiring, with two outlets highlighted |
 
 The plan and angled interior views cut through the model without altering its
-construction. Eye-level views retain enclosing walls and ceilings. In the wall
+construction. Eye-level views retain enclosing walls and ceilings and open in **Look around**
+mode: drag to turn in place. **View navigation** also offers room presets and
+click-to-place viewpoints. In the wall
 contents view, follow a selected outlet's related-component links to inspect its
 box, cable and circuit. See the [viewer guide](viewer-guide.md) for selection,
 navigation and visibility controls.

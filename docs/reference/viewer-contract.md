@@ -197,3 +197,33 @@ repeating solid resolution; a source edit invalidates the retained snapshot.
 
 The [coverage record](visual-inspection-evaluations.md) describes public example,
 recipe, image and export checks.
+
+## Camera navigation
+
+`camera-navigation.ts` owns camera gesture handoffs and footprint-based viewpoint
+selection. Orbit mode delegates to unmodified OrbitControls. Look mode disables
+OrbitControls and its frame updates, applies yaw/pitch with no roll, and translates
+camera and target together for pan/dolly. Switching modes drains pending orbit
+inertia while preserving the pose. Only perspective cameras support Look around.
+Pointer capture, cancellation and two-pointer gestures use the same canvas as
+selection; `PickGesture` prevents drags from selecting components. Temporary pivot
+markers are presentation helpers, excluded from model raycasting.
+
+Room regions use resolved `data.footprint` outer and hole rings in canonical XY
+millimetres. Space mesh bounds provide floor elevation; slab `topElevation` provides the
+walking surface, including decks whose boards own the rendered geometry. Older
+slab data can fall back to its mesh bounds. Viewpoints are chosen from polygon triangulation and interior
+samples, with clearance from the outer boundary and holes. This is viewpoint
+placement, not navigation-mesh collision detection. Authored equipment can still
+occupy an automatically chosen position. Place viewpoint intersects the pointer
+ray with the chosen region's floor plane and rejects points outside the polygon.
+Set orbit center uses the existing visible, unclipped semantic geometry picker.
+
+The render-view schema's optional `navigation` is `orbit` (default) or `look`.
+Look requires explicit perspective `camera.position` and `camera.target`, with
+canonical Z up. The target sets the initial viewing direction, while position is
+the fixed center of look rotation. Capture consumes the same camera definition;
+interaction mode has no effect on image generation or canonical model revisions.
+Camera history is bounded to 50 commands and scoped to the loaded model. It
+restores camera poses and presentation visibility/cuts independently of component
+selection history. Continuous gestures do not create history entries.

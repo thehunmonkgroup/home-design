@@ -10,5 +10,6 @@
       "axis": "z",
       "position": 2200
     }
-  ]
+  ],
+  "navigation": "orbit"
 }

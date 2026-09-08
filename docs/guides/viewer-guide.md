@@ -13,7 +13,7 @@ select normally after choosing a view; **Restore view** reapplies that stop's
 settings. **Reset presentation** clears cuts and highlights, restores default
 component visibility and frames the model with a perspective camera.
 
-The [Master Suite Gable House tour](master-suite-gable-house.md) includes twelve
+The [Master Suite Gable House tour](master-suite-gable-house.md) includes fifteen
 views, from a north-up floor plan and eye-level interiors to framing and services.
 Named section cuts have filled material faces. Changing **Cut** replaces the
 saved cut planes; a custom cut has filled faces when it matches an included
@@ -70,6 +70,50 @@ orientation aid. Panning and zooming do not change its heading.
 
 Hover over **Orbit**, **Pan**, or **Zoom** for a short instruction popup; the hints
 also open on keyboard focus or tap. Press Escape to dismiss a hint.
+
+### Look around rooms and decks
+
+Open **View navigation** above the canvas. **Orbit** rotates around a target;
+**Look around** turns the camera in place, like turning your head. Drag with the
+primary mouse button or one finger. Shift/right-drag pans, and scrolling moves
+forward or backward. On a touchscreen, two-finger dragging pans and pinching
+moves forward or backward. These movements do not enforce wall collisions.
+The compass and gesture hints follow the active mode.
+
+Use **Room or deck** to choose a destination. Selecting a room or deck in
+Components also chooses it here. The controls offer:
+
+- **Center at eye level** places you inside the footprint at **Eye height (mm)**
+  above its floor. The height is limited to below the room ceiling.
+- **Upper corner** places you inside an inset upper corner, looking down into
+  the room. Both interior presets enter Look around mode.
+- **Overview** frames the footprint in Orbit mode.
+- **Place viewpoint** lets you click a position inside the chosen footprint,
+  using the eye-height setting. A floor plan or downward view makes placement
+  easiest. The click projects onto that room's floor plane, so it also works
+  when the floor is hidden. Holes and positions outside the footprint are rejected.
+- **Set orbit center** lets you click a visible surface and then orbit around it.
+  It keeps the camera in place, turns toward the chosen point, and briefly marks
+  the new center. Hidden surfaces and geometry beyond a section cut are ignored.
+
+The two placement tools finish after a successful click. Use **Cancel** or Escape
+to leave a tool without changing the view. Ordinary clicks still select components;
+drags preserve the current selection. Room presets and viewpoint tools retain
+visibility and section cuts: use **Hide**, **Cut**, or a prepared cutaway when a
+roof or wall obscures the area. Presets avoid footprint boundaries and holes but
+do not check furniture or equipment; adjust the position if needed.
+
+**Previous view** returns through up to 50 camera relocations, mode changes,
+framing actions and saved-view changes, restoring their visibility and cuts.
+It does not record every drag or change the Details selection. This history is
+separate from the component **Back** and **Forward** buttons and clears when
+switching models. **Frame model** returns to Orbit mode. Orthographic floor plans
+use Orbit mode; choose an interior preset to enter perspective Look around mode.
+
+Saved interior views restore their Look around mode as well as their position
+and initial direction. **Restore view** returns to that starting point after
+exploring. Master Suite includes every room and its deck; Hillside includes both
+rooms, all three decks and the east entry landing.
 
 ## Find and inspect components
 

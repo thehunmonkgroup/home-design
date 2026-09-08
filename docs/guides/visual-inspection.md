@@ -2,7 +2,7 @@
 
 The AI can capture images directly from the model while working on your design.
 Models with prepared views also offer a **Saved view** selector in the viewer.
-The [Master Suite Gable House tour](master-suite-gable-house.md) illustrates twelve
+The [Master Suite Gable House tour](master-suite-gable-house.md) illustrates fifteen
 views of a complete framed shell and its services. **Restore view** returns to the
 selected view's settings; **Reset presentation** returns to the default uncut model.
 Ask it to show a floor plan, look into a room, remove the roof from a view, or

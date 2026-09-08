@@ -1,0 +1,58 @@
+{
+  "views": [
+    {
+      "id": "overview",
+      "title": "Hillside exterior overview",
+      "description": "Orbit the full house, hillside, decks and stairs.",
+      "file": "overview.json"
+    },
+    {
+      "id": "lower-plan",
+      "title": "Lower floor plan",
+      "description": "A north-up section through the lower room and deck. Use it to place a viewpoint.",
+      "file": "lower-plan.json"
+    },
+    {
+      "id": "upper-plan",
+      "title": "Upper floor plan",
+      "description": "A north-up section through the upper room and decks. Use it to place a viewpoint.",
+      "file": "upper-plan.json"
+    },
+    {
+      "id": "lower-room",
+      "title": "Inside the lower room",
+      "description": "Look around the lower open-plan room toward the south deck doors.",
+      "file": "lower-room.json"
+    },
+    {
+      "id": "upper-room",
+      "title": "Inside the upper room",
+      "description": "Look around the upper open-plan room beneath the gable roof.",
+      "file": "upper-room.json"
+    },
+    {
+      "id": "lower-deck",
+      "title": "On the lower south deck",
+      "description": "Look around the lower deck, its supports and the lower entrance.",
+      "file": "lower-deck.json"
+    },
+    {
+      "id": "upper-deck",
+      "title": "On the covered upper deck",
+      "description": "Look around the covered upper deck and the house connection.",
+      "file": "upper-deck.json"
+    },
+    {
+      "id": "spa-deck",
+      "title": "On the spa deck",
+      "description": "Look across the dedicated spa deck zone toward the covered upper deck. The spa is represented by a load allowance.",
+      "file": "spa-deck.json"
+    },
+    {
+      "id": "entry-landing",
+      "title": "On the east entry landing",
+      "description": "Look along the east entry landing toward its access stairs and the hillside.",
+      "file": "entry-landing.json"
+    }
+  ]
+}
