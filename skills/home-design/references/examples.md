@@ -4,6 +4,11 @@ Choose the smallest public model that demonstrates the requested integration. Ke
 
 ## Select a starting model
 
+- [Assemblies](../../../examples/assemblies.json): nine separate construction
+  packages with complete authored layers, framing, connections and service
+  interfaces. Use the [catalog reference](catalog.md) to select a recipe and
+  discover its parameters, connection points and component coverage.
+
 - [Single-Story Gable House](../../../examples/single-story-gable-house.json):
   architectural walls, slab, roof, openings and shared datums.
 - [Hillside Deck House](../../../examples/hillside-deck-house.json): site, stepped
@@ -11,12 +16,17 @@ Choose the smallest public model that demonstrates the requested integration. Ke
 - [Complete Shell Coordination House](../../../examples/complete-shell-coordination-house.json):
   explicit framing, connected services, hosted equipment and owned cuts.
 - [Integrated Authoring House](../../../examples/integrated-authoring-house.json):
-  version `0.2` named layers and boundaries, two windows sharing stock, the complete
+  named layers and boundaries, two windows sharing stock, the complete
   service partition, and instantiated partition/deck recipes. Use this model for
-  combined editing tasks. The other three examples retain version `0.1` for
-  compatibility; [migrate](identities.md#explicit-migration) before using named selectors.
+  combined editing tasks. When starting from a model with positional selectors,
+  [convert its input format](identities.md#explicit-migration) before using named selectors or recipes.
 
 ## Complete changeset examples
+
+[Move the catalog entrance](../../../examples/change-sets/move-catalog-entrance.json)
+applies to revision 7 of [Assemblies](../../../examples/assemblies.json). It moves
+the landing, stair, rails, screens, door, supports and connections 350 mm east and
+225 mm north, preserving neighboring packages and updating recipe provenance.
 
 Unless a preceding edit is listed, these files apply to revision 1 of their named public model. For an existing
 custom design, inspect its actual IDs, type values and revision first; adapt the
@@ -27,7 +37,7 @@ intent and preconditions instead of applying a reference change unchanged.
 | Single-Story Gable House | [Move a window](../../../examples/change-sets/move-window.json) | Opening follows its new station; sill, dimensions, fill and host cut remain coherent |
 | Single-Story Gable House | [Narrow one window](../../../examples/change-sets/narrow-one-window.json) | New type assigned only to the selected window; original type and opening preserved |
 | Complete Shell Coordination House | [Rotate a serviced partition](../../../examples/change-sets/rotate-service-partition.json) | Framing, electrical/water branches, ledge and owned interfaces follow; independent air branch and quantities preserved |
-| Integrated Authoring House | [Rotate a serviced partition](../../../examples/change-sets/rotate-service-partition.json) | The same coordinated edit works with named version `0.2` selectors |
+| Integrated Authoring House | [Rotate a serviced partition](../../../examples/change-sets/rotate-service-partition.json) | The coordinated edit preserves named selectors |
 | Integrated Authoring House | [Local shared window](../../../examples/change-sets/local-shared-window.json) | North window becomes 1400 mm wide; east window retains the original shared type and geometry |
 | Integrated Authoring House | [Insert a named layer](../../../examples/change-sets/insert-named-layer.json) | Add 6 mm gypsum lining to the recipe partition; its named cavity, framing and box retain their references |
 | Integrated Authoring House, after inserting the layer (revision 2) | [Reorder named layers](../../../examples/change-sets/reorder-named-layers.json) | Exchange the two gypsum lining leaves; physical order changes while the cavity remains selected by ID |

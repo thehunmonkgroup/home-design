@@ -2,6 +2,7 @@ import { generatedElementIds, groupElements, type ElementGroup, type NavigationL
 
 export type NavigationGrouping = 'kind' | 'assembly' | 'room' | 'host' | 'system';
 export type ReviewScope = 'contents' | 'system' | 'connected';
+export type ContextAction = ReviewScope | 'reveal' | 'reinforcement';
 
 const CONTENT_LINKS = new Set<NavigationLink['kind']>(['assembly', 'room', 'host', 'ownership', 'system', 'generated']);
 
@@ -25,6 +26,13 @@ export function contextElementIds(manifest: RenderManifest, identity: string, sc
     }
   }
   return [...generatedElementIds(manifest, selected)];
+}
+
+export function reinforcementElementIds(manifest: RenderManifest, identity: string): string[] {
+  return contextElementIds(manifest, identity).filter((id) => {
+    const element = manifest.elements[id];
+    return element.nodes.length > 0 && ['reinforcingBar', 'reinforcingMesh'].includes(element.kind);
+  });
 }
 
 export function relatedElements(manifest: RenderManifest, identity: string): Array<{ id: string; label: string; kind: NavigationLink['kind'] }> {
@@ -59,4 +67,18 @@ export function selectionNodes(manifest: RenderManifest, identity: string): stri
   const own = manifest.elements[identity]?.nodes ?? [];
   if (own.length) return own;
   return [...new Set(contextElementIds(manifest, identity).flatMap((id) => manifest.elements[id].nodes))];
+}
+
+// Expose actual immediate containers, without inventing a single tree for a graph.
+export function containingElements(manifest: RenderManifest, identity: string): Array<{ id: string; label: string }> {
+  const result = new Map<string, string>();
+  const parent = manifest.elements[identity]?.parentId;
+  if (parent && manifest.elements[parent]) result.set(parent, 'Generating component');
+  for (const link of manifest.navigation?.links ?? []) {
+    if (link.sourceId === identity && link.targetId !== identity && manifest.elements[link.targetId]
+      && ['assembly', 'host', 'room'].includes(link.kind) && !result.has(link.targetId)) {
+      result.set(link.targetId, link.sourceLabel);
+    }
+  }
+  return [...result].map(([id, label]) => ({ id, label }));
 }

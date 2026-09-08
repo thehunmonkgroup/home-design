@@ -16,6 +16,34 @@ from home_design.json_types import JsonObject
 from home_design.resolver import ModelResolver
 from home_design.terrain import TerrainSurface
 from home_design.validation import ModelValidator
+from home_design.solids import SolidOperations
+
+
+@pytest.mark.parametrize("direction", [(1.0, 0.0), (0.0, 1.0), (0.6, 0.8)])
+def test_plumb_stringer_top_meets_the_landing_plane(
+    construction_model: JsonObject, direction: tuple[float, float],
+) -> None:
+    """An authored top trim removes stock beyond a rotated landing without changing the flight."""
+    stair = Authoring.object(Authoring.object(construction_model["elements"])["stair.entry"])
+    stair.update({
+        "origin": [0, 0], "direction": list(direction), "riserCount": 6,
+        "bottom": {"kind": "level", "level": "level.lower", "offset": 0},
+        "top": {"kind": "level", "level": "level.lower", "offset": 1050},
+    })
+    before = ModelResolver(construction_model).resolve_component("stair.entry")
+    definition = Authoring.object(Authoring.object(construction_model["types"])["type.stair"])
+    definition["stringerTopCut"] = "plumb"
+    after = ModelResolver(construction_model).resolve_component("stair.entry")
+    endpoint = Authoring.array(Authoring.array(after.data["path"])[-1])
+    limit = sum(float(str(endpoint[i])) * direction[i] for i in range(2))
+    assert before.data == after.data
+    for original, trimmed in zip(before.meshes, after.meshes):
+        if not original.role.startswith("stringer:"):
+            assert original == trimmed
+            continue
+        assert max(sum(p[i] * direction[i] for i in range(2)) for p in original.vertices) > limit
+        assert max(sum(p[i] * direction[i] for i in range(2)) for p in trimmed.vertices) == pytest.approx(limit)
+        assert SolidOperations.volume(trimmed) < SolidOperations.volume(original)
 
 
 def test_reference_shell_has_complete_storeys_floors_and_excavated_interior(

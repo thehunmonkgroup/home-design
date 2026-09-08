@@ -57,6 +57,10 @@ supply and explain information still needed.
 
 ## Review a coordinated shell
 
+The [assembly catalog](assembly-catalog.md) provides nine separate construction
+examples in one model. Use it to explore what goes into a wall, roof, floor,
+deck, service partition, ventilation branch, foundation, entrance or truss.
+
 [Complete Shell Coordination House](../../examples/complete-shell-coordination-house.json)
 is a public example with wall, floor, roof and deck framing, concealed services,
 an interior ledge and a sealed service penetration. The dimensions and
@@ -70,7 +74,10 @@ describe the expected results.
 
 Use the viewer's **Framing** and **Services** views to expose concealed components.
 Select parts, inspect sections, and compare the dimensions and quantities with
-your request. See the [viewer guide](viewer-guide.md) for controls.
+your request. The [viewer guide](viewer-guide.md#find-reveal-wall-contents) explains
+how to reveal a wall and browse individual framing members. Use the Details
+panel's **Back**, **Forward** and **Selection history** controls to retrace your
+inspection, or **Show in model** to locate the selected component.
 
 ## Understand the results
 

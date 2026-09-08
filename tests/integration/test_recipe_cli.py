@@ -30,7 +30,11 @@ def test_recipe_cli_discovers_instantiates_duplicates_and_adapts(
         model,
     )
     assert main(["recipes"]) == 0
-    assert len(json.loads(capsys.readouterr().out)["recipes"]) == 2
+    recipes = json.loads(capsys.readouterr().out)["recipes"]
+    assert len(recipes) == 11
+    assert {"recipe.exterior-wall", "recipe.insulated-roof", "recipe.complete-deck"} <= {
+        recipe["id"] for recipe in recipes
+    }
     assert main(["recipes", "serviced-partition", "--object", "stock.stud"]) == 0
     assert json.loads(capsys.readouterr().out)["registry"] == "types"
     original = model.read_bytes()

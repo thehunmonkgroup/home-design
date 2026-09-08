@@ -19,7 +19,7 @@ read the domain reference for required fields and geometry constraints.
 - Lengths are millimetres; angles are degrees.
 - The local system is right-handed and Z-up: X east, Y north, Z up.
 - Registry keys are stable IDs. A component keeps its ID when it moves or receives a new name.
-- Version `0.2` names layers, edges and segments. Preserve those scoped names through reordering; see [identities](identities.md) for migration and removed-part behavior.
+- Layers, edges and segments have scoped names. Preserve those names through reordering; see [identities](identities.md) for identity and removed-part behavior.
 - Georeferencing, when present, is separate from local building coordinates.
 
 Three.js receives `(x / 1000, z / 1000, -y / 1000)`. IFC remains millimetre-based. Each adapter performs this conversion explicitly.
@@ -47,7 +47,7 @@ The root object contains:
 
 The complete field contract is [home-model-0.2.schema.json](../../../schema/home-model-0.2.schema.json). [Single-Story Gable House](../../../examples/single-story-gable-house.json) demonstrates core architectural components. [Hillside Deck House](../../../examples/hillside-deck-house.json) demonstrates a two-storey shell with site, construction and envelope coordination. Example dimensions and member sizes are illustrative and require project-specific engineering before construction.
 
-New models use `modelVersion: "0.2"`; read [scoped identities](identities.md) for required layer, boundary and segment names. Existing version `0.1` models remain readable and migrate through an explicit changeset. Optional root `solarStudies` and `drawings` arrays store reproducible analysis/view requests. Use canonical element IDs for integrations; generated mesh counts and node names depend on resolved geometry.
+Author models with `modelVersion: "0.2"`; this field identifies the JSON schema, not the design's `revision`. Read [scoped identities](identities.md) for required layer, boundary and segment names. Optional root `solarStudies` and `drawings` arrays store reproducible analysis/view requests. Use canonical element IDs for integrations; generated mesh counts and node names depend on resolved geometry.
 
 
 ## Assemblies
@@ -56,7 +56,7 @@ An assembly groups parts through an `aggregates` relationship. It carries intent
 
 Use [reusable assemblies](assemblies.md) for parameterized packages, duplication,
 explicit external bindings and updates that preserve local edits. Anchor-based
-point locators support model-axis `offset` vectors in version `0.2`, allowing
+point locators support model-axis `offset` vectors, allowing
 vertices and member endpoints to share one origin. Recipe parameters can target
 those offsets with explicit scalar scale/offset rules.
 

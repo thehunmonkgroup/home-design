@@ -21,7 +21,7 @@ the scoped identity and nominal stock. Those details remain JSON rather than
 requiring every discipline to share one large object hierarchy. Shared consumers
 read typed contracts instead of independently decoding the same required fields.
 
-The legacy repeated-framing family exports its existing indexed children. Named
+The repeated-framing family exports indexed children. Named
 wall, planar and member assemblies use `GeneratedMember` records. Capability
 registration distinguishes generated children from assemblies that support scoped
 member hosting.

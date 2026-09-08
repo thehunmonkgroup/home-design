@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import ElementDetails from './ElementDetails';
+import ElementDetails, { initialDetailsView } from './ElementDetails';
 import type { RenderManifest } from '../lib/model';
 
 const manifest: RenderManifest = {
@@ -17,8 +17,9 @@ const manifest: RenderManifest = {
 };
 
 describe('component inspector', () => {
+  const navigation = { view: initialDetailsView, onView: () => {}, onFind: () => {}, onShow: () => {}, hasGeometry: true, hidden: false };
   it('shows friendly units and navigable wall contents while keeping technical values expandable', () => {
-    const html = renderToStaticMarkup(createElement(ElementDetails, { manifest, elementId: 'wall', units: 'imperial', onUnits: () => {}, onSelect: () => {}, onIsolate: () => {} }));
+    const html = renderToStaticMarkup(createElement(ElementDetails, { ...navigation, manifest, elementId: 'wall', units: 'imperial', onUnits: () => {}, onSelect: () => {}, onIsolate: () => {} }));
     expect(html).toContain('Ground floor');
     expect(html).toContain('8 ft 0 in');
     expect(html).toContain('Reveal wall contents');
@@ -26,13 +27,33 @@ describe('component inspector', () => {
     expect(html).toContain('Office studs');
     expect(html).toContain('<summary>Technical properties</summary>');
     expect(html).not.toContain('Isolate system');
+    expect(html).not.toContain('Reveal reinforcement');
+  });
+  it('offers reinforcement reveal on a host with modeled steel', () => {
+    const reinforced: RenderManifest = {
+      ...manifest,
+      elements: {
+        ...manifest.elements,
+        bar: { kind: 'reinforcingBar', name: 'Wall bar', storeyId: 'ground', nodes: ['bar'], defaultVisible: true, data: {} },
+      },
+      navigation: { format: 'home-design-navigation-0.1', links: [
+        { sourceId: 'bar', targetId: 'wall', kind: 'ownership', sourceLabel: 'Owned by', targetLabel: 'Owned component' },
+      ] },
+    };
+    const html = renderToStaticMarkup(createElement(ElementDetails, { ...navigation, manifest: reinforced, elementId: 'wall', units: 'metric', onUnits: () => {}, onSelect: () => {}, onIsolate: () => {} }));
+    expect(html).toContain('Reveal reinforcement');
   });
   it('offers generated-member discovery and a return link to the generating assembly', () => {
-    const props = { manifest, units: 'metric' as const, onUnits: () => {}, onSelect: () => {}, onIsolate: () => {} };
+    const props = { ...navigation, manifest, units: 'metric' as const, onUnits: () => {}, onSelect: () => {}, onIsolate: () => {} };
     const parent = renderToStaticMarkup(createElement(ElementDetails, { ...props, elementId: 'frame' }));
     expect(parent).toContain('Find generated members');
     expect(parent).toContain('run.main/stud/0');
     const child = renderToStaticMarkup(createElement(ElementDetails, { ...props, elementId: 'stud' }));
-    expect(child).toContain('Back to Office studs');
+    expect(child).toContain('Generating component');
+    expect(child).toContain('↑ Office studs');
+    expect(child).not.toContain('Reveal wall contents');
+    const hidden = renderToStaticMarkup(createElement(ElementDetails, { ...props, elementId: 'stud', hidden: true }));
+    expect(hidden).toContain('This component is hidden');
+    expect(hidden).toContain('Show in model');
   });
 });

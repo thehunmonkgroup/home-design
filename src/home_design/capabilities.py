@@ -126,6 +126,7 @@ class ComponentRegistry:
                 "reinforcingBar",
                 "reinforcingMesh",
                 "panel",
+                "sweep",
             ),
         ),
         ComponentCapability(

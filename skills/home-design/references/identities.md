@@ -1,12 +1,12 @@
-# Scoped identities and version migration
+# Scoped construction identities
 
-Read this reference for new version 0.2 models, layer or boundary edits, generated
-member overrides, and migration of version 0.1 designs. Read [editing](editing.md)
+Read this reference for layer or boundary edits, generated
+member overrides, and input-format conversion. Read [editing](editing.md)
 for committing the resulting changeset.
 
 ## Named construction substructure
 
-Model version `0.2` requires each wall/slab/roof type layer to have an `id`, unique
+Each wall/slab/roof type layer requires an `id`, unique
 within that type. The array still specifies physical layer order. Select the ID
 in hosted `layer` fields, cavity regions, framing, cut limits and penetration
 `layers` arrays. Keep the ID when changing material, thickness or order. Removing
@@ -56,15 +56,17 @@ provenance produces an error instead of selecting an arbitrary fragment.
 
 `memberIds` maps generation identity keys to retained exported member keys.
 Parametric roof `faceIds` similarly maps generated plane identities to retained
-face IDs. Migration supplies these maps to preserve existing external identities.
+face IDs. Input-format conversion supplies these maps to preserve external identities.
 Keep them during ordinary edits; unused entries preserve identity history. Edit
 them only when deliberately assigning identity, never to hide a removed part.
 
 ## Explicit migration
 
-The engine reads versions `0.1` and `0.2`; it never rewrites a source merely by
-loading it. Version 0.1 retains positional selections. Use named selections in
-version 0.2. An explicit CLI `--schema` override replaces normal version selection.
+Use named selections for authoring. If a source declares the positional input
+format, convert it before adding named selections or recipes. Inspect its
+`modelVersion`; the [input-format contract](../../../docs/reference/schema-evolution.md#input-format-conversion)
+lists accepted values. Loading never rewrites source. An explicit CLI `--schema`
+override replaces normal schema selection.
 
 ```text
 home-design migrate MODEL --to 0.2 --output migration.json
@@ -80,6 +82,7 @@ and full changed-object preconditions. Review and apply it once; a source change
 requires preparing a fresh migration. Migration preparation does not export or
 save a model. The guarded transaction validates and builds the migrated result.
 
-The supported transition is `0.1` to `0.2`; unsupported versions and reverse
-migrations fail explicitly. See the [version contract](../../../docs/reference/schema-evolution.md)
-for compatibility and export guarantees.
+Unsupported input formats and reverse conversions fail explicitly. See the
+[input-format contract](../../../docs/reference/schema-evolution.md#input-format-conversion)
+for conversion and export guarantees. The target identifier in the command selects
+the authoring schema; the design's `revision` advances through the transaction.

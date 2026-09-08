@@ -1,0 +1,684 @@
+{
+  "recipeVersion": "0.1",
+  "modelVersion": "0.2",
+  "id": "recipe.king-post-truss",
+  "name": "King-post roof truss and joint connections",
+  "description": "An authored timber truss with bottom chord, two top chords and king post, explicit joint trims, steel gussets and scheduled connection screws.",
+  "assembly": "assembly.root",
+  "bindings": {
+    "binding.storey": {
+      "registry": "levels",
+      "kind": "storey",
+      "description": "Storey supplying the package's elevation datum"
+    }
+  },
+  "parameters": {
+    "origin": {
+      "valueType": "point2",
+      "description": "Package origin in model XY millimetres",
+      "default": [
+        0,
+        0
+      ],
+      "targets": [
+        "/anchors/anchor.origin/position"
+      ]
+    }
+  },
+  "objects": {
+    "anchors": {
+      "anchor.origin": {
+        "kind": "point2",
+        "name": "Package origin",
+        "position": [
+          0,
+          0
+        ],
+        "level": "binding.storey"
+      }
+    },
+    "materials": {
+      "material.timber": {
+        "name": "Framing timber",
+        "category": "wood",
+        "appearance": {
+          "color": "#C69C6D",
+          "roughness": 0.8
+        }
+      },
+      "material.steel": {
+        "name": "Illustrative galvanized service stock",
+        "appearance": {
+          "color": "#8fabb8"
+        }
+      }
+    },
+    "types": {
+      "type.member": {
+        "kind": "memberType",
+        "name": "40 by 120 mm truss stock",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 40,
+          "depth": 120
+        }
+      },
+      "type.gusset": {
+        "kind": "hardwareType",
+        "name": "Illustrative steel truss gusset",
+        "role": "bracket",
+        "material": "material.steel",
+        "solids": {
+          "plate": {
+            "section": {
+              "kind": "rectangle",
+              "width": 260,
+              "depth": 200
+            },
+            "depth": 4
+          }
+        }
+      },
+      "type.screw": {
+        "kind": "fastenerType",
+        "name": "Illustrative connector screw",
+        "role": "screw",
+        "material": "material.steel",
+        "nominalDiameter": 6,
+        "nominalLength": 50,
+        "solids": {
+          "shank": {
+            "section": {
+              "kind": "circle",
+              "diameter": 6
+            },
+            "depth": 50
+          }
+        }
+      }
+    },
+    "elements": {
+      "assembly.root": {
+        "kind": "assembly",
+        "name": "King-post roof truss and joint connections",
+        "assemblyType": "other"
+      },
+      "truss": {
+        "kind": "memberAssembly",
+        "name": "Four-member king-post truss",
+        "assemblyType": "truss",
+        "storey": "binding.storey",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              0,
+              0,
+              1000
+            ]
+          }
+        },
+        "nodes": {
+          "left": {
+            "local": [
+              0,
+              0,
+              0
+            ]
+          },
+          "right": {
+            "local": [
+              4000,
+              0,
+              0
+            ]
+          },
+          "apex": {
+            "local": [
+              2000,
+              0,
+              1500
+            ]
+          },
+          "middle": {
+            "local": [
+              2000,
+              0,
+              0
+            ]
+          }
+        },
+        "members": {
+          "bottom": {
+            "start": "left",
+            "end": "right",
+            "memberType": "type.member",
+            "role": "bottomChord"
+          },
+          "left": {
+            "start": "left",
+            "end": "apex",
+            "memberType": "type.member",
+            "role": "topChord",
+            "trimAgainst": [
+              "bottom"
+            ]
+          },
+          "right": {
+            "start": "right",
+            "end": "apex",
+            "memberType": "type.member",
+            "role": "topChord",
+            "trimAgainst": [
+              "bottom",
+              "left"
+            ]
+          },
+          "web": {
+            "start": "middle",
+            "end": "apex",
+            "memberType": "type.member",
+            "role": "web",
+            "roll": 90,
+            "trimAgainst": [
+              "bottom",
+              "left",
+              "right"
+            ]
+          }
+        }
+      },
+      "gusset.left.front": {
+        "kind": "hardware",
+        "name": "Left front gusset",
+        "type": "type.gusset",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "truss",
+              "offset": [
+                100,
+                -20,
+                40
+              ]
+            }
+          },
+          "rotation": [
+            90,
+            0,
+            0
+          ]
+        },
+        "participants": [
+          {
+            "element": "truss",
+            "part": "bottom"
+          },
+          {
+            "element": "truss",
+            "part": "left"
+          }
+        ]
+      },
+      "screws.left.front": {
+        "kind": "fastenerGroup",
+        "name": "Left front connection screws",
+        "type": "type.screw",
+        "quantity": 8,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "gusset.left.front"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "gusset.left.front"
+          },
+          {
+            "element": "truss"
+          }
+        ]
+      },
+      "gusset.left.back": {
+        "kind": "hardware",
+        "name": "Left back gusset",
+        "type": "type.gusset",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "truss",
+              "offset": [
+                100,
+                20,
+                40
+              ]
+            }
+          },
+          "rotation": [
+            -90,
+            0,
+            0
+          ]
+        },
+        "participants": [
+          {
+            "element": "truss",
+            "part": "bottom"
+          },
+          {
+            "element": "truss",
+            "part": "left"
+          }
+        ]
+      },
+      "screws.left.back": {
+        "kind": "fastenerGroup",
+        "name": "Left back connection screws",
+        "type": "type.screw",
+        "quantity": 8,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "gusset.left.back"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "gusset.left.back"
+          },
+          {
+            "element": "truss"
+          }
+        ]
+      },
+      "gusset.right.front": {
+        "kind": "hardware",
+        "name": "Right front gusset",
+        "type": "type.gusset",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "truss",
+              "offset": [
+                3900,
+                -20,
+                40
+              ]
+            }
+          },
+          "rotation": [
+            90,
+            0,
+            0
+          ]
+        },
+        "participants": [
+          {
+            "element": "truss",
+            "part": "bottom"
+          },
+          {
+            "element": "truss",
+            "part": "right"
+          }
+        ]
+      },
+      "screws.right.front": {
+        "kind": "fastenerGroup",
+        "name": "Right front connection screws",
+        "type": "type.screw",
+        "quantity": 8,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "gusset.right.front"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "gusset.right.front"
+          },
+          {
+            "element": "truss"
+          }
+        ]
+      },
+      "gusset.right.back": {
+        "kind": "hardware",
+        "name": "Right back gusset",
+        "type": "type.gusset",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "truss",
+              "offset": [
+                3900,
+                20,
+                40
+              ]
+            }
+          },
+          "rotation": [
+            -90,
+            0,
+            0
+          ]
+        },
+        "participants": [
+          {
+            "element": "truss",
+            "part": "bottom"
+          },
+          {
+            "element": "truss",
+            "part": "right"
+          }
+        ]
+      },
+      "screws.right.back": {
+        "kind": "fastenerGroup",
+        "name": "Right back connection screws",
+        "type": "type.screw",
+        "quantity": 8,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "gusset.right.back"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "gusset.right.back"
+          },
+          {
+            "element": "truss"
+          }
+        ]
+      },
+      "gusset.apex.front": {
+        "kind": "hardware",
+        "name": "Apex front gusset",
+        "type": "type.gusset",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "truss",
+              "offset": [
+                2000,
+                -20,
+                1430
+              ]
+            }
+          },
+          "rotation": [
+            90,
+            0,
+            0
+          ]
+        },
+        "participants": [
+          {
+            "element": "truss",
+            "part": "left"
+          },
+          {
+            "element": "truss",
+            "part": "right"
+          },
+          {
+            "element": "truss",
+            "part": "web"
+          }
+        ]
+      },
+      "screws.apex.front": {
+        "kind": "fastenerGroup",
+        "name": "Apex front connection screws",
+        "type": "type.screw",
+        "quantity": 8,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "gusset.apex.front"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "gusset.apex.front"
+          },
+          {
+            "element": "truss"
+          }
+        ]
+      },
+      "gusset.apex.back": {
+        "kind": "hardware",
+        "name": "Apex back gusset",
+        "type": "type.gusset",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "truss",
+              "offset": [
+                2000,
+                20,
+                1430
+              ]
+            }
+          },
+          "rotation": [
+            -90,
+            0,
+            0
+          ]
+        },
+        "participants": [
+          {
+            "element": "truss",
+            "part": "left"
+          },
+          {
+            "element": "truss",
+            "part": "right"
+          },
+          {
+            "element": "truss",
+            "part": "web"
+          }
+        ]
+      },
+      "screws.apex.back": {
+        "kind": "fastenerGroup",
+        "name": "Apex back connection screws",
+        "type": "type.screw",
+        "quantity": 8,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "gusset.apex.back"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "gusset.apex.back"
+          },
+          {
+            "element": "truss"
+          }
+        ]
+      },
+      "gusset.middle.front": {
+        "kind": "hardware",
+        "name": "Middle front gusset",
+        "type": "type.gusset",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "truss",
+              "offset": [
+                2000,
+                -20,
+                40
+              ]
+            }
+          },
+          "rotation": [
+            90,
+            0,
+            0
+          ]
+        },
+        "participants": [
+          {
+            "element": "truss",
+            "part": "bottom"
+          },
+          {
+            "element": "truss",
+            "part": "web"
+          }
+        ]
+      },
+      "screws.middle.front": {
+        "kind": "fastenerGroup",
+        "name": "Middle front connection screws",
+        "type": "type.screw",
+        "quantity": 8,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "gusset.middle.front"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "gusset.middle.front"
+          },
+          {
+            "element": "truss"
+          }
+        ]
+      },
+      "gusset.middle.back": {
+        "kind": "hardware",
+        "name": "Middle back gusset",
+        "type": "type.gusset",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "truss",
+              "offset": [
+                2000,
+                20,
+                40
+              ]
+            }
+          },
+          "rotation": [
+            -90,
+            0,
+            0
+          ]
+        },
+        "participants": [
+          {
+            "element": "truss",
+            "part": "bottom"
+          },
+          {
+            "element": "truss",
+            "part": "web"
+          }
+        ]
+      },
+      "screws.middle.back": {
+        "kind": "fastenerGroup",
+        "name": "Middle back connection screws",
+        "type": "type.screw",
+        "quantity": 8,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "gusset.middle.back"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "gusset.middle.back"
+          },
+          {
+            "element": "truss"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "relationship.parts": {
+        "kind": "aggregates",
+        "assembly": "assembly.root",
+        "parts": [
+          "truss",
+          "gusset.left.front",
+          "screws.left.front",
+          "gusset.left.back",
+          "screws.left.back",
+          "gusset.right.front",
+          "screws.right.front",
+          "gusset.right.back",
+          "screws.right.back",
+          "gusset.apex.front",
+          "screws.apex.front",
+          "gusset.apex.back",
+          "screws.apex.back",
+          "gusset.middle.front",
+          "screws.middle.front",
+          "gusset.middle.back",
+          "screws.middle.back"
+        ]
+      }
+    }
+  },
+  "connectionPoints": {
+    "truss": {
+      "element": "truss",
+      "description": "Truss with scoped bottom, left, right and web members"
+    }
+  },
+  "overridePaths": [
+    "/elements/assembly.root/name"
+  ]
+}

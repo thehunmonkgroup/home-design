@@ -2424,7 +2424,7 @@
                   "const": "surface"
                 },
                 "point": {
-                  "$ref": "#/$defs/Vec2"
+                  "$ref": "#/$defs/PlanPoint"
                 },
                 "surface": {
                   "enum": [
@@ -2698,6 +2698,10 @@
             },
             "stringerType": {
               "$ref": "#/$defs/Id"
+            },
+            "stringerTopCut": {
+              "enum": ["square", "plumb"],
+              "description": "Optional vertical trim at the stringer top endpoint; square preserves the stock end perpendicular to its axis."
             },
             "nosing": {
               "type": "number",
@@ -4548,7 +4552,7 @@
               "$ref": "#/$defs/Id"
             },
             "origin": {
-              "$ref": "#/$defs/Vec2"
+              "$ref": "#/$defs/PlanPoint"
             },
             "direction": {
               "$ref": "#/$defs/UnitVec2"
@@ -4977,7 +4981,7 @@
           ]
         },
         "point": {
-          "$ref": "#/$defs/Vec2"
+          "$ref": "#/$defs/PlanPoint"
         },
         "selector": {
           "type": "string"
@@ -4986,6 +4990,16 @@
           "$ref": "#/$defs/Length"
         }
       }
+    },
+    "PlanPoint": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/Vec2"
+        },
+        {
+          "$ref": "#/$defs/PointLocator2"
+        }
+      ]
     },
     "ElevationDatum": {
       "oneOf": [
@@ -6009,6 +6023,10 @@
             },
             "layerOrder": {
               "const": "topToBottom"
+            },
+            "layerJoin": {
+              "enum": ["independent", "miter"],
+              "description": "Trim adjoining roof-face layers at shared spatial edge bisectors; independent retains each face extrusion."
             }
           }
         }

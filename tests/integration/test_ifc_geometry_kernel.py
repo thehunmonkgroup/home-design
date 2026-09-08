@@ -151,6 +151,7 @@ class KernelFixture(IfcExporter):
         "hillside-deck-house",
         "complete-shell-coordination-house",
         "integrated-authoring-house",
+        "assemblies",
         "trimmed-member",
     ],
 )
@@ -202,5 +203,12 @@ def test_kernel_preserves_material_volume_and_world_extents(
     KernelFixture.scene_and_schedule(resolved, owner_volumes, tmp_path)
     if case == "trimmed-member":
         assert checked == {"member.cut"}
+    elif case == "assemblies":
+        assert {
+            "assembly.exterior-wall.wall.exterior",
+            "assembly.insulated-roof.roof",
+            "assembly.reinforced-foundation.mesh",
+            "assembly.screened-entrance.stair",
+        }.issubset(checked)
     else:
         assert {"wall.south", "roof.main"}.issubset(checked)

@@ -1,0 +1,1755 @@
+{
+  "recipeVersion": "0.1",
+  "modelVersion": "0.2",
+  "id": "recipe.reinforced-foundation",
+  "name": "Reinforced foundation and masonry stem wall",
+  "description": "Concrete strip with explicit bars and mesh, three courses of hollow masonry, separate grout and mortar, exterior waterproofing seam and a falling perimeter drain.",
+  "assembly": "assembly.root",
+  "bindings": {
+    "binding.storey": {
+      "registry": "levels",
+      "kind": "storey",
+      "description": "Storey supplying the package's elevation datum"
+    }
+  },
+  "parameters": {
+    "origin": {
+      "valueType": "point2",
+      "description": "Package origin in model XY millimetres",
+      "default": [
+        0,
+        0
+      ],
+      "targets": [
+        "/anchors/anchor.origin/position"
+      ]
+    }
+  },
+  "objects": {
+    "anchors": {
+      "anchor.origin": {
+        "kind": "point2",
+        "name": "Package origin",
+        "position": [
+          0,
+          0
+        ],
+        "level": "binding.storey"
+      }
+    },
+    "materials": {
+      "material.concrete": {
+        "name": "Concrete",
+        "category": "concrete",
+        "appearance": {
+          "color": "#A8A8A8",
+          "roughness": 0.9
+        }
+      },
+      "material.steel": {
+        "name": "Illustrative galvanized service stock",
+        "appearance": {
+          "color": "#8fabb8"
+        }
+      },
+      "material.gypsum": {
+        "name": "Gypsum board",
+        "category": "finish",
+        "appearance": {
+          "color": "#E8E5DF",
+          "roughness": 0.95
+        }
+      },
+      "material.block": {
+        "name": "Concrete masonry",
+        "appearance": {
+          "color": "#aca99f"
+        }
+      },
+      "material.grout": {
+        "name": "Cell grout",
+        "appearance": {
+          "color": "#b8b5ab"
+        }
+      },
+      "material.mortar": {
+        "name": "Masonry mortar",
+        "appearance": {
+          "color": "#ded8c9"
+        }
+      },
+      "material.waterproofing": {
+        "name": "Foundation waterproofing",
+        "appearance": {
+          "color": "#3c4550"
+        }
+      },
+      "mat.black": {
+        "name": "Black aluminum",
+        "appearance": {
+          "color": "#24282a"
+        }
+      }
+    },
+    "types": {
+      "type.footing": {
+        "kind": "footingType",
+        "name": "Explicit reinforced concrete strip",
+        "depth": 500,
+        "material": "material.concrete",
+        "representation": "explicit"
+      },
+      "type.bar": {
+        "kind": "reinforcingBarType",
+        "name": "16 mm main reinforcement",
+        "material": "material.steel",
+        "nominalDiameter": 16,
+        "role": "main",
+        "surface": "ribbed",
+        "minimumBendRadius": 64
+      },
+      "type.mesh": {
+        "kind": "reinforcingMeshType",
+        "name": "8 mm transverse and longitudinal mesh",
+        "material": "material.steel",
+        "longitudinalDiameter": 8,
+        "transverseDiameter": 8,
+        "longitudinalSpacing": 200,
+        "transverseSpacing": 200
+      },
+      "type.wall": {
+        "kind": "wallType",
+        "name": "Explicit masonry stem wall",
+        "layerOrder": "exteriorToInterior",
+        "layers": [
+          {
+            "id": "parge",
+            "name": "Exterior parge coat",
+            "thickness": 3,
+            "function": "substrate",
+            "material": "material.concrete"
+          },
+          {
+            "id": "masonry",
+            "name": "Units, grout and mortar",
+            "function": "structure",
+            "thickness": 190,
+            "representation": "explicit"
+          }
+        ]
+      },
+      "type.block": {
+        "kind": "masonryPartType",
+        "name": "Hollow 390 mm masonry unit",
+        "role": "unit",
+        "material": "material.block",
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 390,
+              "depth": 190
+            },
+            "depth": 200
+          }
+        },
+        "cuts": {
+          "cell.0": {
+            "section": {
+              "kind": "rectangle",
+              "width": 150,
+              "depth": 130
+            },
+            "depth": 190,
+            "placement": {
+              "origin": [
+                -95,
+                0,
+                10
+              ]
+            }
+          },
+          "cell.1": {
+            "section": {
+              "kind": "rectangle",
+              "width": 150,
+              "depth": 130
+            },
+            "depth": 190,
+            "placement": {
+              "origin": [
+                95,
+                0,
+                10
+              ]
+            }
+          }
+        }
+      },
+      "type.grout": {
+        "kind": "masonryPartType",
+        "name": "Separate cell grout",
+        "role": "grout",
+        "material": "material.grout",
+        "solids": {
+          "cell.0": {
+            "section": {
+              "kind": "rectangle",
+              "width": 150,
+              "depth": 130
+            },
+            "depth": 190,
+            "placement": {
+              "origin": [
+                -95,
+                0,
+                10
+              ]
+            }
+          },
+          "cell.1": {
+            "section": {
+              "kind": "rectangle",
+              "width": 150,
+              "depth": 130
+            },
+            "depth": 190,
+            "placement": {
+              "origin": [
+                95,
+                0,
+                10
+              ]
+            }
+          }
+        }
+      },
+      "type.bed": {
+        "kind": "masonryPartType",
+        "name": "Continuous mortar bed",
+        "role": "mortar",
+        "material": "material.mortar",
+        "solids": {
+          "bed": {
+            "section": {
+              "kind": "rectangle",
+              "width": 2000,
+              "depth": 190
+            },
+            "depth": 10
+          }
+        }
+      },
+      "type.joint": {
+        "kind": "masonryPartType",
+        "name": "Vertical mortar joint",
+        "role": "mortar",
+        "material": "material.mortar",
+        "solids": {
+          "joint": {
+            "section": {
+              "kind": "rectangle",
+              "width": 10,
+              "depth": 190
+            },
+            "depth": 200
+          }
+        }
+      },
+      "type.membrane": {
+        "kind": "envelopePartType",
+        "name": "Foundation waterproofing sheet",
+        "role": "membrane",
+        "material": "material.waterproofing",
+        "solids": {
+          "sheet": {
+            "section": {
+              "kind": "rectangle",
+              "width": 1000,
+              "depth": 630
+            },
+            "depth": 2
+          }
+        }
+      },
+      "type.pipe": {
+        "kind": "sweepType",
+        "name": "Drain pipe",
+        "section": {
+          "kind": "profile",
+          "profile": {
+            "outer": [
+              [
+                -60,
+                -60
+              ],
+              [
+                60,
+                -60
+              ],
+              [
+                60,
+                60
+              ],
+              [
+                -60,
+                60
+              ]
+            ],
+            "holes": [
+              [
+                [
+                  -50,
+                  -50
+                ],
+                [
+                  -50,
+                  50
+                ],
+                [
+                  50,
+                  50
+                ],
+                [
+                  50,
+                  -50
+                ]
+              ]
+            ]
+          }
+        },
+        "material": "mat.black"
+      }
+    },
+    "elements": {
+      "assembly.root": {
+        "kind": "assembly",
+        "name": "Reinforced foundation and masonry stem wall",
+        "assemblyType": "other"
+      },
+      "footing": {
+        "kind": "footing",
+        "name": "Reinforced strip footing",
+        "type": "type.footing",
+        "shape": "strip",
+        "storey": "binding.storey",
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                -100,
+                0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                2100,
+                0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                2100,
+                600
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                -100,
+                600
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ],
+            "holes": []
+          }
+        },
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 500
+        }
+      },
+      "bar.0": {
+        "kind": "reinforcingBar",
+        "name": "Longitudinal footing bar 1",
+        "type": "type.bar",
+        "path": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              0,
+              100,
+              100
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              2000,
+              100,
+              100
+            ]
+          }
+        ],
+        "bendRadius": 80,
+        "chordTolerance": 0.1,
+        "occupies": {
+          "regions": [
+            {
+              "host": "footing",
+              "layer": "layer.legacy.0"
+            }
+          ]
+        }
+      },
+      "bar.1": {
+        "kind": "reinforcingBar",
+        "name": "Longitudinal footing bar 2",
+        "type": "type.bar",
+        "path": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              0,
+              300,
+              100
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              2000,
+              300,
+              100
+            ]
+          }
+        ],
+        "bendRadius": 80,
+        "chordTolerance": 0.1,
+        "occupies": {
+          "regions": [
+            {
+              "host": "footing",
+              "layer": "layer.legacy.0"
+            }
+          ]
+        }
+      },
+      "bar.2": {
+        "kind": "reinforcingBar",
+        "name": "Longitudinal footing bar 3",
+        "type": "type.bar",
+        "path": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              0,
+              500,
+              100
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              2000,
+              500,
+              100
+            ]
+          }
+        ],
+        "bendRadius": 80,
+        "chordTolerance": 0.1,
+        "occupies": {
+          "regions": [
+            {
+              "host": "footing",
+              "layer": "layer.legacy.0"
+            }
+          ]
+        }
+      },
+      "mesh": {
+        "kind": "reinforcingMesh",
+        "name": "Upper footing mesh",
+        "type": "type.mesh",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              0,
+              100,
+              350
+            ]
+          }
+        },
+        "length": 2000,
+        "width": 400,
+        "occupies": {
+          "regions": [
+            {
+              "host": "footing",
+              "layer": "layer.legacy.0"
+            }
+          ]
+        }
+      },
+      "wall": {
+        "kind": "wall",
+        "name": "Masonry stem wall",
+        "type": "type.wall",
+        "storey": "binding.storey",
+        "locationLine": "center",
+        "path": {
+          "kind": "line",
+          "start": {
+            "anchor": "anchor.origin",
+            "offset": [
+              0,
+              301.5
+            ]
+          },
+          "end": {
+            "anchor": "anchor.origin",
+            "offset": [
+              2000,
+              301.5
+            ]
+          },
+          "segmentIds": [
+            "main"
+          ]
+        },
+        "base": {
+          "kind": "surface",
+          "element": "footing",
+          "surface": "top",
+          "offset": 0
+        },
+        "top": {
+          "kind": "height",
+          "height": 630
+        }
+      },
+      "bed.0": {
+        "kind": "masonryPart",
+        "name": "Course 1 mortar bed",
+        "type": "type.bed",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1000,
+              300,
+              500
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.0.0": {
+        "kind": "masonryPart",
+        "name": "Course 1, unit 1 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              200,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.0.0": {
+        "kind": "masonryPart",
+        "name": "Course 1, unit 1 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              200,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.0.0": {
+        "kind": "masonryPart",
+        "name": "Course 1, joint 1",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              400,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.0.1": {
+        "kind": "masonryPart",
+        "name": "Course 1, unit 2 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              600,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.0.1": {
+        "kind": "masonryPart",
+        "name": "Course 1, unit 2 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              600,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.0.1": {
+        "kind": "masonryPart",
+        "name": "Course 1, joint 2",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              800,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.0.2": {
+        "kind": "masonryPart",
+        "name": "Course 1, unit 3 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1000,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.0.2": {
+        "kind": "masonryPart",
+        "name": "Course 1, unit 3 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1000,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.0.2": {
+        "kind": "masonryPart",
+        "name": "Course 1, joint 3",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1200,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.0.3": {
+        "kind": "masonryPart",
+        "name": "Course 1, unit 4 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1400,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.0.3": {
+        "kind": "masonryPart",
+        "name": "Course 1, unit 4 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1400,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.0.3": {
+        "kind": "masonryPart",
+        "name": "Course 1, joint 4",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1600,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.0.4": {
+        "kind": "masonryPart",
+        "name": "Course 1, unit 5 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1800,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.0.4": {
+        "kind": "masonryPart",
+        "name": "Course 1, unit 5 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1800,
+              300,
+              510
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "bed.1": {
+        "kind": "masonryPart",
+        "name": "Course 2 mortar bed",
+        "type": "type.bed",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1000,
+              300,
+              710
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.1.0": {
+        "kind": "masonryPart",
+        "name": "Course 2, unit 1 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              200,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.1.0": {
+        "kind": "masonryPart",
+        "name": "Course 2, unit 1 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              200,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.1.0": {
+        "kind": "masonryPart",
+        "name": "Course 2, joint 1",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              400,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.1.1": {
+        "kind": "masonryPart",
+        "name": "Course 2, unit 2 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              600,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.1.1": {
+        "kind": "masonryPart",
+        "name": "Course 2, unit 2 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              600,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.1.1": {
+        "kind": "masonryPart",
+        "name": "Course 2, joint 2",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              800,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.1.2": {
+        "kind": "masonryPart",
+        "name": "Course 2, unit 3 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1000,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.1.2": {
+        "kind": "masonryPart",
+        "name": "Course 2, unit 3 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1000,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.1.2": {
+        "kind": "masonryPart",
+        "name": "Course 2, joint 3",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1200,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.1.3": {
+        "kind": "masonryPart",
+        "name": "Course 2, unit 4 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1400,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.1.3": {
+        "kind": "masonryPart",
+        "name": "Course 2, unit 4 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1400,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.1.3": {
+        "kind": "masonryPart",
+        "name": "Course 2, joint 4",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1600,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.1.4": {
+        "kind": "masonryPart",
+        "name": "Course 2, unit 5 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1800,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.1.4": {
+        "kind": "masonryPart",
+        "name": "Course 2, unit 5 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1800,
+              300,
+              720
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "bed.2": {
+        "kind": "masonryPart",
+        "name": "Course 3 mortar bed",
+        "type": "type.bed",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1000,
+              300,
+              920
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.2.0": {
+        "kind": "masonryPart",
+        "name": "Course 3, unit 1 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              200,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.2.0": {
+        "kind": "masonryPart",
+        "name": "Course 3, unit 1 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              200,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.2.0": {
+        "kind": "masonryPart",
+        "name": "Course 3, joint 1",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              400,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.2.1": {
+        "kind": "masonryPart",
+        "name": "Course 3, unit 2 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              600,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.2.1": {
+        "kind": "masonryPart",
+        "name": "Course 3, unit 2 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              600,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.2.1": {
+        "kind": "masonryPart",
+        "name": "Course 3, joint 2",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              800,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.2.2": {
+        "kind": "masonryPart",
+        "name": "Course 3, unit 3 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1000,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.2.2": {
+        "kind": "masonryPart",
+        "name": "Course 3, unit 3 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1000,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.2.2": {
+        "kind": "masonryPart",
+        "name": "Course 3, joint 3",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1200,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.2.3": {
+        "kind": "masonryPart",
+        "name": "Course 3, unit 4 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1400,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.2.3": {
+        "kind": "masonryPart",
+        "name": "Course 3, unit 4 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1400,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "joint.2.3": {
+        "kind": "masonryPart",
+        "name": "Course 3, joint 4",
+        "type": "type.joint",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1600,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "block.2.4": {
+        "kind": "masonryPart",
+        "name": "Course 3, unit 5 block",
+        "type": "type.block",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1800,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "grout.2.4": {
+        "kind": "masonryPart",
+        "name": "Course 3, unit 5 grout",
+        "type": "type.grout",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1800,
+              300,
+              930
+            ]
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall",
+              "layer": "masonry"
+            }
+          ]
+        }
+      },
+      "membrane.0": {
+        "kind": "envelopePart",
+        "name": "Waterproofing sheet 1",
+        "type": "type.membrane",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall",
+              "surface": "exterior",
+              "station": 500,
+              "height": 315
+            }
+          }
+        }
+      },
+      "membrane.1": {
+        "kind": "envelopePart",
+        "name": "Waterproofing sheet 2",
+        "type": "type.membrane",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall",
+              "surface": "exterior",
+              "station": 1500,
+              "height": 315
+            }
+          }
+        }
+      },
+      "waterproofing.check": {
+        "kind": "barrierCheck",
+        "name": "Waterproofing seam continuity probe",
+        "purpose": "water",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall",
+              "surface": "exterior",
+              "station": 1000,
+              "height": 315
+            }
+          }
+        },
+        "geometry": {
+          "section": {
+            "kind": "rectangle",
+            "width": 20,
+            "depth": 40
+          },
+          "depth": 2
+        },
+        "participants": [
+          {
+            "element": "membrane.0"
+          },
+          {
+            "element": "membrane.1"
+          }
+        ]
+      },
+      "drain": {
+        "kind": "sweep",
+        "name": "Falling perimeter drain",
+        "type": "type.pipe",
+        "role": "drain",
+        "path": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              -200,
+              750,
+              350
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              2400,
+              750,
+              298
+            ]
+          }
+        ],
+        "minFall": 0.01,
+        "outlet": {
+          "name": "Illustrative open drain connection",
+          "stable": true
+        }
+      }
+    },
+    "relationships": {
+      "supports.wall": {
+        "kind": "supports",
+        "support": "footing",
+        "supported": "wall"
+      },
+      "relationship.parts": {
+        "kind": "aggregates",
+        "assembly": "assembly.root",
+        "parts": [
+          "footing",
+          "bar.0",
+          "bar.1",
+          "bar.2",
+          "mesh",
+          "wall",
+          "bed.0",
+          "block.0.0",
+          "grout.0.0",
+          "joint.0.0",
+          "block.0.1",
+          "grout.0.1",
+          "joint.0.1",
+          "block.0.2",
+          "grout.0.2",
+          "joint.0.2",
+          "block.0.3",
+          "grout.0.3",
+          "joint.0.3",
+          "block.0.4",
+          "grout.0.4",
+          "bed.1",
+          "block.1.0",
+          "grout.1.0",
+          "joint.1.0",
+          "block.1.1",
+          "grout.1.1",
+          "joint.1.1",
+          "block.1.2",
+          "grout.1.2",
+          "joint.1.2",
+          "block.1.3",
+          "grout.1.3",
+          "joint.1.3",
+          "block.1.4",
+          "grout.1.4",
+          "bed.2",
+          "block.2.0",
+          "grout.2.0",
+          "joint.2.0",
+          "block.2.1",
+          "grout.2.1",
+          "joint.2.1",
+          "block.2.2",
+          "grout.2.2",
+          "joint.2.2",
+          "block.2.3",
+          "grout.2.3",
+          "joint.2.3",
+          "block.2.4",
+          "grout.2.4",
+          "membrane.0",
+          "membrane.1",
+          "waterproofing.check",
+          "drain"
+        ]
+      }
+    }
+  },
+  "connectionPoints": {
+    "wall": {
+      "element": "wall",
+      "description": "Stem wall top for the supported floor"
+    },
+    "footing": {
+      "element": "footing",
+      "description": "Foundation support body"
+    }
+  },
+  "overridePaths": [
+    "/elements/assembly.root/name"
+  ]
+}

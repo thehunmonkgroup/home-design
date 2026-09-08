@@ -1,0 +1,910 @@
+{
+  "recipeVersion": "0.1",
+  "modelVersion": "0.2",
+  "id": "recipe.ventilation-branch",
+  "name": "Ventilation distribution and maintenance access",
+  "description": "Air handler, damper, tee, insulated duct branches, two registers, support framing and hanger, with an explicit equipment maintenance volume.",
+  "assembly": "assembly.root",
+  "bindings": {
+    "binding.storey": {
+      "registry": "levels",
+      "kind": "storey",
+      "description": "Storey supplying the package's elevation datum"
+    }
+  },
+  "parameters": {
+    "origin": {
+      "valueType": "point2",
+      "description": "Package origin in model XY millimetres",
+      "default": [
+        0,
+        0
+      ],
+      "targets": [
+        "/anchors/anchor.origin/position"
+      ]
+    }
+  },
+  "objects": {
+    "anchors": {
+      "anchor.origin": {
+        "kind": "point2",
+        "name": "Package origin",
+        "position": [
+          0,
+          0
+        ],
+        "level": "binding.storey"
+      }
+    },
+    "materials": {
+      "material.steel": {
+        "name": "Illustrative galvanized service stock",
+        "appearance": {
+          "color": "#8fabb8"
+        }
+      },
+      "material.timber": {
+        "name": "Framing timber",
+        "category": "wood",
+        "appearance": {
+          "color": "#C69C6D",
+          "roughness": 0.8
+        }
+      },
+      "mechanical.material.support": {
+        "name": "Illustrative support stock"
+      },
+      "mechanical.material.cover": {
+        "name": "Illustrative service insulation"
+      }
+    },
+    "types": {
+      "mechanical.type.duct": {
+        "kind": "serviceRouteType",
+        "name": "240 by 160 mm supply duct",
+        "family": "duct",
+        "material": "material.steel",
+        "section": {
+          "kind": "rectangle",
+          "width": 240,
+          "height": 160
+        },
+        "wallThickness": 4,
+        "medium": "air",
+        "connectionType": "illustrativeFlange",
+        "duct": {
+          "designation": "Branch stock",
+          "construction": "rigid"
+        }
+      },
+      "mechanical.type.beam": {
+        "kind": "memberType",
+        "name": "Illustrative support framing",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 80,
+          "depth": 80
+        }
+      },
+      "mechanical.type.support": {
+        "kind": "hardwareType",
+        "name": "Illustrative insulated duct strap",
+        "role": "hanger",
+        "material": "mechanical.material.support",
+        "solids": {
+          "ring": {
+            "section": {
+              "kind": "rectangle",
+              "width": 400,
+              "depth": 320
+            },
+            "depth": 24
+          },
+          "arm": {
+            "section": {
+              "kind": "rectangle",
+              "width": 80,
+              "depth": 320
+            },
+            "depth": 24,
+            "placement": {
+              "origin": [
+                0,
+                -280,
+                0
+              ]
+            }
+          }
+        },
+        "cuts": {
+          "passage": {
+            "section": {
+              "kind": "rectangle",
+              "width": 336,
+              "depth": 256
+            },
+            "depth": 24
+          }
+        }
+      },
+      "mechanical.type.terminal": {
+        "kind": "serviceDeviceType",
+        "name": "Illustrative airTerminal",
+        "role": "airTerminal",
+        "material": "material.steel",
+        "mechanical": {
+          "designation": "airTerminal",
+          "terminalType": "register"
+        },
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 400,
+              "depth": 320
+            },
+            "depth": 200
+          }
+        },
+        "cuts": {
+          "passage": {
+            "section": {
+              "kind": "rectangle",
+              "width": 240,
+              "depth": 160
+            },
+            "depth": 200
+          }
+        },
+        "ports": {
+          "in": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "direction": [
+              0,
+              0,
+              -1
+            ],
+            "section": {
+              "kind": "rectangle",
+              "width": 240,
+              "height": 160
+            },
+            "medium": "air",
+            "flow": "bidirectional",
+            "connectionType": "illustrativeFlange"
+          }
+        },
+        "portGroups": []
+      },
+      "mechanical.type.branch": {
+        "kind": "serviceFittingType",
+        "name": "Illustrative duct tee",
+        "family": "duct",
+        "material": "material.steel",
+        "wallThickness": 4,
+        "chordTolerance": 0.1,
+        "medium": "air",
+        "connectionType": "illustrativeFlange",
+        "geometry": {
+          "kind": "branch",
+          "trunk": {
+            "section": {
+              "kind": "rectangle",
+              "width": 240,
+              "height": 160
+            },
+            "path": [
+              [
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                1600
+              ]
+            ],
+            "up": [
+              0,
+              1,
+              0
+            ]
+          },
+          "branches": {
+            "side": {
+              "section": {
+                "kind": "rectangle",
+                "width": 240,
+                "height": 160
+              },
+              "path": [
+                [
+                  0,
+                  0,
+                  800
+                ],
+                [
+                  800,
+                  0,
+                  800
+                ]
+              ],
+              "up": [
+                0,
+                1,
+                0
+              ]
+            }
+          }
+        }
+      },
+      "mechanical.type.cover": {
+        "kind": "serviceInsulationType",
+        "name": "40 mm duct insulation",
+        "material": "mechanical.material.cover",
+        "thickness": 40
+      },
+      "mechanical.type.damper": {
+        "kind": "serviceDeviceType",
+        "name": "Illustrative damper",
+        "role": "damper",
+        "material": "material.steel",
+        "mechanical": {
+          "designation": "damper",
+          "damperType": "balancing"
+        },
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 400,
+              "depth": 320
+            },
+            "depth": 200
+          }
+        },
+        "cuts": {
+          "passage": {
+            "section": {
+              "kind": "rectangle",
+              "width": 240,
+              "depth": 160
+            },
+            "depth": 200
+          }
+        },
+        "ports": {
+          "in": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "direction": [
+              0,
+              0,
+              -1
+            ],
+            "section": {
+              "kind": "rectangle",
+              "width": 240,
+              "height": 160
+            },
+            "medium": "air",
+            "flow": "bidirectional",
+            "connectionType": "illustrativeFlange"
+          },
+          "out": {
+            "position": [
+              0,
+              0,
+              200
+            ],
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "section": {
+              "kind": "rectangle",
+              "width": 240,
+              "height": 160
+            },
+            "medium": "air",
+            "flow": "bidirectional",
+            "connectionType": "illustrativeFlange"
+          }
+        },
+        "portGroups": [
+          [
+            "in",
+            "out"
+          ]
+        ]
+      },
+      "mechanical.type.ahu": {
+        "kind": "serviceDeviceType",
+        "name": "Illustrative airHandler",
+        "role": "airHandler",
+        "material": "material.steel",
+        "mechanical": {
+          "designation": "airHandler"
+        },
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 400,
+              "depth": 320
+            },
+            "depth": 400
+          }
+        },
+        "cuts": {
+          "passage": {
+            "section": {
+              "kind": "rectangle",
+              "width": 240,
+              "depth": 160
+            },
+            "depth": 400
+          }
+        },
+        "ports": {
+          "in": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "direction": [
+              0,
+              0,
+              -1
+            ],
+            "section": {
+              "kind": "rectangle",
+              "width": 240,
+              "height": 160
+            },
+            "medium": "air",
+            "flow": "bidirectional",
+            "connectionType": "illustrativeFlange"
+          },
+          "out": {
+            "position": [
+              0,
+              0,
+              400
+            ],
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "section": {
+              "kind": "rectangle",
+              "width": 240,
+              "height": 160
+            },
+            "medium": "air",
+            "flow": "bidirectional",
+            "connectionType": "illustrativeFlange"
+          }
+        },
+        "portGroups": [
+          [
+            "in",
+            "out"
+          ]
+        ]
+      }
+    },
+    "elements": {
+      "assembly.root": {
+        "kind": "assembly",
+        "name": "Ventilation distribution and maintenance access",
+        "assemblyType": "other"
+      },
+      "mechanical.duct.side": {
+        "kind": "serviceRoute",
+        "name": "Duct side",
+        "type": "mechanical.type.duct",
+        "chordTolerance": 0.1,
+        "path": [
+          {
+            "port": {
+              "element": "mechanical.fitting.branch",
+              "port": "side"
+            }
+          },
+          {
+            "host": {
+              "kind": "component",
+              "element": "mechanical.fitting.branch",
+              "offset": [
+                2000,
+                0,
+                800
+              ]
+            }
+          }
+        ]
+      },
+      "mechanical.member.support": {
+        "kind": "member",
+        "name": "Support framing",
+        "type": "mechanical.type.beam",
+        "role": "beam",
+        "axis": [
+          {
+            "host": {
+              "kind": "component",
+              "element": "mechanical.device.ahu",
+              "offset": [
+                -800,
+                -400,
+                960
+              ]
+            }
+          },
+          {
+            "host": {
+              "kind": "component",
+              "element": "mechanical.device.ahu",
+              "offset": [
+                800,
+                -400,
+                960
+              ]
+            }
+          }
+        ]
+      },
+      "mechanical.hardware.support": {
+        "kind": "hardware",
+        "name": "Duct support",
+        "type": "mechanical.type.support",
+        "discipline": "services",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "route",
+              "element": "mechanical.duct.feed",
+              "station": 600
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "mechanical.duct.feed"
+          },
+          {
+            "element": "mechanical.cover.duct.feed"
+          },
+          {
+            "element": "mechanical.member.support"
+          }
+        ]
+      },
+      "mechanical.terminal.end": {
+        "kind": "serviceDevice",
+        "name": "Register end",
+        "type": "mechanical.type.terminal",
+        "placement": {
+          "origin": {
+            "port": {
+              "element": "mechanical.duct.end",
+              "port": "end"
+            }
+          }
+        }
+      },
+      "mechanical.fitting.branch": {
+        "kind": "serviceFitting",
+        "name": "Branch tee",
+        "type": "mechanical.type.branch",
+        "placement": {
+          "origin": {
+            "port": {
+              "element": "mechanical.duct.trunk",
+              "port": "end"
+            }
+          }
+        }
+      },
+      "mechanical.cover.duct.end": {
+        "kind": "serviceInsulation",
+        "name": "Cover for duct.end",
+        "type": "mechanical.type.cover",
+        "host": "mechanical.duct.end",
+        "chordTolerance": 0.1
+      },
+      "mechanical.duct.end": {
+        "kind": "serviceRoute",
+        "name": "Duct end",
+        "type": "mechanical.type.duct",
+        "chordTolerance": 0.1,
+        "path": [
+          {
+            "port": {
+              "element": "mechanical.fitting.branch",
+              "port": "end"
+            }
+          },
+          {
+            "host": {
+              "kind": "component",
+              "element": "mechanical.fitting.branch",
+              "offset": [
+                0,
+                0,
+                2800
+              ]
+            }
+          }
+        ]
+      },
+      "mechanical.device.damper": {
+        "kind": "serviceDevice",
+        "name": "Branch damper",
+        "type": "mechanical.type.damper",
+        "placement": {
+          "origin": {
+            "port": {
+              "element": "mechanical.duct.feed",
+              "port": "end"
+            }
+          }
+        }
+      },
+      "mechanical.cover.duct.side": {
+        "kind": "serviceInsulation",
+        "name": "Cover for duct.side",
+        "type": "mechanical.type.cover",
+        "host": "mechanical.duct.side",
+        "chordTolerance": 0.1
+      },
+      "mechanical.cover.duct.feed": {
+        "kind": "serviceInsulation",
+        "name": "Cover for duct.feed",
+        "type": "mechanical.type.cover",
+        "host": "mechanical.duct.feed",
+        "chordTolerance": 0.1
+      },
+      "mechanical.system.air": {
+        "kind": "serviceSystem",
+        "name": "Connected supply air",
+        "systemType": "supplyAir",
+        "members": [
+          {
+            "element": "mechanical.device.ahu",
+            "port": "in"
+          },
+          {
+            "element": "mechanical.device.ahu",
+            "port": "out"
+          },
+          {
+            "element": "mechanical.device.damper",
+            "port": "in"
+          },
+          {
+            "element": "mechanical.device.damper",
+            "port": "out"
+          },
+          {
+            "element": "mechanical.fitting.branch",
+            "port": "start"
+          },
+          {
+            "element": "mechanical.fitting.branch",
+            "port": "end"
+          },
+          {
+            "element": "mechanical.fitting.branch",
+            "port": "side"
+          },
+          {
+            "element": "mechanical.duct.feed",
+            "port": "start"
+          },
+          {
+            "element": "mechanical.duct.feed",
+            "port": "end"
+          },
+          {
+            "element": "mechanical.duct.trunk",
+            "port": "start"
+          },
+          {
+            "element": "mechanical.duct.trunk",
+            "port": "end"
+          },
+          {
+            "element": "mechanical.duct.end",
+            "port": "start"
+          },
+          {
+            "element": "mechanical.duct.end",
+            "port": "end"
+          },
+          {
+            "element": "mechanical.duct.side",
+            "port": "start"
+          },
+          {
+            "element": "mechanical.duct.side",
+            "port": "end"
+          },
+          {
+            "element": "mechanical.terminal.end",
+            "port": "in"
+          },
+          {
+            "element": "mechanical.terminal.side",
+            "port": "in"
+          }
+        ]
+      },
+      "mechanical.zone.access": {
+        "kind": "clearanceZone",
+        "name": "Equipment maintenance access",
+        "owner": "mechanical.device.ahu",
+        "purpose": "maintenance",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "mechanical.device.ahu",
+              "offset": [
+                0,
+                -800,
+                0
+              ]
+            }
+          }
+        },
+        "geometry": {
+          "section": {
+            "kind": "rectangle",
+            "width": 1200,
+            "depth": 800
+          },
+          "depth": 800
+        }
+      },
+      "mechanical.terminal.side": {
+        "kind": "serviceDevice",
+        "name": "Register side",
+        "type": "mechanical.type.terminal",
+        "placement": {
+          "origin": {
+            "port": {
+              "element": "mechanical.duct.side",
+              "port": "end"
+            }
+          }
+        }
+      },
+      "mechanical.cover.fitting.branch": {
+        "kind": "serviceInsulation",
+        "name": "Cover for fitting.branch",
+        "type": "mechanical.type.cover",
+        "host": "mechanical.fitting.branch",
+        "chordTolerance": 0.1
+      },
+      "mechanical.duct.feed": {
+        "kind": "serviceRoute",
+        "name": "Duct feed",
+        "type": "mechanical.type.duct",
+        "chordTolerance": 0.1,
+        "path": [
+          {
+            "port": {
+              "element": "mechanical.device.ahu",
+              "port": "out"
+            }
+          },
+          {
+            "host": {
+              "kind": "component",
+              "element": "mechanical.device.ahu",
+              "offset": [
+                0,
+                0,
+                1600
+              ]
+            }
+          }
+        ]
+      },
+      "mechanical.device.ahu": {
+        "kind": "serviceDevice",
+        "name": "Air handler",
+        "type": "mechanical.type.ahu",
+        "placement": {
+          "origin": {
+            "anchor": "anchor.origin",
+            "offset": [
+              0,
+              0,
+              1400
+            ]
+          },
+          "rotation": [
+            0,
+            90,
+            0
+          ]
+        },
+        "portStates": {
+          "in": "open"
+        }
+      },
+      "mechanical.duct.trunk": {
+        "kind": "serviceRoute",
+        "name": "Duct trunk",
+        "type": "mechanical.type.duct",
+        "chordTolerance": 0.1,
+        "path": [
+          {
+            "port": {
+              "element": "mechanical.device.damper",
+              "port": "out"
+            }
+          },
+          {
+            "host": {
+              "kind": "component",
+              "element": "mechanical.device.damper",
+              "offset": [
+                0,
+                0,
+                1400
+              ]
+            }
+          }
+        ]
+      },
+      "mechanical.cover.duct.trunk": {
+        "kind": "serviceInsulation",
+        "name": "Cover for duct.trunk",
+        "type": "mechanical.type.cover",
+        "host": "mechanical.duct.trunk",
+        "chordTolerance": 0.1
+      }
+    },
+    "relationships": {
+      "mechanical.connection.0": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "mechanical.device.ahu",
+          "port": "out"
+        },
+        "b": {
+          "element": "mechanical.duct.feed",
+          "port": "start"
+        }
+      },
+      "mechanical.connection.1": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "mechanical.duct.feed",
+          "port": "end"
+        },
+        "b": {
+          "element": "mechanical.device.damper",
+          "port": "in"
+        }
+      },
+      "mechanical.connection.2": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "mechanical.device.damper",
+          "port": "out"
+        },
+        "b": {
+          "element": "mechanical.duct.trunk",
+          "port": "start"
+        }
+      },
+      "mechanical.connection.3": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "mechanical.duct.trunk",
+          "port": "end"
+        },
+        "b": {
+          "element": "mechanical.fitting.branch",
+          "port": "start"
+        }
+      },
+      "mechanical.connection.4": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "mechanical.fitting.branch",
+          "port": "end"
+        },
+        "b": {
+          "element": "mechanical.duct.end",
+          "port": "start"
+        }
+      },
+      "mechanical.connection.5": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "mechanical.duct.end",
+          "port": "end"
+        },
+        "b": {
+          "element": "mechanical.terminal.end",
+          "port": "in"
+        }
+      },
+      "mechanical.connection.6": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "mechanical.fitting.branch",
+          "port": "side"
+        },
+        "b": {
+          "element": "mechanical.duct.side",
+          "port": "start"
+        }
+      },
+      "mechanical.connection.7": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "mechanical.duct.side",
+          "port": "end"
+        },
+        "b": {
+          "element": "mechanical.terminal.side",
+          "port": "in"
+        }
+      },
+      "relationship.parts": {
+        "kind": "aggregates",
+        "assembly": "assembly.root",
+        "parts": [
+          "mechanical.duct.side",
+          "mechanical.member.support",
+          "mechanical.hardware.support",
+          "mechanical.terminal.end",
+          "mechanical.fitting.branch",
+          "mechanical.cover.duct.end",
+          "mechanical.duct.end",
+          "mechanical.device.damper",
+          "mechanical.cover.duct.side",
+          "mechanical.cover.duct.feed",
+          "mechanical.system.air",
+          "mechanical.zone.access",
+          "mechanical.terminal.side",
+          "mechanical.cover.fitting.branch",
+          "mechanical.duct.feed",
+          "mechanical.device.ahu",
+          "mechanical.duct.trunk",
+          "mechanical.cover.duct.trunk"
+        ]
+      }
+    }
+  },
+  "connectionPoints": {
+    "inlet": {
+      "element": "mechanical.device.ahu",
+      "port": "in",
+      "description": "Open air-handler inlet"
+    }
+  },
+  "overridePaths": [
+    "/elements/assembly.root/name"
+  ]
+}

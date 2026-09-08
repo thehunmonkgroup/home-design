@@ -49,7 +49,7 @@ rather than for the standard transaction build below.
 | --- | --- |
 | Compact source/measurement queries and dependency discovery | [Inspection](references/inspection.md) |
 | Local type edits, rehosting, removal and propagation review | [Changesets](references/changesets.md) |
-| Named layers/boundaries, generated-part identity and schema migration | [Scoped identities](references/identities.md) |
+| Named layers/boundaries, generated-part identity and input-format conversion | [Scoped identities](references/identities.md) |
 | Instantiate, duplicate, adapt and combine reusable packages | [Assemblies](references/assemblies.md) |
 | Walls, floors/decks, roofs, openings and rooms | [Architectural shell](references/architecture.md) |
 | Hosted placement, layer selections, cavities, holes and recesses | [Layers and cuts](references/layers-cuts.md) |

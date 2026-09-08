@@ -10,6 +10,17 @@ Read [identity and composition](composition.md) for shared authoring rules. Use 
 
 `stairType` specifies `treadDepth`, `treadThickness`, `maxRiser`, optional `minRiser`/`nosing`, material and a `stringerType`. A `stair` defines plan `origin`, unit `direction`, connected `bottom` and `top` datums, and `clearWidth`. Set `riserCount` for a fixed layout, or let the resolver select uniform risers within the maximum. There is one fewer tread than risers; the upper landing is the final walking surface.
 
+Stair `origin` and a sampled elevation datum's `point` accept
+either a literal XY vector or a point/anchor locator. Use one shared anchor with
+model-axis offsets for a landing footprint, stair origin and sampled landing
+point so the flight and following rails move with the package.
+
+A stair type can specify `stringerTopCut: "plumb"` to trim
+stringers at the vertical plane through their upper endpoints. Use this when a
+flight meets a landing rim or beam. The default `"square"` leaves the stock end
+perpendicular to its axis. The cut changes the solid, preserving the flight's
+rise, run, tread layout and following rail paths.
+
 Model landings as slabs with the landing role. For turns or intermediate landings, compose flights and landing slabs into a `stairSystem` assembly. Each flight updates when its datums change; check run and landing alignment after elevation changes. Stair clear width measures the usable flight, with side stringers outside that width.
 
 `railingType` specifies height, post spacing/section, rail section, material and optional baluster infill (`balusterSection`, `maxInfillGap`). `railing.role` distinguishes structural guards from graspable handrails. Use a circular `railSection` for a round handrail. These are geometric/specification controls, not jurisdictional certification.
@@ -47,6 +58,15 @@ segment fail. Start the path in a direction that gives the desired local profile
 orientation; the first frame uses world Z as its up reference (world Y for a
 vertical start). Use separate runs/details for manufactured elbows or transitions.
 Sweeps do not infer bend radii, hydraulic capacity or global self-intersections.
+
+Sweeps expose nonmaterial construction volumes for explicit owned penetrations:
+`envelope` sweeps the section's convex hull, including an open channel, and
+`bore` sweeps enclosed profile holes when present. These use the stock's path
+and miter frames before cuts and do not contribute material or rendered geometry.
+An envelope can remove more than the physical stock occupies; select it only
+when that complete passage is intended. A penetration can cut a sweep host.
+For a gutter outlet, cut the receiver with the gutter envelope and cut the gutter
+with the receiver bore. The catalog roof demonstrates these separate ownerships.
 
 `detailType` supplies a category, reusable instructions, optional reference and material. A `detail` associates it with at least two participants and a 3D location. Use it for flashing, waterproofing, air-sealing transitions and engineer-specified connections. These details appear in schedules/IFC without requiring individually modeled fasteners or membranes.
 

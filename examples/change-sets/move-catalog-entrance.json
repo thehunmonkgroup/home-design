@@ -1,0 +1,296 @@
+{
+  "changeVersion": "0.1",
+  "id": "change.adapt.assembly.screened-entrance",
+  "description": "Adapt assembly.screened-entrance using recipe.screened-entrance; preserve independent occurrence edits",
+  "baseRevision": 7,
+  "preconditions": [
+    {
+      "path": "/anchors/assembly.screened-entrance.anchor.origin",
+      "equals": {
+        "kind": "point2",
+        "name": "Assembly plan origin",
+        "position": [
+          7000,
+          -13000
+        ],
+        "level": "level.ground"
+      }
+    },
+    {
+      "path": "/elements/assembly.screened-entrance",
+      "equals": {
+        "kind": "assembly",
+        "name": "Screened landing and stair entrance",
+        "assemblyType": "stairSystem",
+        "recipeInstance": {
+          "recipeId": "recipe.screened-entrance",
+          "recipeDigest": "8ffd963f58abedc9999719250aa7dcd4a08f3eb145d191c65cc74e0195da7952",
+          "parameters": {
+            "origin": [
+              7000,
+              -13000
+            ]
+          },
+          "bindings": {
+            "binding.storey": "level.ground"
+          },
+          "objectIds": {
+            "levels": {},
+            "anchors": {
+              "anchor.origin": "assembly.screened-entrance.anchor.origin"
+            },
+            "materials": {
+              "material.timber": "assembly.screened-entrance.material.timber",
+              "material.concrete": "assembly.screened-entrance.material.concrete",
+              "mat.black": "assembly.screened-entrance.mat.black",
+              "material.steel": "assembly.screened-entrance.material.steel",
+              "mat.wood": "assembly.screened-entrance.mat.wood",
+              "mat.composite": "assembly.screened-entrance.mat.composite",
+              "mat.screen": "assembly.screened-entrance.mat.screen"
+            },
+            "types": {
+              "type.deck": "assembly.screened-entrance.type.deck",
+              "stock.joist": "assembly.screened-entrance.stock.joist",
+              "stock.beam": "assembly.screened-entrance.stock.beam",
+              "stock.post": "assembly.screened-entrance.stock.post",
+              "type.joists": "assembly.screened-entrance.type.joists",
+              "type.pad": "assembly.screened-entrance.type.pad",
+              "type.guard": "assembly.screened-entrance.type.guard",
+              "stock.board": "assembly.screened-entrance.stock.board",
+              "type.boards": "assembly.screened-entrance.type.boards",
+              "type.postCap": "assembly.screened-entrance.type.postCap",
+              "type.postBase": "assembly.screened-entrance.type.postBase",
+              "type.screw": "assembly.screened-entrance.type.screw",
+              "type.stair": "assembly.screened-entrance.type.stair",
+              "type.stringer": "assembly.screened-entrance.type.stringer",
+              "type.handrail": "assembly.screened-entrance.type.handrail",
+              "type.screen": "assembly.screened-entrance.type.screen",
+              "type.screen-door": "assembly.screened-entrance.type.screen-door"
+            },
+            "elements": {
+              "assembly.root": "assembly.screened-entrance",
+              "slab.deck": "assembly.screened-entrance.slab.deck",
+              "framing.joists": "assembly.screened-entrance.framing.joists",
+              "beam.south": "assembly.screened-entrance.beam.south",
+              "post.south.west": "assembly.screened-entrance.post.south.west",
+              "pad.south.west": "assembly.screened-entrance.pad.south.west",
+              "post.south.east": "assembly.screened-entrance.post.south.east",
+              "pad.south.east": "assembly.screened-entrance.pad.south.east",
+              "beam.north": "assembly.screened-entrance.beam.north",
+              "post.north.west": "assembly.screened-entrance.post.north.west",
+              "pad.north.west": "assembly.screened-entrance.pad.north.west",
+              "post.north.east": "assembly.screened-entrance.post.north.east",
+              "pad.north.east": "assembly.screened-entrance.pad.north.east",
+              "decking": "assembly.screened-entrance.decking",
+              "hardware.postBase.south.west": "assembly.screened-entrance.hardware.postBase.south.west",
+              "screws.postBase.south.west": "assembly.screened-entrance.screws.postBase.south.west",
+              "hardware.postCap.south.west": "assembly.screened-entrance.hardware.postCap.south.west",
+              "screws.postCap.south.west": "assembly.screened-entrance.screws.postCap.south.west",
+              "hardware.postBase.south.east": "assembly.screened-entrance.hardware.postBase.south.east",
+              "screws.postBase.south.east": "assembly.screened-entrance.screws.postBase.south.east",
+              "hardware.postCap.south.east": "assembly.screened-entrance.hardware.postCap.south.east",
+              "screws.postCap.south.east": "assembly.screened-entrance.screws.postCap.south.east",
+              "hardware.postBase.north.west": "assembly.screened-entrance.hardware.postBase.north.west",
+              "screws.postBase.north.west": "assembly.screened-entrance.screws.postBase.north.west",
+              "hardware.postCap.north.west": "assembly.screened-entrance.hardware.postCap.north.west",
+              "screws.postCap.north.west": "assembly.screened-entrance.screws.postCap.north.west",
+              "hardware.postBase.north.east": "assembly.screened-entrance.hardware.postBase.north.east",
+              "screws.postBase.north.east": "assembly.screened-entrance.screws.postBase.north.east",
+              "hardware.postCap.north.east": "assembly.screened-entrance.hardware.postCap.north.east",
+              "screws.postCap.north.east": "assembly.screened-entrance.screws.postCap.north.east",
+              "stair": "assembly.screened-entrance.stair",
+              "stair.guard.left": "assembly.screened-entrance.stair.guard.left",
+              "stair.handrail.left": "assembly.screened-entrance.stair.handrail.left",
+              "stair.guard.right": "assembly.screened-entrance.stair.guard.right",
+              "stair.handrail.right": "assembly.screened-entrance.stair.handrail.right",
+              "guard.south": "assembly.screened-entrance.guard.south",
+              "screen.south": "assembly.screened-entrance.screen.south",
+              "guard.east": "assembly.screened-entrance.guard.east",
+              "screen.east": "assembly.screened-entrance.screen.east",
+              "guard.north": "assembly.screened-entrance.guard.north",
+              "screen.north": "assembly.screened-entrance.screen.north",
+              "guard.west": "assembly.screened-entrance.guard.west",
+              "screen.west": "assembly.screened-entrance.screen.west",
+              "opening.door": "assembly.screened-entrance.opening.door",
+              "door": "assembly.screened-entrance.door"
+            },
+            "relationships": {
+              "supports.south.joists": "assembly.screened-entrance.supports.south.joists",
+              "supports.south.west.post": "assembly.screened-entrance.supports.south.west.post",
+              "supports.south.west.beam": "assembly.screened-entrance.supports.south.west.beam",
+              "supports.south.east.post": "assembly.screened-entrance.supports.south.east.post",
+              "supports.south.east.beam": "assembly.screened-entrance.supports.south.east.beam",
+              "supports.north.joists": "assembly.screened-entrance.supports.north.joists",
+              "supports.north.west.post": "assembly.screened-entrance.supports.north.west.post",
+              "supports.north.west.beam": "assembly.screened-entrance.supports.north.west.beam",
+              "supports.north.east.post": "assembly.screened-entrance.supports.north.east.post",
+              "supports.north.east.beam": "assembly.screened-entrance.supports.north.east.beam",
+              "relationship.parts": "assembly.screened-entrance.relationship.parts",
+              "void.door": "assembly.screened-entrance.void.door",
+              "fill.door": "assembly.screened-entrance.fill.door"
+            }
+          },
+          "overrides": {},
+          "sharedTypes": {},
+          "connectionPoints": {
+            "landing": {
+              "element": "assembly.screened-entrance.slab.deck",
+              "description": "Finished entrance landing"
+            }
+          }
+        }
+      }
+    },
+    {
+      "path": "/levels/level.ground",
+      "equals": {
+        "kind": "storey",
+        "name": "Catalog datum",
+        "elevation": 0
+      }
+    }
+  ],
+  "operations": [
+    {
+      "op": "putObject",
+      "registry": "anchors",
+      "objectId": "assembly.screened-entrance.anchor.origin",
+      "value": {
+        "kind": "point2",
+        "name": "Assembly plan origin",
+        "position": [
+          7350,
+          -12775
+        ],
+        "level": "level.ground"
+      }
+    },
+    {
+      "op": "putObject",
+      "registry": "elements",
+      "objectId": "assembly.screened-entrance",
+      "value": {
+        "kind": "assembly",
+        "name": "Screened landing and stair entrance",
+        "assemblyType": "stairSystem",
+        "recipeInstance": {
+          "recipeId": "recipe.screened-entrance",
+          "recipeDigest": "8ffd963f58abedc9999719250aa7dcd4a08f3eb145d191c65cc74e0195da7952",
+          "parameters": {
+            "origin": [
+              7350,
+              -12775
+            ]
+          },
+          "bindings": {
+            "binding.storey": "level.ground"
+          },
+          "objectIds": {
+            "levels": {},
+            "anchors": {
+              "anchor.origin": "assembly.screened-entrance.anchor.origin"
+            },
+            "materials": {
+              "material.timber": "assembly.screened-entrance.material.timber",
+              "material.concrete": "assembly.screened-entrance.material.concrete",
+              "mat.black": "assembly.screened-entrance.mat.black",
+              "material.steel": "assembly.screened-entrance.material.steel",
+              "mat.wood": "assembly.screened-entrance.mat.wood",
+              "mat.composite": "assembly.screened-entrance.mat.composite",
+              "mat.screen": "assembly.screened-entrance.mat.screen"
+            },
+            "types": {
+              "type.deck": "assembly.screened-entrance.type.deck",
+              "stock.joist": "assembly.screened-entrance.stock.joist",
+              "stock.beam": "assembly.screened-entrance.stock.beam",
+              "stock.post": "assembly.screened-entrance.stock.post",
+              "type.joists": "assembly.screened-entrance.type.joists",
+              "type.pad": "assembly.screened-entrance.type.pad",
+              "type.guard": "assembly.screened-entrance.type.guard",
+              "stock.board": "assembly.screened-entrance.stock.board",
+              "type.boards": "assembly.screened-entrance.type.boards",
+              "type.postCap": "assembly.screened-entrance.type.postCap",
+              "type.postBase": "assembly.screened-entrance.type.postBase",
+              "type.screw": "assembly.screened-entrance.type.screw",
+              "type.stair": "assembly.screened-entrance.type.stair",
+              "type.stringer": "assembly.screened-entrance.type.stringer",
+              "type.handrail": "assembly.screened-entrance.type.handrail",
+              "type.screen": "assembly.screened-entrance.type.screen",
+              "type.screen-door": "assembly.screened-entrance.type.screen-door"
+            },
+            "elements": {
+              "assembly.root": "assembly.screened-entrance",
+              "slab.deck": "assembly.screened-entrance.slab.deck",
+              "framing.joists": "assembly.screened-entrance.framing.joists",
+              "beam.south": "assembly.screened-entrance.beam.south",
+              "post.south.west": "assembly.screened-entrance.post.south.west",
+              "pad.south.west": "assembly.screened-entrance.pad.south.west",
+              "post.south.east": "assembly.screened-entrance.post.south.east",
+              "pad.south.east": "assembly.screened-entrance.pad.south.east",
+              "beam.north": "assembly.screened-entrance.beam.north",
+              "post.north.west": "assembly.screened-entrance.post.north.west",
+              "pad.north.west": "assembly.screened-entrance.pad.north.west",
+              "post.north.east": "assembly.screened-entrance.post.north.east",
+              "pad.north.east": "assembly.screened-entrance.pad.north.east",
+              "decking": "assembly.screened-entrance.decking",
+              "hardware.postBase.south.west": "assembly.screened-entrance.hardware.postBase.south.west",
+              "screws.postBase.south.west": "assembly.screened-entrance.screws.postBase.south.west",
+              "hardware.postCap.south.west": "assembly.screened-entrance.hardware.postCap.south.west",
+              "screws.postCap.south.west": "assembly.screened-entrance.screws.postCap.south.west",
+              "hardware.postBase.south.east": "assembly.screened-entrance.hardware.postBase.south.east",
+              "screws.postBase.south.east": "assembly.screened-entrance.screws.postBase.south.east",
+              "hardware.postCap.south.east": "assembly.screened-entrance.hardware.postCap.south.east",
+              "screws.postCap.south.east": "assembly.screened-entrance.screws.postCap.south.east",
+              "hardware.postBase.north.west": "assembly.screened-entrance.hardware.postBase.north.west",
+              "screws.postBase.north.west": "assembly.screened-entrance.screws.postBase.north.west",
+              "hardware.postCap.north.west": "assembly.screened-entrance.hardware.postCap.north.west",
+              "screws.postCap.north.west": "assembly.screened-entrance.screws.postCap.north.west",
+              "hardware.postBase.north.east": "assembly.screened-entrance.hardware.postBase.north.east",
+              "screws.postBase.north.east": "assembly.screened-entrance.screws.postBase.north.east",
+              "hardware.postCap.north.east": "assembly.screened-entrance.hardware.postCap.north.east",
+              "screws.postCap.north.east": "assembly.screened-entrance.screws.postCap.north.east",
+              "stair": "assembly.screened-entrance.stair",
+              "stair.guard.left": "assembly.screened-entrance.stair.guard.left",
+              "stair.handrail.left": "assembly.screened-entrance.stair.handrail.left",
+              "stair.guard.right": "assembly.screened-entrance.stair.guard.right",
+              "stair.handrail.right": "assembly.screened-entrance.stair.handrail.right",
+              "guard.south": "assembly.screened-entrance.guard.south",
+              "screen.south": "assembly.screened-entrance.screen.south",
+              "guard.east": "assembly.screened-entrance.guard.east",
+              "screen.east": "assembly.screened-entrance.screen.east",
+              "guard.north": "assembly.screened-entrance.guard.north",
+              "screen.north": "assembly.screened-entrance.screen.north",
+              "guard.west": "assembly.screened-entrance.guard.west",
+              "screen.west": "assembly.screened-entrance.screen.west",
+              "opening.door": "assembly.screened-entrance.opening.door",
+              "door": "assembly.screened-entrance.door"
+            },
+            "relationships": {
+              "supports.south.joists": "assembly.screened-entrance.supports.south.joists",
+              "supports.south.west.post": "assembly.screened-entrance.supports.south.west.post",
+              "supports.south.west.beam": "assembly.screened-entrance.supports.south.west.beam",
+              "supports.south.east.post": "assembly.screened-entrance.supports.south.east.post",
+              "supports.south.east.beam": "assembly.screened-entrance.supports.south.east.beam",
+              "supports.north.joists": "assembly.screened-entrance.supports.north.joists",
+              "supports.north.west.post": "assembly.screened-entrance.supports.north.west.post",
+              "supports.north.west.beam": "assembly.screened-entrance.supports.north.west.beam",
+              "supports.north.east.post": "assembly.screened-entrance.supports.north.east.post",
+              "supports.north.east.beam": "assembly.screened-entrance.supports.north.east.beam",
+              "relationship.parts": "assembly.screened-entrance.relationship.parts",
+              "void.door": "assembly.screened-entrance.void.door",
+              "fill.door": "assembly.screened-entrance.fill.door"
+            }
+          },
+          "overrides": {},
+          "sharedTypes": {},
+          "connectionPoints": {
+            "landing": {
+              "element": "assembly.screened-entrance.slab.deck",
+              "description": "Finished entrance landing"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

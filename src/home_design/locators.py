@@ -58,6 +58,18 @@ class LocatorResolver:
             return point[0] + offset[0], point[1] + offset[1]
         return point
 
+    def plan_point(self, value: JsonValue) -> Vec2:
+        """Resolve a legacy XY vector or an explicit shared point locator.
+
+        :param value: Literal coordinates or canonical point/anchor locator.
+        :returns: Resolved model-axis XY coordinates in millimetres.
+        """
+        return (
+            self.point2(value)
+            if isinstance(value, dict)
+            else vector2(value, "plan point")
+        )
+
     def _point2(self, locator: JsonValue, active: tuple[str, ...] = ()) -> Vec2:
         """Resolve a two-dimensional point locator.
 

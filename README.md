@@ -81,10 +81,16 @@ partition controls the mounted circuits, water supply, recess and interface part
 Use the framing and services views to inspect the concealed components.
 
 [Integrated Authoring House](examples/integrated-authoring-house.json) adds named
-version `0.2` construction identities, two windows sharing stock and reusable
+named construction identities, two windows sharing stock and reusable
 partition/deck assemblies. Its [worked edits](skills/home-design/references/examples.md#complete-changeset-examples)
 demonstrate coordinated movement, local stock changes, layer insertion/reordering
 and assembly duplication/adaptation.
+
+[Assemblies](examples/assemblies.json) is a collection of nine distinct construction
+packages, including complete layered walls, roof, floor/deck, wet-wall services,
+ventilation, reinforced masonry foundations, a screened entrance and a king-post
+truss. The [catalog guide](docs/guides/assembly-catalog.md) explains how to inspect
+and reuse them.
 
 ## The conversational workflow
 

@@ -37,7 +37,7 @@ to distinguish them.
 Switching homes refreshes the project title, revision, components, requirements,
 details and report links. Each home starts with its default visibility, framed
 camera, presentation lighting and **Cut** set to **Off**. Selection, component
-filter, isolation mode and sun-study choices are cleared. If a home fails to load,
+filter, isolation mode, component navigation history and sun-study choices are cleared. If a home fails to load,
 retry it or choose another home. Reload the page to discover newly published models.
 
 ## Navigate the model
@@ -72,6 +72,37 @@ design. Measurements include their units; **Technical properties** contains the
 complete resolved details. Feet/inches are rounded to the nearest sixteenth for
 display. Model switching resets grouping and display units along with selection.
 
+### Return to components and find your place
+
+The top of **Details** has **Back** and **Forward** buttons and a **Selection
+history** menu. These track selections from the model, Components list, related
+links and generated-member lists. Use the menu to jump directly to a visited
+component. Selecting a different component after going back starts a new forward
+path. **Clear selection** removes the selection; **Back** restores it.
+
+Returning to a component restores its member search, expanded lists, technical
+properties disclosure and Details scroll position. History changes the inspected
+component without changing the camera, section cut or hidden components. It lasts
+for the loaded model and retains up to 100 selections.
+
+Below the selected component's name:
+
+- **Find in Components** opens the Components panel, filters by the selected ID,
+  and focuses its row, including individual generated members. Clear the filter
+  to browse the full collection. On narrow screens this action closes Details so
+  the list is accessible; **Show Details** reopens the same selection.
+- **Show in model** displays the selected component and frames it without hiding
+  other components. For an assembly it shows and frames the contents. Other
+  geometry can still conceal the selection; use isolation or a section cut to
+  look inside. This action is unavailable for components without geometry or
+  rendered contents. It leaves the current section cut in place.
+- Labeled upward links lead to the generating component, host, assembly or room
+  when those relationships exist. These describe where the part belongs; **Back**
+  follows your actual browsing history. A component can belong to several groups.
+
+Dragging to orbit or pan, and using two fingers to navigate, preserves the
+selection. A click or tap selects a part; clicking empty model space clears it.
+
 ### Follow construction relationships
 
 The **Related components** list links a part to its assembly, room, host,
@@ -86,11 +117,29 @@ component belongs to. **Isolate connected parts** follows explicit connections.
 These actions frame the selected geometry. **Show all** restores visibility;
 **Frame model** returns to the complete home.
 
-A framing component's **Generated members** list lets you find and select a
-specific stud, joist, plate or other modeled member. Its details show stock
+A framing component represents a set of boards, such as a wall's studs and plates
+or a roof's rafters. Select its name, then scroll within Details to **Generated
+members**. Search that list and click a member to inspect its stock
 dimensions and material volume, with a link back to the generating component.
 Members can also be selected directly in the model. Search includes generated
 members; the default index keeps them inside their generating components.
+Use **Back** to return to the framing list with your search and position retained.
+
+### Find Reveal wall contents
+
+Open **Show Details**, then select the wall's name in **Components** or click its
+surface in the model. **Reveal wall contents** appears in Details below **Display
+units**, beside **Isolate with contents**, only when the selected component is a
+wall. An assembly, framing component or individual stud has different actions.
+Clicking an eye button changes visibility; it does not select the component.
+
+For the **Assemblies** model, search for **Complete exterior wall**, click its
+name, then choose **Reveal wall contents**. To inspect individual boards, select
+**Studs, double top plate, bottom plate and window framing** and use its
+**Generated members** list. The **Framing** and **Services** buttons in the lower
+controls isolate those construction groups across the model.
+
+### Inspect service coordination
 
 Service parts with authored coordination checks expose `serviceCoordination`
 in their details. Review each obstructing component/member ID, measured overlap
@@ -131,11 +180,34 @@ The envelope view also includes accessories. Site geometry and space volumes are
 excluded from these presets. A framing view shows only framing that is physically
 modeled; aggregate cavity percentages do not generate members.
 
+**Framing** includes structural concrete, masonry, reinforcing bars and mesh as
+well as timber members. It keeps concrete and masonry visible, so reinforcement
+can remain concealed. The lower discipline buttons apply across the whole model,
+independently of the selected component.
+
+To expose the steel in the Assemblies foundation, select **Reinforced foundation
+and masonry stem wall**, open **Details**, then click **Reveal reinforcement**
+below **Display units**. This action isolates and frames the selected component's
+modeled reinforcing bars and mesh, hiding concrete, masonry and other components.
+It retains the assembly or host selection so **Isolate with contents** restores
+its construction. **Show all** restores the complete model.
+
+**Reveal reinforcement** is available when the selected component or its modeled
+contents includes rendered reinforcing bars or mesh. It also works for an
+individual reinforced footing or wall when the steel is linked as its contents.
+
 Access volumes and barrier probes start hidden and appear as translucent purple
 geometry when enabled in the component tree. Their properties show access
 obstructions or local barrier gaps and connectivity. They do not contribute
 material or solar shading. Hosted accessories appear with the envelope review
 group; inspect their mounting range and net volume after a recess or cavity edit.
+
+The Assemblies component **Waterproofing seam continuity probe** is a small
+virtual checking region where two waterproofing sheets meet. Search for that
+name and select it to inspect modeled coverage and connectivity; click its eye
+button to show the purple region. It starts hidden and is not a physical building
+part. This local geometry check does not establish that an installed seam is
+watertight.
 
 ### Cutaway views of Hillside Deck House
 

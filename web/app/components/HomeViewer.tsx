@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import {
   Box3,
   Box3Helper,
@@ -39,8 +39,11 @@ import ViewOrientation from './ViewOrientation';
 import DesignRequirements from './DesignRequirements';
 import PanelControls from './PanelControls';
 import QuickStart from './QuickStart';
-import ElementDetails from './ElementDetails';
-import { contextElementIds, navigationGroups, selectionNodes, type NavigationGrouping, type ReviewScope } from '../lib/navigation';
+import ElementDetails, { initialDetailsView, type DetailsView } from './ElementDetails';
+import SelectionHistory from './SelectionHistory';
+import { emptySelectionHistory, selectionHistoryReducer } from '../lib/selection-history';
+import { PickGesture } from '../lib/pick-gesture';
+import { contextElementIds, navigationGroups, reinforcementElementIds, selectionNodes, type ContextAction, type NavigationGrouping } from '../lib/navigation';
 import type { DisplayUnits } from '../lib/properties';
 import { readPanelVisibility, savePanelVisibility, type PanelVisibility, type ReviewPanel } from '../lib/panels';
 
@@ -57,7 +60,7 @@ export default function HomeViewer() {
   const [panels, setPanels] = useState(readPanelVisibility);
   const togglePanel = (panel: ReviewPanel) => {
     const visible = !panels[panel];
-    setPanels({ ...panels, [panel]: visible });
+    setPanels((current) => ({ ...current, [panel]: !current[panel] }));
     savePanelVisibility(panel, visible);
   };
   const [models, setModels] = useState<CatalogModel[]>([]);
@@ -108,7 +111,11 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const hiddenIdsRef = useRef<ReadonlySet<string>>(new Set());
   const [manifest, setManifest] = useState<RenderManifest | null>(null);
   const [hiddenIds, setHiddenIds] = useState<ReadonlySet<string>>(new Set());
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [history, dispatchSelection] = useReducer(selectionHistoryReducer, emptySelectionHistory);
+  const selectedId = history.entries[history.index];
+  const [detailsViews, setDetailsViews] = useState<Record<string, DetailsView>>({});
+  const [listRequest, setListRequest] = useState<{ id: string } | null>(null);
+  const componentList = useRef<HTMLElement>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(entry ? 'loading' : catalogStatus);
   const [message, setMessage] = useState(entry ? 'Loading model…' : catalogMessage);
   const [loadAttempt, setLoadAttempt] = useState(0);
@@ -135,7 +142,10 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const spacesVisible = spaceIds.length > 0 && spaceIds.every((id) => !hiddenIds.has(id));
 
   const selectElement = useCallback((elementId: string | null) => {
-    setSelectedId(elementId);
+    dispatchSelection({ type: 'visit', id: elementId });
+  }, []);
+
+  useEffect(() => {
     const handle = sceneHandle.current;
     const currentManifest = manifestRef.current;
     if (!handle || !currentManifest) return;
@@ -144,10 +154,10 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
       disposeSceneResources(highlight.current);
     }
     highlight.current = null;
-    if (!elementId) return;
-    const element = currentManifest.elements[elementId];
+    if (!selectedId) return;
+    const element = currentManifest.elements[selectedId];
     if (!element) return;
-    const objects = selectionNodes(currentManifest, elementId)
+    const objects = selectionNodes(currentManifest, selectedId)
       .map((name) => handle.scene.getObjectByName(name))
       .filter((object): object is NonNullable<typeof object> => Boolean(object));
     if (!objects.length) return;
@@ -157,7 +167,15 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     helper.name = 'selection-outline';
     handle.scene.add(helper);
     highlight.current = helper;
-  }, []);
+  }, [selectedId, manifest]);
+
+  useEffect(() => {
+    if (!listRequest || !displayedPanels.components) return;
+    const row = [...(componentList.current?.querySelectorAll<HTMLButtonElement>('[data-component-id]') ?? [])]
+      .find((button) => button.dataset.componentId === listRequest.id);
+    row?.scrollIntoView({ block: 'nearest' });
+    row?.focus({ preventScroll: true });
+  }, [listRequest, displayedPanels.components]);
 
   const resetView = useCallback(() => {
     const handle = sceneHandle.current;
@@ -273,7 +291,12 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
         setMessage(error instanceof Error ? error.message : 'The model could not be loaded');
       });
 
+    const gesture = new PickGesture();
+    const onPointerDown = (event: PointerEvent) => gesture.down(event);
+    const onPointerMove = (event: PointerEvent) => gesture.move(event);
+    const onPointerCancel = (event: PointerEvent) => gesture.cancel(event.pointerId);
     const onPointerUp = (event: PointerEvent) => {
+      if (!gesture.up(event) || event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) return;
       const currentManifest = manifestRef.current;
       if (!sceneHandle.current || !currentManifest) return;
       const rect = renderer.domElement.getBoundingClientRect();
@@ -291,12 +314,20 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
         });
       selectElement(hit ? elementIdForObject(hit.object, index) : null);
     };
+    renderer.domElement.addEventListener('pointerdown', onPointerDown);
+    renderer.domElement.addEventListener('pointermove', onPointerMove);
+    renderer.domElement.addEventListener('pointercancel', onPointerCancel);
+    renderer.domElement.addEventListener('lostpointercapture', onPointerCancel);
     renderer.domElement.addEventListener('pointerup', onPointerUp);
 
     return () => {
       controller.abort();
       cancelAnimationFrame(frame);
       observer.disconnect();
+      renderer.domElement.removeEventListener('pointerdown', onPointerDown);
+      renderer.domElement.removeEventListener('pointermove', onPointerMove);
+      renderer.domElement.removeEventListener('pointercancel', onPointerCancel);
+      renderer.domElement.removeEventListener('lostpointercapture', onPointerCancel);
       renderer.domElement.removeEventListener('pointerup', onPointerUp);
       controls.dispose();
       controls.removeEventListener('change', updateOrientation);
@@ -356,14 +387,15 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     setHiddenIds(next);
   };
 
-  const isolateContext = (scope: ReviewScope | 'reveal') => {
+  const isolateContext = (scope: ContextAction) => {
     if (!manifest || !selectedId) return;
-    const ids = contextElementIds(manifest, selectedId, scope === 'reveal' ? 'contents' : scope)
-      .filter((id) => scope !== 'reveal' || id !== selectedId);
+    const ids = scope === 'reinforcement' ? reinforcementElementIds(manifest, selectedId)
+      : contextElementIds(manifest, selectedId, scope === 'reveal' ? 'contents' : scope)
+        .filter((id) => scope !== 'reveal' || id !== selectedId);
     const next = isolateElements(manifest, ids);
     hiddenIdsRef.current = next;
     setHiddenIds(next);
-    if (scope !== 'reveal' && next.has(selectedId)) selectElement(null);
+    if (scope !== 'reveal' && scope !== 'reinforcement' && next.has(selectedId)) selectElement(null);
     const handle = sceneHandle.current;
     if (handle) {
       const bounds = new Box3();
@@ -373,6 +405,30 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
       }
       frameBounds(handle.camera, handle.controls, bounds);
     }
+  };
+
+  const findSelection = () => {
+    if (!selectedId) return;
+    setComponentQuery(selectedId);
+    setListRequest({ id: selectedId });
+    if (!panels.components) onTogglePanel('components');
+    // On narrow screens the inspector overlays the component list.
+    if (window.matchMedia('(max-width: 1000px)').matches && panels.details) onTogglePanel('details');
+  };
+
+  const showSelection = () => {
+    const handle = sceneHandle.current;
+    if (!manifest || !selectedId || !handle) return;
+    const ids = manifest.elements[selectedId].nodes.length ? [selectedId] : contextElementIds(manifest, selectedId);
+    const next = withElementVisibility(manifest, hiddenIdsRef.current, ids, true);
+    hiddenIdsRef.current = next;
+    setHiddenIds(next);
+    const bounds = new Box3();
+    for (const name of selectionNodes(manifest, selectedId)) {
+      const object = handle.scene.getObjectByName(name);
+      if (object) bounds.expandByObject(object);
+    }
+    frameBounds(handle.camera, handle.controls, bounds);
   };
 
   return (
@@ -416,7 +472,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           </div>
           <span role="status">{componentQuery.trim() ? `${matchCount} matching components` : `${matchCount} components`}</span>
         </div>
-        <nav className="tree-groups">
+        <nav className="tree-groups" ref={componentList}>
           {manifest && <DesignRequirements manifest={manifest} />}
           {manifest && filteredGroups.length === 0 && <p className="no-components">No matching components.</p>}
           {filteredGroups.map((group) => {
@@ -444,6 +500,8 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
                   <div className={`component-row ${visible ? '' : 'component-hidden'}`} key={elementId}>
                     <button
                       className={`component-select ${selectedId === elementId ? 'selected' : ''}`}
+                      data-component-id={elementId}
+                      aria-current={selectedId === elementId ? 'true' : undefined}
                       onClick={() => selectElement(elementId)}
                     >
                       <span className={`kind-swatch kind-${element.kind}`} />
@@ -526,9 +584,14 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           <div><p>Selection</p><h2>{selected ? selected.kindLabel ?? selected.kind : 'Nothing selected'}</h2></div>
           {selected && <span className={`large-swatch kind-${selected.kind}`} />}
         </div>
+        <SelectionHistory history={history} manifest={manifest} onGo={(index) => dispatchSelection({ type: 'go', index })} onClear={() => selectElement(null)} />
         {selected && selectedId && manifest ? (
           <>
-            <ElementDetails key={selectedId} elementId={selectedId} manifest={manifest} units={displayUnits} onUnits={setDisplayUnits} onSelect={selectElement} onIsolate={isolateContext} />
+            <ElementDetails key={selectedId} elementId={selectedId} manifest={manifest} units={displayUnits} onUnits={setDisplayUnits} onSelect={selectElement} onIsolate={isolateContext}
+              view={detailsViews[selectedId] ?? initialDetailsView}
+              onView={(changes) => setDetailsViews((views) => ({ ...views, [selectedId]: { ...(views[selectedId] ?? initialDetailsView), ...changes } }))}
+              onFind={findSelection} onShow={showSelection} hasGeometry={selectionNodes(manifest, selectedId).length > 0}
+              hidden={canToggleVisibility(selected) && hiddenIds.has(selectedId)} />
             {manifest?.solarStudies?.filter((study) => study.id === solarStudyId).map((study) => {
               const opening = study.openings.find((entry) => entry.elementId === selectedId);
               return opening ? <p className="solar-result" key={study.id}>{study.name}: {Math.round(opening.unshadedFraction * 100)}% of sampled opening receives direct sun. {study.at}</p> : null;

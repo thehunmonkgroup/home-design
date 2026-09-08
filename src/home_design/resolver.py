@@ -412,8 +412,13 @@ class ModelResolver:
             )
         meshes = tuple(
             mesh
-            for boundary, face_id in zip(boundaries, face_ids)
-            for mesh in LayerAssembly.roof(boundary, component_type, face_id)
+            for index, (boundary, face_id) in enumerate(zip(boundaries, face_ids))
+            for mesh in LayerAssembly.roof(
+                boundary,
+                component_type,
+                face_id,
+                tuple(other for position, other in enumerate(boundaries) if position != index),
+            )
         )
         face_id_values: list[JsonValue] = []
         face_id_values.extend(face_ids)
@@ -908,7 +913,7 @@ class ModelResolver:
         """Resolve a level or an explicitly sampled element surface datum."""
         if datum.get("kind") == "level":
             return self.locators.level_constraint(datum)
-        point = vector2(datum.get("point"), "surface datum point")
+        point = self.locators.plan_point(datum.get("point"))
         return self._constraint_height(datum, point, "top")
 
     def _prepare_openings(self) -> None:

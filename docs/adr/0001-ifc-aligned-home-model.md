@@ -2,7 +2,6 @@
 
 - Status: Accepted
 - Date: 2026-09-04
-- Model version: 0.1
 
 ## Context
 

@@ -1,8 +1,8 @@
 # Viewer navigation and property contracts
 
 The GLB adapter publishes `home-design-render-manifest-0.1`. Optional navigation,
-generated-member and property fields extend that format; older manifests remain
-readable. The viewer validates node lists, property values, relationship endpoints
+generated-member and property fields describe component navigation and display.
+The viewer validates node lists, property values, relationship endpoints
 and generated child/parent references before loading a model.
 
 ## Construction navigation
@@ -33,7 +33,28 @@ connection dependency. System isolation includes the selected component's system
 and its members. Connected-part isolation traverses explicit connection links.
 Grouping preserves components outside named groups in **Other components**.
 
+`reinforcementElementIds` filters content traversal to rendered `reinforcingBar`
+and `reinforcingMesh` components. **Reveal reinforcement** isolates and frames
+those IDs while retaining the selected assembly or host inspector. It does not
+change discipline classification: **Framing** includes concrete and masonry as
+structural components and applies across the complete model.
+
 ## Generated members and geometry
+
+`selectionHistoryReducer` retains up to 100 component selections, including
+deselection, inside the review keyed by model key and asset version. History
+navigation changes its cursor; a new selection truncates forward entries, and
+reselecting the current ID does not append an entry. Details state is cached by
+component ID for the loaded review. History restores that state without changing
+visibility, clipping or camera state. History is independent of browser URL history.
+
+`containingElements` exposes the generated parent and immediate outgoing assembly,
+host and room links. It does not synthesize one hierarchy from multiple containers.
+**Find in Components** filters by canonical/scoped ID and focuses its index row.
+**Show in model** restores selection visibility and frames `selectionNodes`, using
+content traversal for meshless groups. Pointer picking accepts primary clicks or
+taps within five CSS pixels and excludes drags, secondary buttons, cancellation
+and multiple pointers.
 
 Generated framing/member-assembly children use the same scoped IDs as IFC export:
 `OWNER/member/KEY`. Their manifest entries have `parentId`; the owner's entry has
@@ -74,7 +95,7 @@ The viewer converts length, area and volume for metric or US customary display.
 Feet/inches round to the nearest sixteenth of an inch for review; source geometry
 is unchanged. Areas and volumes retain their physical dimensions, counts remain
 unitless counts, and loads retain declared engineering units. Storey labels come
-from the manifest's `storeys` registry. Legacy manifests use the existing scalar
+from the manifest's `storeys` registry. Manifests without property records use scalar
 presentation fallback when explicit property records are absent.
 
 The repository's compact public fixture `web/tests/fixtures/component-navigation.json`

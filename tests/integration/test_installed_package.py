@@ -79,6 +79,9 @@ def test_sdist_wheel_resources_and_guarded_cli_outside_checkout(tmp_path: Path) 
     assert (skill.parent / "references/editing.md").is_file()
     examples = Path(str(locations["examples"]))
     assert (examples / "integrated-authoring-house.json").is_file()
+    assert (examples / "assemblies.json").is_file()
+    assert (skill.parent / "references/catalog.md").is_file()
+    assert (Path(str(locations["recipes"])) / "exterior-wall.json").is_file()
     assert (examples / "change-sets/adapt-copied-deck.json").is_file()
     model = workspace / "home.json"
     shutil.copyfile(examples / "single-story-gable-house.json", model)
@@ -95,7 +98,15 @@ def test_sdist_wheel_resources_and_guarded_cli_outside_checkout(tmp_path: Path) 
     assert recovered["written"] is False
     assert Path(str(locations["recipes"])).is_dir()
     catalog = cli.run("recipes")["recipes"]
-    assert isinstance(catalog, list) and len(catalog) == 2
+    assert isinstance(catalog, list)
+    assert {recipe["id"] for recipe in catalog} == {
+        f"recipe.{name}" for name in (
+            "serviced-partition", "coordinated-deck", "exterior-wall",
+            "insulated-roof", "complete-deck", "insulated-floor",
+            "interior-wet-wall", "ventilation-branch", "reinforced-foundation",
+            "screened-entrance", "king-post-truss",
+        )
+    }
     migration = workspace / "migration.json"
     cli.run("migrate", str(model), "--output", str(migration))
     cli.run("transact", str(model), str(migration))

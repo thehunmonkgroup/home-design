@@ -1,20 +1,39 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { canToggleVisibility, formatProperty, type RenderManifest } from '../lib/model';
-import { relatedElements, type ReviewScope } from '../lib/navigation';
+import { containingElements, reinforcementElementIds, relatedElements, type ContextAction } from '../lib/navigation';
 import { formatDisplayProperty, type DisplayUnits } from '../lib/properties';
 
-export default function ElementDetails({ elementId, manifest, units, onUnits, onSelect, onIsolate }: {
+export interface DetailsView {
+  limit: number;
+  memberQuery: string;
+  memberLimit: number;
+  scrollTop: number;
+  technicalOpen: boolean;
+}
+
+export const initialDetailsView: DetailsView = { limit: 20, memberQuery: '', memberLimit: 30, scrollTop: 0, technicalOpen: false };
+
+export default function ElementDetails({ elementId, manifest, units, onUnits, onSelect, onIsolate, view, onView, onFind, onShow, hasGeometry, hidden }: {
   elementId: string;
   manifest: RenderManifest;
   units: DisplayUnits;
   onUnits: (units: DisplayUnits) => void;
   onSelect: (id: string) => void;
-  onIsolate: (scope: ReviewScope | 'reveal') => void;
+  onIsolate: (scope: ContextAction) => void;
+  view: DetailsView;
+  onView: (changes: Partial<DetailsView>) => void;
+  onFind: () => void;
+  onShow: () => void;
+  hasGeometry: boolean;
+  hidden: boolean;
 }) {
   const element = manifest.elements[elementId];
-  const [limit, setLimit] = useState(20);
-  const [memberQuery, setMemberQuery] = useState('');
-  const [memberLimit, setMemberLimit] = useState(30);
+  const { limit, memberQuery, memberLimit } = view;
+  const container = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    if (container.current) container.current.scrollTop = view.scrollTop;
+  }, [view.scrollTop]);
+  const containers = containingElements(manifest, elementId);
   const relations = relatedElements(manifest, elementId).filter((entry) => entry.kind !== 'generated');
   const children = (element.children ?? []).filter((id) => {
     const child = manifest.elements[id];
@@ -26,10 +45,19 @@ export default function ElementDetails({ elementId, manifest, units, onUnits, on
       const formatted = formatProperty(key, value);
       return formatted ? [{ id: key, label: key.replace(/([A-Z])/g, ' $1'), value: formatted }] : [];
     });
-  return <div className="element-details">
+  return <div className="element-details" ref={container} onScroll={(event) => onView({ scrollTop: event.currentTarget.scrollTop })}>
     <h3>{element.name}</h3>
     <code>{elementId}</code>
-    {element.parentId && <button className="related-link parent-link" onClick={() => onSelect(element.parentId!)}>Back to {manifest.elements[element.parentId]?.name ?? 'assembly'}</button>}
+    <div className="context-actions" aria-label="Find selected component">
+      <button onClick={onFind}>Find in Components</button>
+      <button onClick={onShow} disabled={!hasGeometry} title="Show this component and frame it without hiding other components">Show in model</button>
+    </div>
+    {hidden && <p className="component-note">This component is hidden. Use Show in model to display it.</p>}
+    {containers.length > 0 && <nav className="containing-components" aria-label="Containing components">
+      {containers.map(({ id, label }) => <button key={id} className="related-link" onClick={() => onSelect(id)}>
+        <small>{label}</small><span>↑ {manifest.elements[id].name}</span>
+      </button>)}
+    </nav>}
     {!canToggleVisibility(element) && <p className="component-note">This component groups or describes other parts. Select its contents to review geometry.</p>}
     <label className="display-units">Display units
       <select aria-label="Display units" value={units} onChange={(event) => onUnits(event.target.value as DisplayUnits)}>
@@ -39,6 +67,7 @@ export default function ElementDetails({ elementId, manifest, units, onUnits, on
     {manifest.navigation && <div className="context-actions">
       <button onClick={() => onIsolate('contents')}>Isolate with contents</button>
       {element.kind === 'wall' && <button onClick={() => onIsolate('reveal')}>Reveal wall contents</button>}
+      {reinforcementElementIds(manifest, elementId).length > 0 && <button onClick={() => onIsolate('reinforcement')}>Reveal reinforcement</button>}
       {hasSystem && <button onClick={() => onIsolate('system')}>Isolate system</button>}
       {relations.some((entry) => entry.kind === 'connection') && <button onClick={() => onIsolate('connected')}>Isolate connected parts</button>}
     </div>}
@@ -52,18 +81,18 @@ export default function ElementDetails({ elementId, manifest, units, onUnits, on
       {relations.slice(0, limit).map((entry) => <button className="related-link" key={`${entry.kind}:${entry.id}`} onClick={() => onSelect(entry.id)}>
         <small>{entry.label}</small><span>{manifest.elements[entry.id].name}</span>
       </button>)}
-      {relations.length > limit && <button className="more-components" onClick={() => setLimit(limit + 20)}>Show more relationships</button>}
+      {relations.length > limit && <button className="more-components" onClick={() => onView({ limit: limit + 20 })}>Show more relationships</button>}
     </section>}
     {(element.children?.length ?? 0) > 0 && <section className="generated-components" aria-label="Generated members">
       <h4>Generated members <span>{element.children!.length}</span></h4>
-      <input type="search" aria-label="Find generated members" placeholder="Find a member…" value={memberQuery} onChange={(event) => { setMemberQuery(event.target.value); setMemberLimit(30); }} />
+      <input type="search" aria-label="Find generated members" placeholder="Find a member…" value={memberQuery} onChange={(event) => onView({ memberQuery: event.target.value, memberLimit: 30 })} />
       {children.slice(0, memberLimit).map((id) => <button className="related-link" key={id} onClick={() => onSelect(id)}>
         <span>{manifest.elements[id].name}</span>
         <small>{String(manifest.elements[id].data.key ?? manifest.elements[id].data.memberIndex ?? id)}</small>
       </button>)}
       {children.length === 0 && <p>No matching members.</p>}
-      {children.length > memberLimit && <button className="more-components" onClick={() => setMemberLimit(memberLimit + 30)}>Show more members</button>}
+      {children.length > memberLimit && <button className="more-components" onClick={() => onView({ memberLimit: memberLimit + 30 })}>Show more members</button>}
     </section>}
-    <details><summary>Technical properties</summary><pre>{JSON.stringify(element.data, null, 2)}</pre></details>
+    <details open={view.technicalOpen} onToggle={(event) => { if (event.currentTarget.open !== view.technicalOpen) onView({ technicalOpen: event.currentTarget.open }); }}><summary>Technical properties</summary><pre>{JSON.stringify(element.data, null, 2)}</pre></details>
   </div>;
 }

@@ -17,6 +17,8 @@ from home_design.geometry import (
 )
 from home_design.json_types import JsonObject, JsonValue
 from home_design.resolved import MeshData, Vec2, Vec3
+from home_design.roof_joints import RoofJoints
+from home_design.solids import SolidOperations
 
 
 @dataclass(frozen=True)
@@ -184,10 +186,19 @@ class LayerAssembly:
 
     @classmethod
     def roof(
-        cls, boundary: tuple[Vec3, ...], component_type: JsonObject, face_id: str
+        cls,
+        boundary: tuple[Vec3, ...],
+        component_type: JsonObject,
+        face_id: str,
+        neighbors: tuple[tuple[Vec3, ...], ...] = (),
     ) -> tuple[MeshData, ...]:
-        """Stack layers along the face normal and expose both finish surfaces."""
+        """Stack normal-thickness layers with optional shared-edge bisector trimming."""
         meshes: list[MeshData] = []
+        joints = (
+            RoofJoints.planes(boundary, neighbors)
+            if component_type.get("layerJoin") == "miter"
+            else ()
+        )
         for layer in cls.layers(component_type):
             mesh = extrude_planar_face(
                 boundary,
@@ -195,8 +206,13 @@ class LayerAssembly:
                 layer.material,
                 f"roof-face:{face_id}:layer:{layer.index}",
             )
-            meshes.append(mesh)
             boundary = mesh.vertices[len(mesh.vertices) // 2 :]
+            for origin, normal in joints:
+                clipped = SolidOperations.clip_plane(mesh, origin, normal)
+                if clipped is None:
+                    raise ResolutionError("Roof miter consumes an entire material layer")
+                mesh = clipped
+            meshes.append(mesh)
         return tuple(meshes)
 
     @classmethod

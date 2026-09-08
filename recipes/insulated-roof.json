@@ -1,0 +1,674 @@
+{
+  "recipeVersion": "0.1",
+  "modelVersion": "0.2",
+  "id": "recipe.insulated-roof",
+  "name": "Insulated gable roof",
+  "description": "Shingles, underlay, sheathing, explicit insulated rafters, air-control layer, sloping gypsum ceiling, fascia and rainwater eave details.",
+  "assembly": "assembly.root",
+  "bindings": {
+    "binding.storey": {
+      "registry": "levels",
+      "kind": "storey",
+      "description": "Storey supplying the package's elevation datum"
+    }
+  },
+  "parameters": {
+    "origin": {
+      "valueType": "point2",
+      "description": "Package origin in model XY millimetres",
+      "default": [
+        0,
+        0
+      ],
+      "targets": [
+        "/anchors/anchor.origin/position"
+      ]
+    }
+  },
+  "objects": {
+    "anchors": {
+      "anchor.origin": {
+        "kind": "point2",
+        "name": "Package origin",
+        "position": [
+          0,
+          0
+        ],
+        "level": "binding.storey"
+      }
+    },
+    "materials": {
+      "material.roofing": {
+        "name": "Asphalt shingles",
+        "category": "roofing",
+        "appearance": {
+          "color": "#3F4448",
+          "roughness": 0.9
+        }
+      },
+      "material.sheathing": {
+        "name": "Structural sheathing",
+        "category": "wood"
+      },
+      "material.insulation": {
+        "name": "Illustrative cavity insulation",
+        "appearance": {
+          "color": "#d8b66a"
+        }
+      },
+      "material.timber": {
+        "name": "Framing timber",
+        "category": "wood",
+        "appearance": {
+          "color": "#C69C6D",
+          "roughness": 0.8
+        }
+      },
+      "material.gypsum": {
+        "name": "Gypsum board",
+        "category": "finish",
+        "appearance": {
+          "color": "#E8E5DF",
+          "roughness": 0.95
+        }
+      },
+      "material.steel": {
+        "name": "Illustrative galvanized service stock",
+        "appearance": {
+          "color": "#8fabb8"
+        }
+      },
+      "material.membrane": {
+        "name": "Roof membrane",
+        "appearance": {
+          "color": "#536378"
+        }
+      },
+      "mat.black": {
+        "name": "Black aluminum",
+        "appearance": {
+          "color": "#24282a"
+        }
+      }
+    },
+    "types": {
+      "roofType.shingle-250": {
+        "kind": "roofType",
+        "name": "Shingle roof assembly",
+        "layers": [
+          {
+            "name": "Asphalt shingles",
+            "material": "material.roofing",
+            "thickness": 10,
+            "function": "finish",
+            "id": "roofing"
+          },
+          {
+            "id": "underlay",
+            "name": "Roof underlay",
+            "thickness": 2,
+            "material": "material.membrane",
+            "function": "membrane"
+          },
+          {
+            "name": "Sheathing",
+            "material": "material.sheathing",
+            "thickness": 20,
+            "function": "substrate",
+            "id": "sheathing"
+          },
+          {
+            "name": "Rafter and insulation zone",
+            "material": "material.insulation",
+            "thickness": 220,
+            "function": "structure",
+            "representation": "explicit",
+            "id": "cavity"
+          },
+          {
+            "id": "air",
+            "name": "Air-control membrane",
+            "thickness": 1,
+            "material": "material.membrane",
+            "function": "membrane"
+          },
+          {
+            "id": "ceiling",
+            "name": "Interior gypsum ceiling",
+            "thickness": 13,
+            "material": "material.gypsum",
+            "function": "finish"
+          }
+        ],
+        "layerOrder": "topToBottom",
+        "layerJoin": "miter"
+      },
+      "planarFramingType.shell": {
+        "kind": "planarFramingType",
+        "name": "Explicit floor, deck and roof framing",
+        "memberType": "memberType.shell.joist",
+        "rimType": "memberType.shell.joist",
+        "spacing": 600
+      },
+      "memberType.shell.joist": {
+        "kind": "memberType",
+        "name": "Illustrative joist stock",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 40,
+          "depth": 220
+        }
+      },
+      "type.fascia": {
+        "kind": "sweepType",
+        "name": "Fascia",
+        "section": {
+          "kind": "rectangle",
+          "width": 25,
+          "depth": 200
+        },
+        "material": "material.timber"
+      },
+      "type.gutter": {
+        "kind": "sweepType",
+        "name": "Gutter",
+        "section": {
+          "kind": "profile",
+          "profile": {
+            "outer": [
+              [
+                -60,
+                40
+              ],
+              [
+                -60,
+                -40
+              ],
+              [
+                60,
+                -40
+              ],
+              [
+                60,
+                40
+              ],
+              [
+                57,
+                40
+              ],
+              [
+                57,
+                -37
+              ],
+              [
+                -57,
+                -37
+              ],
+              [
+                -57,
+                40
+              ]
+            ]
+          }
+        },
+        "material": "material.steel"
+      },
+      "type.pipe": {
+        "kind": "sweepType",
+        "name": "Drain pipe",
+        "section": {
+          "kind": "profile",
+          "profile": {
+            "outer": [
+              [
+                -60,
+                -60
+              ],
+              [
+                60,
+                -60
+              ],
+              [
+                60,
+                60
+              ],
+              [
+                -60,
+                60
+              ]
+            ],
+            "holes": [
+              [
+                [
+                  -50,
+                  -50
+                ],
+                [
+                  -50,
+                  50
+                ],
+                [
+                  50,
+                  50
+                ],
+                [
+                  50,
+                  -50
+                ]
+              ]
+            ]
+          }
+        },
+        "material": "mat.black"
+      },
+      "type.drip": {
+        "kind": "envelopePartType",
+        "name": "Metal roof drip edge",
+        "role": "dripEdge",
+        "material": "material.steel",
+        "solids": {
+          "flange": {
+            "section": {
+              "kind": "rectangle",
+              "width": 4500,
+              "depth": 60
+            },
+            "depth": 1
+          }
+        }
+      }
+    },
+    "elements": {
+      "assembly.root": {
+        "kind": "assembly",
+        "name": "Insulated gable roof",
+        "assemblyType": "roofSystem"
+      },
+      "roof": {
+        "kind": "roof",
+        "name": "Layered gable roof",
+        "storey": "binding.storey",
+        "type": "roofType.shingle-250",
+        "geometry": {
+          "kind": "parametric",
+          "form": "gable",
+          "footprint": {
+            "outer": [
+              {
+                "anchor": "anchor.origin",
+                "offset": [
+                  0,
+                  0
+                ]
+              },
+              {
+                "anchor": "anchor.origin",
+                "offset": [
+                  4000,
+                  0
+                ]
+              },
+              {
+                "anchor": "anchor.origin",
+                "offset": [
+                  4000,
+                  3000
+                ]
+              },
+              {
+                "anchor": "anchor.origin",
+                "offset": [
+                  0,
+                  3000
+                ]
+              }
+            ],
+            "boundaryIds": {
+              "outer": [
+                "south",
+                "east",
+                "north",
+                "west"
+              ],
+              "holes": []
+            }
+          },
+          "eaveDatum": {
+            "kind": "level",
+            "level": "binding.storey",
+            "offset": 2700
+          },
+          "pitch": 25,
+          "ridgeDirection": [
+            1,
+            0
+          ],
+          "overhang": 250,
+          "faceIds": {
+            "face.gable.south": "south",
+            "face.gable.north": "north"
+          }
+        }
+      },
+      "rafters.south": {
+        "kind": "planarFraming",
+        "name": "South rafters and edge blocking",
+        "type": "planarFramingType.shell",
+        "host": "roof",
+        "layer": "cavity",
+        "face": "south",
+        "direction": [
+          0,
+          1
+        ],
+        "originBoundary": "west"
+      },
+      "rafters.north": {
+        "kind": "planarFraming",
+        "name": "North rafters and edge blocking",
+        "type": "planarFramingType.shell",
+        "host": "roof",
+        "layer": "cavity",
+        "face": "north",
+        "direction": [
+          0,
+          1
+        ],
+        "originBoundary": "west"
+      },
+      "fascia.south": {
+        "kind": "sweep",
+        "name": "South fascia",
+        "storey": "binding.storey",
+        "type": "type.fascia",
+        "role": "fascia",
+        "path": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              -250,
+              -265,
+              2580
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              4250,
+              -265,
+              2580
+            ]
+          }
+        ]
+      },
+      "fascia.north": {
+        "kind": "sweep",
+        "name": "North fascia",
+        "storey": "binding.storey",
+        "type": "type.fascia",
+        "role": "fascia",
+        "path": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              -250,
+              3265,
+              2580
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              4250,
+              3265,
+              2580
+            ]
+          }
+        ]
+      },
+      "gutter.south": {
+        "kind": "sweep",
+        "name": "South gutter",
+        "storey": "binding.storey",
+        "type": "type.gutter",
+        "role": "gutter",
+        "path": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              -250,
+              -340,
+              2580
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              4250,
+              -340,
+              2550
+            ]
+          }
+        ],
+        "minFall": 0.005
+      },
+      "gutter.north": {
+        "kind": "sweep",
+        "name": "North gutter",
+        "storey": "binding.storey",
+        "type": "type.gutter",
+        "role": "gutter",
+        "path": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              -250,
+              3340,
+              2580
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              4250,
+              3340,
+              2550
+            ]
+          }
+        ],
+        "minFall": 0.005
+      },
+      "downspout.south": {
+        "kind": "sweep",
+        "name": "South downspout",
+        "type": "type.pipe",
+        "role": "downspout",
+        "path": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              4250,
+              -340,
+              2550
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              4250,
+              -340,
+              200
+            ]
+          }
+        ],
+        "outlet": {
+          "name": "Illustrative rainwater connection",
+          "stable": true
+        }
+      },
+      "downspout.north": {
+        "kind": "sweep",
+        "name": "North downspout",
+        "type": "type.pipe",
+        "role": "downspout",
+        "path": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              4250,
+              3340,
+              2550
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              4250,
+              3340,
+              200
+            ]
+          }
+        ],
+        "outlet": {
+          "name": "Illustrative rainwater connection",
+          "stable": true
+        }
+      },
+      "drip.south": {
+        "kind": "envelopePart",
+        "name": "South drip edge",
+        "type": "type.drip",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "surface",
+              "element": "roof",
+              "face": "south",
+              "surface": "top",
+              "point": {
+                "anchor": "anchor.origin",
+                "offset": [
+                  2000,
+                  -220
+                ]
+              }
+            }
+          }
+        }
+      },
+      "drip.north": {
+        "kind": "envelopePart",
+        "name": "North drip edge",
+        "type": "type.drip",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "surface",
+              "element": "roof",
+              "face": "north",
+              "surface": "top",
+              "point": {
+                "anchor": "anchor.origin",
+                "offset": [
+                  2000,
+                  3220
+                ]
+              }
+            }
+          }
+        }
+      },
+      "cut.south.inlet": {
+        "kind": "penetration",
+        "name": "South gutter inlet",
+        "storey": "binding.storey",
+        "host": "downspout.south",
+        "owner": "gutter.south",
+        "purpose": "opening",
+        "geometrySource": {
+          "element": "gutter.south",
+          "volume": "envelope"
+        }
+      },
+      "cut.south.outlet": {
+        "kind": "penetration",
+        "name": "South gutter outlet",
+        "storey": "binding.storey",
+        "host": "gutter.south",
+        "owner": "downspout.south",
+        "purpose": "opening",
+        "geometrySource": {
+          "element": "downspout.south",
+          "volume": "bore"
+        }
+      },
+      "cut.north.inlet": {
+        "kind": "penetration",
+        "name": "North gutter inlet",
+        "storey": "binding.storey",
+        "host": "downspout.north",
+        "owner": "gutter.north",
+        "purpose": "opening",
+        "geometrySource": {
+          "element": "gutter.north",
+          "volume": "envelope"
+        }
+      },
+      "cut.north.outlet": {
+        "kind": "penetration",
+        "name": "North gutter outlet",
+        "storey": "binding.storey",
+        "host": "gutter.north",
+        "owner": "downspout.north",
+        "purpose": "opening",
+        "geometrySource": {
+          "element": "downspout.north",
+          "volume": "bore"
+        }
+      }
+    },
+    "relationships": {
+      "drains.south": {
+        "kind": "drainsTo",
+        "source": "gutter.south",
+        "target": "downspout.south"
+      },
+      "drains.north": {
+        "kind": "drainsTo",
+        "source": "gutter.north",
+        "target": "downspout.north"
+      },
+      "relationship.parts": {
+        "kind": "aggregates",
+        "assembly": "assembly.root",
+        "parts": [
+          "roof",
+          "rafters.south",
+          "rafters.north",
+          "fascia.south",
+          "fascia.north",
+          "gutter.south",
+          "gutter.north",
+          "downspout.south",
+          "downspout.north",
+          "drip.south",
+          "drip.north",
+          "cut.south.inlet",
+          "cut.south.outlet",
+          "cut.north.inlet",
+          "cut.north.outlet"
+        ]
+      }
+    }
+  },
+  "connectionPoints": {
+    "roof": {
+      "element": "roof",
+      "description": "Roof underside for supporting walls and beams"
+    }
+  },
+  "overridePaths": [
+    "/elements/assembly.root/name"
+  ]
+}

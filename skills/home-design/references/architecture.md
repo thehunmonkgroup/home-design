@@ -10,7 +10,7 @@ Read [identity and composition](composition.md) for shared authoring rules. For 
 
 ## Walls
 
-A wall has a plan `path`, a reusable layered wall `type`, a `locationLine`, a base constraint, and a top constraint. Paths may be lines, polylines, or shared `axis2` anchors. Each path declares `segmentIds`; each profile declares `boundaryIds`. Read [scoped identities](identities.md) for the complete version 0.2 contract.
+A wall has a plan `path`, a reusable layered wall `type`, a `locationLine`, a base constraint, and a top constraint. Paths may be lines, polylines, or shared `axis2` anchors. Each path declares `segmentIds`; each profile declares `boundaryIds`. Read [scoped identities](identities.md) for the complete contract.
 
 Use a height top for a free-standing wall. Use a roof `underside` surface constraint when the wall must follow a roof. Gable ridge and explicit roof-face crossings are inserted into derived geometry while preserving the authoritative wall axis.
 
@@ -31,6 +31,13 @@ Parametric roofs support `flat`, `shed`, `gable`, and rectangular `hip` forms. T
 Parametric hip recipes require a rectangular footprint. Use explicit planar faces for irregular hips or multi-ridge roofs.
 
 Pitch is in degrees: 8:12 is approximately `33.690067526`; 1:12 is `4.763641691`. Roof layers measure normal thickness. Surface queries measure the actual underside elevation at the queried X/Y, including that normal thickness.
+
+Roof types accept `layerJoin: "miter"` to trim adjoining layers
+at the bisectors used by roof framing. Only shared spatial edges participate;
+coincident plan edges at different elevations do not. This fits overlapping
+ridge layers without crossing the opposite face's framing or ceiling. The
+default `"independent"` retains separate normal extrusions. Miter trimming does
+not extend stock into a valley gap or construct flashing between separate roofs.
 
 The default `datumReference: "eave"` places the datum at the overhung footprint's low edge. Use `datumReference: "bearing"` to keep roof planes/ridge fixed relative to the bearing footprint when changing overhangs. `datumSurface: "underside"` makes the datum describe the bearing underside; the default is `"top"`. `edgeOverhangs` maps each named footprint edge to its outward distance and overrides uniform `overhang`; it requires a convex footprint without holes.
 

@@ -1,0 +1,1070 @@
+{
+  "recipeVersion": "0.1",
+  "modelVersion": "0.2",
+  "id": "recipe.exterior-wall",
+  "name": "Exterior wall with window and electrical circuit",
+  "description": "Layered exterior wall, framed window, recessed panel and receptacle boxes, protected cable circuit and separate hollow conduit. Fixed 4000 by 2700 mm demonstration bay.",
+  "assembly": "assembly.root",
+  "bindings": {
+    "binding.storey": {
+      "registry": "levels",
+      "kind": "storey",
+      "description": "Storey supplying the package's elevation datum"
+    }
+  },
+  "parameters": {
+    "origin": {
+      "valueType": "point2",
+      "description": "Package origin in model XY millimetres",
+      "default": [
+        0,
+        0
+      ],
+      "targets": [
+        "/anchors/anchor.origin/position"
+      ]
+    }
+  },
+  "objects": {
+    "anchors": {
+      "anchor.origin": {
+        "kind": "point2",
+        "name": "Package origin",
+        "position": [
+          0,
+          0
+        ],
+        "level": "binding.storey"
+      }
+    },
+    "materials": {
+      "material.sheathing": {
+        "name": "Structural sheathing",
+        "category": "wood"
+      },
+      "material.siding": {
+        "name": "Wood siding",
+        "category": "finish",
+        "appearance": {
+          "color": "#8B6F47",
+          "roughness": 0.85
+        }
+      },
+      "material.insulation": {
+        "name": "Illustrative cavity insulation",
+        "appearance": {
+          "color": "#d8b66a"
+        }
+      },
+      "material.gypsum": {
+        "name": "Gypsum board",
+        "category": "finish",
+        "appearance": {
+          "color": "#E8E5DF",
+          "roughness": 0.95
+        }
+      },
+      "material.timber": {
+        "name": "Framing timber",
+        "category": "wood",
+        "appearance": {
+          "color": "#C69C6D",
+          "roughness": 0.8
+        }
+      },
+      "material.device": {
+        "name": "Illustrative electrical enclosure stock",
+        "appearance": {
+          "color": "#e9e5d8"
+        }
+      },
+      "material.copper": {
+        "name": "Illustrative bundled conductor stock",
+        "appearance": {
+          "color": "#bf6b34"
+        }
+      },
+      "material.steel": {
+        "name": "Illustrative galvanized service stock",
+        "appearance": {
+          "color": "#8fabb8"
+        }
+      },
+      "material.membrane": {
+        "name": "Weather and air membrane",
+        "appearance": {
+          "color": "#445970"
+        }
+      }
+    },
+    "types": {
+      "wallType.exterior.wood-185": {
+        "kind": "wallType",
+        "name": "187 mm exterior wall with weather and air control layers",
+        "layers": [
+          {
+            "name": "Siding",
+            "material": "material.siding",
+            "thickness": 20,
+            "function": "finish",
+            "id": "siding"
+          },
+          {
+            "id": "weather",
+            "name": "Weather-resistive barrier",
+            "material": "material.membrane",
+            "thickness": 1,
+            "function": "membrane"
+          },
+          {
+            "name": "Sheathing",
+            "material": "material.sheathing",
+            "thickness": 12,
+            "function": "substrate",
+            "id": "sheathing"
+          },
+          {
+            "name": "Framed structure",
+            "material": "material.insulation",
+            "thickness": 140,
+            "function": "structure",
+            "representation": "explicit",
+            "id": "cavity"
+          },
+          {
+            "id": "air",
+            "name": "Interior air control membrane",
+            "material": "material.membrane",
+            "thickness": 1,
+            "function": "membrane"
+          },
+          {
+            "name": "Interior gypsum",
+            "material": "material.gypsum",
+            "thickness": 13,
+            "function": "finish",
+            "id": "drywall"
+          }
+        ],
+        "layerOrder": "exteriorToInterior",
+        "referencePlane": "center"
+      },
+      "wallFramingType.shell": {
+        "kind": "wallFramingType",
+        "name": "Explicit shell wall framing",
+        "studType": "memberType.shell.stud",
+        "plateType": "memberType.shell.plate",
+        "headerType": "memberType.shell.header",
+        "spacing": 600
+      },
+      "memberType.shell.header": {
+        "kind": "memberType",
+        "name": "Illustrative header stock",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 140,
+          "depth": 140
+        }
+      },
+      "memberType.shell.plate": {
+        "kind": "memberType",
+        "name": "Illustrative plate stock",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 140,
+          "depth": 40
+        }
+      },
+      "memberType.shell.stud": {
+        "kind": "memberType",
+        "name": "Illustrative stud stock",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 40,
+          "depth": 140
+        }
+      },
+      "type.window": {
+        "kind": "windowType",
+        "name": "Casement window 1500 x 1200",
+        "nominalWidth": 1200,
+        "nominalHeight": 1200,
+        "operation": "casement",
+        "frameDepth": 185,
+        "material": "material.timber"
+      },
+      "type.box.panel": {
+        "kind": "serviceDeviceType",
+        "name": "Panel enclosure",
+        "role": "distributionPanel",
+        "material": "material.device",
+        "electrical": {
+          "ratedVoltageV": 120,
+          "ratedCurrentA": 20,
+          "supply": "AC",
+          "frequencyHz": 60,
+          "poles": 1
+        },
+        "solids": {
+          "shell": {
+            "section": {
+              "kind": "rectangle",
+              "width": 160,
+              "depth": 180
+            },
+            "depth": 60
+          }
+        },
+        "cuts": {
+          "interior": {
+            "section": {
+              "kind": "rectangle",
+              "width": 154,
+              "depth": 174
+            },
+            "depth": 57,
+            "placement": {
+              "origin": [
+                0,
+                0,
+                3
+              ]
+            }
+          },
+          "cableEntry": {
+            "section": {
+              "kind": "circle",
+              "diameter": 12
+            },
+            "depth": 6,
+            "placement": {
+              "origin": [
+                0,
+                -91,
+                25
+              ],
+              "rotation": [
+                -90,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        "ports": {
+          "out": {
+            "position": [
+              0,
+              30,
+              25
+            ],
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 10
+            },
+            "medium": "electrical",
+            "function": "power",
+            "flow": "source",
+            "connectionType": "catalog.power"
+          }
+        }
+      },
+      "type.box.outlet": {
+        "kind": "serviceDeviceType",
+        "name": "Outlet enclosure",
+        "role": "deviceBox",
+        "material": "material.device",
+        "electrical": {
+          "ratedVoltageV": 120,
+          "ratedCurrentA": 20
+        },
+        "solids": {
+          "shell": {
+            "section": {
+              "kind": "rectangle",
+              "width": 60,
+              "depth": 90
+            },
+            "depth": 65
+          }
+        },
+        "cuts": {
+          "interior": {
+            "section": {
+              "kind": "rectangle",
+              "width": 54,
+              "depth": 84
+            },
+            "depth": 62,
+            "placement": {
+              "origin": [
+                0,
+                0,
+                3
+              ]
+            }
+          },
+          "cableEntry": {
+            "section": {
+              "kind": "circle",
+              "diameter": 12
+            },
+            "depth": 6,
+            "placement": {
+              "origin": [
+                0,
+                46,
+                30
+              ],
+              "rotation": [
+                90,
+                0,
+                0
+              ]
+            }
+          }
+        },
+        "ports": {
+          "entry": {
+            "position": [
+              0,
+              0,
+              3
+            ],
+            "direction": [
+              0,
+              0,
+              -1
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 10
+            },
+            "medium": "electrical",
+            "function": "containment",
+            "flow": "bidirectional",
+            "connectionType": "catalog.box"
+          }
+        }
+      },
+      "type.breaker": {
+        "kind": "serviceDeviceType",
+        "name": "20 A circuit breaker",
+        "role": "circuitBreaker",
+        "material": "material.device",
+        "electrical": {
+          "ratedVoltageV": 120,
+          "ratedCurrentA": 20,
+          "poles": 1,
+          "supply": "AC",
+          "frequencyHz": 60
+        },
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 40,
+              "depth": 60
+            },
+            "depth": 20
+          }
+        },
+        "ports": {
+          "in": {
+            "position": [
+              0,
+              30,
+              20
+            ],
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 10
+            },
+            "medium": "electrical",
+            "function": "power",
+            "flow": "sink",
+            "connectionType": "catalog.power"
+          },
+          "out": {
+            "position": [
+              0,
+              -30,
+              20
+            ],
+            "direction": [
+              0,
+              -1,
+              0
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 10
+            },
+            "medium": "electrical",
+            "function": "power",
+            "flow": "source",
+            "connectionType": "catalog.power"
+          }
+        },
+        "portGroups": [
+          [
+            "in",
+            "out"
+          ]
+        ]
+      },
+      "type.receptacle": {
+        "kind": "serviceDeviceType",
+        "name": "120 V receptacle and faceplate",
+        "role": "receptacle",
+        "material": "material.device",
+        "electrical": {
+          "ratedVoltageV": 120,
+          "ratedCurrentA": 20,
+          "poles": 1,
+          "supply": "AC",
+          "frequencyHz": 60
+        },
+        "solids": {
+          "plate": {
+            "section": {
+              "kind": "rectangle",
+              "width": 70,
+              "depth": 100
+            },
+            "depth": 4
+          },
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 40,
+              "depth": 72
+            },
+            "depth": 44,
+            "placement": {
+              "origin": [
+                0,
+                0,
+                -44
+              ]
+            }
+          }
+        },
+        "ports": {
+          "in": {
+            "position": [
+              0,
+              36,
+              -35
+            ],
+            "direction": [
+              0,
+              1,
+              0
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 10
+            },
+            "medium": "electrical",
+            "function": "power",
+            "flow": "sink",
+            "connectionType": "catalog.power"
+          }
+        }
+      },
+      "electrical.type.cable": {
+        "kind": "serviceRouteType",
+        "name": "Illustrative cable",
+        "family": "cable",
+        "material": "material.copper",
+        "medium": "electrical",
+        "function": "power",
+        "connectionType": "catalog.power",
+        "section": {
+          "kind": "circle",
+          "diameter": 10
+        },
+        "flow": "forward",
+        "cable": {
+          "designation": "Illustrative three-conductor stock",
+          "ratedVoltageV": 600,
+          "allowableCurrentA": 20,
+          "maximumProtectionA": 20,
+          "conductors": [
+            {
+              "function": "power",
+              "count": 1,
+              "areaMm2": 2.5,
+              "materialSpec": "Illustrative copper",
+              "insulationSpec": "Illustrative insulation"
+            },
+            {
+              "function": "neutral",
+              "count": 1,
+              "areaMm2": 2.5,
+              "materialSpec": "Illustrative copper",
+              "insulationSpec": "Illustrative insulation"
+            },
+            {
+              "function": "protectiveEarth",
+              "count": 1,
+              "areaMm2": 2.5,
+              "materialSpec": "Illustrative copper",
+              "insulationSpec": "Illustrative insulation"
+            }
+          ]
+        }
+      },
+      "type.conduit": {
+        "kind": "serviceRouteType",
+        "name": "20 mm hollow electrical conduit",
+        "family": "conduit",
+        "material": "material.steel",
+        "medium": "electrical",
+        "function": "containment",
+        "connectionType": "catalog.conduit",
+        "section": {
+          "kind": "circle",
+          "diameter": 20
+        },
+        "flow": "bidirectional",
+        "wallThickness": 2
+      }
+    },
+    "elements": {
+      "assembly.root": {
+        "kind": "assembly",
+        "name": "Exterior wall with window and electrical circuit",
+        "assemblyType": "wallSystem"
+      },
+      "wall.exterior": {
+        "kind": "wall",
+        "name": "Complete exterior wall",
+        "storey": "binding.storey",
+        "type": "wallType.exterior.wood-185",
+        "locationLine": "center",
+        "path": {
+          "kind": "line",
+          "start": {
+            "anchor": "anchor.origin",
+            "offset": [
+              0,
+              0
+            ]
+          },
+          "end": {
+            "anchor": "anchor.origin",
+            "offset": [
+              4000,
+              0
+            ]
+          },
+          "segmentIds": [
+            "main"
+          ]
+        },
+        "base": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "top": {
+          "kind": "height",
+          "height": 2700
+        }
+      },
+      "framing.wall": {
+        "kind": "wallFraming",
+        "name": "Studs, double top plate, bottom plate and window framing",
+        "host": "wall.exterior",
+        "type": "wallFramingType.shell",
+        "layer": "cavity",
+        "segment": "main"
+      },
+      "opening.window": {
+        "kind": "opening",
+        "name": "Window rough opening",
+        "geometry": {
+          "kind": "rectangle",
+          "width": 1240,
+          "height": 1240,
+          "depth": 187
+        },
+        "placement": {
+          "station": 2500,
+          "stationReference": "center",
+          "verticalOffset": 900,
+          "verticalReference": "bottom",
+          "depthOffset": 0
+        }
+      },
+      "window": {
+        "kind": "window",
+        "name": "Framed casement window",
+        "type": "type.window"
+      },
+      "box.panel": {
+        "kind": "serviceDevice",
+        "name": "Recessed panel box",
+        "type": "type.box.panel",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall.exterior",
+              "surface": "interior",
+              "station": 450,
+              "height": 2100
+            }
+          }
+        },
+        "projection": -60,
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall.exterior",
+              "layer": "cavity"
+            }
+          ],
+          "fit": "intersect"
+        }
+      },
+      "cut.panel": {
+        "kind": "penetration",
+        "name": "Owned panel recess",
+        "host": "wall.exterior",
+        "owner": "box.panel",
+        "purpose": "recess",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall.exterior",
+              "surface": "interior",
+              "station": 450,
+              "height": 2100
+            }
+          },
+          "rotation": [
+            180,
+            0,
+            0
+          ]
+        },
+        "section": {
+          "kind": "rectangle",
+          "width": 160,
+          "depth": 180
+        },
+        "depth": 60
+      },
+      "box.outlet": {
+        "kind": "serviceDevice",
+        "name": "Recessed outlet box",
+        "type": "type.box.outlet",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall.exterior",
+              "surface": "interior",
+              "station": 450,
+              "height": 450
+            }
+          }
+        },
+        "projection": -65,
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall.exterior",
+              "layer": "cavity"
+            }
+          ],
+          "fit": "intersect"
+        },
+        "portStates": {
+          "entry": "open"
+        }
+      },
+      "cut.outlet": {
+        "kind": "penetration",
+        "name": "Owned outlet recess",
+        "host": "wall.exterior",
+        "owner": "box.outlet",
+        "purpose": "recess",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall.exterior",
+              "surface": "interior",
+              "station": 450,
+              "height": 450
+            }
+          },
+          "rotation": [
+            180,
+            0,
+            0
+          ]
+        },
+        "section": {
+          "kind": "rectangle",
+          "width": 60,
+          "depth": 90
+        },
+        "depth": 65
+      },
+      "breaker": {
+        "kind": "serviceDevice",
+        "name": "Receptacle circuit protection",
+        "type": "type.breaker",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall.exterior",
+              "surface": "interior",
+              "station": 450,
+              "height": 2100
+            }
+          }
+        },
+        "projection": -55,
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall.exterior",
+              "layer": "cavity"
+            }
+          ],
+          "fit": "intersect"
+        }
+      },
+      "receptacle": {
+        "kind": "serviceDevice",
+        "name": "Recessed wall receptacle",
+        "type": "type.receptacle",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "wall.exterior",
+              "surface": "interior",
+              "station": 450,
+              "height": 450
+            }
+          }
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall.exterior",
+              "layer": "cavity"
+            }
+          ],
+          "fit": "intersect"
+        }
+      },
+      "cable": {
+        "kind": "serviceRoute",
+        "name": "Protected cable inside the stud bay",
+        "type": "electrical.type.cable",
+        "chordTolerance": 0.1,
+        "path": [
+          {
+            "port": {
+              "element": "breaker",
+              "port": "out"
+            }
+          },
+          {
+            "port": {
+              "element": "receptacle",
+              "port": "in"
+            }
+          }
+        ],
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall.exterior",
+              "layer": "cavity"
+            }
+          ],
+          "fit": "intersect"
+        }
+      },
+      "conduit": {
+        "kind": "serviceRoute",
+        "name": "Hollow conduit enclosing the cable",
+        "type": "type.conduit",
+        "path": [
+          {
+            "host": {
+              "kind": "wall",
+              "element": "wall.exterior",
+              "surface": "interior",
+              "station": 450,
+              "height": 1900,
+              "offset": [
+                0,
+                0,
+                -35
+              ]
+            }
+          },
+          {
+            "host": {
+              "kind": "wall",
+              "element": "wall.exterior",
+              "surface": "interior",
+              "station": 450,
+              "height": 550,
+              "offset": [
+                0,
+                0,
+                -35
+              ]
+            }
+          }
+        ],
+        "chordTolerance": 0.1,
+        "portStates": {
+          "start": "open",
+          "end": "open"
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "wall.exterior",
+              "layer": "cavity"
+            }
+          ],
+          "fit": "intersect"
+        }
+      },
+      "system.power": {
+        "kind": "serviceSystem",
+        "name": "Receptacle supply",
+        "systemType": "electrical",
+        "members": [
+          {
+            "element": "box.panel",
+            "port": "out"
+          },
+          {
+            "element": "breaker",
+            "port": "in"
+          },
+          {
+            "element": "breaker",
+            "port": "out"
+          },
+          {
+            "element": "cable",
+            "port": "start"
+          },
+          {
+            "element": "cable",
+            "port": "end"
+          },
+          {
+            "element": "receptacle",
+            "port": "in"
+          }
+        ]
+      },
+      "system.containment": {
+        "kind": "serviceSystem",
+        "name": "Open-ended conduit sleeve",
+        "systemType": "electrical",
+        "members": [
+          {
+            "element": "conduit",
+            "port": "start"
+          },
+          {
+            "element": "conduit",
+            "port": "end"
+          }
+        ]
+      },
+      "circuit": {
+        "kind": "serviceCircuit",
+        "name": "20 A receptacle branch",
+        "system": "system.power",
+        "members": [
+          {
+            "element": "box.panel",
+            "port": "out"
+          },
+          {
+            "element": "breaker",
+            "port": "in"
+          },
+          {
+            "element": "breaker",
+            "port": "out"
+          },
+          {
+            "element": "cable",
+            "port": "start"
+          },
+          {
+            "element": "cable",
+            "port": "end"
+          },
+          {
+            "element": "receptacle",
+            "port": "in"
+          }
+        ],
+        "schedule": {
+          "panel": {
+            "element": "box.panel",
+            "port": "out"
+          },
+          "number": "1",
+          "electrical": {
+            "nominalVoltageV": 120,
+            "supply": "AC",
+            "poles": 1,
+            "frequencyHz": 60,
+            "designCurrentA": 10,
+            "overcurrentProtection": {
+              "element": "breaker",
+              "port": "out"
+            },
+            "loads": [
+              {
+                "terminal": {
+                  "element": "receptacle",
+                  "port": "in"
+                },
+                "apparentPowerVA": 900
+              }
+            ]
+          }
+        }
+      },
+      "system.box": {
+        "kind": "serviceSystem",
+        "name": "Box rough-in interface",
+        "systemType": "electrical",
+        "members": [
+          {
+            "element": "box.outlet",
+            "port": "entry"
+          }
+        ]
+      },
+      "cut.conduit": {
+        "kind": "penetration",
+        "name": "Empty conduit passage through insulation",
+        "host": "wall.exterior",
+        "owner": "conduit",
+        "purpose": "service",
+        "layers": [
+          "cavity"
+        ],
+        "geometrySource": {
+          "element": "conduit",
+          "volume": "bore"
+        }
+      }
+    },
+    "relationships": {
+      "void.window": {
+        "kind": "voids",
+        "host": "wall.exterior",
+        "opening": "opening.window"
+      },
+      "fill.window": {
+        "kind": "fills",
+        "opening": "opening.window",
+        "element": "window"
+      },
+      "connect.0": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "box.panel",
+          "port": "out"
+        },
+        "b": {
+          "element": "breaker",
+          "port": "in"
+        }
+      },
+      "connect.1": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "breaker",
+          "port": "out"
+        },
+        "b": {
+          "element": "cable",
+          "port": "start"
+        }
+      },
+      "connect.2": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "cable",
+          "port": "end"
+        },
+        "b": {
+          "element": "receptacle",
+          "port": "in"
+        }
+      },
+      "relationship.parts": {
+        "kind": "aggregates",
+        "assembly": "assembly.root",
+        "parts": [
+          "wall.exterior",
+          "framing.wall",
+          "opening.window",
+          "window",
+          "box.panel",
+          "cut.panel",
+          "box.outlet",
+          "cut.outlet",
+          "breaker",
+          "receptacle",
+          "cable",
+          "conduit",
+          "system.power",
+          "system.containment",
+          "circuit",
+          "system.box",
+          "cut.conduit"
+        ]
+      }
+    }
+  },
+  "connectionPoints": {
+    "wall": {
+      "element": "wall.exterior",
+      "description": "Layered host for adjoining construction"
+    }
+  },
+  "overridePaths": [
+    "/elements/assembly.root/name"
+  ]
+}

@@ -154,8 +154,8 @@ reapplying the changeset. It also handles a process interruption after saving bu
 before the journal records that phase. If the source has changed since the commit,
 recovery rejects it: inspect the current model and build that revision explicitly.
 Report saved-source and artifact status separately. Journals contain local paths;
-browser publication excludes them. The older skill script uses the same service,
-with its historical default viewer destination and success fields.
+browser publication excludes them. The skill's transaction script uses the same
+service with its own default viewer destination and success fields.
 
 If the source is invalid, use source inspection and structured validation
 diagnostics before attempting an edit. Use the JSON Schema and the affected

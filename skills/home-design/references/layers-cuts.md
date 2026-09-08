@@ -65,7 +65,7 @@ infill only inside the declared regions; use it deliberately for parts that exte
 outside the host. Every declared region must contain some of the part. A clipped
 framing array retains the indices and identities of its surviving members.
 
-Regions are identified by host and layer ID in version 0.2 (legacy 0.1 uses an index). Duplicate or overlapping
+Regions are identified by host and layer ID. Duplicate or overlapping
 regions, absent layers, aggregate layers and overlapping physical ownership fail
 validation. Two parts may touch, but cannot own the same cavity volume. Placement
 remains explicit: use host locators when a part must move with the cavity.
@@ -125,6 +125,10 @@ they do not imply a physical surface. Physical accessories still require a
 physical mounting host. Other host kinds expose the specific surface controls
 listed above.
 
+Surface host `point` fields accept a literal XY vector or a
+point/anchor locator. Use the same assembly origin as the slab, footing or roof
+footprint when a mounting point should translate with that assembly.
+
 Route frames point local Z from the path's start toward its end and preserve the
 transported cross-section X/Y orientation. Stations include the exact circular
 bend lengths and do not depend on `chordTolerance`. For a branched fitting,
@@ -149,7 +153,7 @@ The route, covering and hardware retain separate selectable solids and material
 quantities through a host move. Changing insulation thickness does not resize
 the authored support geometry.
 
-Layer surfaces require a named `layer` ID in version 0.2. Wall layers run exterior to
+Layer surfaces require a named `layer` ID. Wall layers run exterior to
 interior; slab and roof layers run top to bottom. Explicit footings expose their
 body as `layer.legacy.0`; aggregate footings have no selectable layers. Read
 [scoped identities](identities.md) before inserting or reordering layers. Member side names

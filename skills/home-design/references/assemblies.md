@@ -28,6 +28,10 @@ not for building an existing instance.
 
 Public recipes include:
 
+The [construction catalog](catalog.md) provides complete exterior wall, insulated
+roof, floor/deck, wet wall, ventilation, foundation, entrance and truss packages.
+The two smaller recipes below provide focused starting points.
+
 - `serviced-partition`: insulated wall, framed rough opening, flush electrical
   rough-in box, owned recess and open containment interface. It exposes origin,
   wall width/height, opening width and box height. Add connected service routes or
@@ -43,8 +47,8 @@ members for structural capacity or add products outside the declared package.
 
 ## Instantiate
 
-Recipes require model version `0.2`. For an older model, prepare and transact the
-[migration](identities.md#explicit-migration) first.
+Recipes require `modelVersion: "0.2"`. If the destination declares another input
+format, prepare and transact the [format conversion](identities.md#explicit-migration) first.
 
 Inspect the destination storey, then bind it explicitly. Supply parameter values
 as JSON; lengths remain millimetres. Quote shell arguments containing arrays,

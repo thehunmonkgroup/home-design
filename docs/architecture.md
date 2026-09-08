@@ -61,6 +61,7 @@ host materials after cavity ownership. Route passage checks run after those cuts
 | `resolver.py` | Element and relationship integration into absolute shared geometry |
 | `components.py`, `construction.py` | Typed construction resolution, oriented members, shared-miter sweeps, repeated framing, stairs, guards and screens |
 | `roof_controls.py`, `layers.py`, `doors.py`, `screens.py` | Bearing/overhang roof controls, physical material layers, framed doors and profiled screen enclosures |
+| `roof_joints.py`, `sweep_volumes.py` | Shared roof-layer/framing bisectors and nonmaterial drainage sweep envelopes/bores for owned junction cuts |
 | `terrain.py`, `survey.py` | Triangulated grade surfaces, bounded elevation queries and revision-checked survey import changes |
 | `coordination.py` | Bearing bounds, load paths, drainage connections/outlets, grade exposure and numeric requirements |
 | `requirements.py` | Shared numeric requirement evaluation and failure diagnostics |
@@ -163,9 +164,9 @@ The [shared resolved contracts](reference/resolved-contracts.md) define placemen
 frames, physical stock, layers, ports and quantities used across module boundaries,
 and the explicit construction-stage prerequisites.
 
-The default authoring schema uses `modelVersion: "0.2"`; the reader also supports
-version `0.1`. [Schema evolution](reference/schema-evolution.md) defines explicit
-migration and durable subcomponent identities.
+The authoring schema uses `modelVersion: "0.2"`, independently of the design's
+`revision`. [Canonical model and durable identity](reference/schema-evolution.md)
+defines named subcomponents and explicit conversion of positional inputs.
 The [recipe contract](reference/assembly-recipes.md) defines explicit parameters,
 bindings, compact provenance and three-way instance updates. Expanded assemblies
 remain ordinary canonical objects consumed by the existing resolver and adapters.
@@ -409,7 +410,7 @@ as IFC opening bodies, with layer-restricted native void relationships. Generate
 relationships use `<penetration-id>/voids` identities.
 
 Explicit cavity ownership exports as native element connections with identities
-`<part-id>/cavity/<host-id>/<layer-id>` (migrated legacy layer IDs retain their
+`<part-id>/cavity/<host-id>/<layer-id>` (converted layer IDs retain their
 original numeric GUID seed). Host/part property sets retain the selected
 regions and actual volume contributions. Aggregate material fractions remain an
 independent layer representation and cannot coexist with explicit ownership.
@@ -497,8 +498,8 @@ IFC header timestamps may vary between builds, so conformance tests compare the 
 5. Add specialized native IFC classification/properties when the default class is
    insufficient. Keep adapter bodies based on final shared resolved meshes.
 6. Supply manifest defaults and labels through the registry. The viewer accepts
-   newly registered families without a second kind list; legacy labels/order remain
-   fallbacks for older manifests. Domain-specific controls may need UI support.
+   registered families without a second kind list; built-in labels/order remain
+   fallbacks for manifests without display metadata. Domain-specific controls may need UI support.
 7. Add focused parameter tests and integration tests for reference propagation,
    host/cavity behavior, IFC/GLB identity and final quantities. Registration audits
    verify schema and IFC class coverage; they do not establish geometric correctness.

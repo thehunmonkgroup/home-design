@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Group, Mesh } from 'three';
 import { applyElementVisibility, isRenderManifest, isolateElements, nodeElementIndex, withElementVisibility, type ManifestElement, type NavigationLink, type RenderManifest } from './model';
-import { contextElementIds, navigationGroups, relatedElements, selectionNodes } from './navigation';
+import { containingElements, contextElementIds, navigationGroups, reinforcementElementIds, relatedElements, selectionNodes } from './navigation';
 
 function element(name: string, nodes: string[] = []): ManifestElement {
   return { kind: 'member', name, nodes, storeyId: null, defaultVisible: true, data: {} };
@@ -29,6 +29,39 @@ export const navigationFixture: RenderManifest = {
 };
 
 describe('construction navigation', () => {
+  it('reveals only rendered reinforcement in the selected assembly or host, including nested ownership', () => {
+    const foundation: RenderManifest = {
+      ...navigationFixture,
+      elements: {
+        assembly: { ...element('Foundation'), kind: 'assembly' },
+        footing: { ...element('Concrete', ['concrete']), kind: 'footing' },
+        masonry: { ...element('Masonry', ['masonry']), kind: 'masonryPart' },
+        bar: { ...element('Bar', ['bar']), kind: 'reinforcingBar' },
+        mesh: { ...element('Mesh', ['mesh']), kind: 'reinforcingMesh' },
+        empty: { ...element('Unrendered bar'), kind: 'reinforcingBar' },
+        elsewhere: { ...element('Other foundation bar', ['other']), kind: 'reinforcingBar' },
+      },
+      navigation: { format: 'home-design-navigation-0.1', links: [
+        link('footing', 'assembly', 'assembly'), link('masonry', 'assembly', 'assembly'),
+        link('bar', 'footing', 'ownership'), link('mesh', 'footing', 'host'),
+        link('empty', 'footing', 'ownership'), link('footing', 'assembly', 'host'),
+      ] },
+    };
+    for (const id of ['assembly', 'footing']) {
+      expect(reinforcementElementIds(foundation, id)).toEqual(['bar', 'mesh']);
+      expect(isolateElements(foundation, reinforcementElementIds(foundation, id))).toEqual(new Set(['footing', 'masonry', 'elsewhere']));
+    }
+    expect(reinforcementElementIds(foundation, 'bar')).toEqual(['bar']);
+    expect(reinforcementElementIds(foundation, 'masonry')).toEqual([]);
+    expect(reinforcementElementIds(foundation, 'missing')).toEqual([]);
+  });
+  it('offers actual containers and generated parents without treating systems or contents as ancestors', () => {
+    expect(containingElements(navigationFixture, 'first')).toEqual([{ id: 'frame', label: 'Generating component' }]);
+    expect(containingElements(navigationFixture, 'wall').map(({ id }) => id)).toEqual(['group', 'room']);
+    expect(containingElements(navigationFixture, 'box').map(({ id }) => id)).toEqual(['wall']);
+    expect(containingElements(navigationFixture, 'group')).toEqual([]);
+    expect(containingElements({ ...navigationFixture, navigation: undefined }, 'first')).toEqual([{ id: 'frame', label: 'Generating component' }]);
+  });
   it('isolates a wall with its hosted and owned contents without pulling in a whole room or system', () => {
     const selected = contextElementIds(navigationFixture, 'wall');
     expect(new Set(selected)).toEqual(new Set(['wall', 'frame', 'first', 'second', 'box', 'cut']));

@@ -2,7 +2,7 @@
 
 A recipe is a separate declarative JSON document validated by
 [`assembly-recipe-0.1.schema.json`](../../schema/assembly-recipe-0.1.schema.json).
-Its `objects` contain canonical version `0.2` definitions in the six normal
+Its `objects` contain canonical model definitions in the six normal
 registries. Expansion produces an ordinary changeset; no executable expressions,
 new geometry format or adapter-specific construction logic is involved.
 
@@ -44,13 +44,19 @@ they cannot evaluate functions or arbitrary code. Whole-vector targets accept th
 corresponding point parameter. Distinct parameters cannot overlap parent/child
 paths because application order must not change meaning.
 
-Canonical `PointLocator2` and `PointLocator3` anchor forms in version `0.2` support
+Canonical `PointLocator2` and `PointLocator3` anchor forms support
 an optional `offset` vector in model axes. For example,
 `{"anchor":"anchor.origin","offset":[4000,0]}` shares the origin while defining
 a separate plan vertex; the three-dimensional form adds XYZ offsets to the
 anchor's resolved spatial point. Offsets are translations, not local rotations.
 Use these locators, host constraints and explicit affine targets to coordinate
 construction. Aggregate membership supplies no geometric transform.
+
+Stair origins, sampled elevation datum points and surface mounting
+points accept either literal XY vectors or `PointLocator2` values. The locator
+form participates in normal anchor dependency discovery and reference remapping,
+allowing stair flights, sampled landings and surface-mounted parts to translate
+with the same package origin.
 
 The public [partition](../../recipes/serviced-partition.json) and
 [deck](../../recipes/coordinated-deck.json) recipes demonstrate complete documents.

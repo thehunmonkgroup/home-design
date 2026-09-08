@@ -29,6 +29,8 @@ from home_design.service_ports import ServicePorts
 from home_design.resolved import MeshData, ResolvedElement, Vec3
 from home_design.terrain import TerrainSurface
 from home_design.member_geometry import MemberGeometry
+from home_design.solids import SolidOperations
+from home_design.sweep_volumes import SweepVolumes
 
 
 class ResolutionContext(Protocol):
@@ -105,6 +107,13 @@ class ConstructionResolver:
             storey if isinstance(storey, str) else None,
             meshes,
             data,
+            construction_volumes=(
+                SweepVolumes.resolve(
+                    self.path(element),
+                    Authoring.object(self.component_type(element)["section"]),
+                )
+                if kind == "sweep" else {}
+            ),
         )
 
     def placement(self, value: JsonObject) -> LocalFrame:
@@ -274,7 +283,7 @@ class ConstructionResolver:
         if thickness > riser:
             raise ResolutionError("Tread thickness exceeds the stair riser")
         width = number(element.get("clearWidth"), "stair clear width")
-        origin = vector2(element.get("origin"), "stair origin")
+        origin = self.context.locators.plan_point(element.get("origin"))
         dx, dy = normalize2(
             vector2(element.get("direction"), "stair direction"), "stair direction"
         )
@@ -318,15 +327,19 @@ class ConstructionResolver:
                 start[1] + dy * run,
                 top - thickness + bounds[1],
             )
-            meshes.append(
-                ConstructionGeometry.member(
-                    start,
-                    end,
-                    section,
-                    Authoring.text(stringer_type.get("material")),
-                    f"stringer:{side}",
-                )
+            stringer = ConstructionGeometry.member(
+                start,
+                end,
+                section,
+                Authoring.text(stringer_type.get("material")),
+                f"stringer:{side}",
             )
+            if component_type.get("stringerTopCut") == "plumb":
+                clipped = SolidOperations.clip_plane(stringer, end, (-dx, -dy, 0))
+                if clipped is None:
+                    raise ResolutionError("Stair top cut consumes the entire stringer")
+                stringer = clipped
+            meshes.append(stringer)
         return tuple(meshes), {
             "bottomElevation": bottom,
             "topElevation": top,

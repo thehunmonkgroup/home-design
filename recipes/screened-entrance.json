@@ -1,0 +1,1512 @@
+{
+  "recipeVersion": "0.1",
+  "modelVersion": "0.2",
+  "id": "recipe.screened-entrance",
+  "name": "Screened landing and stair entrance",
+  "assembly": "assembly.root",
+  "bindings": {
+    "binding.storey": {
+      "registry": "levels",
+      "kind": "storey",
+      "description": "Existing building storey supplying the vertical datum"
+    }
+  },
+  "objects": {
+    "anchors": {
+      "anchor.origin": {
+        "kind": "point2",
+        "name": "Assembly plan origin",
+        "position": [
+          0,
+          0
+        ],
+        "level": "binding.storey"
+      }
+    },
+    "materials": {
+      "material.timber": {
+        "name": "Framing timber",
+        "category": "wood",
+        "appearance": {
+          "color": "#C69C6D",
+          "roughness": 0.8
+        }
+      },
+      "material.concrete": {
+        "name": "Concrete",
+        "category": "concrete",
+        "appearance": {
+          "color": "#A8A8A8",
+          "roughness": 0.9
+        }
+      },
+      "mat.black": {
+        "name": "Black aluminum",
+        "appearance": {
+          "color": "#24282a"
+        }
+      },
+      "material.steel": {
+        "name": "Illustrative galvanized service stock",
+        "appearance": {
+          "color": "#8fabb8"
+        }
+      },
+      "mat.wood": {
+        "name": "Timber",
+        "appearance": {
+          "color": "#b28b60"
+        }
+      },
+      "mat.composite": {
+        "name": "Composite",
+        "appearance": {
+          "color": "#82786c"
+        }
+      },
+      "mat.screen": {
+        "name": "Screen mesh",
+        "appearance": {
+          "color": "#465047",
+          "opacity": 0.18
+        }
+      }
+    },
+    "types": {
+      "type.deck": {
+        "kind": "slabType",
+        "name": "Deck boards and explicit framing cavity",
+        "layerOrder": "topToBottom",
+        "layers": [
+          {
+            "id": "decking",
+            "name": "Deck board envelope",
+            "thickness": 40,
+            "function": "finish",
+            "representation": "explicit"
+          },
+          {
+            "id": "cavity",
+            "name": "Open joist layer",
+            "thickness": 180,
+            "function": "structure",
+            "representation": "explicit"
+          }
+        ]
+      },
+      "stock.joist": {
+        "kind": "memberType",
+        "name": "Illustrative 40 by 180 timber",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 40,
+          "depth": 180
+        }
+      },
+      "stock.beam": {
+        "kind": "memberType",
+        "name": "Illustrative 150 by 200 timber",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 150,
+          "depth": 200
+        }
+      },
+      "stock.post": {
+        "kind": "memberType",
+        "name": "Illustrative 150 by 150 timber",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 150,
+          "depth": 150
+        }
+      },
+      "type.joists": {
+        "kind": "planarFramingType",
+        "name": "Illustrative deck joists and rims",
+        "memberType": "stock.joist",
+        "rimType": "stock.joist",
+        "spacing": 400
+      },
+      "type.pad": {
+        "kind": "footingType",
+        "name": "Illustrative concrete pad",
+        "depth": 300,
+        "material": "material.concrete"
+      },
+      "type.guard": {
+        "kind": "railingType",
+        "name": "Open metal guard",
+        "height": 1100,
+        "postSpacing": 1500,
+        "postSection": {
+          "kind": "rectangle",
+          "width": 40,
+          "depth": 40
+        },
+        "railSection": {
+          "kind": "rectangle",
+          "width": 40,
+          "depth": 40
+        },
+        "material": "mat.black",
+        "infill": "balusters",
+        "balusterSection": {
+          "kind": "rectangle",
+          "width": 16,
+          "depth": 16
+        },
+        "maxInfillGap": 100
+      },
+      "stock.board": {
+        "kind": "memberType",
+        "name": "140 mm deck board with 5 mm spacing gap",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 140,
+          "depth": 40
+        }
+      },
+      "type.boards": {
+        "kind": "planarFramingType",
+        "name": "Deck boards",
+        "memberType": "stock.board",
+        "spacing": 145
+      },
+      "type.postCap": {
+        "kind": "hardwareType",
+        "name": "Steel post cap seat",
+        "role": "postCap",
+        "material": "material.steel",
+        "solids": {
+          "seat": {
+            "section": {
+              "kind": "rectangle",
+              "width": 150,
+              "depth": 150
+            },
+            "depth": 4
+          }
+        }
+      },
+      "type.postBase": {
+        "kind": "hardwareType",
+        "name": "Steel post base seat",
+        "role": "postBase",
+        "material": "material.steel",
+        "solids": {
+          "seat": {
+            "section": {
+              "kind": "rectangle",
+              "width": 160,
+              "depth": 160
+            },
+            "depth": 4
+          }
+        }
+      },
+      "type.screw": {
+        "kind": "fastenerType",
+        "name": "Illustrative connector screw",
+        "role": "screw",
+        "material": "material.steel",
+        "nominalDiameter": 6,
+        "nominalLength": 50,
+        "solids": {
+          "shank": {
+            "section": {
+              "kind": "circle",
+              "diameter": 6
+            },
+            "depth": 50
+          }
+        }
+      },
+      "type.stair": {
+        "kind": "stairType",
+        "name": "Exterior stair",
+        "treadDepth": 280,
+        "treadThickness": 38,
+        "maxRiser": 180,
+        "material": "mat.composite",
+        "stringerType": "type.stringer",
+        "nosing": 20,
+        "stringerTopCut": "plumb"
+      },
+      "type.stringer": {
+        "kind": "memberType",
+        "name": "Stair stringer",
+        "section": {
+          "kind": "rectangle",
+          "width": 50,
+          "depth": 280
+        },
+        "material": "mat.wood"
+      },
+      "type.handrail": {
+        "kind": "railingType",
+        "name": "Graspable handrail",
+        "height": 900,
+        "postSpacing": 1500,
+        "postSection": {
+          "kind": "rectangle",
+          "width": 40,
+          "depth": 40
+        },
+        "railSection": {
+          "kind": "circle",
+          "diameter": 40
+        },
+        "material": "mat.black",
+        "infill": "none"
+      },
+      "type.screen": {
+        "kind": "panelType",
+        "name": "Framed screen",
+        "height": 2200,
+        "frameWidth": 45,
+        "frameDepth": 45,
+        "material": "mat.black",
+        "infillMaterial": "mat.screen"
+      },
+      "type.screen-door": {
+        "kind": "doorType",
+        "name": "Black framed screen door",
+        "nominalWidth": 914.4,
+        "nominalHeight": 2032,
+        "operation": "singleSwing",
+        "frameWidth": 40,
+        "frameDepth": 45,
+        "material": "mat.black",
+        "infillMaterial": "mat.screen",
+        "infillFraction": 0.9,
+        "specifications": {
+          "thermalBoundary": false,
+          "closer": "Self-closing hinges with positive latch"
+        }
+      }
+    },
+    "elements": {
+      "assembly.root": {
+        "kind": "assembly",
+        "name": "Screened landing and stair entrance",
+        "assemblyType": "stairSystem"
+      },
+      "slab.deck": {
+        "kind": "slab",
+        "name": "Screened entry landing",
+        "type": "type.deck",
+        "role": "landing",
+        "storey": "binding.storey",
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                0,
+                0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                3000,
+                0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                3000,
+                2400
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                0,
+                2400
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        },
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 1050
+        },
+        "extrusionDirection": "down"
+      },
+      "framing.joists": {
+        "kind": "planarFraming",
+        "name": "Fitted deck joists and rim boards",
+        "type": "type.joists",
+        "host": "slab.deck",
+        "layer": "cavity",
+        "originBoundary": "south",
+        "direction": [
+          0,
+          1
+        ]
+      },
+      "beam.south": {
+        "kind": "member",
+        "name": "South deck beam",
+        "type": "stock.beam",
+        "role": "beam",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              75,
+              730.0
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              2925.0,
+              75,
+              730.0
+            ]
+          }
+        ]
+      },
+      "post.south.west": {
+        "kind": "member",
+        "name": "south.west post",
+        "type": "stock.post",
+        "role": "column",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              75,
+              4
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              75,
+              626.0
+            ]
+          }
+        ]
+      },
+      "pad.south.west": {
+        "kind": "footing",
+        "name": "south.west concrete pad",
+        "type": "type.pad",
+        "shape": "pad",
+        "storey": "binding.storey",
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                -125,
+                -125
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                275,
+                -125
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                275,
+                275
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                -125,
+                275
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      },
+      "post.south.east": {
+        "kind": "member",
+        "name": "south.east post",
+        "type": "stock.post",
+        "role": "column",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              2925.0,
+              75,
+              4
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              2925.0,
+              75,
+              626.0
+            ]
+          }
+        ]
+      },
+      "pad.south.east": {
+        "kind": "footing",
+        "name": "south.east concrete pad",
+        "type": "type.pad",
+        "shape": "pad",
+        "storey": "binding.storey",
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                2725.0,
+                -125
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                3125.0,
+                -125
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                3125.0,
+                275
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                2725.0,
+                275
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      },
+      "beam.north": {
+        "kind": "member",
+        "name": "North deck beam",
+        "type": "stock.beam",
+        "role": "beam",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              2325.0,
+              730.0
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              2925.0,
+              2325.0,
+              730.0
+            ]
+          }
+        ]
+      },
+      "post.north.west": {
+        "kind": "member",
+        "name": "north.west post",
+        "type": "stock.post",
+        "role": "column",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              2325.0,
+              4
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              75,
+              2325.0,
+              626.0
+            ]
+          }
+        ]
+      },
+      "pad.north.west": {
+        "kind": "footing",
+        "name": "north.west concrete pad",
+        "type": "type.pad",
+        "shape": "pad",
+        "storey": "binding.storey",
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                -125,
+                2125.0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                275,
+                2125.0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                275,
+                2525.0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                -125,
+                2525.0
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      },
+      "post.north.east": {
+        "kind": "member",
+        "name": "north.east post",
+        "type": "stock.post",
+        "role": "column",
+        "storey": "binding.storey",
+        "axis": [
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              2925.0,
+              2325.0,
+              4
+            ]
+          },
+          {
+            "anchor": "anchor.origin",
+            "offset": [
+              2925.0,
+              2325.0,
+              626.0
+            ]
+          }
+        ]
+      },
+      "pad.north.east": {
+        "kind": "footing",
+        "name": "north.east concrete pad",
+        "type": "type.pad",
+        "shape": "pad",
+        "storey": "binding.storey",
+        "datum": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "footprint": {
+          "outer": [
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                2725.0,
+                2125.0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                3125.0,
+                2125.0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                3125.0,
+                2525.0
+              ]
+            },
+            {
+              "anchor": "anchor.origin",
+              "offset": [
+                2725.0,
+                2525.0
+              ]
+            }
+          ],
+          "boundaryIds": {
+            "outer": [
+              "south",
+              "east",
+              "north",
+              "west"
+            ]
+          }
+        }
+      },
+      "decking": {
+        "kind": "planarFraming",
+        "name": "Individual deck boards",
+        "host": "slab.deck",
+        "layer": "decking",
+        "type": "type.boards",
+        "direction": [
+          1,
+          0
+        ],
+        "originBoundary": "south",
+        "role": "decking"
+      },
+      "hardware.postBase.south.west": {
+        "kind": "hardware",
+        "name": "south.west postBase",
+        "type": "type.postBase",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "post.south.west",
+              "surface": "start",
+              "station": 0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "post.south.west"
+          },
+          {
+            "element": "pad.south.west"
+          }
+        ]
+      },
+      "screws.postBase.south.west": {
+        "kind": "fastenerGroup",
+        "name": "south.west postBase screws",
+        "type": "type.screw",
+        "quantity": 4,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "hardware.postBase.south.west"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "hardware.postBase.south.west"
+          },
+          {
+            "element": "post.south.west"
+          }
+        ]
+      },
+      "hardware.postCap.south.west": {
+        "kind": "hardware",
+        "name": "south.west postCap",
+        "type": "type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "post.south.west",
+              "surface": "end",
+              "station": 622
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "post.south.west"
+          },
+          {
+            "element": "beam.south"
+          }
+        ]
+      },
+      "screws.postCap.south.west": {
+        "kind": "fastenerGroup",
+        "name": "south.west postCap screws",
+        "type": "type.screw",
+        "quantity": 4,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "hardware.postCap.south.west"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "hardware.postCap.south.west"
+          },
+          {
+            "element": "post.south.west"
+          }
+        ]
+      },
+      "hardware.postBase.south.east": {
+        "kind": "hardware",
+        "name": "south.east postBase",
+        "type": "type.postBase",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "post.south.east",
+              "surface": "start",
+              "station": 0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "post.south.east"
+          },
+          {
+            "element": "pad.south.east"
+          }
+        ]
+      },
+      "screws.postBase.south.east": {
+        "kind": "fastenerGroup",
+        "name": "south.east postBase screws",
+        "type": "type.screw",
+        "quantity": 4,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "hardware.postBase.south.east"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "hardware.postBase.south.east"
+          },
+          {
+            "element": "post.south.east"
+          }
+        ]
+      },
+      "hardware.postCap.south.east": {
+        "kind": "hardware",
+        "name": "south.east postCap",
+        "type": "type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "post.south.east",
+              "surface": "end",
+              "station": 622
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "post.south.east"
+          },
+          {
+            "element": "beam.south"
+          }
+        ]
+      },
+      "screws.postCap.south.east": {
+        "kind": "fastenerGroup",
+        "name": "south.east postCap screws",
+        "type": "type.screw",
+        "quantity": 4,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "hardware.postCap.south.east"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "hardware.postCap.south.east"
+          },
+          {
+            "element": "post.south.east"
+          }
+        ]
+      },
+      "hardware.postBase.north.west": {
+        "kind": "hardware",
+        "name": "north.west postBase",
+        "type": "type.postBase",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "post.north.west",
+              "surface": "start",
+              "station": 0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "post.north.west"
+          },
+          {
+            "element": "pad.north.west"
+          }
+        ]
+      },
+      "screws.postBase.north.west": {
+        "kind": "fastenerGroup",
+        "name": "north.west postBase screws",
+        "type": "type.screw",
+        "quantity": 4,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "hardware.postBase.north.west"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "hardware.postBase.north.west"
+          },
+          {
+            "element": "post.north.west"
+          }
+        ]
+      },
+      "hardware.postCap.north.west": {
+        "kind": "hardware",
+        "name": "north.west postCap",
+        "type": "type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "post.north.west",
+              "surface": "end",
+              "station": 622
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "post.north.west"
+          },
+          {
+            "element": "beam.north"
+          }
+        ]
+      },
+      "screws.postCap.north.west": {
+        "kind": "fastenerGroup",
+        "name": "north.west postCap screws",
+        "type": "type.screw",
+        "quantity": 4,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "hardware.postCap.north.west"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "hardware.postCap.north.west"
+          },
+          {
+            "element": "post.north.west"
+          }
+        ]
+      },
+      "hardware.postBase.north.east": {
+        "kind": "hardware",
+        "name": "north.east postBase",
+        "type": "type.postBase",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "post.north.east",
+              "surface": "start",
+              "station": 0
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "post.north.east"
+          },
+          {
+            "element": "pad.north.east"
+          }
+        ]
+      },
+      "screws.postBase.north.east": {
+        "kind": "fastenerGroup",
+        "name": "north.east postBase screws",
+        "type": "type.screw",
+        "quantity": 4,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "hardware.postBase.north.east"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "hardware.postBase.north.east"
+          },
+          {
+            "element": "post.north.east"
+          }
+        ]
+      },
+      "hardware.postCap.north.east": {
+        "kind": "hardware",
+        "name": "north.east postCap",
+        "type": "type.postCap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "member",
+              "element": "post.north.east",
+              "surface": "end",
+              "station": 622
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "post.north.east"
+          },
+          {
+            "element": "beam.north"
+          }
+        ]
+      },
+      "screws.postCap.north.east": {
+        "kind": "fastenerGroup",
+        "name": "north.east postCap screws",
+        "type": "type.screw",
+        "quantity": 4,
+        "representation": "scheduled",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "component",
+              "element": "hardware.postCap.north.east"
+            }
+          }
+        },
+        "participants": [
+          {
+            "element": "hardware.postCap.north.east"
+          },
+          {
+            "element": "post.north.east"
+          }
+        ]
+      },
+      "stair": {
+        "kind": "stair",
+        "name": "Six-riser entrance stair",
+        "storey": "binding.storey",
+        "type": "type.stair",
+        "origin": {
+          "anchor": "anchor.origin",
+          "offset": [
+            1500,
+            -1400
+          ]
+        },
+        "direction": [
+          0,
+          1
+        ],
+        "bottom": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "top": {
+          "kind": "surface",
+          "element": "slab.deck",
+          "surface": "top",
+          "point": {
+            "anchor": "anchor.origin",
+            "offset": [
+              1500,
+              0
+            ]
+          },
+          "offset": 0
+        },
+        "clearWidth": 1000,
+        "riserCount": 6
+      },
+      "stair.guard.left": {
+        "kind": "railing",
+        "name": "Stair left guard",
+        "type": "type.guard",
+        "role": "guard",
+        "follow": {
+          "element": "stair",
+          "side": "left",
+          "offset": 40
+        }
+      },
+      "stair.handrail.left": {
+        "kind": "railing",
+        "name": "Stair left handrail",
+        "type": "type.handrail",
+        "role": "handrail",
+        "follow": {
+          "element": "stair",
+          "side": "left",
+          "offset": 0
+        }
+      },
+      "stair.guard.right": {
+        "kind": "railing",
+        "name": "Stair right guard",
+        "type": "type.guard",
+        "role": "guard",
+        "follow": {
+          "element": "stair",
+          "side": "right",
+          "offset": 40
+        }
+      },
+      "stair.handrail.right": {
+        "kind": "railing",
+        "name": "Stair right handrail",
+        "type": "type.handrail",
+        "role": "handrail",
+        "follow": {
+          "element": "stair",
+          "side": "right",
+          "offset": 0
+        }
+      },
+      "guard.south": {
+        "kind": "railing",
+        "name": "Landing south guard",
+        "type": "type.guard",
+        "role": "guard",
+        "follow": {
+          "element": "slab.deck",
+          "edge": "south",
+          "offset": 0
+        },
+        "openings": [
+          {
+            "start": 900,
+            "end": 2100
+          }
+        ]
+      },
+      "screen.south": {
+        "kind": "panel",
+        "name": "Landing south screen",
+        "type": "type.screen",
+        "follow": {
+          "element": "slab.deck",
+          "edge": "south",
+          "offset": 100
+        },
+        "specifications": {
+          "thermalBoundary": false
+        },
+        "openings": [
+          {
+            "start": 0,
+            "end": 100
+          },
+          {
+            "start": 2900,
+            "end": 3000
+          }
+        ]
+      },
+      "guard.east": {
+        "kind": "railing",
+        "name": "Landing east guard",
+        "type": "type.guard",
+        "role": "guard",
+        "follow": {
+          "element": "slab.deck",
+          "edge": "east",
+          "offset": 0
+        },
+        "openings": [
+          {
+            "start": 0,
+            "end": 40
+          },
+          {
+            "start": 2360,
+            "end": 2400
+          }
+        ]
+      },
+      "screen.east": {
+        "kind": "panel",
+        "name": "Landing east screen",
+        "type": "type.screen",
+        "follow": {
+          "element": "slab.deck",
+          "edge": "east",
+          "offset": 100
+        },
+        "specifications": {
+          "thermalBoundary": false
+        },
+        "openings": [
+          {
+            "start": 0,
+            "end": 145
+          },
+          {
+            "start": 2255,
+            "end": 2400
+          }
+        ]
+      },
+      "guard.north": {
+        "kind": "railing",
+        "name": "Landing north guard",
+        "type": "type.guard",
+        "role": "guard",
+        "follow": {
+          "element": "slab.deck",
+          "edge": "north",
+          "offset": 0
+        }
+      },
+      "screen.north": {
+        "kind": "panel",
+        "name": "Landing north screen",
+        "type": "type.screen",
+        "follow": {
+          "element": "slab.deck",
+          "edge": "north",
+          "offset": 100
+        },
+        "specifications": {
+          "thermalBoundary": false
+        },
+        "openings": [
+          {
+            "start": 0,
+            "end": 100
+          },
+          {
+            "start": 2900,
+            "end": 3000
+          }
+        ]
+      },
+      "guard.west": {
+        "kind": "railing",
+        "name": "Landing west guard",
+        "type": "type.guard",
+        "role": "guard",
+        "follow": {
+          "element": "slab.deck",
+          "edge": "west",
+          "offset": 0
+        },
+        "openings": [
+          {
+            "start": 0,
+            "end": 40
+          },
+          {
+            "start": 2360,
+            "end": 2400
+          }
+        ]
+      },
+      "screen.west": {
+        "kind": "panel",
+        "name": "Landing west screen",
+        "type": "type.screen",
+        "follow": {
+          "element": "slab.deck",
+          "edge": "west",
+          "offset": 100
+        },
+        "specifications": {
+          "thermalBoundary": false
+        },
+        "openings": [
+          {
+            "start": 0,
+            "end": 145
+          },
+          {
+            "start": 2255,
+            "end": 2400
+          }
+        ]
+      },
+      "opening.door": {
+        "kind": "opening",
+        "name": "Screen door rough opening",
+        "geometry": {
+          "kind": "rectangle",
+          "width": 914.4,
+          "height": 2032,
+          "depth": 45
+        },
+        "placement": {
+          "station": 1500,
+          "stationReference": "center",
+          "verticalOffset": 0,
+          "verticalReference": "bottom",
+          "depthOffset": 0
+        }
+      },
+      "door": {
+        "kind": "door",
+        "name": "Landing screen door",
+        "type": "type.screen-door",
+        "handing": "left",
+        "swingDirection": "inward",
+        "swingAngle": 0
+      }
+    },
+    "relationships": {
+      "supports.south.joists": {
+        "kind": "supports",
+        "support": "beam.south",
+        "supported": "framing.joists"
+      },
+      "supports.south.west.post": {
+        "kind": "supports",
+        "support": "pad.south.west",
+        "supported": "post.south.west"
+      },
+      "supports.south.west.beam": {
+        "kind": "supports",
+        "support": "post.south.west",
+        "supported": "beam.south"
+      },
+      "supports.south.east.post": {
+        "kind": "supports",
+        "support": "pad.south.east",
+        "supported": "post.south.east"
+      },
+      "supports.south.east.beam": {
+        "kind": "supports",
+        "support": "post.south.east",
+        "supported": "beam.south"
+      },
+      "supports.north.joists": {
+        "kind": "supports",
+        "support": "beam.north",
+        "supported": "framing.joists"
+      },
+      "supports.north.west.post": {
+        "kind": "supports",
+        "support": "pad.north.west",
+        "supported": "post.north.west"
+      },
+      "supports.north.west.beam": {
+        "kind": "supports",
+        "support": "post.north.west",
+        "supported": "beam.north"
+      },
+      "supports.north.east.post": {
+        "kind": "supports",
+        "support": "pad.north.east",
+        "supported": "post.north.east"
+      },
+      "supports.north.east.beam": {
+        "kind": "supports",
+        "support": "post.north.east",
+        "supported": "beam.north"
+      },
+      "relationship.parts": {
+        "kind": "aggregates",
+        "assembly": "assembly.root",
+        "parts": [
+          "slab.deck",
+          "framing.joists",
+          "beam.south",
+          "post.south.west",
+          "pad.south.west",
+          "post.south.east",
+          "pad.south.east",
+          "beam.north",
+          "post.north.west",
+          "pad.north.west",
+          "post.north.east",
+          "pad.north.east",
+          "decking",
+          "hardware.postBase.south.west",
+          "screws.postBase.south.west",
+          "hardware.postCap.south.west",
+          "screws.postCap.south.west",
+          "hardware.postBase.south.east",
+          "screws.postBase.south.east",
+          "hardware.postCap.south.east",
+          "screws.postCap.south.east",
+          "hardware.postBase.north.west",
+          "screws.postBase.north.west",
+          "hardware.postCap.north.west",
+          "screws.postCap.north.west",
+          "hardware.postBase.north.east",
+          "screws.postBase.north.east",
+          "hardware.postCap.north.east",
+          "screws.postCap.north.east",
+          "stair",
+          "stair.guard.left",
+          "stair.handrail.left",
+          "stair.guard.right",
+          "stair.handrail.right",
+          "guard.south",
+          "screen.south",
+          "guard.east",
+          "screen.east",
+          "guard.north",
+          "screen.north",
+          "guard.west",
+          "screen.west",
+          "opening.door",
+          "door"
+        ]
+      },
+      "void.door": {
+        "kind": "voids",
+        "host": "screen.south",
+        "opening": "opening.door"
+      },
+      "fill.door": {
+        "kind": "fills",
+        "opening": "opening.door",
+        "element": "door"
+      }
+    }
+  },
+  "description": "Supported deck landing, stair treads and stringers, following guards and round handrails, screen panels and a framed screen door.",
+  "parameters": {
+    "origin": {
+      "valueType": "point2",
+      "description": "Southwest deck corner in model XY millimetres",
+      "default": [
+        0,
+        0
+      ],
+      "targets": [
+        "/anchors/anchor.origin/position"
+      ]
+    }
+  },
+  "connectionPoints": {
+    "landing": {
+      "element": "slab.deck",
+      "description": "Finished entrance landing"
+    }
+  },
+  "overridePaths": [
+    "/elements/assembly.root/name",
+    "/elements/framing.joists/memberOverrides",
+    "/types/stock.joist/section",
+    "/types/stock.beam/section",
+    "/types/stock.post/section"
+  ]
+}

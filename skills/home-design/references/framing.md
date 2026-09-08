@@ -153,8 +153,8 @@ longitudinal axis. Each row generates separate transverse bay boards;
 slab and `rafter` for a roof; an explicit `role` can also identify decking or
 purlins.
 
-Inspect generated keys before adding `memberOverrides`. Version 0.2 keys derive
-from named bounding interfaces; migrated models can retain legacy keys such as
+Inspect generated keys before adding `memberOverrides`. Keys derive
+from named bounding interfaces; models can retain keys such as
 `grid/3/0` through explicit identity maps. See [scoped identities](identities.md).
 Overrides support `omit`, same-section `memberType` substitutions and `endCuts`.
 Grid indices survive dimensional edits; new holes can replace a board with

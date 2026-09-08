@@ -5,7 +5,6 @@ from __future__ import annotations
 import math
 from dataclasses import replace
 
-from shapely import get_coordinates
 from shapely.affinity import affine_transform
 from shapely.geometry import GeometryCollection, LineString, MultiPolygon, Polygon, box
 from shapely.geometry.base import BaseGeometry
@@ -23,9 +22,10 @@ from home_design.geometry import (
     vector3,
 )
 from home_design.json_types import JsonObject
-from home_design.placement import LocalFrame, tuple3
+from home_design.placement import LocalFrame
 from home_design.resolved import MeshData, ResolvedElement, Vec2, Vec3
 from home_design.solids import SolidOperations
+from home_design.roof_joints import RoofJoints
 from home_design.member_geometry import MemberGeometry
 from home_design.boundaries import BoundaryIdentity
 from home_design.topology import NamedSpan, PartIdentity
@@ -98,89 +98,18 @@ class PlanarFraming:
             vector3(value, "roof boundary")
             for value in Authoring.array(selected["boundary"])
         ]
-        perimeter = Polygon([(point[0], point[1]) for point in boundary]).boundary
-        for plane in planes:
-            if plane["id"] == selected["id"]:
-                continue
-            other = [
-                vector3(value, "roof boundary")
-                for value in Authoring.array(plane["boundary"])
-            ]
-            shared = perimeter.intersection(
-                Polygon([(point[0], point[1]) for point in other]).boundary
-            )
-            if shared.length <= 0.01:
-                continue
-            normal = polygon_normal(other)
-            if normal[2] < 0:
-                normal = (-normal[0], -normal[1], -normal[2])
-            if not self._same_edge_elevation(
-                shared, boundary[0], self.frame.z, other[0], normal
-            ):
-                continue
-            difference: Vec3 = tuple3(
-                [self.frame.z[index] - normal[index] for index in range(3)]
-            )
-            if math.sqrt(sum(value * value for value in difference)) <= 1e-8:
-                continue
-            midpoint = shared.representative_point()
-            z = (
-                boundary[0][2]
-                - (
-                    self.frame.z[0] * (midpoint.x - boundary[0][0])
-                    + self.frame.z[1] * (midpoint.y - boundary[0][1])
-                )
-                / self.frame.z[2]
-            )
-            origin = (midpoint.x, midpoint.y, z)
-            inside = self.frame.point(
-                (self.profile.centroid.x, self.profile.centroid.y, 0)
-            )
-            if (
-                sum(
-                    difference[index] * (inside[index] - origin[index])
-                    for index in range(3)
-                )
-                < 0
-            ):
-                difference = tuple3([-value for value in difference])
+        neighbors = [
+            [vector3(value, "roof boundary") for value in Authoring.array(plane["boundary"])]
+            for plane in planes if plane["id"] != selected["id"]
+        ]
+        inside = self.frame.point((self.profile.centroid.x, self.profile.centroid.y, 0))
+        for origin, difference in RoofJoints.planes(boundary, neighbors, inside):
             clipped = SolidOperations.clip_plane(mask, origin, difference)
             if clipped is None:
-                raise ResolutionError(
-                    "Roof miter consumes the entire selected framing face"
-                )
+                raise ResolutionError("Roof miter consumes the entire selected framing face")
             mask = clipped
             self._clip_profile(origin, difference)
         return mask
-
-    @staticmethod
-    def _same_edge_elevation(
-        shared: BaseGeometry,
-        first: Vec3,
-        first_normal: Vec3,
-        second: Vec3,
-        second_normal: Vec3,
-    ) -> bool:
-        """Require a real shared spatial edge rather than coincident plan projections."""
-        if second_normal[2] <= 1e-9:
-            return False
-        for x, y in get_coordinates(shared):
-            a = (
-                first[2]
-                - (first_normal[0] * (x - first[0]) + first_normal[1] * (y - first[1]))
-                / first_normal[2]
-            )
-            b = (
-                second[2]
-                - (
-                    second_normal[0] * (x - second[0])
-                    + second_normal[1] * (y - second[1])
-                )
-                / second_normal[2]
-            )
-            if abs(a - b) > 0.01:
-                return False
-        return True
 
     def _clip_profile(self, origin: Vec3, normal: Vec3) -> None:
         """Apply a spatial miter plane to the two-dimensional layer-center layout."""

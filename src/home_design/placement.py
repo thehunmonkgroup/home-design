@@ -16,7 +16,7 @@ from home_design.errors import ResolutionError
 from home_design.member_assemblies import MemberAssemblies
 from home_design.geometry import number, vector2, vector3
 from home_design.json_types import JsonObject, JsonValue
-from home_design.locators import point_at_station
+from home_design.locators import LocatorResolver, point_at_station
 from home_design.resolved import ResolvedElement, Vec3
 from home_design.frames import LocalFrame as LocalFrame, tuple3 as tuple3
 from home_design.round_paths import RoundPath
@@ -28,6 +28,7 @@ class PlacementContext(Protocol):
     """Dependency resolution available to host placements."""
 
     elements: dict[str, JsonObject]
+    locators: LocatorResolver
 
     def resolve_component(self, element_id: str) -> ResolvedElement:
         """Return the resolved host or reject a dependency cycle."""
@@ -178,7 +179,7 @@ class HostPlacement:
 
     def _surface(self, host: ResolvedElement, placement: JsonObject) -> LocalFrame:
         """Sample a slab, footing or selected roof plane at a model X/Y point."""
-        x, y = vector2(placement.get("point"), "host plan point")
+        x, y = self.context.locators.plan_point(placement.get("point"))
         if host.kind == "roof":
             return self._roof(host, placement, x, y)
         if "face" in placement:

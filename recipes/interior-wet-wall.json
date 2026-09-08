@@ -1,0 +1,1469 @@
+{
+  "recipeVersion": "0.1",
+  "modelVersion": "0.2",
+  "id": "recipe.interior-wet-wall",
+  "name": "Interior wet wall and service ledge",
+  "description": "Insulated stud partition, interior ledge, connected cold-water valve and tee branches, owned sleeve opening, protective plate and separate seal rings. Includes a washbasin, drain neck, return trap and open waste arm.",
+  "assembly": "assembly.root",
+  "bindings": {
+    "binding.storey": {
+      "registry": "levels",
+      "kind": "storey",
+      "description": "Storey supplying the package's elevation datum"
+    }
+  },
+  "parameters": {
+    "origin": {
+      "valueType": "point2",
+      "description": "Package origin in model XY millimetres",
+      "default": [
+        0,
+        0
+      ],
+      "targets": [
+        "/anchors/anchor.origin/position"
+      ]
+    }
+  },
+  "objects": {
+    "anchors": {
+      "anchor.origin": {
+        "kind": "point2",
+        "name": "Package origin",
+        "position": [
+          0,
+          0
+        ],
+        "level": "binding.storey"
+      }
+    },
+    "materials": {
+      "material.insulation": {
+        "name": "Illustrative cavity insulation",
+        "appearance": {
+          "color": "#d8b66a"
+        }
+      },
+      "material.steel": {
+        "name": "Illustrative galvanized service stock",
+        "appearance": {
+          "color": "#8fabb8"
+        }
+      },
+      "material.copper": {
+        "name": "Illustrative bundled conductor stock",
+        "appearance": {
+          "color": "#bf6b34"
+        }
+      },
+      "material.timber": {
+        "name": "Framing timber",
+        "category": "wood",
+        "appearance": {
+          "color": "#C69C6D",
+          "roughness": 0.8
+        }
+      },
+      "material.gypsum": {
+        "name": "Gypsum board",
+        "category": "finish",
+        "appearance": {
+          "color": "#E8E5DF",
+          "roughness": 0.95
+        }
+      },
+      "material.ceramic": {
+        "name": "Sanitary ceramic",
+        "appearance": {
+          "color": "#f2f0ea"
+        }
+      }
+    },
+    "types": {
+      "interface.type.acousticSeal": {
+        "kind": "envelopePartType",
+        "name": "Illustrative penetration acousticSeal",
+        "role": "acousticSeal",
+        "material": "material.insulation",
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 80,
+              "depth": 80
+            },
+            "depth": 10
+          }
+        },
+        "cuts": {
+          "passage": {
+            "section": {
+              "kind": "rectangle",
+              "width": 64,
+              "depth": 64
+            },
+            "depth": 10
+          }
+        }
+      },
+      "plumbing.type.valve": {
+        "kind": "serviceDeviceType",
+        "name": "Water valve",
+        "role": "valve",
+        "material": "material.steel",
+        "plumbing": {
+          "designation": "Illustrative valve",
+          "valveType": "isolating"
+        },
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 60,
+              "depth": 60
+            },
+            "depth": 100
+          }
+        },
+        "cuts": {
+          "passage": {
+            "section": {
+              "kind": "circle",
+              "diameter": 40
+            },
+            "depth": 100
+          }
+        },
+        "ports": {
+          "in": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "direction": [
+              0,
+              0,
+              -1
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 40
+            },
+            "medium": "water",
+            "connectionType": "illustrativeWaterFace",
+            "flow": "bidirectional"
+          },
+          "out": {
+            "position": [
+              0,
+              0,
+              100
+            ],
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 40
+            },
+            "medium": "water",
+            "connectionType": "illustrativeWaterFace",
+            "flow": "bidirectional"
+          }
+        },
+        "portGroups": [
+          [
+            "in",
+            "out"
+          ]
+        ]
+      },
+      "plumbing.type.tee": {
+        "kind": "serviceFittingType",
+        "name": "Water branch tee",
+        "family": "pipe",
+        "material": "material.copper",
+        "wallThickness": 2,
+        "medium": "water",
+        "connectionType": "illustrativeWaterFace",
+        "flow": "bidirectional",
+        "chordTolerance": 0.1,
+        "pipe": {
+          "designation": "Illustrative water branch stock",
+          "construction": "rigid",
+          "pressureRatingPa": 1000000,
+          "minimumTemperatureC": 0,
+          "maximumTemperatureC": 90
+        },
+        "geometry": {
+          "kind": "branch",
+          "trunk": {
+            "section": {
+              "kind": "circle",
+              "diameter": 40
+            },
+            "path": [
+              [
+                0,
+                0,
+                0
+              ],
+              [
+                0,
+                0,
+                400
+              ]
+            ]
+          },
+          "branches": {
+            "side": {
+              "section": {
+                "kind": "circle",
+                "diameter": 40
+              },
+              "path": [
+                [
+                  0,
+                  0,
+                  200
+                ],
+                [
+                  200,
+                  0,
+                  200
+                ]
+              ]
+            }
+          }
+        }
+      },
+      "interface.type.protectivePlate": {
+        "kind": "envelopePartType",
+        "name": "Illustrative penetration protectivePlate",
+        "role": "protectivePlate",
+        "material": "material.steel",
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 100,
+              "depth": 100
+            },
+            "depth": 2
+          }
+        },
+        "cuts": {
+          "passage": {
+            "section": {
+              "kind": "rectangle",
+              "width": 80,
+              "depth": 80
+            },
+            "depth": 2
+          }
+        }
+      },
+      "plumbing.type.pipe": {
+        "kind": "serviceRouteType",
+        "name": "Water branch pipe",
+        "family": "pipe",
+        "material": "material.copper",
+        "section": {
+          "kind": "circle",
+          "diameter": 40
+        },
+        "wallThickness": 2,
+        "medium": "water",
+        "connectionType": "illustrativeWaterFace",
+        "flow": "bidirectional",
+        "pipe": {
+          "designation": "Illustrative water branch stock",
+          "construction": "rigid",
+          "pressureRatingPa": 1000000,
+          "minimumTemperatureC": 0,
+          "maximumTemperatureC": 90
+        }
+      },
+      "interface.type.sleeve": {
+        "kind": "envelopePartType",
+        "name": "Illustrative penetration sleeve",
+        "role": "sleeve",
+        "material": "material.steel",
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 64,
+              "depth": 64
+            },
+            "depth": 166
+          }
+        },
+        "cuts": {
+          "passage": {
+            "section": {
+              "kind": "rectangle",
+              "width": 60,
+              "depth": 60
+            },
+            "depth": 166
+          }
+        }
+      },
+      "interface.type.fireStop": {
+        "kind": "envelopePartType",
+        "name": "Illustrative penetration fireStop",
+        "role": "fireStop",
+        "material": "material.insulation",
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 80,
+              "depth": 80
+            },
+            "depth": 10
+          }
+        },
+        "cuts": {
+          "passage": {
+            "section": {
+              "kind": "rectangle",
+              "width": 64,
+              "depth": 64
+            },
+            "depth": 10
+          }
+        }
+      },
+      "accessoryType.service.ledge": {
+        "kind": "accessoryType",
+        "name": "Timber service ledge",
+        "role": "ledge",
+        "material": "material.timber",
+        "solids": {
+          "shelf": {
+            "section": {
+              "kind": "rectangle",
+              "width": 600,
+              "depth": 30
+            },
+            "depth": 250
+          }
+        }
+      },
+      "wallFramingType.shell": {
+        "kind": "wallFramingType",
+        "name": "Explicit shell wall framing",
+        "studType": "memberType.shell.stud",
+        "plateType": "memberType.shell.plate",
+        "headerType": "memberType.shell.header",
+        "spacing": 600
+      },
+      "memberType.shell.header": {
+        "kind": "memberType",
+        "name": "Illustrative header stock",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 140,
+          "depth": 140
+        }
+      },
+      "memberType.shell.plate": {
+        "kind": "memberType",
+        "name": "Illustrative plate stock",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 140,
+          "depth": 40
+        }
+      },
+      "memberType.shell.stud": {
+        "kind": "memberType",
+        "name": "Illustrative stud stock",
+        "material": "material.timber",
+        "section": {
+          "kind": "rectangle",
+          "width": 40,
+          "depth": 140
+        }
+      },
+      "plumbing.type.terminal": {
+        "kind": "serviceDeviceType",
+        "name": "Water terminal",
+        "role": "fixtureConnection",
+        "material": "material.steel",
+        "plumbing": {
+          "designation": "Illustrative terminal"
+        },
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 60,
+              "depth": 60
+            },
+            "depth": 100
+          }
+        },
+        "cuts": {
+          "passage": {
+            "section": {
+              "kind": "circle",
+              "diameter": 40
+            },
+            "depth": 100
+          }
+        },
+        "ports": {
+          "in": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "direction": [
+              0,
+              0,
+              -1
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 40
+            },
+            "medium": "water",
+            "connectionType": "illustrativeWaterFace",
+            "flow": "bidirectional"
+          }
+        },
+        "portGroups": []
+      },
+      "wallType.service.partition": {
+        "kind": "wallType",
+        "name": "Framed service partition",
+        "layerOrder": "exteriorToInterior",
+        "layers": [
+          {
+            "name": "Back gypsum",
+            "material": "material.gypsum",
+            "thickness": 13,
+            "function": "finish",
+            "id": "layer.legacy.0"
+          },
+          {
+            "name": "Framed service cavity",
+            "material": "material.insulation",
+            "thickness": 140,
+            "function": "structure",
+            "representation": "explicit",
+            "id": "layer.legacy.1"
+          },
+          {
+            "name": "Front gypsum",
+            "material": "material.gypsum",
+            "thickness": 13,
+            "function": "finish",
+            "id": "layer.legacy.2"
+          }
+        ]
+      },
+      "type.basin": {
+        "kind": "accessoryType",
+        "name": "Fabricated washbasin",
+        "role": "fixedEquipment",
+        "material": "material.ceramic",
+        "solids": {
+          "body": {
+            "section": {
+              "kind": "rectangle",
+              "width": 600,
+              "depth": 200
+            },
+            "depth": 450
+          }
+        },
+        "cuts": {
+          "bowl": {
+            "section": {
+              "kind": "rectangle",
+              "width": 540,
+              "depth": 200
+            },
+            "depth": 390,
+            "placement": {
+              "origin": [
+                0,
+                30,
+                30
+              ]
+            }
+          },
+          "drain": {
+            "section": {
+              "kind": "circle",
+              "diameter": 50
+            },
+            "depth": 32,
+            "placement": {
+              "origin": [
+                0,
+                -101,
+                225
+              ],
+              "rotation": [
+                -90,
+                0,
+                0
+              ]
+            }
+          }
+        }
+      },
+      "type.drain": {
+        "kind": "serviceDeviceType",
+        "name": "Washbasin waste connection",
+        "role": "fixtureConnection",
+        "material": "material.steel",
+        "plumbing": {
+          "designation": "40 mm basin waste"
+        },
+        "solids": {
+          "neck": {
+            "section": {
+              "kind": "circle",
+              "diameter": 50
+            },
+            "depth": 30
+          }
+        },
+        "cuts": {
+          "bore": {
+            "section": {
+              "kind": "circle",
+              "diameter": 36
+            },
+            "depth": 30
+          }
+        },
+        "ports": {
+          "in": {
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "direction": [
+              0,
+              0,
+              -1
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 40
+            },
+            "medium": "waste",
+            "flow": "sink",
+            "connectionType": "catalog.waste"
+          },
+          "out": {
+            "position": [
+              0,
+              0,
+              30
+            ],
+            "direction": [
+              0,
+              0,
+              1
+            ],
+            "section": {
+              "kind": "circle",
+              "diameter": 40
+            },
+            "medium": "waste",
+            "flow": "source",
+            "connectionType": "catalog.waste"
+          }
+        },
+        "portGroups": [
+          [
+            "in",
+            "out"
+          ]
+        ]
+      },
+      "type.waste": {
+        "kind": "serviceRouteType",
+        "name": "40 mm waste pipe",
+        "family": "pipe",
+        "material": "material.steel",
+        "medium": "waste",
+        "connectionType": "catalog.waste",
+        "section": {
+          "kind": "circle",
+          "diameter": 40
+        },
+        "wallThickness": 2,
+        "flow": "forward"
+      },
+      "type.trap": {
+        "kind": "serviceFittingType",
+        "name": "40 mm return trap",
+        "family": "pipe",
+        "material": "material.steel",
+        "medium": "waste",
+        "connectionType": "catalog.waste",
+        "wallThickness": 2,
+        "flow": "forward",
+        "geometry": {
+          "kind": "trap",
+          "section": {
+            "kind": "circle",
+            "diameter": 40
+          },
+          "path": [
+            [
+              0,
+              0,
+              200
+            ],
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              200,
+              0,
+              0
+            ],
+            [
+              200,
+              0,
+              150
+            ],
+            [
+              400,
+              0,
+              150
+            ]
+          ],
+          "bendRadius": 60
+        },
+        "chordTolerance": 0.1
+      }
+    },
+    "elements": {
+      "assembly.root": {
+        "kind": "assembly",
+        "name": "Interior wet wall and service ledge",
+        "assemblyType": "wallSystem"
+      },
+      "interface.acousticSeal": {
+        "kind": "envelopePart",
+        "name": "Service partition acousticSeal",
+        "type": "interface.type.acousticSeal",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "route",
+              "element": "plumbing.pipe.supply",
+              "station": 456
+            }
+          }
+        },
+        "interface": {
+          "host": {
+            "element": "electrical.wall.host"
+          },
+          "services": [
+            {
+              "element": "plumbing.pipe.supply"
+            }
+          ]
+        }
+      },
+      "plumbing.device.valve": {
+        "kind": "serviceDevice",
+        "name": "Partition water isolation valve",
+        "type": "plumbing.type.valve",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "electrical.wall.host",
+              "surface": "exterior",
+              "station": 3200,
+              "height": 1000,
+              "offset": [
+                0,
+                0,
+                200
+              ]
+            }
+          },
+          "rotation": [
+            0,
+            -90,
+            0
+          ]
+        }
+      },
+      "plumbing.fitting.tee": {
+        "kind": "serviceFitting",
+        "name": "Connected water branch",
+        "type": "plumbing.type.tee",
+        "placement": {
+          "origin": {
+            "port": {
+              "element": "plumbing.pipe.feed",
+              "port": "end"
+            }
+          }
+        }
+      },
+      "interface.protectivePlate": {
+        "kind": "envelopePart",
+        "name": "Service partition protectivePlate",
+        "type": "interface.type.protectivePlate",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "route",
+              "element": "plumbing.pipe.supply",
+              "station": 298
+            }
+          }
+        },
+        "interface": {
+          "host": {
+            "element": "electrical.wall.host"
+          },
+          "services": [
+            {
+              "element": "plumbing.pipe.supply"
+            }
+          ]
+        }
+      },
+      "plumbing.pipe.supply": {
+        "kind": "serviceRoute",
+        "name": "Water supply through service partition",
+        "type": "plumbing.type.pipe",
+        "path": [
+          {
+            "host": {
+              "kind": "wall",
+              "element": "electrical.wall.host",
+              "surface": "interior",
+              "station": 2700,
+              "height": 1000,
+              "offset": [
+                0,
+                0,
+                300
+              ]
+            }
+          },
+          {
+            "host": {
+              "kind": "component",
+              "element": "plumbing.device.valve",
+              "offset": [
+                0,
+                0,
+                -500
+              ]
+            }
+          },
+          {
+            "port": {
+              "element": "plumbing.device.valve",
+              "port": "in"
+            }
+          }
+        ],
+        "up": [
+          0,
+          0,
+          1
+        ],
+        "bendRadius": 100,
+        "chordTolerance": 0.1,
+        "clearance": 10,
+        "portStates": {
+          "start": "open"
+        },
+        "conditions": {
+          "pressurePa": 300000,
+          "temperatureC": 20
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "electrical.wall.host",
+              "layer": "layer.legacy.1"
+            }
+          ],
+          "fit": "intersect"
+        },
+        "coordinationChecks": {
+          "interference": "error",
+          "clearance": {
+            "severity": "error"
+          }
+        }
+      },
+      "plumbing.pipe.feed": {
+        "kind": "serviceRoute",
+        "name": "Water feed branch",
+        "type": "plumbing.type.pipe",
+        "path": [
+          {
+            "port": {
+              "element": "plumbing.device.valve",
+              "port": "out"
+            }
+          },
+          {
+            "host": {
+              "kind": "component",
+              "element": "plumbing.device.valve",
+              "offset": [
+                0,
+                0,
+                400
+              ]
+            }
+          }
+        ],
+        "chordTolerance": 0.1
+      },
+      "interface.sleeve": {
+        "kind": "envelopePart",
+        "name": "Service partition sleeve",
+        "type": "interface.type.sleeve",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "route",
+              "element": "plumbing.pipe.supply",
+              "station": 300
+            }
+          }
+        },
+        "interface": {
+          "host": {
+            "element": "electrical.wall.host"
+          },
+          "services": [
+            {
+              "element": "plumbing.pipe.supply"
+            }
+          ]
+        },
+        "occupies": {
+          "regions": [
+            {
+              "host": "electrical.wall.host",
+              "layer": "layer.legacy.1"
+            }
+          ],
+          "fit": "intersect"
+        }
+      },
+      "interface.fireStop": {
+        "kind": "envelopePart",
+        "name": "Service partition fireStop",
+        "type": "interface.type.fireStop",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "route",
+              "element": "plumbing.pipe.supply",
+              "station": 300
+            }
+          }
+        },
+        "interface": {
+          "host": {
+            "element": "electrical.wall.host"
+          },
+          "services": [
+            {
+              "element": "plumbing.pipe.supply"
+            }
+          ]
+        }
+      },
+      "accessory.service.ledge": {
+        "kind": "accessory",
+        "name": "Interior service ledge",
+        "type": "accessoryType.service.ledge",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "electrical.wall.host",
+              "surface": "interior",
+              "station": 800,
+              "height": 1000
+            }
+          }
+        }
+      },
+      "framing.partition": {
+        "kind": "wallFraming",
+        "name": "Interior partition framing",
+        "type": "wallFramingType.shell",
+        "host": "electrical.wall.host",
+        "layer": "layer.legacy.1",
+        "segment": "segment.legacy.0"
+      },
+      "plumbing.terminal.end": {
+        "kind": "serviceDevice",
+        "name": "Water rough-in end",
+        "type": "plumbing.type.terminal",
+        "placement": {
+          "origin": {
+            "port": {
+              "element": "plumbing.pipe.end",
+              "port": "end"
+            }
+          }
+        }
+      },
+      "electrical.wall.host": {
+        "kind": "wall",
+        "name": "Interior service partition",
+        "storey": "binding.storey",
+        "type": "wallType.service.partition",
+        "locationLine": "center",
+        "path": {
+          "kind": "line",
+          "start": {
+            "anchor": "anchor.origin",
+            "offset": [
+              0,
+              0
+            ]
+          },
+          "end": {
+            "anchor": "anchor.origin",
+            "offset": [
+              4000,
+              0
+            ]
+          },
+          "segmentIds": [
+            "segment.legacy.0"
+          ]
+        },
+        "base": {
+          "kind": "level",
+          "level": "binding.storey",
+          "offset": 0
+        },
+        "top": {
+          "kind": "height",
+          "height": 2700
+        }
+      },
+      "interface.cut.partition": {
+        "kind": "penetration",
+        "name": "Owned partition sleeve hole",
+        "host": "electrical.wall.host",
+        "owner": "interface.sleeve",
+        "purpose": "service",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "route",
+              "element": "plumbing.pipe.supply",
+              "station": 300
+            }
+          }
+        },
+        "section": {
+          "kind": "rectangle",
+          "width": 80,
+          "depth": 80
+        },
+        "depth": 166,
+        "limits": {
+          "authoredOpening": {
+            "host": {
+              "kind": "wall",
+              "element": "electrical.wall.host",
+              "surface": "interior",
+              "station": 2700,
+              "height": 1000
+            },
+            "maximumExtent": {
+              "x": 80,
+              "y": 80,
+              "z": 166
+            },
+            "reference": "Illustrative service opening geometry"
+          }
+        }
+      },
+      "plumbing.terminal.side": {
+        "kind": "serviceDevice",
+        "name": "Water rough-in side",
+        "type": "plumbing.type.terminal",
+        "placement": {
+          "origin": {
+            "port": {
+              "element": "plumbing.pipe.side",
+              "port": "end"
+            }
+          }
+        }
+      },
+      "plumbing.pipe.end": {
+        "kind": "serviceRoute",
+        "name": "Water end branch",
+        "type": "plumbing.type.pipe",
+        "path": [
+          {
+            "port": {
+              "element": "plumbing.fitting.tee",
+              "port": "end"
+            }
+          },
+          {
+            "host": {
+              "kind": "component",
+              "element": "plumbing.fitting.tee",
+              "offset": [
+                0,
+                0,
+                800
+              ]
+            }
+          }
+        ],
+        "chordTolerance": 0.1
+      },
+      "plumbing.pipe.side": {
+        "kind": "serviceRoute",
+        "name": "Water side branch",
+        "type": "plumbing.type.pipe",
+        "path": [
+          {
+            "port": {
+              "element": "plumbing.fitting.tee",
+              "port": "side"
+            }
+          },
+          {
+            "host": {
+              "kind": "component",
+              "element": "plumbing.fitting.tee",
+              "offset": [
+                600,
+                0,
+                200
+              ]
+            }
+          }
+        ],
+        "chordTolerance": 0.1
+      },
+      "plumbing.system.water": {
+        "kind": "serviceSystem",
+        "name": "Connected cold water branches",
+        "systemType": "coldWater",
+        "members": [
+          {
+            "element": "plumbing.device.valve",
+            "port": "in"
+          },
+          {
+            "element": "plumbing.device.valve",
+            "port": "out"
+          },
+          {
+            "element": "plumbing.pipe.supply",
+            "port": "start"
+          },
+          {
+            "element": "plumbing.pipe.supply",
+            "port": "end"
+          },
+          {
+            "element": "plumbing.fitting.tee",
+            "port": "start"
+          },
+          {
+            "element": "plumbing.fitting.tee",
+            "port": "end"
+          },
+          {
+            "element": "plumbing.fitting.tee",
+            "port": "side"
+          },
+          {
+            "element": "plumbing.pipe.feed",
+            "port": "start"
+          },
+          {
+            "element": "plumbing.pipe.feed",
+            "port": "end"
+          },
+          {
+            "element": "plumbing.pipe.end",
+            "port": "start"
+          },
+          {
+            "element": "plumbing.pipe.end",
+            "port": "end"
+          },
+          {
+            "element": "plumbing.pipe.side",
+            "port": "start"
+          },
+          {
+            "element": "plumbing.pipe.side",
+            "port": "end"
+          },
+          {
+            "element": "plumbing.terminal.end",
+            "port": "in"
+          },
+          {
+            "element": "plumbing.terminal.side",
+            "port": "in"
+          }
+        ]
+      },
+      "basin": {
+        "kind": "accessory",
+        "name": "Wall-mounted washbasin",
+        "type": "type.basin",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "electrical.wall.host",
+              "surface": "interior",
+              "station": 1600,
+              "height": 850
+            }
+          }
+        }
+      },
+      "basin.drain": {
+        "kind": "serviceDevice",
+        "name": "Basin drain neck",
+        "type": "type.drain",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "electrical.wall.host",
+              "surface": "interior",
+              "station": 1600,
+              "height": 750,
+              "offset": [
+                0,
+                0,
+                225
+              ]
+            }
+          },
+          "rotation": [
+            90,
+            0,
+            0
+          ]
+        },
+        "portStates": {
+          "in": "open"
+        }
+      },
+      "trap": {
+        "kind": "serviceFitting",
+        "name": "Basin return trap",
+        "type": "type.trap",
+        "placement": {
+          "origin": {
+            "host": {
+              "kind": "wall",
+              "element": "electrical.wall.host",
+              "surface": "interior",
+              "station": 1600,
+              "height": 350,
+              "offset": [
+                0,
+                0,
+                225
+              ]
+            }
+          },
+          "rotation": [
+            -90,
+            0,
+            0
+          ]
+        }
+      },
+      "waste.tail": {
+        "kind": "serviceRoute",
+        "name": "Basin waste tailpiece",
+        "type": "type.waste",
+        "path": [
+          {
+            "port": {
+              "element": "basin.drain",
+              "port": "out"
+            }
+          },
+          {
+            "port": {
+              "element": "trap",
+              "port": "start"
+            }
+          }
+        ],
+        "chordTolerance": 0.1
+      },
+      "waste.outlet": {
+        "kind": "serviceRoute",
+        "name": "Open trap arm connection",
+        "type": "type.waste",
+        "path": [
+          {
+            "port": {
+              "element": "trap",
+              "port": "end"
+            }
+          },
+          {
+            "host": {
+              "kind": "wall",
+              "element": "electrical.wall.host",
+              "surface": "interior",
+              "station": 2400,
+              "height": 500,
+              "offset": [
+                0,
+                0,
+                225
+              ]
+            }
+          }
+        ],
+        "chordTolerance": 0.1,
+        "portStates": {
+          "end": "open"
+        }
+      },
+      "system.waste": {
+        "kind": "serviceSystem",
+        "name": "Connected basin waste and trap",
+        "systemType": "waste",
+        "members": [
+          {
+            "element": "basin.drain",
+            "port": "in"
+          },
+          {
+            "element": "basin.drain",
+            "port": "out"
+          },
+          {
+            "element": "waste.tail",
+            "port": "start"
+          },
+          {
+            "element": "waste.tail",
+            "port": "end"
+          },
+          {
+            "element": "trap",
+            "port": "start"
+          },
+          {
+            "element": "trap",
+            "port": "end"
+          },
+          {
+            "element": "waste.outlet",
+            "port": "start"
+          },
+          {
+            "element": "waste.outlet",
+            "port": "end"
+          }
+        ]
+      }
+    },
+    "relationships": {
+      "plumbing.connect.supply": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "plumbing.pipe.supply",
+          "port": "end"
+        },
+        "b": {
+          "element": "plumbing.device.valve",
+          "port": "in"
+        }
+      },
+      "plumbing.connect.feed": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "plumbing.device.valve",
+          "port": "out"
+        },
+        "b": {
+          "element": "plumbing.pipe.feed",
+          "port": "start"
+        }
+      },
+      "plumbing.connect.tee": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "plumbing.pipe.feed",
+          "port": "end"
+        },
+        "b": {
+          "element": "plumbing.fitting.tee",
+          "port": "start"
+        }
+      },
+      "plumbing.connect.end": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "plumbing.fitting.tee",
+          "port": "end"
+        },
+        "b": {
+          "element": "plumbing.pipe.end",
+          "port": "start"
+        }
+      },
+      "plumbing.connect.side": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "plumbing.fitting.tee",
+          "port": "side"
+        },
+        "b": {
+          "element": "plumbing.pipe.side",
+          "port": "start"
+        }
+      },
+      "plumbing.connect.terminal.end": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "plumbing.pipe.end",
+          "port": "end"
+        },
+        "b": {
+          "element": "plumbing.terminal.end",
+          "port": "in"
+        }
+      },
+      "plumbing.connect.terminal.side": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "plumbing.pipe.side",
+          "port": "end"
+        },
+        "b": {
+          "element": "plumbing.terminal.side",
+          "port": "in"
+        }
+      },
+      "waste.connect.0": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "basin.drain",
+          "port": "out"
+        },
+        "b": {
+          "element": "waste.tail",
+          "port": "start"
+        }
+      },
+      "waste.connect.1": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "waste.tail",
+          "port": "end"
+        },
+        "b": {
+          "element": "trap",
+          "port": "start"
+        }
+      },
+      "waste.connect.2": {
+        "kind": "connectsPorts",
+        "a": {
+          "element": "trap",
+          "port": "end"
+        },
+        "b": {
+          "element": "waste.outlet",
+          "port": "start"
+        }
+      },
+      "relationship.parts": {
+        "kind": "aggregates",
+        "assembly": "assembly.root",
+        "parts": [
+          "plumbing.fitting.tee",
+          "plumbing.system.water",
+          "plumbing.pipe.supply",
+          "plumbing.pipe.feed",
+          "interface.cut.partition",
+          "plumbing.terminal.side",
+          "plumbing.pipe.end",
+          "interface.protectivePlate",
+          "accessory.service.ledge",
+          "plumbing.device.valve",
+          "framing.partition",
+          "plumbing.terminal.end",
+          "plumbing.pipe.side",
+          "interface.acousticSeal",
+          "interface.fireStop",
+          "interface.sleeve",
+          "electrical.wall.host",
+          "basin",
+          "basin.drain",
+          "trap",
+          "waste.tail",
+          "waste.outlet",
+          "system.waste"
+        ]
+      }
+    }
+  },
+  "connectionPoints": {
+    "supply": {
+      "element": "plumbing.pipe.supply",
+      "port": "start",
+      "description": "Open cold-water supply; connect explicitly"
+    },
+    "wall": {
+      "element": "electrical.wall.host",
+      "description": "Interior wall host"
+    },
+    "waste": {
+      "element": "waste.outlet",
+      "port": "end",
+      "description": "Open trap arm for an explicitly coordinated waste and vent connection"
+    }
+  },
+  "overridePaths": [
+    "/elements/assembly.root/name"
+  ]
+}
