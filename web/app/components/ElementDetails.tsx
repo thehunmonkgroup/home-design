@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { canToggleVisibility, formatProperty, type RenderManifest } from '../lib/model';
 import { containingElements, reinforcementElementIds, relatedElements, type ContextAction } from '../lib/navigation';
 import { formatDisplayProperty, type DisplayUnits } from '../lib/properties';
+import { useCompactLayout } from '../lib/viewer-layout';
 
 export interface DetailsView {
   limit: number;
@@ -31,9 +32,18 @@ export default function ElementDetails({ elementId, manifest, units, onUnits, on
   const element = manifest.elements[elementId];
   const { limit, memberQuery, memberLimit } = view;
   const container = useRef<HTMLDivElement>(null);
+  const compact = useCompactLayout();
   useLayoutEffect(() => {
-    if (container.current) container.current.scrollTop = view.scrollTop;
-  }, [view.scrollTop]);
+    const scroller = compact ? container.current?.closest('.panel-body') : container.current;
+    if (scroller) scroller.scrollTop = view.scrollTop;
+  }, [view.scrollTop, compact]);
+  useLayoutEffect(() => {
+    if (!compact) return;
+    const scroller = container.current?.closest('.panel-body');
+    const remember = () => { if (scroller) onView({ scrollTop: scroller.scrollTop }); };
+    scroller?.addEventListener('scroll', remember);
+    return () => scroller?.removeEventListener('scroll', remember);
+  }, [compact, onView]);
   const containers = containingElements(manifest, elementId);
   const relations = relatedElements(manifest, elementId).filter((entry) => entry.kind !== 'generated');
   const children = (element.children ?? []).filter((id) => {
@@ -46,7 +56,7 @@ export default function ElementDetails({ elementId, manifest, units, onUnits, on
       const formatted = formatProperty(key, value);
       return formatted ? [{ id: key, label: key.replace(/([A-Z])/g, ' $1'), value: formatted }] : [];
     });
-  return <div className="element-details" ref={container} onScroll={(event) => onView({ scrollTop: event.currentTarget.scrollTop })}>
+  return <div className="element-details" ref={container} onScroll={(event) => { if (!compact) onView({ scrollTop: event.currentTarget.scrollTop }); }}>
     <h3>{element.name}</h3>
     <code>{elementId}</code>
     <div className="context-actions" aria-label="Find selected component">

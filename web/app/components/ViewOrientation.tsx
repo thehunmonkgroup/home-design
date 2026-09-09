@@ -10,14 +10,15 @@ const GESTURES = [
 
 export default function ViewOrientation({ northRotation, mode = 'orbit' }: { northRotation: number; mode?: 'orbit' | 'look' }) {
   const [activeHint, setActiveHint] = useState<string | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   useEffect(() => {
-    if (!activeHint) return;
+    if (!activeHint && !helpOpen) return;
     const dismiss = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setActiveHint(null);
+      if (event.key === 'Escape') { setActiveHint(null); setHelpOpen(false); }
     };
     window.addEventListener('keydown', dismiss);
     return () => window.removeEventListener('keydown', dismiss);
-  }, [activeHint]);
+  }, [activeHint, helpOpen]);
   const gestures = mode === 'look' ? [
     { word: 'Look', help: 'Drag with one finger or the primary mouse button to look around without moving your viewpoint.' },
     GESTURES[1],
@@ -35,8 +36,8 @@ export default function ViewOrientation({ northRotation, mode = 'orbit' }: { nor
         </g>
         <text x={36 + 27 * Math.sin(radians)} y={36 - 27 * Math.cos(radians)}>N</text>
       </svg>
-      <span className="orientation-caption">Model north</span>
-      <div className="gesture-hints" aria-label="View navigation help" onMouseLeave={() => setActiveHint(null)}>
+      <button className="gesture-help-toggle" type="button" aria-label="Navigation help" aria-expanded={helpOpen} onClick={() => setHelpOpen(!helpOpen)}>Gestures</button>
+      <div hidden={!helpOpen} className="gesture-hints" aria-label="View navigation help" onMouseLeave={() => setActiveHint(null)}>
         {gestures.map(({ word, help }) => (
           <span className="gesture-hint" key={word}>
             <button

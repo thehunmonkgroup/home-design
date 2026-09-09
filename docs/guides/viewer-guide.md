@@ -12,11 +12,15 @@ provide a usable total, the bar stays indeterminate and shows bytes received.
 **Preparing model** means the download is complete and the viewer is processing
 the 3D view. If loading fails, the error message includes a **Retry model** button.
 
-Models with a prepared tour show a **Saved view** selector above the model.
+Models with prepared views show a **View** dropdown near the top of the model.
+Choose a view directly there, or open **Views** in the toolbar for the
+**Saved view** selector, descriptions and presentation controls. Both selectors
+stay synchronized with the selected view.
 Choose a view to restore its camera, visible layers and components, highlights
 and cuts. The description explains what the view reveals. Orbit, zoom, pan and
 select normally after choosing a view; **Restore view** reapplies that stop's
-settings. **Reset presentation** clears cuts and highlights, restores default
+settings. On compact screens, choosing or restoring a view closes the drawer so
+you can see the result. **Reset presentation** clears cuts and highlights, restores default
 component visibility and frames the model with a perspective camera.
 
 To share a prepared viewpoint, add `?view=VIEW_ID` to the viewer URL (or
@@ -35,7 +39,8 @@ The **?** button still starts the full tour manually.
 
 The [Master Suite Gable House tour](master-suite-gable-house.md) includes fifteen
 views, from a north-up floor plan and eye-level interiors to framing and services.
-Named section cuts have filled material faces. Changing **Cut** replaces the
+Named section cuts have filled material faces. Open **Tools** to change **Cut** or
+construction visibility, or download reports. Changing **Cut** replaces the
 saved cut planes; a custom cut has filled faces when it matches an included
 named-view plane. Other custom planes use the ordinary unfilled section display.
 **Show all** changes component visibility while retaining the current cuts.
@@ -64,6 +69,27 @@ dismissal are remembered for this site when browser storage is available, or for
 the current session otherwise. The tour temporarily opens the panels it describes
 and restores your saved panel choices, or the hidden defaults, when it closes.
 These temporary openings do not change your saved preferences.
+
+## Make room for the model
+
+The model fills the workspace below a compact header. The toolbar provides
+**Views**, **Components**, **Details**, **Tools** and **Frame**. The **i** button
+opens model information, including the full name, revision and loading status.
+
+On portrait phones, controls open in a bottom drawer. **Expand** gives it more
+room; **Reduce** returns to its initial size. In landscape or a short window,
+the toolbar moves to the left edge and drawers open on the right. Scroll inside
+a drawer to reach all of its controls. Only one compact drawer opens at a time;
+switching drawers preserves the current selection and component filter.
+
+Use a drawer's **×** button, its toolbar button, or Escape while focus is inside
+it to close it. The uncovered model stays interactive. On desktop, Components
+and Details can remain open side by side. Opening temporary controls never
+reduces the canvas height. Rotating the device preserves the viewpoint and
+selection; **Frame** fits the complete home to the new screen shape.
+
+The viewer follows the available browser height and keeps controls above the
+software keyboard. It also leaves space for device cutouts and home indicators.
 
 ## Choose a home
 
@@ -101,18 +127,19 @@ retry it or choose another home. Reload the page to discover newly published mod
 | Pan | Right-click and drag, or hold Shift and drag | Drag with two fingers |
 | Zoom | Scroll wheel or two-finger scroll | Pinch with two fingers |
 
-**Frame model** fits the complete model to the current viewport with a surrounding
+**Frame** (accessible as **Frame model**) fits the complete model to the current viewport with a surrounding
 margin. The **Model north** compass rotates with the camera's orbit heading. It
 indicates canonical +Y north, not surveyed true north, and is a read-only
 orientation aid. Panning and zooming do not change its heading.
 
-Hover over **Orbit**, **Pan**, or **Zoom** for a short instruction popup; the hints
-also open on keyboard focus or tap. Press Escape to dismiss a hint.
+Choose **Gestures** below the compass for navigation help. Hover, focus or tap
+**Orbit**, **Pan**, or **Zoom** to read its instructions. Press Escape to dismiss
+the help. The quick-start navigation step uses concise touch instructions on
+touchscreens and describes the active Orbit or Look around mode.
 
 ### Look around rooms and decks
 
-**View navigation** starts collapsed above the canvas; click its heading to open
-the controls. **Orbit** rotates around a target;
+Open **Tools**, then expand **View navigation** to reach the controls. **Orbit** rotates around a target;
 **Look around** turns the camera in place, like turning your head. Drag with the
 primary mouse button or one finger. Shift/right-drag pans, and scrolling moves
 forward or backward. On a touchscreen, two-finger dragging pans and pinching
@@ -135,7 +162,10 @@ Components also chooses it here. The controls offer:
   It keeps the camera in place, turns toward the chosen point, and briefly marks
   the new center. Hidden surfaces and geometry beyond a section cut are ignored.
 
-The two placement tools finish after a successful click. Use **Cancel** or Escape
+On compact screens, choosing a placement tool closes Tools and shows an
+instruction with a **Cancel** button over the model. Room presets also close
+Tools so you can explore the resulting view. The two placement tools finish
+after a successful click. Use **Cancel** or Escape
 to leave a tool without changing the view. Ordinary clicks still select components;
 drags preserve the current selection. Room presets and viewpoint tools retain
 visibility and section cuts: use **Hide**, **Cut**, or a prepared cutaway when a
@@ -156,10 +186,12 @@ rooms, all three decks and the east entry landing.
 
 ## Find and inspect components
 
-Both panels start hidden unless you have saved a different preference.
-Use the **Show/Hide Components** and **Show/Hide Details** buttons below the project
-title to toggle each panel. This browser remembers your choices for this site
-across reloads and model switches, when browser storage is available.
+Components and Details start hidden unless you have saved a different desktop
+preference. Use **Components** and **Details** in the toolbar to toggle them.
+Desktop panel choices are remembered for this site when storage is available.
+Compact drawers operate independently, so opening them does not overwrite your
+desktop layout. If both desktop panels were saved open, a fresh compact session
+starts with Components.
 
 Use **Group by** to explore component types, assemblies, rooms, hosts or service
 systems. **Other components** retains parts outside the selected groups. Select a component in the model or in the list to inspect its
@@ -189,7 +221,7 @@ Below the selected component's name:
 - **Find in Components** opens the Components panel, filters by the selected ID,
   and focuses its row, including individual generated members. Clear the filter
   to browse the full collection. On narrow screens this action closes Details so
-  the list is accessible; **Show Details** reopens the same selection.
+  the list is accessible; **Details** reopens the same selection.
 - **Show in model** displays the selected component and frames it without hiding
   other components. For an assembly it shows and frames the contents. Other
   geometry can still conceal the selection; use isolation or a section cut to
@@ -233,7 +265,7 @@ Use **Back** to return to the framing list with your search and position retaine
 
 ### Find Reveal wall contents
 
-Open **Show Details**, then select the wall's name in **Components** or click its
+Open **Details**, then select the wall's name in **Components** or click its
 surface in the model. **Reveal wall contents** appears in Details below **Display
 units**, beside **Isolate with contents**, only when the selected component is a
 wall. An assembly, framing component or individual stud has different actions.

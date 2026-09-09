@@ -33,7 +33,7 @@ Use the group visibility control with **Isolate on eye click** to focus on one
 example. **Show all** restores the collection.
 
 For the exterior wall, search the Components list for **Complete exterior wall**
-and click its name. Open **Show Details** if needed, then choose **Reveal wall
+and click its name. Open **Details** if needed, then choose **Reveal wall
 contents** below **Display units**. This action appears when the wall itself is
 selected. Selecting the assembly or clicking an eye button does not enable it.
 

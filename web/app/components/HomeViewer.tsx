@@ -46,6 +46,8 @@ import { ModelLoading } from './ModelLoading';
 import ViewOrientation from './ViewOrientation';
 import DesignRequirements from './DesignRequirements';
 import PanelControls from './PanelControls';
+import ViewerPanel from './ViewerPanel';
+import { useCompactLayout, useTouchInput, useVisibleViewport, type TourFocus, type ViewerDrawer } from '../lib/viewer-layout';
 import QuickStart from './QuickStart';
 import ElementDetails, { initialDetailsView, type DetailsView } from './ElementDetails';
 import SelectionHistory from './SelectionHistory';
@@ -218,8 +220,30 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
   const [grouping, setGrouping] = useState<NavigationGrouping>('kind');
   const [displayUnits, setDisplayUnits] = useState<DisplayUnits>('metric');
   const [isolateOnClick, setIsolateOnClick] = useState(false);
-  const [tourPanel, setTourPanel] = useState<ReviewPanel | 'none' | null>(null);
-  const displayedPanels = tourPanel ? { components: tourPanel === 'components', details: tourPanel === 'details' } : panels;
+  const compact = useCompactLayout();
+  const touch = useTouchInput();
+  useVisibleViewport();
+  const [drawer, setDrawer] = useState<ViewerDrawer | null>(() => panels.components ? 'components' : panels.details ? 'details' : null);
+  const [utility, setUtility] = useState<ViewerDrawer | null>(null);
+  const [tourPanel, setTourPanel] = useState<TourFocus>(null);
+  const activeDrawer = tourPanel !== null ? tourPanel === 'none' ? null : tourPanel : compact ? drawer : utility;
+  const displayedPanels = tourPanel !== null || compact
+    ? { components: activeDrawer === 'components', details: activeDrawer === 'details' }
+    : panels;
+  const openDrawer = (next: ViewerDrawer) => {
+    if (compact) setDrawer(next);
+    else if (next === 'components' || next === 'details') { if (!panels[next]) onTogglePanel(next); setUtility(null); }
+    else setUtility(next);
+  };
+  const closeDrawer = (next: ViewerDrawer) => {
+    if (compact) setDrawer(null);
+    else if (next === 'components' || next === 'details') { if (panels[next]) onTogglePanel(next); }
+    else setUtility(null);
+  };
+  const toggleDrawer = (next: ViewerDrawer) => {
+    const open = next === 'components' || next === 'details' ? displayedPanels[next] : activeDrawer === next;
+    if (open) closeDrawer(next); else openDrawer(next);
+  };
 
   const groups = useMemo(() => (manifest ? navigationGroups(manifest, grouping, Boolean(componentQuery.trim())) : []), [manifest, grouping, componentQuery]);
   const filteredGroups = useMemo(() => filterElementGroups(groups, componentQuery), [groups, componentQuery]);
@@ -678,9 +702,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
     if (!selectedId) return;
     setComponentQuery(selectedId);
     setListRequest({ id: selectedId });
-    if (!panels.components) onTogglePanel('components');
-    // On narrow screens the inspector overlays the component list.
-    if (window.matchMedia('(max-width: 1000px)').matches && panels.details) onTogglePanel('details');
+    openDrawer('components');
   };
 
   const showSelection = () => {
@@ -748,33 +770,26 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
   return (
     <main className={`review-shell ${displayedPanels.components ? '' : 'components-hidden'} ${displayedPanels.details ? '' : 'details-hidden'}`}>
       <header className="review-header">
+        <h1 className="sr-only">{manifest?.project.name ?? entry?.name ?? 'Home Design Review'}</h1>
         <div className="brand-mark" aria-hidden="true"><span /><span /><span /></div>
-        <div className="brand-copy">
-          <p>IFC-aligned model</p>
-          <h1>{manifest?.project.name ?? entry?.name ?? 'Home Design Review'}</h1>
-        </div>
-        <div className="header-status">
-          <span className={`status-dot status-${status}`} />
-          <span className="model-status-message" role="status">{status === 'error' ? 'Model unavailable' : message}</span>
-          {models.length > 0 && <select
+        <div className="model-heading">
+          {models.length > 0 ? <select
             className="model-switcher" aria-label="Model" value={entry?.key ?? ''}
             onChange={(event) => onSwitch(event.target.value)}
           >
             {!entry && <option value="" disabled>Choose a model…</option>}
             {models.map((model) => <option key={model.key} value={model.key}>{modelLabel(model, models)}</option>)}
-          </select>}
-          {manifest && <span className="revision-badge">rev {manifest.sourceRevision}</span>}
+          </select> : <span>Home Design Review</span>}
         </div>
+        <span className={`status-dot status-${status}`} title={status === 'ready' ? 'Model ready' : message} />
+        <span className="model-status-message" role="status">{status === 'error' ? 'Model unavailable' : message}</span>
+        <button type="button" className="model-info-button" aria-label="Model information" aria-controls="info-panel"
+          aria-expanded={activeDrawer === 'info'} onClick={() => toggleDrawer('info')}>i</button>
         <QuickStart ready={status === 'ready'} automatic={initialView !== null ? 'navigation' : suppressAutomaticTour ? 'none' : 'full'}
-          hasSavedViews={Boolean(manifest?.namedViews?.length)} onPanelFocus={setTourPanel} />
+          hasSavedViews={Boolean(manifest?.namedViews?.length)} onPanelFocus={setTourPanel} touch={touch} mode={navigationMode} />
       </header>
 
-      <PanelControls visibility={displayedPanels} onToggle={onTogglePanel} />
-      <aside id="components-panel" className="model-tree" hidden={!displayedPanels.components} aria-label="Model components">
-        <div className="panel-heading">
-          <div><p>Model index</p><h2>Components</h2></div>
-          <span>{manifest ? Object.values(manifest.elements).filter((element) => !element.parentId).length : '—'}</span>
-        </div>
+      <ViewerPanel id="components-panel" title="Components" className="model-tree" open={displayedPanels.components} onClose={() => closeDrawer('components')}>
         <div className="component-filter" id="component-filter">
           <label htmlFor="component-grouping">Group by</label>
           <select id="component-grouping" value={grouping} onChange={(event) => setGrouping(event.target.value as NavigationGrouping)}>
@@ -839,31 +854,46 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
             </section>;
           })}
         </nav>
-      </aside>
+      </ViewerPanel>
 
-      <section className="viewport has-named-views" aria-label="Interactive three-dimensional home model">
+      <section className="viewport" aria-label="Interactive three-dimensional home model">
         <div ref={canvasHost} className="canvas-host" />
-        {!!manifest?.namedViews?.length && <div className="named-view-tools">
-          <label>Saved view <select aria-label="Saved view" value={namedViewId} onChange={(event) => applyNamedView(event.target.value)}>
+        {!!manifest?.namedViews?.length && <label className="current-view">
+          <span>View</span>
+          <select aria-label="Current view" value={namedViewId} onChange={(event) => applyNamedView(event.target.value)}>
+            <option value="" disabled>Choose a saved view…</option>
+            {manifest.namedViews.map((view) => <option key={view.id} value={view.id}>{view.title}</option>)}
+          </select>
+        </label>}
+        {viewMessage && !namedViewId && <p className="view-notice" role="status">{viewMessage}</p>}
+        <ViewerPanel id="views-panel" title="Views" className="utility-panel" open={activeDrawer === 'views'} onClose={() => closeDrawer('views')}>
+        <div className="drawer-content named-view-tools">
+          {!manifest?.namedViews?.length && <p>This model has no saved views. Use Tools to explore rooms or place a viewpoint.</p>}
+          {!!manifest?.namedViews?.length && <>
+          <label>Saved view <select aria-label="Saved view" value={namedViewId} onChange={(event) => { applyNamedView(event.target.value); if (compact) closeDrawer('views'); }}>
             <option value="" disabled>Choose a view…</option>
             {manifest.namedViews.map((view) => <option key={view.id} value={view.id}>{view.title}</option>)}
           </select></label>
-          <button type="button" onClick={() => applyNamedView(namedViewId)} disabled={!namedViewId}>Restore view</button>
-          <button type="button" onClick={resetPresentation}>Reset presentation</button>
+          <button type="button" onClick={() => { applyNamedView(namedViewId); if (compact) closeDrawer('views'); }} disabled={!namedViewId}>Restore view</button>
+          <button type="button" onClick={() => { resetPresentation(); if (compact) closeDrawer('views'); }}>Reset presentation</button>
           <p role="status">{viewMessage || 'Choose a prepared view, then orbit, pan or inspect components.'}</p>
-        </div>}
-        {!manifest?.namedViews?.length && viewMessage && <div className="named-view-tools"><p role="status">{viewMessage}</p></div>}
+          </>}
+        </div>
+        </ViewerPanel>
+        <ViewerPanel id="info-panel" title="Model information" className="utility-panel" open={activeDrawer === 'info'} onClose={() => closeDrawer('info')}>
+          <div className="drawer-content"><h3>{manifest?.project.name ?? entry?.name ?? 'Home Design Review'}</h3>
+            {manifest && <p>Revision {manifest.sourceRevision}</p>}<p>{message}</p><p>View and inspect the home without changing its saved design.</p>
+          </div>
+        </ViewerPanel>
+        <ViewerPanel id="tools-panel" title="Tools" className="utility-panel" open={activeDrawer === 'tools'} onClose={() => closeDrawer('tools')}>
+        <div className="drawer-content">
         <CameraTools ready={status === 'ready'} mode={navigationMode} orthographic={orthographic}
-          tool={viewpointTool} onMode={(mode) => { rememberCamera(); changeMode(mode); }} onTool={chooseTool}
+          tool={viewpointTool} onMode={(mode) => { rememberCamera(); changeMode(mode); }} onTool={(tool) => { chooseTool(tool); if (compact && tool) closeDrawer('tools'); }}
           canGoBack={cameraHistorySize > 0} onBack={previousCamera} rooms={rooms} roomId={roomId}
-          onRoom={(id) => { setRoomId(id); roomIdRef.current = id; chooseTool(null); }} onPreset={roomPreset}
+          onRoom={(id) => { setRoomId(id); roomIdRef.current = id; chooseTool(null); }} onPreset={(preset) => { roomPreset(preset); if (compact) closeDrawer('tools'); }}
           height={eyeHeight} onHeight={(height) => { setEyeHeight(height); eyeHeightRef.current = height; }} message={cameraMessage} />
-        {status === 'loading' && <ModelLoading progress={loadProgress} />}
-        {status === 'error' && <div className="error-card" role="alert"><strong>Preview unavailable</strong><p>{message}</p>
-          {entry && <button onClick={() => { setLoadProgress(null); setStatus('loading'); setMessage('Loading model…'); setLoadAttempt((attempt) => attempt + 1); }}>Retry model</button>}
-        </div>}
         <div className="viewport-tools">
-          <button onClick={resetView} title="Frame the complete model">Frame model</button>
+          <h3>Visibility</h3>
           <button onClick={showAll} disabled={hiddenIds.size === 0} title="Show every component with 3D geometry">
             Show all
           </button>
@@ -896,9 +926,10 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
               </select>
             </label>
           )}
+          <h3>Reports and section cuts</h3>
           {manifest?.reports && entry && <a href={modelAssetUrl(entry, manifest.reports.drawings)} target="_blank" rel="noreferrer">Drawings</a>}
           {manifest?.reports && entry && <a href={modelAssetUrl(entry, manifest.reports.schedules)} download>Schedules</a>}
-          {manifest?.reports && entry && <a href={modelAssetUrl(entry, manifest.reports.envelope)} download>Envelope</a>}
+          {manifest?.reports && entry && <a href={modelAssetUrl(entry, manifest.reports.envelope)} download>Envelope report</a>}
           <label>
             <span>Cut</span>
             <select aria-label="Section axis" value={sectionAxis} onChange={(event) => applySection(event.target.value as 'none' | 'x' | 'y' | 'z', sectionOffset)}>
@@ -907,10 +938,18 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
           </label>
           {sectionAxis !== 'none' && <label><span>mm</span><input aria-label="Section position in millimetres" type="number" step="100" value={sectionOffset} onChange={(event) => applySection(sectionAxis, Number(event.target.value))} /></label>}
         </div>
+        </div>
+        </ViewerPanel>
+        {status === 'loading' && <ModelLoading progress={loadProgress} />}
+        {status === 'error' && <div className="error-card" role="alert"><strong>Preview unavailable</strong><p>{message}</p>
+          {entry && <button onClick={() => { setLoadProgress(null); setStatus('loading'); setMessage('Loading model…'); setLoadAttempt((attempt) => attempt + 1); }}>Retry model</button>}
+        </div>}
+        {viewpointTool && <div className="placement-notice" role="status">{viewpointTool === 'pivot' ? 'Tap a surface to set the orbit center.' : 'Tap inside the chosen space to place the viewpoint.'}<button onClick={() => chooseTool(null)}>Cancel</button></div>}
+        <PanelControls visibility={displayedPanels} active={activeDrawer} onToggle={toggleDrawer} onFrame={resetView} ready={status === 'ready'} />
         <ViewOrientation northRotation={northRotation} mode={navigationMode} />
       </section>
 
-      <aside id="details-panel" className="inspector" hidden={!displayedPanels.details} aria-label="Element details">
+      <ViewerPanel id="details-panel" title="Details" className="inspector" open={displayedPanels.details} onClose={() => closeDrawer('details')}>
         <div className="panel-heading">
           <div><p>Selection</p><h2>{selected ? selected.kindLabel ?? selected.kind : 'Nothing selected'}</h2></div>
           {selected && <span className={`large-swatch kind-${selected.kind}`} />}
@@ -939,7 +978,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
           <span>X east · Y north · Z up</span>
           <span>millimetres · degrees</span>
         </footer>
-      </aside>
+      </ViewerPanel>
     </main>
   );
 }

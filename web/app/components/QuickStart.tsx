@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { ReviewPanel } from '../lib/panels';
+import type { TourFocus } from '../lib/viewer-layout';
 import { hasSeenQuickStart, rememberQuickStart } from '../lib/quick-start';
 
-const basicSteps: Array<{ title: string; text: string; target: string; panel?: ReviewPanel }> = [
+const basicSteps: Array<{ title: string; text: string; target: string; panel?: TourFocus }> = [
   {
     title: 'Choose a model', target: '.model-switcher',
     text: 'Use the model menu in the top bar to switch homes. You can restart this quick start any time with the ? button.',
@@ -17,26 +17,28 @@ const basicSteps: Array<{ title: string; text: string; target: string; panel?: R
     text: 'Drag to orbit, right-drag or Shift-drag to pan, and scroll to zoom. On touchscreens, drag with one finger to orbit, two to pan, or pinch to zoom. The compass and gesture hints help you stay oriented. Click a component to select it.',
   },
   {
-    title: 'Inspect details', target: '#details-panel .panel-heading', panel: 'details',
-    text: 'The Details panel shows the selected component’s ID, measurements, and design properties. Use Show or Hide Components and Details below the top bar to make room for the model.',
+    title: 'Inspect details', target: '#details-panel .drawer-heading', panel: 'details',
+    text: 'The Details panel shows the selected component’s ID, measurements, and design properties. Open Components and Details from the toolbar. Close a panel to return to the model; your selection is kept.',
   },
   {
-    title: 'Control the view', target: '.viewport-tools',
-    text: 'Frame model resets the camera. Show all reveals every component. Enable Isolate on eye click, then click an eye to show only that component or group. Turn it off to hide or show individual items while keeping that view. The other controls show spaces, make section cuts, and offer sun studies and reports when available.',
+    title: 'Control the view', target: '#tools-panel', panel: 'tools',
+    text: 'Frame in the toolbar fits the whole home. Tools contains room navigation, construction visibility, section cuts and reports. Show all reveals hidden components. Isolate on eye click makes an eye show only that component or group.',
   },
 ];
 
 const savedViewSteps = [...basicSteps.slice(0, 3), {
-  title: 'Explore saved views', target: '.named-view-tools',
+  title: 'Explore saved views', target: '#views-panel', panel: 'views' as const,
   text: 'Choose a Saved view to jump to a prepared viewpoint, with its layers, highlights and cuts. Move around or inspect components from there. Restore view returns to those settings; Reset presentation restores the complete model’s default presentation.',
 }, ...basicSteps.slice(3)];
 const navigationSteps = [basicSteps[2]];
 
-export default function QuickStart({ ready, automatic = 'full', hasSavedViews = false, onPanelFocus }: {
+export default function QuickStart({ ready, automatic = 'full', hasSavedViews = false, touch = false, mode = 'orbit', onPanelFocus }: {
   ready: boolean;
   automatic?: 'full' | 'navigation' | 'none';
   hasSavedViews?: boolean;
-  onPanelFocus: (panel: ReviewPanel | 'none' | null) => void;
+  touch?: boolean;
+  mode?: 'orbit' | 'look';
+  onPanelFocus: (panel: TourFocus) => void;
 }) {
   const [seen, setSeen] = useState(hasSeenQuickStart);
   const [requested, setRequested] = useState(false);
@@ -57,15 +59,17 @@ export default function QuickStart({ ready, automatic = 'full', hasSavedViews = 
   return <>
     <button ref={restartButton} type="button" className="quick-start-button" aria-label="Start quick-start tour"
       title="Quick start" disabled={!ready} onClick={() => setRequested(true)}>?</button>
-    {open && createPortal(<Tour mini={mini} hasSavedViews={hasSavedViews} onDismiss={dismiss} onPanelFocus={onPanelFocus} />, document.body)}
+    {open && createPortal(<Tour touch={touch} mode={mode} mini={mini} hasSavedViews={hasSavedViews} onDismiss={dismiss} onPanelFocus={onPanelFocus} />, document.body)}
   </>;
 }
 
-function Tour({ mini, hasSavedViews, onDismiss, onPanelFocus }: {
+function Tour({ touch, mode, mini, hasSavedViews, onDismiss, onPanelFocus }: {
   mini: boolean;
+  touch: boolean;
+  mode: 'orbit' | 'look';
   hasSavedViews: boolean;
   onDismiss: () => void;
-  onPanelFocus: (panel: ReviewPanel | 'none' | null) => void;
+  onPanelFocus: (panel: TourFocus) => void;
 }) {
   const [index, setIndex] = useState(0);
   const steps = mini ? navigationSteps : hasSavedViews ? savedViewSteps : basicSteps;
@@ -74,6 +78,10 @@ function Tour({ mini, hasSavedViews, onDismiss, onPanelFocus }: {
   const spotlight = useRef<HTMLDivElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const step = steps[index];
+  const stepText = step.title !== 'Explore the 3D view' ? step.text : touch
+    ? `Drag one finger to ${mode === 'look' ? 'look around' : 'orbit'}. Use two fingers to pan or pinch to ${mode === 'look' ? 'move forward or back' : 'zoom'}. Tap a component, then open Details. Frame fits the home; the compass shows north.`
+    : mode === 'look' ? 'Drag to look around. Right-drag or Shift-drag to pan; scroll to move forward or back. Click a component, then open Details. Frame fits the home; the compass shows north.'
+      : step.text;
 
   useLayoutEffect(() => {
     onPanelFocus(mini ? null : step.panel ?? 'none');
@@ -128,7 +136,7 @@ function Tour({ mini, hasSavedViews, onDismiss, onPanelFocus }: {
     };
   }, [step]);
 
-  return <dialog ref={dialog} className="quick-start-dialog" aria-labelledby="tour-title" aria-describedby="tour-description"
+  return <dialog ref={dialog} className={`quick-start-dialog ${mini ? 'mini-tour' : ''}`} aria-labelledby="tour-title" aria-describedby="tour-description"
     onCancel={(event) => { event.preventDefault(); onDismiss(); }}>
     <div ref={spotlight} className="tour-spotlight" aria-hidden="true" />
     <div ref={card} className="tour-card">
@@ -136,7 +144,7 @@ function Tour({ mini, hasSavedViews, onDismiss, onPanelFocus }: {
         <button type="button" onClick={onDismiss}>Skip tour</button>
       </div>
       <h2 ref={heading} tabIndex={-1} id="tour-title">{step.title}</h2>
-      <p id="tour-description">{step.text}</p>
+      <p id="tour-description">{stepText}</p>
       <div className="tour-actions">
         {!mini && <button type="button" disabled={index === 0} onClick={() => setIndex(index - 1)}>Back</button>}
         <button type="button" className="tour-next" onClick={() => index === steps.length - 1 ? onDismiss() : setIndex(index + 1)}>
