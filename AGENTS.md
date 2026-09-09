@@ -19,3 +19,9 @@ When separately authorized to develop engine features or fix engine defects, add
 - Keep user guides focused on user-visible concepts and controls; place implementation contracts in developer reference material. Document supported workflows at the level needed to carry out the task.
 - Collect proposed features and future development work in the root `TODO.md` file.
 - Use public, repository-contained or generic examples and references suitable for distribution with the project. Keep private design context confined to its private project materials.
+
+## Special handling of the `design` directory
+
+The `design` directory in the repository root is ignored by .gitignore
+
+The `design` directory is exclusively for 'custom' model builds by end users of this project. The user may choose to maintain this directory as a separate git repository. If so, you should treat is as such, following the `File change rules` as above, and by default placing requests for new 'custom' model builds here unless the user specifies otherwise.
