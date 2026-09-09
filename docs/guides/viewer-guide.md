@@ -6,6 +6,12 @@ the saved design or its IFC export.
 
 ## Open the viewer
 
+A progress bar in the main viewing area shows the model download, including the
+percentage and transferred size when the total is known. If the server does not
+provide a usable total, the bar stays indeterminate and shows bytes received.
+**Preparing model** means the download is complete and the viewer is processing
+the 3D view. If loading fails, the error message includes a **Retry model** button.
+
 Models with a prepared tour show a **Saved view** selector above the model.
 Choose a view to restore its camera, visible layers and components, highlights
 and cuts. The description explains what the view reveals. Orbit, zoom, pan and

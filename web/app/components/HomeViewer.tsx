@@ -41,7 +41,8 @@ import {
   type ReviewPreset,
 } from '../lib/model';
 import { canonicalSectionPlane, configureDirectionalShadow, configureOrbitControls, disposeSceneResources, frameBounds, frameModel, isObjectVisible, modelNorthRotation } from '../lib/scene';
-import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, type CatalogModel } from '../lib/catalog';
+import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, type CatalogModel, type ModelLoadProgress } from '../lib/catalog';
+import { ModelLoading } from './ModelLoading';
 import ViewOrientation from './ViewOrientation';
 import DesignRequirements from './DesignRequirements';
 import PanelControls from './PanelControls';
@@ -196,6 +197,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>(entry ? 'loading' : catalogStatus);
   const [message, setMessage] = useState(entry ? 'Loading model…' : catalogMessage);
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [loadProgress, setLoadProgress] = useState<ModelLoadProgress | null>(null);
   const [solarStudyId, setSolarStudyId] = useState('');
   const [sectionAxis, setSectionAxis] = useState<'none' | 'x' | 'y' | 'z'>('none');
   const [sectionOffset, setSectionOffset] = useState(0);
@@ -449,7 +451,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     };
     animate();
 
-    loadModelAssets(entry, controller.signal)
+    loadModelAssets(entry, controller.signal, setLoadProgress)
       .then(({ manifest: loadedManifest, model: loadedModel }) => {
         if (controller.signal.aborted) {
           disposeSceneResources(loadedModel);
@@ -836,9 +838,9 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           canGoBack={cameraHistorySize > 0} onBack={previousCamera} rooms={rooms} roomId={roomId}
           onRoom={(id) => { setRoomId(id); roomIdRef.current = id; chooseTool(null); }} onPreset={roomPreset}
           height={eyeHeight} onHeight={(height) => { setEyeHeight(height); eyeHeightRef.current = height; }} message={cameraMessage} />
-        {status === 'loading' && <div className="loading-card"><span /><p>Resolving the building view</p></div>}
+        {status === 'loading' && <ModelLoading progress={loadProgress} />}
         {status === 'error' && <div className="error-card" role="alert"><strong>Preview unavailable</strong><p>{message}</p>
-          {entry && <button onClick={() => { setStatus('loading'); setMessage('Loading model…'); setLoadAttempt((attempt) => attempt + 1); }}>Retry model</button>}
+          {entry && <button onClick={() => { setLoadProgress(null); setStatus('loading'); setMessage('Loading model…'); setLoadAttempt((attempt) => attempt + 1); }}>Retry model</button>}
         </div>}
         <div className="viewport-tools">
           <button onClick={resetView} title="Frame the complete model">Frame model</button>

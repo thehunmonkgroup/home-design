@@ -42,7 +42,10 @@ For a shareable static website, use `home-design website-export MODEL... --outpu
 build/website`. This builds an isolated collection containing exactly the selected
 homes and packages the viewer without changing local preview assets. Node/npm
 and installed `web/` dependencies are required. The output directory is disposable
-and replaced on subsequent exports. Exporting is local; upload only when the user
+and replaced on subsequent exports. Exports include compressed model/manifest
+copies and the viewer shows download and preparation progress. Upload the complete
+output, including `.gz` files; no host compression setup is required.
+Exporting is local; upload only when the user
 requests deployment to the intended audience. Read
 `docs/guides/website-deployment.md` for preview and hosting options.
 

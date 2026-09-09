@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 import json
 import logging
 import os
@@ -72,6 +73,7 @@ class WebsiteExporter:
             self._build_viewer(npm, web_project, public, site)
             if not (site / "index.html").is_file():
                 raise HomeDesignError("Viewer build did not produce index.html")
+            self._compress_assets(site)
             catalog = json.loads((site / "model/index.json").read_text())
             (site / EXPORT_MARKER).write_text(
                 json.dumps({"format": EXPORT_FORMAT}) + "\n", encoding="utf-8"
@@ -88,6 +90,24 @@ class WebsiteExporter:
                 raise
         LOGGER.info("Website ready at %s", output)
         return {"output": str(output), "models": catalog["models"]}
+
+    @staticmethod
+    def _compress_assets(site: Path) -> None:
+        """Package gzip assets and their transfer sizes for static delivery.
+
+        :param site: Completed, isolated website staging directory.
+        """
+        catalog_path = site / "model/index.json"
+        catalog = json.loads(catalog_path.read_text())
+        for entry in catalog["models"]:
+            directory = site / "model" / entry["baseUrl"]
+            sizes: dict[str, int] = {}
+            for name in ("model.glb", "render-manifest.json"):
+                compressed = gzip.compress((directory / name).read_bytes(), mtime=0)
+                (directory / f"{name}.gz").write_bytes(compressed)
+                sizes[name] = len(compressed)
+            entry["compressedAssets"] = sizes
+        catalog_path.write_text(json.dumps(catalog, indent=2) + "\n", encoding="utf-8")
 
     @staticmethod
     def _check_output(output: Path, sources: Sequence[Path], web_project: Path) -> None:

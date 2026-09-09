@@ -19,6 +19,12 @@ schedules, and envelope reports. It also contains `website-export.json`, which
 identifies a generated export directory. Hosting requires only static HTTP/HTTPS
 file serving, with no Python, Node server, or database at runtime.
 
+Exports include compressed copies of the 3D model and its viewing metadata.
+The viewer downloads and decompresses these automatically, without requiring
+compression settings on the host. Original files remain available for browsers
+without built-in decompression. Upload the complete folder, including `.gz` files.
+The main viewing area shows download progress followed by model preparation.
+
 Use one or more filenames or quoted globs to select homes. The selection rules
 match [`build`](export-and-sharing.md#build-a-collection). The export always uses
 exactly that selection, independent of any homes or extra files in

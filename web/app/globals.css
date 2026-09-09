@@ -116,10 +116,13 @@ button { color: inherit; }
 .canvas-host { position: absolute; inset: 0; }
 .canvas-host canvas { display: block; width: 100%; height: 100%; }
 .loading-card, .error-card { position: absolute; left: 50%; top: 50%; min-width: 230px; padding: 18px 22px; transform: translate(-50%, -50%); border: 1px solid rgb(255 255 255 / 55%); border-radius: 7px; background: rgb(250 251 248 / 90%); box-shadow: 0 15px 50px rgb(35 45 42 / 12%); text-align: center; }
-.loading-card span { display: block; width: 32px; height: 2px; margin: 0 auto 13px; background: var(--accent); animation: scan 1.2s ease-in-out infinite alternate; }
+.loading-card, .error-card { z-index: 4; }
+.loading-card { width: min(360px, calc(100% - 48px)); min-width: 0; }
+.loading-card strong { display: block; margin-bottom: 14px; font-size: 16px; }
+.loading-card progress { display: block; width: 100%; height: 12px; margin: 0 0 12px; accent-color: var(--accent); }
+.loading-percent { margin-bottom: 6px; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .loading-card p, .error-card p { margin: 0; color: var(--muted); font-size: 12px; }
 .error-card strong { display: block; margin-bottom: 7px; font-family: Georgia, serif; }
-@keyframes scan { from { transform: translateX(-25px); } to { transform: translateX(25px); } }
 .viewport-tools { position: absolute; left: 18px; bottom: 18px; display: flex; flex-wrap: wrap; max-width: calc(100% - 36px); overflow: hidden; border: 1px solid rgb(40 53 49 / 15%); border-radius: 5px; background: rgb(250 251 248 / 90%); box-shadow: 0 8px 25px rgb(38 46 43 / 8%); backdrop-filter: blur(12px); }
 .viewport-tools a { display: inline-flex; align-items: center; padding: 10px; color: inherit; font-size: 12px; }
 .viewport-tools select, .viewport-tools input[type=number] { max-width: 160px; border: 1px solid #b6c2b8; border-radius: 3px; padding: 4px; background: white; color: #26332e; }
@@ -209,9 +212,6 @@ button { color: inherit; }
   .axis-key { right: 12px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .loading-card span { animation: none; }
-}
 .project-requirements { margin: 0 16px 18px; font-size: 12px; line-height: 1.5; }
 .project-requirements summary { cursor: pointer; }
 .project-requirements small { display: block; overflow-wrap: anywhere; }

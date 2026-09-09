@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import gzip
 import json
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -65,7 +66,12 @@ def test_export_selected_collection_and_replace(
         assert {path.name for path in files.iterdir()} == {
             "model.glb", "render-manifest.json", "drawings.svg",
             "schedules.json", "envelope.json",
+            "model.glb.gz", "render-manifest.json.gz",
         }
+        for name, size in entry["compressedAssets"].items():
+            compressed = (files / f"{name}.gz").read_bytes()
+            assert len(compressed) == size
+            assert gzip.decompress(compressed) == (files / name).read_bytes()
     assert not list(output.rglob("*.ifc"))
     assert not list(output.rglob("private-note.txt"))
     assert not list(output.rglob("not-selected.json"))
@@ -202,7 +208,7 @@ def test_real_static_build_serves_from_subdirectory(model_file: Path, tmp_path: 
         with urlopen(origin + "model/index.json", timeout=5) as response:
             assert json.load(response) == catalog
         entry = catalog["models"][0]
-        for artifact in ["model.glb", "render-manifest.json", "drawings.svg", "schedules.json", "envelope.json"]:
+        for artifact in ["model.glb", "render-manifest.json", "drawings.svg", "schedules.json", "envelope.json", "model.glb.gz", "render-manifest.json.gz"]:
             with urlopen(origin + "model/" + entry["baseUrl"] + artifact, timeout=5) as response:
                 assert response.status == 200
                 assert response.read()

@@ -458,6 +458,18 @@ Viewer logs go to stderr; stdout contains the resulting directory and model
 catalog entries as JSON. Only static viewer output and browser model artifacts
 reach the destination; temporary CAD and diagnostic outputs are discarded.
 
+Website exports add deterministic gzip copies of `model.glb` and
+`render-manifest.json`, preserving their original counterparts. Each exported
+catalog entry has an optional `compressedAssets` map from those two original
+filenames to positive compressed byte lengths. The loader appends `.gz`, streams
+both downloads with aggregate progress, and decompresses them with
+`DecompressionStream` before validation and GLB parsing. This works on plain static
+servers without `Content-Encoding` configuration. HTTP-decoded responses are
+also accepted. Catalogs without this metadata and browsers without decompression
+use the original assets. Encoded HTTP responses with unavailable transfer sizes
+show indeterminate progress; model preparation is a separate phase. Cancellation
+stops both downloads and suppresses stale progress updates.
+
 The destination must be empty or contain the `website-export.json` marker with
 format `home-design-website-0.1`. It must be separate from viewer and selected
 model sources. A successful export replaces the complete directory; build failure

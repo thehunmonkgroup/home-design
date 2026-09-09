@@ -3,6 +3,8 @@ import { BoxGeometry, Group, Mesh, MeshStandardMaterial, Texture } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, parseCatalog, sortModels, type CatalogModel } from './catalog';
 import { disposeSceneResources } from './scene';
+import { gzipSync } from 'node:zlib';
+import type { ModelLoadProgress } from './catalog';
 
 const version = 'a'.repeat(64);
 const entry: CatalogModel = {
@@ -42,6 +44,7 @@ describe('model catalog', () => {
     { format: 'home-design-model-catalog-0.1', models: [{ ...entry, baseUrl: 'https://example.com/' }] },
     { format: 'home-design-model-catalog-0.1', models: [{ ...entry, key: '..' }] },
     { format: 'home-design-model-catalog-0.1', models: [{ ...entry, sourceRevision: '2' }] },
+    ...[null, [], {}, { 'model.glb': -1, 'render-manifest.json': 1 }, { 'model.glb': 1, 'render-manifest.json': 1.5 }].map(compressedAssets => ({ format: 'home-design-model-catalog-0.1', models: [{ ...entry, compressedAssets }] })),
   ])('rejects malformed or unsafe catalogs', (value) => {
     expect(() => parseCatalog(value)).toThrow();
   });
@@ -82,6 +85,78 @@ describe('model catalog', () => {
 });
 
 describe('model asset lifecycle', () => {
+  const geometry = new Uint8Array([103, 108, 84, 70, 2, 0, 0, 0]);
+  const packedModel = gzipSync(geometry);
+  const packedManifest = gzipSync(JSON.stringify(manifest));
+  const packedEntry: CatalogModel = { ...entry, compressedAssets: {
+    'model.glb': packedModel.byteLength, 'render-manifest.json': packedManifest.byteLength,
+  } };
+
+  it('streams compressed downloads with aggregate progress and decodes exact original bytes', async () => {
+    let finishModel!: () => void;
+    const halfway = Math.floor(packedModel.byteLength / 2);
+    const fetchMock = vi.fn((url: string) => Promise.resolve(url.endsWith('model.glb.gz')
+      ? new Response(new ReadableStream({ start(controller) {
+        controller.enqueue(packedModel.subarray(0, halfway));
+        finishModel = () => { controller.enqueue(packedModel.subarray(halfway)); controller.close(); };
+      } })) : new Response(packedManifest)));
+    vi.stubGlobal('fetch', fetchMock);
+    const parse = vi.spyOn(GLTFLoader.prototype, 'parseAsync').mockResolvedValue({ scene: new Group() } as GLTF);
+    const progress: ModelLoadProgress[] = [];
+    const loading = loadModelAssets(packedEntry, new AbortController().signal, (value) => progress.push(value));
+    await vi.waitFor(() => expect(progress.some(value => value.loadedBytes === packedManifest.length + halfway)).toBe(true));
+    expect(parse).not.toHaveBeenCalled();
+    finishModel();
+    expect((await loading).manifest).toEqual(manifest);
+    expect(new Uint8Array(parse.mock.calls[0][0] as ArrayBuffer)).toEqual(geometry);
+    expect(progress[0]).toEqual({ phase: 'downloading', loadedBytes: 0, totalBytes: packedModel.length + packedManifest.length });
+    expect(progress.at(-1)).toEqual({ phase: 'preparing', loadedBytes: packedModel.length + packedManifest.length, totalBytes: packedModel.length + packedManifest.length });
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      `./model/${entry.baseUrl}render-manifest.json.gz`, `./model/${entry.baseUrl}model.glb.gz`,
+    ]);
+  });
+
+  it('uses original assets when decompression is unavailable', async () => {
+    vi.stubGlobal('DecompressionStream', undefined);
+    const fetchMock = mockAssets();
+    vi.spyOn(GLTFLoader.prototype, 'parseAsync').mockResolvedValue({ scene: new Group() } as GLTF);
+    await loadModelAssets(packedEntry, new AbortController().signal);
+    expect(fetchMock.mock.calls.every(([url]) => !url.endsWith('.gz'))).toBe(true);
+  });
+
+  it('accepts gzip already decoded by HTTP and avoids claiming encoded-byte percentages', async () => {
+    vi.stubGlobal('fetch', vi.fn((url: string) => Promise.resolve(new Response(
+      url.endsWith('model.glb.gz') ? geometry : JSON.stringify(manifest),
+      { headers: { 'content-encoding': 'gzip' } },
+    ))));
+    const progress: ModelLoadProgress[] = [];
+    vi.spyOn(GLTFLoader.prototype, 'parseAsync').mockResolvedValue({ scene: new Group() } as GLTF);
+    expect((await loadModelAssets(packedEntry, new AbortController().signal, value => progress.push(value))).manifest).toEqual(manifest);
+    expect(progress.at(-1)?.totalBytes).toBeUndefined();
+  });
+
+  it('rejects corrupt compressed assets without falling back to a second large download', async () => {
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response('invalid gzip'))));
+    const parse = vi.spyOn(GLTFLoader.prototype, 'parseAsync');
+    await expect(loadModelAssets(packedEntry, new AbortController().signal)).rejects.toThrow('compressed model download is invalid');
+    expect(parse).not.toHaveBeenCalled();
+  });
+
+  it('cancels pending streams on model switch and suppresses late progress', async () => {
+    const cancel = vi.fn();
+    vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(new ReadableStream({ cancel })))));
+    const controller = new AbortController();
+    const progress = vi.fn();
+    const loading = loadModelAssets(packedEntry, controller.signal, progress);
+    const rejection = expect(loading).rejects.toThrow();
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+    controller.abort();
+    const count = progress.mock.calls.length;
+    await rejection;
+    expect(cancel).toHaveBeenCalledTimes(2);
+    expect(progress).toHaveBeenCalledTimes(count);
+  });
+
   function mockAssets(value: unknown = manifest) {
     const fetchMock = vi.fn((url: string) => Promise.resolve(
       url.endsWith('.json') ? new Response(JSON.stringify(value)) : new Response(new ArrayBuffer(0)),
