@@ -183,6 +183,21 @@ button { color: inherit; }
 .review-header .brand-mark { transform: scale(.85) rotate(-8deg); }
 .viewport { grid-column: 2; grid-row: 2; }
 .canvas-host { touch-action: none; }
+.canvas-host canvas:focus-visible { outline: 2px solid var(--green); outline-offset: -3px; }
+.quick-selection { position: absolute; z-index: 9; bottom: 84px; left: 50%; transform: translateX(-50%); width: 320px; max-width: calc(100% - 24px); padding: 6px; border: 1px solid #c5cdc6; border-radius: 12px; background: #fafbf8f5; box-shadow: 0 3px 20px #20302618; }
+.quick-selection[hidden] { display: none; }
+.quick-selection-heading { display: flex; align-items: center; gap: 8px; padding-left: 6px; }
+.quick-selection-heading strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.quick-selection-heading small { color: var(--muted); font-size: 11px; font-weight: 400; }
+.quick-selection button { min-height: 44px; min-width: 44px; padding: 4px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); cursor: pointer; }
+.quick-selection button:hover:not(:disabled) { background: #e7eee7; }
+.quick-selection button:disabled { opacity: .4; cursor: default; }
+.quick-selection-heading button { font-size: 20px; }
+.quick-selection-actions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 2px; }
+.quick-selection-actions button { display: grid; place-items: center; font-size: 18px; }
+.quick-selection-actions small { font-size: 10px; }
+.quick-selection-actions .quick-visibility { background: #dce9df; color: #244d3c; font-size: 14px; font-weight: 600; }
+.quick-selection select { width: 100%; min-height: 44px; margin-top: 4px; padding: 6px; border: 1px solid #c5cdc6; border-radius: 6px; background: white; color: var(--ink); font-size: 16px; }
 .viewer-toolbar { position: absolute; z-index: 10; bottom: 12px; left: 50%; transform: translateX(-50%); display: flex; width: max-content; max-width: calc(100% - 24px); padding: 4px; border: 1px solid #c5cdc6; border-radius: 14px; background: #fafbf8f5; box-shadow: 0 3px 20px #20302618; }
 .viewer-toolbar button { display: grid; place-items: center; gap: 3px; min-width: 62px; min-height: 52px; padding: 5px 9px; border: 0; border-radius: 9px; background: transparent; font-size: 11px; cursor: pointer; }
 .viewer-toolbar button[aria-expanded=true] { background: #dce9df; color: #244d3c; }
@@ -199,6 +214,7 @@ button { color: inherit; }
 .gesture-help-toggle { border: 0; padding: 3px 6px; min-height: 28px; background: #fafbf8dc; border-radius: 5px; font-size: 10px; cursor: pointer; }
 .gesture-hints { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; position: absolute; right: 0; top: calc(100% + 8px); width: 200px; padding: 6px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 4px 20px #20302618; }
 .gesture-hints[hidden] { display: none; }
+.keyboard-help { grid-column: 1 / -1; margin: 4px; font-size: 11px; line-height: 1.5; color: var(--muted); }
 .gesture-hint { display: flex; min-width: 0; }
 .gesture-hint button { width: 100%; min-height: 44px; padding: 6px; border-radius: 5px; font-size: 12px; white-space: nowrap; }
 .gesture-hint button:hover, .gesture-hint button:focus-visible { background: #e7eee7; text-decoration: none; }
@@ -299,6 +315,7 @@ button { color: inherit; }
 }
 @media (orientation: landscape) and (max-width: 1000px), (max-height: 520px) {
   .viewer-toolbar { left: 8px; top: 8px; bottom: 8px; transform: none; flex-direction: column; width: 76px; max-height: 292px; overflow: auto; }
+  .quick-selection { left: auto; right: 8px; bottom: 8px; transform: none; max-width: calc(100% - 112px); }
   .viewer-toolbar button { flex: 1; min-height: 44px; padding: 3px; }
   .viewer-toolbar button:last-child { border-left: 0; border-top: 1px solid var(--line); border-radius: 0 0 9px 9px; }
   .current-view { left: 96px; max-width: min(380px, calc(100% - 184px)); }

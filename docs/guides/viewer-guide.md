@@ -137,6 +137,35 @@ Choose **Gestures** below the compass for navigation help. Hover, focus or tap
 the help. The quick-start navigation step uses concise touch instructions on
 touchscreens and describes the active Orbit or Look around mode.
 
+### Keyboard camera navigation
+
+When quick component controls are inactive, focus the model by clicking empty
+model space or using Tab to reach **3D model viewport**. Keyboard focus has a
+visible outline. Pressing **Esc** in quick component controls clears the
+selection and returns focus to the model.
+
+| Keys | Camera action |
+| --- | --- |
+| Arrow keys or **h j k l** | Orbit left, down, up, right |
+| **Shift + arrows** or **H J K L** | Pan left, down, up, right |
+| **+** or **=** | Zoom in |
+| **−** | Zoom out |
+| **F** | Frame the complete model |
+
+Hold a movement key for smooth motion; release it to stop. Pan and zoom scale
+with the current view, and zoom also works in orthographic plans. In **Look
+around** mode, directional keys turn the view in place and **+ / −** move
+forward or backward. **F** returns to an overview in Orbit mode.
+
+Camera shortcuts require focus on the model and pause while Details, a temporary
+drawer, a dialog, the tour or a viewpoint-placement tool is active. Typing and
+other focused controls retain their normal keyboard behavior; Ctrl, Alt and
+Command shortcuts are left to the browser. Moving focus, switching modes or
+starting a pointer gesture stops held-key movement. A fresh keypress is required
+to resume, so a key held while dismissing component controls does not suddenly
+move the camera. Each continuous keyboard movement is one **Previous view**
+history entry. **Gestures** shows camera or component shortcuts for the active mode.
+
 ### Look around rooms and decks
 
 Open **Tools**, then expand **View navigation** to reach the controls. **Orbit** rotates around a target;
@@ -227,19 +256,54 @@ Below the selected component's name:
   geometry can still conceal the selection; use isolation or a section cut to
   look inside. This action is unavailable for components without geometry or
   rendered contents. It leaves the current section cut in place.
-- **Hide**, beside **Isolate with contents**, hides the selected component,
+- **Hide/Show**, beside **Isolate with contents**, toggles the selected component,
   including its generated members, using the Components eye button's visibility
   rules. For an assembly without its own geometry, it hides the assembly's
-  contents. The camera and Details selection stay in place; **Show in model**
-  restores the selection's geometry. Hide always hides, even when **Isolate on
-  eye click** is enabled. It is unavailable when the selection is already hidden
-  or has no rendered geometry or contents.
+  contents. The camera and selection stay in place. After hiding, the button
+  becomes **Show**, which restores the geometry without framing it. A partially
+  hidden selection also offers **Show** to restore all its members. This toggle
+  works independently of **Isolate on eye click** and is unavailable only when
+  the selection has no rendered geometry or contents. Section cuts remain active.
 - Labeled upward links lead to the generating component, host, assembly or room
   when those relationships exist. These describe where the part belongs; **Back**
   follows your actual browsing history. A component can belong to several groups.
 
 Dragging to orbit or pan, and using two fingers to navigate, preserves the
 selection. A click or tap selects a part; clicking empty model space clears it.
+
+### Quick component controls
+
+Selecting a component with Details closed displays a small control bar over the
+model. On a phone, close any open drawer to use it. The bar shows the selected
+name and offers the same **Hide/Show** toggle as Details. It stays available after
+hiding the selection, so you can immediately show it again. The Components eye
+buttons also preserve selection when hiding a part.
+
+- **↑ Parent** selects the generating component or containing assembly, host,
+  owner, room or service system. If there are multiple parents, **Choose another
+  parent…** lets you navigate to a specific one.
+- **↓ Child** selects an immediate child, returning to the child last visited in
+  that container when possible.
+- **← Previous** and **→ Next** select siblings within the current parent. They
+  stop at the ends of the group. The heading shows the member's position in that
+  group, helping distinguish parts with repeated names such as rafters. Hidden
+  components remain navigable.
+- **×** clears the selection and dismisses the bar.
+
+For example, select a rafter, choose **Parent** to reach its framing group, and
+continue to the roof assembly if the model defines that relationship. Choose
+**Hide** to hide that assembly. These actions preserve the camera and use the
+same selection history as Details. Arrows without a destination are disabled.
+The bar is tucked away while Details, temporary controls, a viewpoint placement
+tool or the quick-start tour is open.
+
+While the quick controls are visible, **↑ / k** selects the parent, **↓ / j**
+selects a child, **← / h** selects the previous sibling, and **→ / l** selects
+the next sibling. **Space** toggles Hide/Show; holding Space toggles only once.
+**Esc** clears the selection and dismisses the bar.
+Shortcuts are inactive when the bar is hidden or the selection is cleared. They
+also leave typing, dropdowns, dialogs and controls outside the bar alone, and
+do not intercept modified shortcuts such as Ctrl, Alt, Command or Shift combinations.
 
 ### Follow construction relationships
 

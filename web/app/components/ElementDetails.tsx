@@ -14,7 +14,7 @@ export interface DetailsView {
 
 export const initialDetailsView: DetailsView = { limit: 20, memberQuery: '', memberLimit: 30, scrollTop: 0, technicalOpen: false };
 
-export default function ElementDetails({ elementId, manifest, units, onUnits, onSelect, onIsolate, view, onView, onFind, onShow, onHide, hasGeometry, hidden }: {
+export default function ElementDetails({ elementId, manifest, units, onUnits, onSelect, onIsolate, view, onView, onFind, onShow, onToggleVisibility, hasGeometry, hidden, fullyVisible }: {
   elementId: string;
   manifest: RenderManifest;
   units: DisplayUnits;
@@ -25,9 +25,10 @@ export default function ElementDetails({ elementId, manifest, units, onUnits, on
   onView: (changes: Partial<DetailsView>) => void;
   onFind: () => void;
   onShow: () => void;
-  onHide: () => void;
+  onToggleVisibility: () => void;
   hasGeometry: boolean;
   hidden: boolean;
+  fullyVisible: boolean;
 }) {
   const element = manifest.elements[elementId];
   const { limit, memberQuery, memberLimit } = view;
@@ -63,7 +64,7 @@ export default function ElementDetails({ elementId, manifest, units, onUnits, on
       <button onClick={onFind}>Find in Components</button>
       <button onClick={onShow} disabled={!hasGeometry} title="Show this component and frame it without hiding other components">Show in model</button>
     </div>
-    {hidden && <p className="component-note">This component is hidden. Use Show in model to display it.</p>}
+    {hidden && <p className="component-note">This component is hidden. Use Show to display it, or Show in model to also frame it.</p>}
     {containers.length > 0 && <nav className="containing-components" aria-label="Containing components">
       {containers.map(({ id, label }) => <button key={id} className="related-link" onClick={() => onSelect(id)}>
         <small>{label}</small><span>↑ {manifest.elements[id].name}</span>
@@ -77,7 +78,7 @@ export default function ElementDetails({ elementId, manifest, units, onUnits, on
     </label>
     <div className="context-actions">
       {manifest.navigation && <button onClick={() => onIsolate('contents')}>Isolate with contents</button>}
-      <button onClick={onHide} disabled={!hasGeometry || hidden} title="Hide this component or assembly without changing the camera or selection">Hide</button>
+      <button onClick={onToggleVisibility} disabled={!hasGeometry} title={`${fullyVisible ? 'Hide' : 'Show'} this component or assembly without changing the camera or selection`}>{fullyVisible ? 'Hide' : 'Show'}</button>
       {manifest.navigation && <>
       {element.kind === 'wall' && <button onClick={() => onIsolate('reveal')}>Reveal wall contents</button>}
       {reinforcementElementIds(manifest, elementId).length > 0 && <button onClick={() => onIsolate('reinforcement')}>Reveal reinforcement</button>}

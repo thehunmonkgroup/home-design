@@ -8,7 +8,9 @@ const GESTURES = [
   { word: 'Zoom', help: 'Mouse: scroll wheel. Touchpad: two-finger scroll. Touchscreen: pinch with two fingers.' },
 ];
 
-export default function ViewOrientation({ northRotation, mode = 'orbit' }: { northRotation: number; mode?: 'orbit' | 'look' }) {
+export default function ViewOrientation({ northRotation, mode = 'orbit', keyboard = 'camera' }: {
+  northRotation: number; mode?: 'orbit' | 'look'; keyboard?: 'camera' | 'components' | 'inactive';
+}) {
   const [activeHint, setActiveHint] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
   useEffect(() => {
@@ -19,11 +21,14 @@ export default function ViewOrientation({ northRotation, mode = 'orbit' }: { nor
     window.addEventListener('keydown', dismiss);
     return () => window.removeEventListener('keydown', dismiss);
   }, [activeHint, helpOpen]);
-  const gestures = mode === 'look' ? [
+  const gestures = (mode === 'look' ? [
     { word: 'Look', help: 'Drag with one finger or the primary mouse button to look around without moving your viewpoint.' },
     GESTURES[1],
     { word: 'Move', help: 'Scroll to move forward or back. On a touchscreen, pinch to move and drag with two fingers to pan.' },
-  ] : GESTURES;
+  ] : GESTURES).map((gesture, index) => ({ ...gesture, help: `${gesture.help} ${keyboard === 'camera'
+    ? ['Keyboard: arrows or h j k l while the model has focus.', 'Keyboard: Shift + arrows or H J K L while the model has focus.', `Keyboard: + or = to ${mode === 'look' ? 'move forward' : 'zoom in'}, − to ${mode === 'look' ? 'move backward' : 'zoom out'}; F frames the model.`][index]
+    : keyboard === 'components' ? 'Keyboard currently navigates components. Esc clears the selection and returns focus to the model.'
+      : 'Keyboard navigation is paused while a panel, dialog, tour or placement tool is active.'}` }));
   const radians = northRotation * Math.PI / 180;
   return (
     <div className="axis-key">
@@ -38,6 +43,10 @@ export default function ViewOrientation({ northRotation, mode = 'orbit' }: { nor
       </svg>
       <button className="gesture-help-toggle" type="button" aria-label="Navigation help" aria-expanded={helpOpen} onClick={() => setHelpOpen(!helpOpen)}>Gestures</button>
       <div hidden={!helpOpen} className="gesture-hints" aria-label="View navigation help" onMouseLeave={() => setActiveHint(null)}>
+        <p className="keyboard-help">{keyboard === 'camera'
+          ? `Focus the model to use keys: arrows / hjkl ${mode === 'look' ? 'look' : 'orbit'} · Shift pans · + / − ${mode === 'look' ? 'moves' : 'zooms'} · F frames.`
+          : keyboard === 'components' ? 'Component keys: ↑/k parent · ↓/j child · ←/h and →/l siblings · Space hides/shows · Esc returns to camera.'
+            : 'Keyboard navigation is paused. Close the panel or finish the active tool to resume.'}</p>
         {gestures.map(({ word, help }) => (
           <span className="gesture-hint" key={word}>
             <button

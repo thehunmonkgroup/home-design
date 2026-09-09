@@ -17,7 +17,16 @@ const manifest: RenderManifest = {
 };
 
 describe('component inspector', () => {
-  const navigation = { view: initialDetailsView, onView: () => {}, onFind: () => {}, onShow: () => {}, onHide: () => {}, hasGeometry: true, hidden: false };
+  const navigation = { view: initialDetailsView, onView: () => {}, onFind: () => {}, onShow: () => {}, onToggleVisibility: () => {}, hasGeometry: true, hidden: false, fullyVisible: true };
+  it('offers Show for hidden or partially hidden selections and disables only selections without geometry', () => {
+    const props = { ...navigation, manifest, elementId: 'frame', units: 'metric' as const, onUnits: () => {}, onSelect: () => {}, onIsolate: () => {} };
+    expect(renderToStaticMarkup(createElement(ElementDetails, props))).toMatch(/<button title="Hide this component[^>]*>Hide<\/button>/);
+    for (const hidden of [true, false]) {
+      const html = renderToStaticMarkup(createElement(ElementDetails, { ...props, hidden, fullyVisible: false }));
+      expect(html).toMatch(/<button title="Show this component[^>]*>Show<\/button>/);
+    }
+    expect(renderToStaticMarkup(createElement(ElementDetails, { ...props, hasGeometry: false }))).toMatch(/<button disabled="" title="Hide this component/);
+  });
   it('shows friendly units and navigable wall contents while keeping technical values expandable', () => {
     const html = renderToStaticMarkup(createElement(ElementDetails, { ...navigation, manifest, elementId: 'wall', units: 'imperial', onUnits: () => {}, onSelect: () => {}, onIsolate: () => {} }));
     expect(html).toContain('Ground floor');

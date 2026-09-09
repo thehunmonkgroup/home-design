@@ -51,6 +51,8 @@ import { useCompactLayout, useTouchInput, useVisibleViewport, type TourFocus, ty
 import QuickStart from './QuickStart';
 import ElementDetails, { initialDetailsView, type DetailsView } from './ElementDetails';
 import SelectionHistory from './SelectionHistory';
+import QuickSelection from './QuickSelection';
+import { useViewerKeyboard } from '../lib/viewer-keyboard';
 import { emptySelectionHistory, selectionHistoryReducer } from '../lib/selection-history';
 import { PickGesture } from '../lib/pick-gesture';
 import { contextElementIds, navigationGroups, reinforcementElementIds, selectionNodes, type ContextAction, type NavigationGrouping } from '../lib/navigation';
@@ -253,6 +255,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
     ? [...generatedElementIds(manifest, selected.nodes.length ? [selectedId] : contextElementIds(manifest, selectedId))]
         .filter((id) => canToggleVisibility(manifest.elements[id]))
     : [];
+  const selectionFullyVisible = selectedVisibilityIds.length > 0 && selectedVisibilityIds.every((id) => !hiddenIds.has(id));
   const spaceIds = useMemo(() => manifest
     ? Object.entries(manifest.elements)
         .filter(([, element]) => element.kind === 'space' && canToggleVisibility(element))
@@ -305,6 +308,12 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
     const handle = sceneHandle.current;
     if (handle) { rememberCamera(); changeMode('orbit'); frameModel(handle.camera, handle.controls, handle.model); }
   }, [rememberCamera, changeMode]);
+
+  const keyboardBlocked = status !== 'ready' || activeDrawer !== null || tourPanel !== null || viewpointTool !== null || displayedPanels.details;
+  const quickSelectionActive = Boolean(selected && selectedId && !keyboardBlocked);
+  useViewerKeyboard({ host: canvasHost, ready: status === 'ready', selectionActive: quickSelectionActive,
+    blocked: keyboardBlocked, mode: navigationMode, navigation: () => sceneHandle.current?.navigation,
+    onStart: rememberCamera, onFrame: resetView });
 
   const applySolarStudy = useCallback((studyId: string) => {
     setSolarStudyId(studyId);
@@ -405,6 +414,8 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = PCFSoftShadowMap;
     host.appendChild(renderer.domElement);
+    renderer.domElement.tabIndex = 0;
+    renderer.domElement.setAttribute('aria-label', '3D model viewport');
 
     let controls = new OrbitControls(camera, renderer.domElement);
     configureOrbitControls(controls);
@@ -534,7 +545,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
       });
 
     const gesture = new PickGesture();
-    const onPointerDown = (event: PointerEvent) => gesture.down(event);
+    const onPointerDown = (event: PointerEvent) => { renderer.domElement.focus({ preventScroll: true }); gesture.down(event); };
     const onPointerMove = (event: PointerEvent) => gesture.move(event);
     const onPointerCancel = (event: PointerEvent) => gesture.cancel(event.pointerId);
     const onPointerUp = (event: PointerEvent) => {
@@ -642,7 +653,6 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
     const next = isolateOnClick
       ? isolateElements(manifest, elementIds)
       : withElementVisibility(manifest, hiddenIdsRef.current, elementIds, !visible);
-    if (selectedId && next.has(selectedId)) selectElement(null);
     hiddenIdsRef.current = next;
     setHiddenIds(next);
   };
@@ -722,10 +732,12 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
     frameBounds(handle.camera, handle.controls, bounds);
   };
 
-  const hideSelection = () => {
+  const toggleSelectionVisibility = () => {
     if (!manifest || !selectedId) return;
-    const ids = manifest.elements[selectedId].nodes.length ? [selectedId] : contextElementIds(manifest, selectedId);
-    const next = withElementVisibility(manifest, hiddenIdsRef.current, ids, false);
+    if (!selectionFullyVisible && nodeMask.current) {
+      for (const id of selectedVisibilityIds) for (const node of selectionNodes(manifest, id)) nodeMask.current.add(node);
+    }
+    const next = withElementVisibility(manifest, hiddenIdsRef.current, selectedVisibilityIds, !selectionFullyVisible);
     hiddenIdsRef.current = next;
     setHiddenIds(next);
   };
@@ -858,6 +870,10 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
 
       <section className="viewport" aria-label="Interactive three-dimensional home model">
         <div ref={canvasHost} className="canvas-host" />
+        {manifest && selectedId && selected && <QuickSelection manifest={manifest} elementId={selectedId}
+          hidden={!quickSelectionActive}
+          fullyVisible={selectionFullyVisible} hasGeometry={selectedVisibilityIds.length > 0}
+          onToggle={toggleSelectionVisibility} onSelect={selectElement} onClear={() => selectElement(null)} />}
         {!!manifest?.namedViews?.length && <label className="current-view">
           <span>View</span>
           <select aria-label="Current view" value={namedViewId} onChange={(event) => applyNamedView(event.target.value)}>
@@ -946,7 +962,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
         </div>}
         {viewpointTool && <div className="placement-notice" role="status">{viewpointTool === 'pivot' ? 'Tap a surface to set the orbit center.' : 'Tap inside the chosen space to place the viewpoint.'}<button onClick={() => chooseTool(null)}>Cancel</button></div>}
         <PanelControls visibility={displayedPanels} active={activeDrawer} onToggle={toggleDrawer} onFrame={resetView} ready={status === 'ready'} />
-        <ViewOrientation northRotation={northRotation} mode={navigationMode} />
+        <ViewOrientation northRotation={northRotation} mode={navigationMode} keyboard={keyboardBlocked ? 'inactive' : quickSelectionActive ? 'components' : 'camera'} />
       </section>
 
       <ViewerPanel id="details-panel" title="Details" className="inspector" open={displayedPanels.details} onClose={() => closeDrawer('details')}>
@@ -960,7 +976,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
             <ElementDetails key={selectedId} elementId={selectedId} manifest={manifest} units={displayUnits} onUnits={setDisplayUnits} onSelect={selectElement} onIsolate={isolateContext}
               view={detailsViews[selectedId] ?? initialDetailsView}
               onView={(changes) => setDetailsViews((views) => ({ ...views, [selectedId]: { ...(views[selectedId] ?? initialDetailsView), ...changes } }))}
-              onFind={findSelection} onShow={showSelection} onHide={hideSelection} hasGeometry={selectionNodes(manifest, selectedId).length > 0}
+              onFind={findSelection} onShow={showSelection} onToggleVisibility={toggleSelectionVisibility} hasGeometry={selectedVisibilityIds.length > 0} fullyVisible={selectionFullyVisible}
               hidden={selectedVisibilityIds.length > 0 && selectedVisibilityIds.every((id) => hiddenIds.has(id))} />
             {manifest?.solarStudies?.filter((study) => study.id === solarStudyId).map((study) => {
               const opening = study.openings.find((entry) => entry.elementId === selectedId);

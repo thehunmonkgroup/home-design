@@ -1,4 +1,4 @@
-import { Box3, Euler, OrthographicCamera, PerspectiveCamera, ShapeUtils, Vector2, Vector3 } from 'three';
+import { Box3, Euler, OrthographicCamera, PerspectiveCamera, Quaternion, ShapeUtils, Spherical, Vector2, Vector3 } from 'three';
 import type { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { ManifestElement } from './model';
 import { fromCanonical } from './visual-view';
@@ -7,6 +7,7 @@ export type NavigationMode = 'orbit' | 'look';
 export type Camera = PerspectiveCamera | OrthographicCamera;
 export type CameraPose = { camera: Camera; target: Vector3; mode: NavigationMode };
 export type ViewpointTool = 'pivot' | 'position' | null;
+export interface CameraMotion { x: number; y: number; zoom: number; pan: boolean }
 
 export function lookDirection(camera: Camera, dx: number, dy: number, height: number): void {
   const angles = new Euler().setFromQuaternion(camera.quaternion, 'YXZ');
@@ -49,6 +50,42 @@ export class CameraNavigation {
     this.controls.enabled = this.mode === 'orbit' && !this.tool;
   }
   pose(): CameraPose { return { camera: this.camera.clone(), target: this.controls.target.clone(), mode: this.mode }; }
+  /** Apply time-based keyboard movement using the current camera's scale and constraints. */
+  keyboardMotion(motion: CameraMotion, seconds: number): void {
+    if (this.tool || seconds <= 0) return;
+    const { camera, controls } = this;
+    const distance = Math.max(camera.position.distanceTo(controls.target), camera.near * 2, 0.01);
+    const span = camera instanceof OrthographicCamera ? (camera.top - camera.bottom) / camera.zoom
+      : 2 * distance * Math.tan(camera.getEffectiveFOV() * Math.PI / 360);
+    const diagonal = Math.max(1, Math.hypot(motion.x, motion.y));
+    const x = motion.x / diagonal * seconds, y = motion.y / diagonal * seconds;
+    if (motion.pan) {
+      const offset = new Vector3(-x, -y, 0).applyQuaternion(camera.quaternion).multiplyScalar(span * 0.6);
+      camera.position.add(offset); controls.target.add(offset);
+    } else if (this.mode === 'look') {
+      lookDirection(camera, x, -y, Math.PI);
+      this.aimTarget();
+    } else {
+      const up = new Quaternion().setFromUnitVectors(camera.up.clone().normalize(), new Vector3(0, 1, 0));
+      const spherical = new Spherical().setFromVector3(camera.position.clone().sub(controls.target).applyQuaternion(up));
+      spherical.theta -= x;
+      spherical.phi = Math.max(controls.minPolarAngle, Math.min(controls.maxPolarAngle, spherical.phi + y));
+      spherical.makeSafe();
+      camera.position.copy(controls.target).add(new Vector3().setFromSpherical(spherical).applyQuaternion(up.invert()));
+    }
+    const zoom = motion.zoom * seconds;
+    if (zoom && this.mode === 'look') this.dolly(zoom * span * 0.8);
+    else if (zoom && camera instanceof OrthographicCamera) {
+      camera.zoom = Math.max(Math.max(controls.minZoom, 0.0001), Math.min(controls.maxZoom, camera.zoom * Math.exp(zoom)));
+      camera.updateProjectionMatrix();
+    } else if (zoom) {
+      const radius = Math.max(Math.max(controls.minDistance, camera.near * 2, 0.01), Math.min(controls.maxDistance, distance * Math.exp(-zoom)));
+      camera.position.sub(controls.target).setLength(radius).add(controls.target);
+    }
+    if (this.mode === 'orbit') controls.update();
+    else camera.updateMatrixWorld();
+    this.changed();
+  }
   aimTarget(): void {
     const distance = Math.max(this.camera.position.distanceTo(this.controls.target), 1);
     this.controls.target.copy(this.camera.position).addScaledVector(this.camera.getWorldDirection(new Vector3()), distance);

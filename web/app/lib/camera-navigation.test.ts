@@ -89,6 +89,90 @@ describe('stationary look navigation', () => {
   });
 });
 
+describe('keyboard camera movement', () => {
+  const motion = { x: 0, y: 0, zoom: 0, pan: false };
+  it.each([1, -1])('rotates vertically in the requested model direction (%s)', (y) => {
+    const { nav, camera } = fixture();
+    const height = camera.position.y;
+    nav.keyboardMotion({ ...motion, y }, 0.25);
+    expect((camera.position.y - height) * y).toBeLessThan(0);
+    nav.dispose();
+  });
+  it.each(['orbit', 'look'] as const)('pans the model in the pressed screen direction in %s mode', (mode) => {
+    for (const [x, y] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const { nav, camera, controls } = fixture(); nav.setMode(mode);
+      const point = controls.target.clone(), before = point.clone().project(camera);
+      nav.keyboardMotion({ ...motion, x, y, pan: true }, 0.25);
+      const delta = point.project(camera).sub(before);
+      expect(delta.x * x + delta.y * y).toBeGreaterThan(0);
+      nav.dispose();
+    }
+  });
+  it('orbits around the same target at a frame-rate independent speed and stops without inertia', () => {
+    const one = fixture(), many = fixture();
+    const target = one.controls.target.clone(), distance = one.camera.position.distanceTo(target);
+    one.controls.enableDamping = true;
+    one.nav.keyboardMotion({ ...motion, x: 1 }, 1);
+    for (let i = 0; i < 60; i++) many.nav.keyboardMotion({ ...motion, x: 1 }, 1 / 60);
+    expect(one.camera.position.distanceTo(many.camera.position)).toBeLessThan(1e-9);
+    expect(one.controls.target.equals(target)).toBe(true);
+    expect(one.camera.position.distanceTo(target)).toBeCloseTo(distance);
+    const stopped = one.camera.position.clone();
+    for (let i = 0; i < 30; i++) one.controls.update();
+    expect(one.camera.position.distanceTo(stopped)).toBeLessThan(1e-9);
+    one.nav.dispose(); many.nav.dispose();
+  });
+  it('pans camera and target together and respects perspective zoom and orbit limits', () => {
+    const { nav, controls, camera } = fixture();
+    const offset = camera.position.clone().sub(controls.target), before = camera.position.clone();
+    nav.keyboardMotion({ ...motion, x: 1, pan: true }, 1);
+    expect(camera.position.distanceTo(before)).toBeGreaterThan(0.1);
+    expect(camera.position.clone().sub(controls.target).distanceTo(offset)).toBeLessThan(1e-9);
+    controls.minDistance = 0.5; controls.maxDistance = 4;
+    nav.keyboardMotion({ ...motion, zoom: 1 }, 100);
+    expect(camera.position.distanceTo(controls.target)).toBeCloseTo(0.5);
+    nav.keyboardMotion({ ...motion, zoom: -1 }, 100);
+    expect(camera.position.distanceTo(controls.target)).toBeCloseTo(4);
+    controls.minPolarAngle = 0.2; controls.maxPolarAngle = 2.8;
+    nav.keyboardMotion({ ...motion, y: 1 }, 100);
+    expect(controls.getPolarAngle()).toBeCloseTo(2.8);
+    nav.keyboardMotion({ ...motion, y: -1 }, 100);
+    expect(controls.getPolarAngle()).toBeCloseTo(0.2);
+    nav.dispose();
+  });
+  it('looks in place, moves along the viewing direction, and pauses for placement tools', () => {
+    const { nav, camera, controls } = fixture(); nav.setMode('look');
+    const position = camera.position.clone(), direction = camera.getWorldDirection(new Vector3());
+    nav.keyboardMotion({ ...motion, x: 1, y: 1 }, 0.5);
+    expect(camera.position.equals(position)).toBe(true);
+    expect(camera.getWorldDirection(new Vector3()).distanceTo(direction)).toBeGreaterThan(0.1);
+    const forward = camera.getWorldDirection(new Vector3()), offset = camera.position.clone().sub(controls.target);
+    nav.keyboardMotion({ ...motion, zoom: 1 }, 0.5);
+    expect(camera.position.clone().sub(position).normalize().distanceTo(forward)).toBeLessThan(1e-9);
+    expect(camera.position.clone().sub(controls.target).distanceTo(offset)).toBeLessThan(1e-9);
+    const stopped = camera.position.clone(); nav.tool = 'position';
+    nav.keyboardMotion({ ...motion, zoom: 1, x: 1 }, 1);
+    expect(camera.position.equals(stopped)).toBe(true);
+    nav.dispose();
+  });
+  it('zooms an orthographic camera without moving it and scales panning to its visible extent', () => {
+    const camera = new OrthographicCamera(-4, 4, 3, -3, 0.1, 100);
+    camera.position.set(4, 4, 4);
+    const controls = new OrbitControls(camera); controls.update();
+    controls.minZoom = 0.5; controls.maxZoom = 4;
+    const nav = new CameraNavigation(camera, controls, new Canvas() as unknown as HTMLElement, () => {});
+    const position = camera.position.clone();
+    nav.keyboardMotion({ ...motion, zoom: 1 }, 100);
+    expect(camera.zoom).toBe(4);
+    expect(camera.position.distanceTo(position)).toBeLessThan(1e-9);
+    nav.keyboardMotion({ ...motion, x: 1, pan: true }, 1);
+    expect(camera.position.distanceTo(position)).toBeCloseTo(6 / 4 * 0.6);
+    nav.keyboardMotion({ ...motion, zoom: -1 }, 100);
+    expect(camera.zoom).toBe(0.5);
+    nav.dispose();
+  });
+});
+
 describe('room and deck viewpoints', () => {
   it('places an eye-level camera on the elevated storey and an inset high corner', () => {
     const center = roomPose(rectangle, 'center');
