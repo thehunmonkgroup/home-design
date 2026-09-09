@@ -4,8 +4,7 @@ export type PanelVisibility = Record<ReviewPanel, boolean>;
 const storageKey = (panel: ReviewPanel) => `home-design.viewer.panels.${panel}`;
 
 export function readPanelVisibility(): PanelVisibility {
-  const width = typeof window === 'undefined' ? 1200 : window.innerWidth;
-  const visibility = { components: width > 680, details: width > 1000 };
+  const visibility = { components: false, details: false };
   for (const panel of ['components', 'details'] as const) {
     try {
       const saved = window.localStorage.getItem(storageKey(panel));

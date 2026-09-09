@@ -59,6 +59,16 @@ export function modelLabel(model: CatalogModel, models: CatalogModel[]): string 
     ? `${model.name} (${model.key})` : model.name;
 }
 
+export function initialModelKey(models: CatalogModel[], requested: string | null): string {
+  if (requested === null) return models[0]?.key ?? '';
+  const keyed = models.find((model) => model.key === requested);
+  if (keyed) return keyed.key;
+  const named = models.filter((model) => model.name === requested);
+  if (named.length === 1) return named[0].key;
+  if (named.length > 1) throw new Error(`Model name “${requested}” matches more than one model. Use its filename stem in the URL or choose a model from the menu.`);
+  throw new Error(`Model “${requested}” was not found. Choose a model from the menu.`);
+}
+
 export function modelAssetUrl(model: CatalogModel, artifact: string): string {
   if (!/^[a-zA-Z0-9._-]+$/.test(artifact) || artifact === '.' || artifact === '..') {
     throw new Error('Invalid model asset filename');

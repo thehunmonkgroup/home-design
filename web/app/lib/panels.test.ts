@@ -15,20 +15,20 @@ function browser(width = 1400, saved: Record<string, string> = {}) {
 
 describe('side panel preferences', () => {
   it.each([
-    [1400, true, true], [1000, true, false], [680, false, false],
-  ])('uses space-aware defaults at width %s', (width, components, details) => {
+    [1400, false, false], [1000, false, false], [680, false, false],
+  ])('starts with panels hidden at width %s', (width, components, details) => {
     browser(width as number);
     expect(readPanelVisibility()).toEqual({ components, details });
   });
 
   it('remembers each explicit choice independently across reads', () => {
     const storage = browser();
-    savePanelVisibility('components', false);
-    expect(readPanelVisibility()).toEqual({ components: false, details: true });
-    expect(storage.getItem('home-design.viewer.panels.details')).toBeNull();
-    savePanelVisibility('details', false);
     savePanelVisibility('components', true);
     expect(readPanelVisibility()).toEqual({ components: true, details: false });
+    expect(storage.getItem('home-design.viewer.panels.details')).toBeNull();
+    savePanelVisibility('details', true);
+    savePanelVisibility('components', false);
+    expect(readPanelVisibility()).toEqual({ components: false, details: true });
   });
 
   it('honors saved preferences on small screens and ignores malformed values', () => {
@@ -44,7 +44,7 @@ describe('side panel preferences', () => {
       innerWidth: 1400,
       get localStorage() { throw new Error('Storage blocked'); },
     });
-    expect(readPanelVisibility()).toEqual({ components: true, details: true });
+    expect(readPanelVisibility()).toEqual({ components: false, details: false });
     expect(() => savePanelVisibility('components', false)).not.toThrow();
   });
 

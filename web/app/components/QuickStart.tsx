@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import type { ReviewPanel } from '../lib/panels';
 import { hasSeenQuickStart, rememberQuickStart } from '../lib/quick-start';
 
-const steps: Array<{ title: string; text: string; target: string; panel?: ReviewPanel }> = [
+const basicSteps: Array<{ title: string; text: string; target: string; panel?: ReviewPanel }> = [
   {
     title: 'Choose a model', target: '.model-switcher',
     text: 'Use the model menu in the top bar to switch homes. You can restart this quick start any time with the ? button.',
@@ -26,17 +26,30 @@ const steps: Array<{ title: string; text: string; target: string; panel?: Review
   },
 ];
 
-export default function QuickStart({ ready, onPanelFocus }: {
+const savedViewSteps = [...basicSteps.slice(0, 3), {
+  title: 'Explore saved views', target: '.named-view-tools',
+  text: 'Choose a Saved view to jump to a prepared viewpoint, with its layers, highlights and cuts. Move around or inspect components from there. Restore view returns to those settings; Reset presentation restores the complete model’s default presentation.',
+}, ...basicSteps.slice(3)];
+const navigationSteps = [basicSteps[2]];
+
+export default function QuickStart({ ready, automatic = 'full', hasSavedViews = false, onPanelFocus }: {
   ready: boolean;
+  automatic?: 'full' | 'navigation' | 'none';
+  hasSavedViews?: boolean;
   onPanelFocus: (panel: ReviewPanel | 'none' | null) => void;
 }) {
   const [seen, setSeen] = useState(hasSeenQuickStart);
   const [requested, setRequested] = useState(false);
+  const [navigationDismissed, setNavigationDismissed] = useState(false);
   const restartButton = useRef<HTMLButtonElement>(null);
-  const open = ready && (requested || !seen);
+  const mini = !requested && automatic === 'navigation';
+  const open = ready && (requested || (mini ? !navigationDismissed : automatic === 'full' && !seen));
   const dismiss = () => {
-    rememberQuickStart();
-    setSeen(true);
+    if (mini) setNavigationDismissed(true);
+    else {
+      rememberQuickStart();
+      setSeen(true);
+    }
     setRequested(false);
     restartButton.current?.focus();
   };
@@ -44,15 +57,18 @@ export default function QuickStart({ ready, onPanelFocus }: {
   return <>
     <button ref={restartButton} type="button" className="quick-start-button" aria-label="Start quick-start tour"
       title="Quick start" disabled={!ready} onClick={() => setRequested(true)}>?</button>
-    {open && createPortal(<Tour onDismiss={dismiss} onPanelFocus={onPanelFocus} />, document.body)}
+    {open && createPortal(<Tour mini={mini} hasSavedViews={hasSavedViews} onDismiss={dismiss} onPanelFocus={onPanelFocus} />, document.body)}
   </>;
 }
 
-function Tour({ onDismiss, onPanelFocus }: {
+function Tour({ mini, hasSavedViews, onDismiss, onPanelFocus }: {
+  mini: boolean;
+  hasSavedViews: boolean;
   onDismiss: () => void;
   onPanelFocus: (panel: ReviewPanel | 'none' | null) => void;
 }) {
   const [index, setIndex] = useState(0);
+  const steps = mini ? navigationSteps : hasSavedViews ? savedViewSteps : basicSteps;
   const dialog = useRef<HTMLDialogElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const spotlight = useRef<HTMLDivElement>(null);
@@ -60,9 +76,9 @@ function Tour({ onDismiss, onPanelFocus }: {
   const step = steps[index];
 
   useLayoutEffect(() => {
-    onPanelFocus(step.panel ?? 'none');
+    onPanelFocus(mini ? null : step.panel ?? 'none');
     return () => onPanelFocus(null);
-  }, [step, onPanelFocus]);
+  }, [step, mini, onPanelFocus]);
 
   useEffect(() => {
     const element = dialog.current;
@@ -116,15 +132,15 @@ function Tour({ onDismiss, onPanelFocus }: {
     onCancel={(event) => { event.preventDefault(); onDismiss(); }}>
     <div ref={spotlight} className="tour-spotlight" aria-hidden="true" />
     <div ref={card} className="tour-card">
-      <div className="tour-progress"><span>Quick start · {index + 1} of {steps.length}</span>
+      <div className="tour-progress"><span>{mini ? 'Quick start · Navigation' : `Quick start · ${index + 1} of ${steps.length}`}</span>
         <button type="button" onClick={onDismiss}>Skip tour</button>
       </div>
       <h2 ref={heading} tabIndex={-1} id="tour-title">{step.title}</h2>
       <p id="tour-description">{step.text}</p>
       <div className="tour-actions">
-        <button type="button" disabled={index === 0} onClick={() => setIndex(index - 1)}>Back</button>
+        {!mini && <button type="button" disabled={index === 0} onClick={() => setIndex(index - 1)}>Back</button>}
         <button type="button" className="tour-next" onClick={() => index === steps.length - 1 ? onDismiss() : setIndex(index + 1)}>
-          {index === steps.length - 1 ? 'Finish' : 'Next'}
+          {mini ? 'Got it' : index === steps.length - 1 ? 'Finish' : 'Next'}
         </button>
       </div>
     </div>

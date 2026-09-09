@@ -8,7 +8,7 @@ export default function CameraTools({ ready, mode, orthographic, tool, onMode, o
   roomId: string; onRoom: (id: string) => void; onPreset: (preset: 'center' | 'corner' | 'overview') => void;
   height: number; onHeight: (height: number) => void; message: string;
 }) {
-  const [expanded, setExpanded] = useState(() => window.innerWidth > 600);
+  const [expanded, setExpanded] = useState(false);
   return <details className="camera-tools" open={expanded} onToggle={(event) => setExpanded(event.currentTarget.open)}>
     <summary>View navigation</summary>
     <div className="camera-actions">

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BoxGeometry, Group, Mesh, MeshStandardMaterial, Texture } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, parseCatalog, sortModels, type CatalogModel } from './catalog';
+import { initialModelKey, loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, parseCatalog, sortModels, type CatalogModel } from './catalog';
 import { disposeSceneResources } from './scene';
 import { gzipSync } from 'node:zlib';
 import type { ModelLoadProgress } from './catalog';
@@ -11,6 +11,35 @@ const entry: CatalogModel = {
   key: 'sample', name: 'Sample home', sourceRevision: 2, version,
   baseUrl: `sample/${version}/`,
 };
+
+describe('initial model selection from a URL', () => {
+  const other: CatalogModel = { ...entry, key: 'other', name: 'Other home', baseUrl: `other/${version}/` };
+
+  it('defaults to the first catalog entry only when the parameter is absent', () => {
+    expect(initialModelKey([entry, other], null)).toBe(entry.key);
+    expect(initialModelKey([], null)).toBe('');
+  });
+
+  it('accepts an exact key or unique project name', () => {
+    expect(initialModelKey([entry, other], 'other')).toBe(other.key);
+    expect(initialModelKey([entry, other], 'Other home')).toBe(other.key);
+  });
+
+  it('prefers an exact key when another model has that project name', () => {
+    expect(initialModelKey([{ ...entry, name: other.key }, other], other.key)).toBe(other.key);
+  });
+
+  it('requires a key when project names are duplicated', () => {
+    const models = [entry, { ...other, name: entry.name }];
+    expect(() => initialModelKey(models, entry.name)).toThrow('matches more than one model');
+    expect(initialModelKey(models, other.key)).toBe(other.key);
+  });
+
+  it.each(['', 'missing', 'SAMPLE', '../sample'])('rejects an unmatched value %s without loading another home', (requested) => {
+    expect(() => initialModelKey([entry], requested)).toThrow('was not found');
+  });
+});
+
 const manifest = {
   format: 'home-design-render-manifest-0.1', modelVersion: '0.1', sourceRevision: 2,
   project: { id: 'project.sample', name: entry.name }, elements: {},

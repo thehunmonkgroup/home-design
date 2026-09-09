@@ -19,6 +19,20 @@ select normally after choosing a view; **Restore view** reapplies that stop's
 settings. **Reset presentation** clears cuts and highlights, restores default
 component visibility and frames the model with a perspective camera.
 
+To share a prepared viewpoint, add `?view=VIEW_ID` to the viewer URL (or
+`&view=VIEW_ID` if it already has a query string). Use the saved view's exact ID,
+the `value` in the **Saved view** menu, rather than its displayed title. The view opens after
+the first model finishes loading, with the same settings as selecting it in the
+menu. Switching homes starts the newly selected home in its default view.
+An unknown or empty ID leaves the default view and displays a message.
+Any `view` parameter replaces the automatic full quick start with a one-step
+navigation mini-tour after loading. It shows **Explore the 3D view**, the full
+tour's third step, explaining orbit, pan, zoom and selection. Choose **Got it**,
+**Skip tour** or press Escape to dismiss it. It appears on each visit through a
+view link, even if you have already seen the full tour, and keeps your panel
+visibility unchanged. Dismissing it does not mark the full tour as completed.
+The **?** button still starts the full tour manually.
+
 The [Master Suite Gable House tour](master-suite-gable-house.md) includes fifteen
 views, from a north-up floor plan and eye-level interiors to framing and services.
 Named section cuts have filled material faces. Changing **Cut** replaces the
@@ -41,19 +55,37 @@ published by [`home-design build`](export-and-sharing.md#build-a-collection).
 For a built website preview or deployment, see
 [Website export and deployment](website-deployment.md).
 
-A five-step quick-start tour opens after the first successful model load in a
-new browser. Use **Next** and **Back** to move through it, or **Skip tour** or Escape
+A quick-start tour opens after the first successful model load in a
+new browser, unless the URL contains a `view` parameter. Models with saved views
+include an extra step explaining the **Saved view** controls.
+Use **Next** and **Back** to move through it, or **Skip tour** or Escape
 to dismiss it. The **?** button in the top bar restarts the tour. Completion and
 dismissal are remembered for this site when browser storage is available, or for
 the current session otherwise. The tour temporarily opens the panels it describes
-and restores your panel choices when it closes.
+and restores your saved panel choices, or the hidden defaults, when it closes.
+These temporary openings do not change your saved preferences.
 
 ## Choose a home
 
 The top-bar model selector lists the published collection alphabetically by
-human-readable project name. The first home loads on page load; geometry loads
-only for the selected home. Duplicate project names include the filename stem
-to distinguish them.
+human-readable project name. The first home loads on page load unless the URL
+specifies a model; geometry loads only for the selected home. Duplicate project
+names include the filename stem to distinguish them.
+
+Use `?model=MODEL_NAME` to open a specific home. The value can be its filename
+stem (without `.json`, such as `master-suite-gable-house`) or its exact, unique
+project name. Matching is case-sensitive; filename stems take precedence over
+project names. URL-encode spaces in project names as `%20` or `+`.
+Combine the parameters to open a saved view within the chosen model:
+`?model=master-suite-gable-house&view=VIEW_ID`, replacing `VIEW_ID` with its saved
+view ID. The model loads directly, then the viewer applies the view and shows
+the navigation mini-tour. A `model` parameter alone keeps the normal quick-start
+behavior.
+
+If the model value is empty, unknown or matches multiple project names, the
+viewer displays a message and lets you choose a home from the model menu.
+It does not load another home automatically. Use a filename stem to distinguish
+models with the same project name.
 
 Switching homes refreshes the project title, revision, components, requirements,
 details and report links. Each home starts with its default visibility, framed
@@ -79,7 +111,8 @@ also open on keyboard focus or tap. Press Escape to dismiss a hint.
 
 ### Look around rooms and decks
 
-Open **View navigation** above the canvas. **Orbit** rotates around a target;
+**View navigation** starts collapsed above the canvas; click its heading to open
+the controls. **Orbit** rotates around a target;
 **Look around** turns the camera in place, like turning your head. Drag with the
 primary mouse button or one finger. Shift/right-drag pans, and scrolling moves
 forward or backward. On a touchscreen, two-finger dragging pans and pinching
@@ -123,6 +156,7 @@ rooms, all three decks and the east entry landing.
 
 ## Find and inspect components
 
+Both panels start hidden unless you have saved a different preference.
 Use the **Show/Hide Components** and **Show/Hide Details** buttons below the project
 title to toggle each panel. This browser remembers your choices for this site
 across reloads and model switches, when browser storage is available.

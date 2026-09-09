@@ -41,7 +41,7 @@ import {
   type ReviewPreset,
 } from '../lib/model';
 import { canonicalSectionPlane, configureDirectionalShadow, configureOrbitControls, disposeSceneResources, frameBounds, frameModel, isObjectVisible, modelNorthRotation } from '../lib/scene';
-import { loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, type CatalogModel, type ModelLoadProgress } from '../lib/catalog';
+import { initialModelKey, loadCatalog, loadModelAssets, modelAssetUrl, modelLabel, type CatalogModel, type ModelLoadProgress } from '../lib/catalog';
 import { ModelLoading } from './ModelLoading';
 import ViewOrientation from './ViewOrientation';
 import DesignRequirements from './DesignRequirements';
@@ -75,6 +75,9 @@ interface SceneHandle {
 }
 
 export default function HomeViewer() {
+  const [linkedModel] = useState(() => new URLSearchParams(window.location.search).get('model'));
+  const [linkedView] = useState(() => new URLSearchParams(window.location.search).get('view'));
+  const [initialView, setInitialView] = useState(linkedView);
   const [panels, setPanels] = useState(readPanelVisibility);
   const togglePanel = (panel: ReviewPanel) => {
     const visible = !panels[panel];
@@ -91,10 +94,16 @@ export default function HomeViewer() {
     loadCatalog(controller.signal).then((catalog) => {
       if (controller.signal.aborted) return;
       setModels(catalog.models);
-      setSelectedKey(catalog.models[0]?.key ?? '');
       if (!catalog.models.length) {
         setCatalogStatus('error');
         setCatalogMessage('No models are published. Build a model with --web-assets web/public/model.');
+        return;
+      }
+      try {
+        setSelectedKey(initialModelKey(catalog.models, linkedModel));
+      } catch (error) {
+        setCatalogStatus('error');
+        setCatalogMessage(error instanceof Error ? error.message : 'Choose a model from the menu.');
       }
     }).catch((error: unknown) => {
       if (controller.signal.aborted) return;
@@ -102,21 +111,24 @@ export default function HomeViewer() {
       setCatalogMessage(`${error instanceof Error ? error.message : 'Catalog unavailable'}. Build models with --web-assets web/public/model, then reload.`);
     });
     return () => controller.abort();
-  }, []);
+  }, [linkedModel]);
 
   const entry = models.find((model) => model.key === selectedKey);
   return <ModelReview
     key={entry ? `${entry.key}/${entry.version}` : catalogMessage}
-    entry={entry} models={models} onSwitch={setSelectedKey}
+    entry={entry} models={models} onSwitch={(key) => { setInitialView(null); setSelectedKey(key); }}
+    initialView={initialView} suppressAutomaticTour={linkedView !== null}
     catalogMessage={catalogMessage} catalogStatus={catalogStatus}
     panels={panels} onTogglePanel={togglePanel}
   />;
 }
 
-function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, panels, onTogglePanel }: {
+function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTour, catalogMessage, catalogStatus, panels, onTogglePanel }: {
   entry?: CatalogModel;
   models: CatalogModel[];
   onSwitch: (key: string) => void;
+  initialView: string | null;
+  suppressAutomaticTour: boolean;
   catalogMessage: string;
   catalogStatus: 'loading' | 'error';
   panels: PanelVisibility;
@@ -300,7 +312,8 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     }
   }, []);
 
-  const applyNamedView = (id: string) => {
+  const applyNamedView = useCallback((id: string) => {
+    const manifest = manifestRef.current;
     const handle = sceneHandle.current;
     const host = canvasHost.current;
     if (!manifest || !handle || !host) return;
@@ -335,7 +348,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
     } catch (error) {
       setViewMessage(`View unavailable: ${error instanceof Error ? error.message : String(error)}`);
     }
-  };
+  }, [rememberCamera, changeMode, getRegion, selectElement]);
 
   const resetPresentation = () => {
     const handle = sceneHandle.current;
@@ -485,6 +498,10 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
         setStatus('ready');
         setMessage('Model ready');
         frameModel(camera, controls, model);
+        if (initialView !== null) {
+          if (loadedManifest.namedViews?.some((view) => view.id === initialView)) applyNamedView(initialView);
+          else setViewMessage(`Saved view “${initialView}” was not found in this model. Showing the default view.`);
+        }
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
@@ -571,7 +588,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
       manifestRef.current = null;
       highlight.current = null;
     };
-  }, [entry, loadAttempt, selectElement, rememberCamera, changeMode, chooseTool, getRegion, relocate]);
+  }, [entry, loadAttempt, selectElement, rememberCamera, changeMode, chooseTool, getRegion, relocate, initialView, applyNamedView]);
 
   useEffect(() => {
     if (!manifest || !sceneHandle.current) return;
@@ -743,11 +760,13 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
             className="model-switcher" aria-label="Model" value={entry?.key ?? ''}
             onChange={(event) => onSwitch(event.target.value)}
           >
+            {!entry && <option value="" disabled>Choose a model…</option>}
             {models.map((model) => <option key={model.key} value={model.key}>{modelLabel(model, models)}</option>)}
           </select>}
           {manifest && <span className="revision-badge">rev {manifest.sourceRevision}</span>}
         </div>
-        <QuickStart ready={status === 'ready'} onPanelFocus={setTourPanel} />
+        <QuickStart ready={status === 'ready'} automatic={initialView !== null ? 'navigation' : suppressAutomaticTour ? 'none' : 'full'}
+          hasSavedViews={Boolean(manifest?.namedViews?.length)} onPanelFocus={setTourPanel} />
       </header>
 
       <PanelControls visibility={displayedPanels} onToggle={onTogglePanel} />
@@ -833,6 +852,7 @@ function ModelReview({ entry, models, onSwitch, catalogMessage, catalogStatus, p
           <button type="button" onClick={resetPresentation}>Reset presentation</button>
           <p role="status">{viewMessage || 'Choose a prepared view, then orbit, pan or inspect components.'}</p>
         </div>}
+        {!manifest?.namedViews?.length && viewMessage && <div className="named-view-tools"><p role="status">{viewMessage}</p></div>}
         <CameraTools ready={status === 'ready'} mode={navigationMode} orthographic={orthographic}
           tool={viewpointTool} onMode={(mode) => { rememberCamera(); changeMode(mode); }} onTool={chooseTool}
           canGoBack={cameraHistorySize > 0} onBack={previousCamera} rooms={rooms} roomId={roomId}
