@@ -31,6 +31,10 @@ const savedViewSteps = [...basicSteps.slice(0, 3), {
   text: 'Choose a Saved view to jump to a prepared viewpoint, with its layers, highlights and cuts. Move around or inspect components from there. Restore view returns to those settings; Reset presentation restores the complete model’s default presentation.',
 }, ...basicSteps.slice(3)];
 const navigationSteps = [basicSteps[2]];
+const savedViewNavigationSteps = [{
+  title: 'Explore saved views', target: '.current-view',
+  text: 'Use the View menu to jump to prepared viewpoints of the home. Group headings, when present, organize the choices. Then look around from your chosen view.',
+}, ...navigationSteps];
 
 export default function QuickStart({ ready, automatic = 'full', hasSavedViews = false, touch = false, mode = 'orbit', onPanelFocus }: {
   ready: boolean;
@@ -42,12 +46,15 @@ export default function QuickStart({ ready, automatic = 'full', hasSavedViews = 
 }) {
   const [seen, setSeen] = useState(hasSeenQuickStart);
   const [requested, setRequested] = useState(false);
-  const [navigationDismissed, setNavigationDismissed] = useState(false);
+  const [navigationSeen, setNavigationSeen] = useState(() => hasSeenQuickStart('navigation'));
   const restartButton = useRef<HTMLButtonElement>(null);
   const mini = !requested && automatic === 'navigation';
-  const open = ready && (requested || (mini ? !navigationDismissed : automatic === 'full' && !seen));
+  const open = ready && (requested || (mini ? !navigationSeen : automatic === 'full' && !seen));
+  useEffect(() => {
+    if (open && mini) rememberQuickStart('navigation');
+  }, [open, mini]);
   const dismiss = () => {
-    if (mini) setNavigationDismissed(true);
+    if (mini) setNavigationSeen(true);
     else {
       rememberQuickStart();
       setSeen(true);
@@ -72,7 +79,7 @@ function Tour({ touch, mode, mini, hasSavedViews, onDismiss, onPanelFocus }: {
   onPanelFocus: (panel: TourFocus) => void;
 }) {
   const [index, setIndex] = useState(0);
-  const steps = mini ? navigationSteps : hasSavedViews ? savedViewSteps : basicSteps;
+  const steps = mini ? hasSavedViews ? savedViewNavigationSteps : navigationSteps : hasSavedViews ? savedViewSteps : basicSteps;
   const dialog = useRef<HTMLDialogElement>(null);
   const card = useRef<HTMLDivElement>(null);
   const spotlight = useRef<HTMLDivElement>(null);
@@ -140,15 +147,15 @@ function Tour({ touch, mode, mini, hasSavedViews, onDismiss, onPanelFocus }: {
     onCancel={(event) => { event.preventDefault(); onDismiss(); }}>
     <div ref={spotlight} className="tour-spotlight" aria-hidden="true" />
     <div ref={card} className="tour-card">
-      <div className="tour-progress"><span>{mini ? 'Quick start · Navigation' : `Quick start · ${index + 1} of ${steps.length}`}</span>
+      <div className="tour-progress"><span>{mini && steps.length === 1 ? 'Quick start · Navigation' : `Quick start · ${index + 1} of ${steps.length}`}</span>
         <button type="button" onClick={onDismiss}>Skip tour</button>
       </div>
       <h2 ref={heading} tabIndex={-1} id="tour-title">{step.title}</h2>
       <p id="tour-description">{stepText}</p>
       <div className="tour-actions">
-        {!mini && <button type="button" disabled={index === 0} onClick={() => setIndex(index - 1)}>Back</button>}
+        {steps.length > 1 && <button type="button" disabled={index === 0} onClick={() => setIndex(index - 1)}>Back</button>}
         <button type="button" className="tour-next" onClick={() => index === steps.length - 1 ? onDismiss() : setIndex(index + 1)}>
-          {mini ? 'Got it' : index === steps.length - 1 ? 'Finish' : 'Next'}
+          {index === steps.length - 1 ? mini ? 'Got it' : 'Finish' : 'Next'}
         </button>
       </div>
     </div>

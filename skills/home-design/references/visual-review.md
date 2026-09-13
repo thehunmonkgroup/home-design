@@ -23,6 +23,14 @@ changing room geometry, check eye-level camera positions; after removing or
 renaming an ID, update affected view selectors. Views are presentation inputs and
 do not advance the canonical model revision.
 
+Use optional `group: {"id": "rooms", "title": "Rooms & layout", "order": 20}`
+on index entries to organize large tours. Reuse exactly the same title and integer
+order for each member of a group; lower orders appear first. The viewer sorts
+views alphabetically within groups. Ungrouped views appear under **Other views**
+last, or in a flat alphabetical menu when no groups are authored. Edit the
+companion index and rebuild to publish presentation-only changes; no canonical
+design transaction or revision increment is needed.
+
 ```bash
 home-design render home.json --output /tmp/home-overview
 home-design render home.json --view interior-view.json --output /tmp/home-interior

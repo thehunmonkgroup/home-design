@@ -59,6 +59,8 @@ import { contextElementIds, navigationGroups, reinforcementElementIds, selection
 import type { DisplayUnits } from '../lib/properties';
 import { readPanelVisibility, savePanelVisibility, type PanelVisibility, type ReviewPanel } from '../lib/panels';
 import { NamedViewPresentation } from '../lib/named-views';
+import { SavedViewOptions } from './SavedViewOptions';
+import { clearViewerView, readViewerLocation, writeViewerLocation } from '../lib/viewer-location';
 import { activeCapNodes, inspectionCamera, toCanonical, type VisualView } from '../lib/visual-view';
 
 import CameraTools from './CameraTools';
@@ -79,9 +81,11 @@ interface SceneHandle {
 }
 
 export default function HomeViewer() {
-  const [linkedModel] = useState(() => new URLSearchParams(window.location.search).get('model'));
-  const [linkedView] = useState(() => new URLSearchParams(window.location.search).get('view'));
-  const [initialView, setInitialView] = useState(linkedView);
+  const [linkedPage] = useState(() => {
+    const location = readViewerLocation();
+    return location.model !== null || location.view !== null;
+  });
+  const [viewRequest, setViewRequest] = useState(() => ({ id: readViewerLocation().view }));
   const [panels, setPanels] = useState(readPanelVisibility);
   const togglePanel = (panel: ReviewPanel) => {
     const visible = !panels[panel];
@@ -104,7 +108,11 @@ export default function HomeViewer() {
         return;
       }
       try {
-        setSelectedKey(initialModelKey(catalog.models, linkedModel));
+        const location = readViewerLocation();
+        const key = initialModelKey(catalog.models, location.model);
+        writeViewerLocation(key, location.view, 'replace');
+        setViewRequest({ id: location.view });
+        setSelectedKey(key);
       } catch (error) {
         setCatalogStatus('error');
         setCatalogMessage(error instanceof Error ? error.message : 'Choose a model from the menu.');
@@ -115,29 +123,53 @@ export default function HomeViewer() {
       setCatalogMessage(`${error instanceof Error ? error.message : 'Catalog unavailable'}. Build models with --web-assets web/public/model, then reload.`);
     });
     return () => controller.abort();
-  }, [linkedModel]);
+  }, []);
+
+  useEffect(() => {
+    if (!models.length) return;
+    const restore = () => {
+      const location = readViewerLocation();
+      setViewRequest({ id: location.view });
+      try {
+        const key = initialModelKey(models, location.model);
+        writeViewerLocation(key, location.view, 'replace');
+        setSelectedKey(key);
+      } catch (error) {
+        setSelectedKey('');
+        setCatalogStatus('error');
+        setCatalogMessage(error instanceof Error ? error.message : 'Choose a model from the menu.');
+      }
+    };
+    window.addEventListener('popstate', restore);
+    return () => window.removeEventListener('popstate', restore);
+  }, [models]);
 
   const entry = models.find((model) => model.key === selectedKey);
   return <ModelReview
     key={entry ? `${entry.key}/${entry.version}` : catalogMessage}
-    entry={entry} models={models} onSwitch={(key) => { setInitialView(null); setSelectedKey(key); }}
-    initialView={initialView} suppressAutomaticTour={linkedView !== null}
+    entry={entry} models={models} onSwitch={(key) => {
+      if (key === selectedKey) return;
+      writeViewerLocation(key, null);
+      setViewRequest({ id: null }); setSelectedKey(key);
+    }}
+    viewRequest={viewRequest} linkedPage={linkedPage}
     catalogMessage={catalogMessage} catalogStatus={catalogStatus}
     panels={panels} onTogglePanel={togglePanel}
   />;
 }
 
-function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTour, catalogMessage, catalogStatus, panels, onTogglePanel }: {
+function ModelReview({ entry, models, onSwitch, viewRequest, linkedPage, catalogMessage, catalogStatus, panels, onTogglePanel }: {
   entry?: CatalogModel;
   models: CatalogModel[];
   onSwitch: (key: string) => void;
-  initialView: string | null;
-  suppressAutomaticTour: boolean;
+  viewRequest: { id: string | null };
+  linkedPage: boolean;
   catalogMessage: string;
   catalogStatus: 'loading' | 'error';
   panels: PanelVisibility;
   onTogglePanel: (panel: ReviewPanel) => void;
 }) {
+  const modelKey = entry?.key;
   const canvasHost = useRef<HTMLDivElement>(null);
   const sceneHandle = useRef<SceneHandle | null>(null);
   const highlight = useRef<Box3Helper | null>(null);
@@ -341,11 +373,12 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
         handle.model.traverse((object) => { if (object instanceof Mesh) object.visible = next.has(object.name); });
       }
       setNamedViewId('');
+      clearViewerView();
       setViewMessage('Custom section. Select a named view to restore its settings.');
     }
   }, []);
 
-  const applyNamedView = useCallback((id: string) => {
+  const applyNamedView = useCallback((id: string, historyMode: 'push' | 'none' = 'push') => {
     const manifest = manifestRef.current;
     const handle = sceneHandle.current;
     const host = canvasHost.current;
@@ -378,13 +411,15 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
       selectElement(null);
       setNamedViewId(id);
       setViewMessage(entry.description);
+      if (historyMode === 'push' && modelKey) writeViewerLocation(modelKey, id);
     } catch (error) {
       setViewMessage(`View unavailable: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }, [rememberCamera, changeMode, getRegion, selectElement]);
+  }, [rememberCamera, changeMode, getRegion, selectElement, modelKey]);
 
-  const resetPresentation = () => {
+  const resetPresentation = useCallback((historyMode: 'push' | 'none' = 'push') => {
     const handle = sceneHandle.current;
+    const manifest = manifestRef.current;
     if (!handle || !manifest) return;
     rememberCamera();
     changeMode('orbit');
@@ -399,7 +434,20 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
     handle.setCamera(camera, new Vector3());
     setHiddenIds(defaultHiddenElementIds(manifest));
     frameModel(camera, handle.controls, handle.model);
-  };
+    if (historyMode === 'push' && modelKey) writeViewerLocation(modelKey, null);
+  }, [rememberCamera, changeMode, modelKey]);
+
+  useEffect(() => {
+    if (status !== 'ready') return;
+    const id = viewRequest.id;
+    if (id === null) resetPresentation('none');
+    else if (manifestRef.current?.namedViews?.some((view) => view.id === id)) applyNamedView(id, 'none');
+    else {
+      resetPresentation('none');
+      clearViewerView();
+      setViewMessage(`Saved view “${id}” was not found in this model. Showing the default view.`);
+    }
+  }, [viewRequest, status, applyNamedView, resetPresentation]);
 
   useEffect(() => {
     const host = canvasHost.current;
@@ -533,10 +581,6 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
         setStatus('ready');
         setMessage('Model ready');
         frameModel(camera, controls, model);
-        if (initialView !== null) {
-          if (loadedManifest.namedViews?.some((view) => view.id === initialView)) applyNamedView(initialView);
-          else setViewMessage(`Saved view “${initialView}” was not found in this model. Showing the default view.`);
-        }
       })
       .catch((error: unknown) => {
         if (controller.signal.aborted) return;
@@ -623,7 +667,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
       manifestRef.current = null;
       highlight.current = null;
     };
-  }, [entry, loadAttempt, selectElement, rememberCamera, changeMode, chooseTool, getRegion, relocate, initialView, applyNamedView]);
+  }, [entry, loadAttempt, selectElement, rememberCamera, changeMode, chooseTool, getRegion, relocate]);
 
   useEffect(() => {
     if (!manifest || !sceneHandle.current) return;
@@ -776,6 +820,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
     handle.setCamera(saved.pose.camera, saved.pose.target); changeMode(saved.pose.mode);
     handle.setInspectionLighting(saved.lighting);
     setNamedViewId(''); setViewMessage('Previous view restored.');
+    clearViewerView();
     setCameraHistorySize(cameraHistory.current.length);
   };
 
@@ -797,7 +842,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
         <span className="model-status-message" role="status">{status === 'error' ? 'Model unavailable' : message}</span>
         <button type="button" className="model-info-button" aria-label="Model information" aria-controls="info-panel"
           aria-expanded={activeDrawer === 'info'} onClick={() => toggleDrawer('info')}>i</button>
-        <QuickStart ready={status === 'ready'} automatic={initialView !== null ? 'navigation' : suppressAutomaticTour ? 'none' : 'full'}
+        <QuickStart ready={status === 'ready'} automatic={linkedPage ? 'navigation' : 'full'}
           hasSavedViews={Boolean(manifest?.namedViews?.length)} onPanelFocus={setTourPanel} touch={touch} mode={navigationMode} />
       </header>
 
@@ -878,7 +923,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
           <span>View</span>
           <select aria-label="Current view" value={namedViewId} onChange={(event) => applyNamedView(event.target.value)}>
             <option value="" disabled>Choose a saved view…</option>
-            {manifest.namedViews.map((view) => <option key={view.id} value={view.id}>{view.title}</option>)}
+            <SavedViewOptions views={manifest.namedViews} />
           </select>
         </label>}
         {viewMessage && !namedViewId && <p className="view-notice" role="status">{viewMessage}</p>}
@@ -888,7 +933,7 @@ function ModelReview({ entry, models, onSwitch, initialView, suppressAutomaticTo
           {!!manifest?.namedViews?.length && <>
           <label>Saved view <select aria-label="Saved view" value={namedViewId} onChange={(event) => { applyNamedView(event.target.value); if (compact) closeDrawer('views'); }}>
             <option value="" disabled>Choose a view…</option>
-            {manifest.namedViews.map((view) => <option key={view.id} value={view.id}>{view.title}</option>)}
+            <SavedViewOptions views={manifest.namedViews} />
           </select></label>
           <button type="button" onClick={() => { applyNamedView(namedViewId); if (compact) closeDrawer('views'); }} disabled={!namedViewId}>Restore view</button>
           <button type="button" onClick={() => { resetPresentation(); if (compact) closeDrawer('views'); }}>Reset presentation</button>

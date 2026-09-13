@@ -33,11 +33,19 @@ class NamedViews:
         if errors:
             raise HomeDesignError(f"Invalid named-view index: {errors[0].message}")
         seen: set[str] = set()
+        groups: dict[str, JsonObject] = {}
         for item in value["views"]:
             identity = item["id"]
             if identity in seen:
                 raise HomeDesignError(f"Duplicate named view: {identity}")
             seen.add(identity)
+            if "group" in item:
+                group = Authoring.object(item["group"])
+                group_id = str(group["id"])
+                if groups.setdefault(group_id, group) != group:
+                    raise HomeDesignError(
+                        f"Conflicting named-view group: {group_id}; use the same title and order for every member"
+                    )
             path = root / item["file"]
             if not path.resolve().is_relative_to(root.resolve()):
                 raise HomeDesignError(

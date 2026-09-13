@@ -76,14 +76,64 @@ def test_companion_views_publish_with_owned_caps(
     before = catalog["models"][0]["version"]
     index = tmp_path / "views/house/index.json"
     data = json.loads(index.read_text())
-    data["views"][0]["description"] = "A revised tour description"
+    group = {"id": "rooms", "title": "Rooms", "order": 20}
+    data["views"][0]["group"] = group
     index.write_text(json.dumps(data))
-    BuildService().build(model, tmp_path / "build", tmp_path / "web")
+    updated = BuildService().build(model, tmp_path / "build", tmp_path / "web")
+    assert json.loads(updated.render_manifest.read_text())["namedViews"][0]["group"] == group
     after = json.loads((tmp_path / "web/index.json").read_text())
     assert after["models"][0]["version"] != before
     assert (
         after["models"][0]["sourceRevision"] == catalog["models"][0]["sourceRevision"]
     )
+
+
+@pytest.mark.parametrize("group", [
+    None, [], "rooms", {},
+    {"id": "Bad ID", "title": "Rooms", "order": 20},
+    {"id": "rooms", "title": "  ", "order": 20},
+    {"id": "rooms", "title": "Rooms"},
+    {"id": "rooms", "title": "Rooms", "order": "20"},
+    {"id": "rooms", "title": "Rooms", "order": 1.5},
+    {"id": "rooms", "title": "Rooms", "order": True},
+    {"id": "rooms", "title": "Rooms", "order": 20, "extra": True},
+])
+def test_invalid_view_groups_fail(
+    tmp_path: Path, model_file: Path, group: object
+) -> None:
+    """Reject malformed optional metadata before publishing a tour."""
+    model = make_library(tmp_path, model_file)
+    index = tmp_path / "views/house/index.json"
+    data = json.loads(index.read_text())
+    data["views"][0]["group"] = group
+    index.write_text(json.dumps(data))
+    with pytest.raises(HomeDesignError, match="Invalid named-view index"):
+        NamedViews(model)
+
+
+@pytest.mark.parametrize("field,value", [("title", "Other title"), ("order", 10)])
+def test_shared_view_groups_must_agree(
+    tmp_path: Path, model_file: Path, field: str, value: str | int
+) -> None:
+    """Group membership is independent of adjacency and rejects contradictions."""
+    model = make_library(tmp_path, model_file)
+    index = tmp_path / "views/house/index.json"
+    data = json.loads(index.read_text())
+    original = data["views"][0]
+    group = {"id": "rooms", "title": "Rooms", "order": 20}
+    data["views"] = [
+        dict(original, group=group),
+        dict(original, id="ungrouped"),
+        dict(original, id="second", group=dict(group)),
+    ]
+    index.write_text(json.dumps(data))
+    library = NamedViews(model)
+    assert len(library.entries) == 3
+    assert library.entries[0]["group"] == library.entries[2]["group"]
+    data["views"][2]["group"][field] = value
+    index.write_text(json.dumps(data))
+    with pytest.raises(HomeDesignError, match="Conflicting named-view group: rooms"):
+        NamedViews(model)
 
 
 def test_transaction_retains_destination_tour(tmp_path: Path, model_file: Path) -> None:

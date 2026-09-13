@@ -1,19 +1,23 @@
-const storageKey = 'home-design.viewer.quick-start.v1';
-let seenThisSession = false;
+type TourKind = 'full' | 'navigation';
+const storageKeys = {
+  full: 'home-design.viewer.quick-start.v1',
+  navigation: 'home-design.viewer.quick-start.navigation.v1',
+};
+const seenThisSession = new Set<TourKind>();
 
-export function hasSeenQuickStart(): boolean {
-  if (seenThisSession) return true;
+export function hasSeenQuickStart(kind: TourKind = 'full'): boolean {
+  if (seenThisSession.has(kind)) return true;
   try {
-    return window.localStorage.getItem(storageKey) === 'seen';
+    return window.localStorage.getItem(storageKeys[kind]) === 'seen';
   } catch {
     return false;
   }
 }
 
-export function rememberQuickStart(): void {
-  seenThisSession = true;
+export function rememberQuickStart(kind: TourKind = 'full'): void {
+  seenThisSession.add(kind);
   try {
-    window.localStorage.setItem(storageKey, 'seen');
+    window.localStorage.setItem(storageKeys[kind], 'seen');
   } catch {
     // Remember dismissal for this session even when browser storage is unavailable.
   }

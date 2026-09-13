@@ -1,4 +1,5 @@
 import type { Object3D } from 'three';
+import { validSavedViewGroups, type NamedView } from './saved-view-groups';
 
 type KnownElementKind =
   | 'assembly'
@@ -84,7 +85,7 @@ export interface RenderManifest {
   };
   elements: Record<string, ManifestElement>;
   meshes?: Record<string, { elementId: string; role: string; materialId: string | null; layerId?: string | number; inspectionCap?: boolean; capOf?: string; section?: { axis: 'x' | 'y' | 'z'; position: number; keep: 'below' | 'above' } }>;
-  namedViews?: Array<{ id: string; title: string; description: string; file: string; view: import('./visual-view').VisualView }>;
+  namedViews?: NamedView[];
   requirements?: DesignRequirement[];
   requirementResults?: RequirementResult[];
   solarStudies?: SolarStudy[];
@@ -251,7 +252,8 @@ export function isRenderManifest(value: unknown): value is RenderManifest {
       candidate.namedViews.every((entry) => entry && typeof entry.id === 'string' && /^[a-z][a-z0-9-]*$/.test(entry.id) &&
         typeof entry.title === 'string' && Boolean(entry.title) && typeof entry.description === 'string' &&
         typeof entry.file === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9_-]*\.json$/.test(entry.file) &&
-        entry.view && typeof entry.view === 'object' && !Array.isArray(entry.view))) &&
+        entry.view && typeof entry.view === 'object' && !Array.isArray(entry.view)) &&
+      validSavedViewGroups(candidate.namedViews)) &&
     (candidate.navigation === undefined || validNavigation(candidate.navigation, candidate.elements)) &&
     (candidate.propertyFormat === undefined || candidate.propertyFormat === 'home-design-view-properties-0.1')
   );

@@ -36,6 +36,22 @@ const manifest: RenderManifest = {
 };
 
 describe('render manifest helpers', () => {
+  it('accepts optional consistent saved-view groups and rejects conflicting metadata', () => {
+    const entry = { id: 'plan', title: 'Plan', description: 'Plan', file: 'plan.json', view: {} };
+    const group = { id: 'rooms', title: 'Rooms', order: 20 };
+    const payload = (groups: unknown[]) => ({ ...manifest, namedViews: groups.map((value, i) =>
+      ({ ...entry, id: `view-${i}`, ...(value === undefined ? {} : { group: value }) })) });
+    expect(isRenderManifest(payload([undefined, group, { ...group }]))).toBe(true);
+    for (const invalid of [null, [], 'rooms', {}, { ...group, id: 'Bad ID' }, { ...group, title: '  ' },
+      { ...group, title: 1 }, { ...group, order: undefined }, { ...group, order: '20' },
+      { ...group, order: 1.5 }, { ...group, order: Infinity }, { ...group, order: NaN },
+      { ...group, extra: true }]) {
+      expect(isRenderManifest(payload([invalid]))).toBe(false);
+    }
+    expect(isRenderManifest(payload([group, { ...group, title: 'Other title' }]))).toBe(false);
+    expect(isRenderManifest(payload([group, { ...group, order: 10 }]))).toBe(false);
+  });
+
   it('keeps service insulation independently selectable in the services view', () => {
     const parts: RenderManifest = { ...manifest, elements: {
       cover: { kind: 'serviceInsulation', name: 'Pipe insulation', storeyId: null, nodes: ['cover'], defaultVisible: true, data: { discipline: 'services' } },

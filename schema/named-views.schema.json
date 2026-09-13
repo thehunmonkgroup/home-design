@@ -15,7 +15,17 @@
           "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
           "title": {"type": "string", "minLength": 1},
           "description": {"type": "string", "minLength": 1},
-          "file": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]*\\.json$"}
+          "file": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_-]*\\.json$"},
+          "group": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["id", "title", "order"],
+            "properties": {
+              "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+              "title": {"type": "string", "pattern": "\\S"},
+              "order": {"type": "integer"}
+            }
+          }
         }
       }
     }

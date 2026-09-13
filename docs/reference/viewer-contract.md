@@ -121,11 +121,43 @@ definition follows `schema/render-view.schema.json`. `render --named-view ID`
 selects the same definition as `render --view PATH`; capture guards all companion
 sources against changes while rendering.
 
+An index entry optionally includes `group: {"id": "rooms", "title": "Rooms & layout",
+"order": 20}`. Group IDs follow the same lowercase slug syntax as view IDs;
+titles contain non-whitespace text and orders are integers, with lower values
+displayed first. All entries with the same group ID must declare the same title
+and order. Discovery and manifest validation reject inconsistent groups.
+
+Both viewer selectors discover groups from entries and render native `optgroup`
+sections. Groups sort by order, then title, then stable ID. Views sort by title,
+then stable ID, using case-insensitive English natural collation for titles.
+Ungrouped entries appear in **Other views** after authored groups; an entirely
+ungrouped model retains a flat alphabetical menu. Grouping does not change source
+entry order, view IDs, URL selection, or camera/presentation definitions. The group
+metadata is embedded with each entry in `namedViews`; older indexes omit it.
+
 Builds and transactions load the destination model's companions, validate their
 component and layer references, and embed them in the render manifest's
 `namedViews` array. Definitions and section geometry participate in the existing
 immutable publication hash. `build-metadata.json` records companion source hashes.
 Canonical model revision and IFC quantities are independent of view edits.
+
+Model switches and successfully applied saved-view selections use `pushState`
+with stable `model` and `view` IDs. Resetting presentation pushes the model with
+no view. Initial model normalization and clearing stale view IDs use `replaceState`;
+identical URLs do not create entries. Other query parameters, fragments and existing
+history state are preserved. `popstate` restores the model and requested view
+without pushing another entry. Same-model view restoration reuses the loaded
+scene; model changes retain the normal cancellation and scene disposal lifecycle.
+Free camera movement and custom visibility are not serialized into these links.
+
+An arrival URL containing either selection parameter uses the brief navigation
+tour. When saved views exist, it highlights the viewport's View selector first,
+then shows navigation help; otherwise it shows navigation help alone. Both steps
+preserve the user's panel visibility. Its site-wide
+`home-design.viewer.quick-start.navigation.v1` storage flag is
+set when shown, independently of the full tour's existing completion flag.
+Unavailable storage falls back to in-memory session tracking. The manual quick-start
+button remains available regardless of either flag.
 
 The GLB contains the union of cap planes required by the named views. Cap mesh
 metadata includes `inspectionCap`, `capOf` and `section` (axis, position and kept

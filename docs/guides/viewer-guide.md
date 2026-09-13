@@ -16,6 +16,10 @@ Models with prepared views show a **View** dropdown near the top of the model.
 Choose a view directly there, or open **Views** in the toolbar for the
 **Saved view** selector, descriptions and presentation controls. Both selectors
 stay synchronized with the selected view.
+Views with authored groups appear under labeled sections, ordered by the author's
+priority. Views are alphabetized within each section. Ungrouped entries appear
+under **Other views** last; models without groups use a flat alphabetical list.
+The section labels organize the dropdown but do not collapse its entries.
 Choose a view to restore its camera, visible layers and components, highlights
 and cuts. The description explains what the view reveals. Orbit, zoom, pan and
 select normally after choosing a view; **Restore view** reapplies that stop's
@@ -23,19 +27,27 @@ settings. On compact screens, choosing or restoring a view closes the drawer so
 you can see the result. **Reset presentation** clears cuts and highlights, restores default
 component visibility and frames the model with a perspective camera.
 
-To share a prepared viewpoint, add `?view=VIEW_ID` to the viewer URL (or
-`&view=VIEW_ID` if it already has a query string). Use the saved view's exact ID,
-the `value` in the **Saved view** menu, rather than its displayed title. The view opens after
-the first model finishes loading, with the same settings as selecting it in the
-menu. Switching homes starts the newly selected home in its default view.
-An unknown or empty ID leaves the default view and displays a message.
-Any `view` parameter replaces the automatic full quick start with a one-step
-navigation mini-tour after loading. It shows **Explore the 3D view**, the full
-tour's third step, explaining orbit, pan, zoom and selection. Choose **Got it**,
-**Skip tour** or press Escape to dismiss it. It appears on each visit through a
-view link, even if you have already seen the full tour, and keeps your panel
-visibility unchanged. Dismissing it does not mark the full tour as completed.
-The **?** button still starts the full tour manually.
+Choose a model and saved view, then copy the address bar to share that selection.
+The viewer updates `model` and `view` automatically. Reload restores the selected
+model and saved view; browser **Back** and **Forward** navigate previous selections.
+Switching homes starts the chosen home in its default view and clears the previous
+view parameter. **Reset presentation** also records a return to the default view.
+Selecting the same view again does not add a duplicate history entry.
+Links restore saved viewpoints, not subsequent free camera movement or custom
+visibility edits. A custom cut or restored camera-history pose clears the stale
+view parameter without adding a browser-history entry.
+
+You can also author `?model=MODEL_KEY&view=VIEW_ID` links using stable IDs. An unknown
+or empty view ID shows the default view and a message, and is removed from the URL.
+Arriving with either a `model` or `view` parameter uses a brief mini-tour instead
+of the automatic full tour. Models with saved views start with **Explore saved
+views**, highlighting the View menu, followed by **Explore the 3D view** for orbit,
+pan, zoom and selection. Models without saved views show only the navigation step.
+Use **Next** and **Back** to move between steps; panel visibility stays unchanged.
+The browser remembers this brief tour as soon as it appears, across all model/view
+links on the site, so later visits and reloads do not show it automatically.
+Choose **Got it**, **Skip tour** or Escape to dismiss it. Its memory is separate
+from the full tour; the **?** button still starts the full tour manually.
 
 The [Master Suite Gable House tour](master-suite-gable-house.md) includes fifteen
 views, from a north-up floor plan and eye-level interiors to framing and services.
@@ -61,7 +73,7 @@ For a built website preview or deployment, see
 [Website export and deployment](website-deployment.md).
 
 A quick-start tour opens after the first successful model load in a
-new browser, unless the URL contains a `view` parameter. Models with saved views
+new browser, unless the arrival URL contains a `model` or `view` parameter. Models with saved views
 include an extra step explaining the **Saved view** controls.
 Use **Next** and **Back** to move through it, or **Skip tour** or Escape
 to dismiss it. The **?** button in the top bar restarts the tour. Completion and
@@ -104,9 +116,8 @@ project name. Matching is case-sensitive; filename stems take precedence over
 project names. URL-encode spaces in project names as `%20` or `+`.
 Combine the parameters to open a saved view within the chosen model:
 `?model=master-suite-gable-house&view=VIEW_ID`, replacing `VIEW_ID` with its saved
-view ID. The model loads directly, then the viewer applies the view and shows
-the navigation mini-tour. A `model` parameter alone keeps the normal quick-start
-behavior.
+view ID. The model loads directly, then the viewer applies the view. Either
+parameter uses the navigation mini-tour on the first linked visit only.
 
 If the model value is empty, unknown or matches multiple project names, the
 viewer displays a message and lets you choose a home from the model menu.

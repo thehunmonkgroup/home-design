@@ -239,6 +239,8 @@ button { color: inherit; }
 .named-view-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .named-view-tools label { width: 100%; display: grid; gap: 6px; }
 .named-view-tools select { width: 100%; }
+.current-view optgroup, .named-view-tools optgroup { font-weight: 700; }
+.current-view option, .named-view-tools option { font-weight: 400; }
 .named-view-tools p { width: 100%; color: #48594d; }
 .camera-tools { border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px; }
 .camera-tools summary { cursor: pointer; font-size: 14px; font-weight: 600; min-height: 44px; display: list-item; align-content: center; }
